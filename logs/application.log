@@ -1,0 +1,162 @@
+2016-02-03 12:43:30,187 [INFO] from play.api.libs.concurrent.ActorSystemProvider in pool-4-thread-3 - Starting application default Akka system: application
+2016-02-03 12:43:30,312 [INFO] from play.core.server.NettyServer in pool-4-thread-3 - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+2016-02-03 12:43:37,282 [ERROR] from application in New I/O worker #1 - 
+
+! @6p29m8pic - Internal server error, for (GET) [/] ->
+ 
+play.sbt.PlayExceptions$CompilationException: Compilation error[value retrieveByID is not a member of object controllers.PropertyController]
+	at play.sbt.PlayExceptions$CompilationException$.apply(PlayExceptions.scala:27) ~[na:na]
+	at play.sbt.PlayExceptions$CompilationException$.apply(PlayExceptions.scala:27) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[scala-library-2.11.7.jar:na]
+	at play.sbt.run.PlayReload$$anonfun$taskFailureHandler$1.apply(PlayReload.scala:49) ~[na:na]
+	at play.sbt.run.PlayReload$$anonfun$taskFailureHandler$1.apply(PlayReload.scala:44) ~[na:na]
+	at scala.Option.map(Option.scala:145) ~[scala-library-2.11.7.jar:na]
+	at play.sbt.run.PlayReload$.taskFailureHandler(PlayReload.scala:44) ~[na:na]
+	at play.sbt.run.PlayReload$.compileFailure(PlayReload.scala:40) ~[na:na]
+	at play.sbt.run.PlayReload$$anonfun$compile$1.apply(PlayReload.scala:17) ~[na:na]
+	at play.sbt.run.PlayReload$$anonfun$compile$1.apply(PlayReload.scala:17) ~[na:na]
+	at scala.util.Either$LeftProjection.map(Either.scala:377) ~[scala-library-2.11.7.jar:na]
+	at play.sbt.run.PlayReload$.compile(PlayReload.scala:17) ~[na:na]
+	at play.sbt.run.PlayRun$$anonfun$playRunTask$1$$anonfun$apply$2$$anonfun$apply$3$$anonfun$2.apply(PlayRun.scala:60) ~[na:na]
+	at play.sbt.run.PlayRun$$anonfun$playRunTask$1$$anonfun$apply$2$$anonfun$apply$3$$anonfun$2.apply(PlayRun.scala:60) ~[na:na]
+	at play.runsupport.Reloader.reload(Reloader.scala:305) ~[na:na]
+	at play.core.server.DevServerStart$$anonfun$mainDev$1$$anon$1$$anonfun$get$1.apply(DevServerStart.scala:113) ~[play-server_2.11-2.4.2.jar:2.4.2]
+	at play.core.server.DevServerStart$$anonfun$mainDev$1$$anon$1$$anonfun$get$1.apply(DevServerStart.scala:111) ~[play-server_2.11-2.4.2.jar:2.4.2]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[scala-library-2.11.7.jar:na]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[scala-library-2.11.7.jar:na]
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(ForkJoinTask.java:1402) ~[na:1.8.0_60]
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:289) ~[na:1.8.0_60]
+	at java.util.concurrent.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1056) ~[na:1.8.0_60]
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1692) ~[na:1.8.0_60]
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:157) ~[na:1.8.0_60]
+2016-02-03 12:44:12 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in ForkJoinPool-1-worker-2 - Starting application default Akka system: application
+2016-02-03 12:44:12 +0300 [INFO] from swagger in ForkJoinPool-1-worker-2 - Swagger - starting initialisation...
+2016-02-03 12:44:12 +0300 [INFO] from swagger in ForkJoinPool-1-worker-2 - Basepath configured as:http://localhost:9000
+2016-02-03 12:44:12 +0300 [INFO] from swagger in ForkJoinPool-1-worker-2 - Loading API metadata
+2016-02-03 12:44:12 +0300 [WARN] from swagger in ForkJoinPool-1-worker-2 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 12:44:12 +0300 [INFO] from swagger in ForkJoinPool-1-worker-2 - Found API controller:  controllers.PropertyController
+2016-02-03 12:44:12 +0300 [INFO] from swagger in ForkJoinPool-1-worker-2 - Swagger - initialization done.
+2016-02-03 12:44:12 +0300 [INFO] from org.reflections.Reflections in ForkJoinPool-1-worker-2 - Reflections took 89 ms to scan 1 urls, producing 30 keys and 180 values 
+2016-02-03 12:44:12 +0300 [INFO] from play.api.Play in ForkJoinPool-1-worker-2 - Application started (Dev)
+2016-02-03 12:44:13 +0300 [INFO] from application in application-akka.actor.default-dispatcher-3 - //////API method=GET uri=/ remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:44:16 +0300 [INFO] from application in application-akka.actor.default-dispatcher-7 - //////API method=GET uri=/ remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:44:17 +0300 [INFO] from application in application-akka.actor.default-dispatcher-8 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:44:23 +0300 [INFO] from application in application-akka.actor.default-dispatcher-5 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:44:23 +0300 [INFO] from application in application-akka.actor.default-dispatcher-2 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:55:03 +0300 [INFO] from swagger in ForkJoinPool-3-worker-7 - Swagger - stopped.
+2016-02-03 12:55:03 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in ForkJoinPool-3-worker-7 - Shutdown application default Akka system: application
+2016-02-03 12:55:03 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-3 - Starting application default Akka system: application
+2016-02-03 12:55:03 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-3 - Swagger - starting initialisation...
+2016-02-03 12:55:03 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-3 - Basepath configured as:http://localhost:9000
+2016-02-03 12:55:03 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-3 - Loading API metadata
+2016-02-03 12:55:03 +0300 [WARN] from swagger in application-akka.actor.default-dispatcher-3 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 12:55:03 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-3 - Found API controller:  controllers.PropertyController
+2016-02-03 12:55:04 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-3 - Swagger - initialization done.
+2016-02-03 12:55:04 +0300 [INFO] from org.reflections.Reflections in application-akka.actor.default-dispatcher-3 - Reflections took 28 ms to scan 1 urls, producing 30 keys and 180 values 
+2016-02-03 12:55:04 +0300 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-3 - Application started (Dev)
+2016-02-03 12:55:04 +0300 [INFO] from application in application-akka.actor.default-dispatcher-5 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:55:26 +0300 [INFO] from application in application-akka.actor.default-dispatcher-2 - //////API method=POST uri=/api/property/update remote-address=0:0:0:0:0:0:0:1 body = {{"value":"2","description":"2","category":"GPS_INTEGRATION","id":"20"}}
+2016-02-03 12:56:47 +0300 [INFO] from application in application-akka.actor.default-dispatcher-10 - //////API method=GET uri=/ remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 12:57:11 +0300 [INFO] from application in application-akka.actor.default-dispatcher-11 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:00:56 +0300 [INFO] from swagger in ForkJoinPool-3-worker-5 - Swagger - stopped.
+2016-02-03 13:00:56 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in ForkJoinPool-3-worker-5 - Shutdown application default Akka system: application
+2016-02-03 13:00:57 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-4 - Starting application default Akka system: application
+2016-02-03 13:00:57 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-4 - Swagger - starting initialisation...
+2016-02-03 13:00:57 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-4 - Basepath configured as:http://localhost:9000
+2016-02-03 13:00:57 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-4 - Loading API metadata
+2016-02-03 13:00:57 +0300 [WARN] from swagger in application-akka.actor.default-dispatcher-4 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 13:00:57 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-4 - Found API controller:  controllers.PropertyController
+2016-02-03 13:00:57 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-4 - Swagger - initialization done.
+2016-02-03 13:00:57 +0300 [INFO] from org.reflections.Reflections in application-akka.actor.default-dispatcher-4 - Reflections took 30 ms to scan 1 urls, producing 30 keys and 181 values 
+2016-02-03 13:00:57 +0300 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-4 - Application started (Dev)
+2016-02-03 13:00:57 +0300 [INFO] from application in application-akka.actor.default-dispatcher-3 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:09 +0300 [INFO] from application in application-akka.actor.default-dispatcher-4 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:25 +0300 [INFO] from application in application-akka.actor.default-dispatcher-5 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:28 +0300 [INFO] from swagger in ForkJoinPool-3-worker-3 - Swagger - stopped.
+2016-02-03 13:01:28 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in ForkJoinPool-3-worker-3 - Shutdown application default Akka system: application
+2016-02-03 13:01:29 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-7 - Starting application default Akka system: application
+2016-02-03 13:01:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-7 - Swagger - starting initialisation...
+2016-02-03 13:01:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-7 - Basepath configured as:http://localhost:9000
+2016-02-03 13:01:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-7 - Loading API metadata
+2016-02-03 13:01:29 +0300 [WARN] from swagger in application-akka.actor.default-dispatcher-7 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 13:01:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-7 - Found API controller:  controllers.PropertyController
+2016-02-03 13:01:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-7 - Swagger - initialization done.
+2016-02-03 13:01:29 +0300 [INFO] from org.reflections.Reflections in application-akka.actor.default-dispatcher-7 - Reflections took 117 ms to scan 1 urls, producing 30 keys and 181 values 
+2016-02-03 13:01:29 +0300 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-7 - Application started (Dev)
+2016-02-03 13:01:29 +0300 [INFO] from application in application-akka.actor.default-dispatcher-2 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:41 +0300 [INFO] from application in application-akka.actor.default-dispatcher-3 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:44 +0300 [INFO] from application in application-akka.actor.default-dispatcher-2 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:45 +0300 [INFO] from application in application-akka.actor.default-dispatcher-7 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:46 +0300 [INFO] from application in application-akka.actor.default-dispatcher-7 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:01:46 +0300 [INFO] from application in application-akka.actor.default-dispatcher-3 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:04:29 +0300 [INFO] from swagger in ForkJoinPool-3-worker-3 - Swagger - stopped.
+2016-02-03 13:04:29 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-6 - Shutdown application default Akka system: application
+2016-02-03 13:04:29 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-6 - Starting application default Akka system: application
+2016-02-03 13:04:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-6 - Swagger - starting initialisation...
+2016-02-03 13:04:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-6 - Basepath configured as:http://localhost:9000
+2016-02-03 13:04:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-6 - Loading API metadata
+2016-02-03 13:04:29 +0300 [WARN] from swagger in application-akka.actor.default-dispatcher-6 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 13:04:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-6 - Found API controller:  controllers.PropertyController
+2016-02-03 13:04:29 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-6 - Swagger - initialization done.
+2016-02-03 13:04:29 +0300 [INFO] from org.reflections.Reflections in application-akka.actor.default-dispatcher-6 - Reflections took 29 ms to scan 1 urls, producing 30 keys and 181 values 
+2016-02-03 13:04:29 +0300 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-6 - Application started (Dev)
+2016-02-03 13:04:29 +0300 [INFO] from application in application-akka.actor.default-dispatcher-2 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:05:24 +0300 [INFO] from swagger in ForkJoinPool-3-worker-3 - Swagger - stopped.
+2016-02-03 13:05:24 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in ForkJoinPool-3-worker-3 - Shutdown application default Akka system: application
+2016-02-03 13:05:24 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-8 - Starting application default Akka system: application
+2016-02-03 13:05:24 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Swagger - starting initialisation...
+2016-02-03 13:05:24 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Basepath configured as:http://localhost:9000
+2016-02-03 13:05:24 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Loading API metadata
+2016-02-03 13:05:24 +0300 [WARN] from swagger in application-akka.actor.default-dispatcher-8 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 13:05:24 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Found API controller:  controllers.PropertyController
+2016-02-03 13:05:24 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Swagger - initialization done.
+2016-02-03 13:05:24 +0300 [INFO] from org.reflections.Reflections in application-akka.actor.default-dispatcher-8 - Reflections took 32 ms to scan 1 urls, producing 30 keys and 181 values 
+2016-02-03 13:05:25 +0300 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-8 - Application started (Dev)
+2016-02-03 13:05:25 +0300 [INFO] from application in application-akka.actor.default-dispatcher-2 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:05:33 +0300 [INFO] from application in application-akka.actor.default-dispatcher-8 - //////API method=GET uri=/api/property/get/20 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:08:53 +0300 [INFO] from swagger in ForkJoinPool-3-worker-7 - Swagger - stopped.
+2016-02-03 13:08:53 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in ForkJoinPool-3-worker-7 - Shutdown application default Akka system: application
+2016-02-03 13:08:54 +0300 [INFO] from play.api.libs.concurrent.ActorSystemProvider in application-akka.actor.default-dispatcher-8 - Starting application default Akka system: application
+2016-02-03 13:08:54 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Swagger - starting initialisation...
+2016-02-03 13:08:54 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Basepath configured as:http://localhost:9000
+2016-02-03 13:08:54 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Loading API metadata
+2016-02-03 13:08:54 +0300 [WARN] from swagger in application-akka.actor.default-dispatcher-8 - ControllerScanner - looking for controllers with API annotation
+2016-02-03 13:08:54 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Found API controller:  controllers.PropertyController
+2016-02-03 13:08:54 +0300 [INFO] from swagger in application-akka.actor.default-dispatcher-8 - Swagger - initialization done.
+2016-02-03 13:08:54 +0300 [INFO] from org.reflections.Reflections in application-akka.actor.default-dispatcher-8 - Reflections took 22 ms to scan 1 urls, producing 30 keys and 181 values 
+2016-02-03 13:08:54 +0300 [INFO] from play.api.Play in application-akka.actor.default-dispatcher-8 - Application started (Dev)
+2016-02-03 13:08:54 +0300 [INFO] from application in application-akka.actor.default-dispatcher-3 - //////API method=GET uri=/swagger remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:09:26 +0300 [INFO] from application in application-akka.actor.default-dispatcher-3 - //////API method=GET uri=/api/property/get/1 remote-address=0:0:0:0:0:0:0:1 body = {null}
+2016-02-03 13:09:26 +0300 [ERROR] from application in application-akka.actor.default-dispatcher-3 - Error:
+java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+	at java.util.ArrayList.rangeCheck(ArrayList.java:653) ~[na:1.8.0_60]
+	at java.util.ArrayList.get(ArrayList.java:429) ~[na:1.8.0_60]
+	at com.github.pgasync.impl.PgResultSet.row(PgResultSet.java:54) ~[postgres-async-driver-0.7.jar:na]
+	at repository.PropertyRepository.lambda$retrieveById$9(PropertyRepository.java:53) ~[classes/:na]
+	at rx.Observable$28.onNext(Observable.java:7588) ~[rxjava-1.0.14.jar:1.0.14]
+	at rx.observers.SafeSubscriber.onNext(SafeSubscriber.java:130) ~[rxjava-1.0.14.jar:1.0.14]
+	at rx.internal.operators.OperatorMerge$MergeSubscriber.emitScalar(OperatorMerge.java:364) ~[rxjava-1.0.14.jar:1.0.14]
+	at rx.internal.operators.OperatorMerge$MergeSubscriber.tryEmit(OperatorMerge.java:326) ~[rxjava-1.0.14.jar:1.0.14]
+	at rx.internal.operators.OperatorMerge$InnerSubscriber.onNext(OperatorMerge.java:802) ~[rxjava-1.0.14.jar:1.0.14]
+	at rx.internal.operators.OperatorDoOnEach$1.onNext(OperatorDoOnEach.java:84) ~[rxjava-1.0.14.jar:1.0.14]
+	at com.github.pgasync.impl.PgConnection$2.onNext(PgConnection.java:160) ~[postgres-async-driver-0.7.jar:na]
+	at com.github.pgasync.impl.PgConnection$2.onNext(PgConnection.java:145) ~[postgres-async-driver-0.7.jar:na]
+	at com.github.pgasync.impl.netty.NettyPgProtocolStream$1.onNext(NettyPgProtocolStream.java:204) ~[postgres-async-driver-0.7.jar:na]
+	at com.github.pgasync.impl.netty.NettyPgProtocolStream$5.channelRead(NettyPgProtocolStream.java:296) ~[postgres-async-driver-0.7.jar:na]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:265) ~[netty-codec-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:265) ~[netty-codec-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:846) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:131) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354) ~[netty-transport-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:112) ~[netty-common-4.0.32.Final.jar:4.0.32.Final]
+	at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run(DefaultThreadFactory.java:137) ~[netty-common-4.0.32.Final.jar:4.0.32.Final]
+	at java.lang.Thread.run(Thread.java:745) ~[na:1.8.0_60]

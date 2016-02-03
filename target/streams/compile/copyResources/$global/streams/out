@@ -1,0 +1,4 @@
+[debug] Copy resource mappings: 
+[debug] 	(/Users/corbandalas/Java/workspace/msp/conf/application.conf,/Users/corbandalas/Java/workspace/msp/target/scala-2.11/classes/application.conf)
+[debug] 	(/Users/corbandalas/Java/workspace/msp/conf/logback.xml,/Users/corbandalas/Java/workspace/msp/target/scala-2.11/classes/logback.xml)
+[debug] 	(/Users/corbandalas/Java/workspace/msp/conf/routes,/Users/corbandalas/Java/workspace/msp/target/scala-2.11/classes/routes)

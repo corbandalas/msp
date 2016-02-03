@@ -1,0 +1,25 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Swagger Stuff
+
+GET        /api-docs              @pl.matisoft.swagger.ApiHelpController.getResources
+GET        /swagger               @controllers.SwaggerController.swagger()
+
+# Index
+GET     /                           @controllers.Application.index
+
+# Property API
+GET        /api-docs/api/property      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/property")
+
+POST       /api/property/create                                          @controllers.PropertyController.create()
+
+POST       /api/property/update                                          @controllers.PropertyController.update()
+
+GET        /api/property/list                                            @controllers.PropertyController.retrieveAll()
+
+GET        /api/property/get/:propertyID                                 @controllers.PropertyController.retrieveByID(propertyID)
+
+# Map static resources from the /public folder to the /assets URL path
+GET            /assets/*file                                        controllers.Assets.at(path="/public", file)
