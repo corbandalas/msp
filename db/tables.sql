@@ -28,7 +28,7 @@ ALTER TABLE ONLY currency
 
 
 CREATE TABLE customer (
-    id character varying(255) NOT NULL,
+    id bigint NOT NULL,
     title character varying(255) NOT NULL,
     firstName character varying(255) NOT NULL,
     lastName character varying(255) NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE card (
     createDate timestamp with time zone DEFAULT now(),
     is_default boolean NOT NULL DEFAULT false,
     active boolean,
-    customer_id character varying(255) NOT NULL,
+    customer_id bigint NOT NULL,
     alias character varying(255) NOT NULL,
     info character varying(255) NOT NULL,
     deliveryAddress1 character varying(255) NOT NULL,

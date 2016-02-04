@@ -11,7 +11,7 @@ import java.util.Date;
  * @author ra - created 03.02.2016
  * @since 0.1.0
  */
-public class Customer extends BaseEntity<Integer> {
+public class Customer extends BaseEntity<Long> {
 
     private Date registrationDate;
     private String title;
@@ -26,6 +26,23 @@ public class Customer extends BaseEntity<Integer> {
     private Boolean active;
     private KYC kyc;
     private String password;
+
+    public Customer(Long id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password) {
+        this.setId(id);
+        this.registrationDate = registrationDate;
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.postcode = postcode;
+        this.city = city;
+        this.email = email;
+        this.dateBirth = dateBirth;
+        this.active = active;
+        this.kyc = kyc;
+        this.password = password;
+    }
 
     public Date getRegistrationDate() {
         return registrationDate;

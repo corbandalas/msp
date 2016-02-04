@@ -17,6 +17,7 @@ public class Card extends BaseEntity<Long> {
     private Integer customerId;
     private CardType type;
     private CardBrand brand;
+    private Boolean cardDefault;
     private Date createDate;
     private String alias;
     private Boolean active;
@@ -27,6 +28,32 @@ public class Card extends BaseEntity<Long> {
     private String deliveryAddress3;
     private String deliveryCountry;
 
+    public Card(Long id, String token, Integer customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry) {
+        this.setId(id);
+        this.token = token;
+        this.customerId = customerId;
+        this.type = type;
+        this.brand = brand;
+        this.cardDefault = cardDefault;
+        this.createDate = createDate;
+        this.alias = alias;
+        this.active = active;
+        this.info = info;
+        this.currencyId = currencyId;
+        this.deliveryAddress1 = deliveryAddress1;
+        this.deliveryAddress2 = deliveryAddress2;
+        this.deliveryAddress3 = deliveryAddress3;
+        this.deliveryCountry = deliveryCountry;
+    }
+
+    public Boolean getCardDefault() {
+        return cardDefault;
+    }
+
+    public void setCardDefault(Boolean cardDefault) {
+        this.cardDefault = cardDefault;
+    }
+
     public String getToken() {
         return token;
     }
@@ -35,7 +62,7 @@ public class Card extends BaseEntity<Long> {
         this.token = token;
     }
 
-    public Integer getCustomer() {
+    public Integer getCustomerId() {
         return customerId;
     }
 
@@ -138,11 +165,12 @@ public class Card extends BaseEntity<Long> {
                 ", customerId=" + customerId +
                 ", type=" + type +
                 ", brand=" + brand +
+                ", cardDefault=" + cardDefault +
                 ", createDate=" + createDate +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
                 ", info='" + info + '\'' +
-                ", currencyId=" + currencyId +
+                ", currencyId='" + currencyId + '\'' +
                 ", deliveryAddress1='" + deliveryAddress1 + '\'' +
                 ", deliveryAddress2='" + deliveryAddress2 + '\'' +
                 ", deliveryAddress3='" + deliveryAddress3 + '\'' +
