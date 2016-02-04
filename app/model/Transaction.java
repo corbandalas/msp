@@ -13,7 +13,7 @@ public class Transaction extends BaseEntity<Long> {
 
     private Long operationId;
     private Long amount;
-    private Currency currency;
+    private String currencyId;
     private Integer fromAccountId;
     private Integer toAccountId;
     private Long cardId;
@@ -21,11 +21,24 @@ public class Transaction extends BaseEntity<Long> {
     private Double toExchangeRate;
     private TransactionType type;
 
-    public Long getOperation() {
+    public Transaction(Long id, Long operationId, Long amount, String currencyId, Integer fromAccountId, Integer toAccountId, Long cardId, Double fromExchangeRate, Double toExchangeRate, TransactionType type) {
+        this.setId(id);
+        this.operationId = operationId;
+        this.amount = amount;
+        this.currencyId = currencyId;
+        this.fromAccountId = fromAccountId;
+        this.toAccountId = toAccountId;
+        this.cardId = cardId;
+        this.fromExchangeRate = fromExchangeRate;
+        this.toExchangeRate = toExchangeRate;
+        this.type = type;
+    }
+
+    public Long getOperationId() {
         return operationId;
     }
 
-    public void setOperation(Long operationId) {
+    public void setOperationId(Long operationId) {
         this.operationId = operationId;
     }
 
@@ -37,19 +50,19 @@ public class Transaction extends BaseEntity<Long> {
         this.amount = amount;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public String getCurrencyId() {
+        return currencyId;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setCurrencyId(String currencyId) {
+        this.currencyId = currencyId;
     }
 
     public Integer getFromAccountId() {
         return fromAccountId;
     }
 
-    public void setFromAccount(Integer fromAccountId) {
+    public void setFromAccountId(Integer fromAccountId) {
         this.fromAccountId = fromAccountId;
     }
 
@@ -57,7 +70,7 @@ public class Transaction extends BaseEntity<Long> {
         return toAccountId;
     }
 
-    public void setToAccount(Integer toAccountId) {
+    public void setToAccountId(Integer toAccountId) {
         this.toAccountId = toAccountId;
     }
 
@@ -65,7 +78,7 @@ public class Transaction extends BaseEntity<Long> {
         return cardId;
     }
 
-    public void setCard(Long cardId) {
+    public void setCardId(Long cardId) {
         this.cardId = cardId;
     }
 
@@ -85,17 +98,26 @@ public class Transaction extends BaseEntity<Long> {
         this.toExchangeRate = toExchangeRate;
     }
 
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
                 "operationId=" + operationId +
                 ", amount=" + amount +
-                ", currency=" + currency +
+                ", currencyId=" + currencyId +
                 ", fromAccountId=" + fromAccountId +
                 ", toAccountId=" + toAccountId +
                 ", cardId=" + cardId +
                 ", fromExchangeRate=" + fromExchangeRate +
                 ", toExchangeRate=" + toExchangeRate +
+                ", type=" + type +
                 '}';
     }
 }

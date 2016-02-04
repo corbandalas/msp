@@ -14,7 +14,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 /**
- * Currency CRUD repository
+ * Country CRUD repository
  *
  * @author ra - created 04.02.2016
  * @since 0.1.0
@@ -79,7 +79,7 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
 
     @Override
     public void delete(Country entity) {
-        //TODO Not implemented yet
+        //Not required yet
     }
 
     private Country createCountry(Row row) {

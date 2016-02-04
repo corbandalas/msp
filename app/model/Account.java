@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Date;
+
 /**
  * Database stored entity for managing accounts across the project
  *
@@ -9,7 +11,17 @@ package model;
 public class Account extends BaseEntity<Integer> {
 
     private String name;
-    private Currency currency;
+    private String currencyId;
+    private Date createDate;
+    private Boolean active;
+
+    public Account(Integer id, String name, String currencyId, Date createDate, Boolean active) {
+        this.setId(id);
+        this.name = name;
+        this.currencyId = currencyId;
+        this.createDate = createDate;
+        this.active = active;
+    }
 
     public String getName() {
         return name;
@@ -19,19 +31,37 @@ public class Account extends BaseEntity<Integer> {
         this.name = name;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public String getCurrencyId() {
+        return currencyId;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setCurrencyId(String currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     @Override
     public String toString() {
         return "Account{" +
                 "name='" + name + '\'' +
-                ", currency=" + currency +
+                ", currencyId='" + currencyId + '\'' +
+                ", createDate=" + createDate +
+                ", active=" + active +
                 '}';
     }
 }

@@ -95,13 +95,22 @@ ALTER TABLE card
       REFERENCES currency (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
       
-      
+CREATE SEQUENCE msp_scheme.operation_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+
+ALTER TABLE msp_scheme.operation_seq
+  OWNER TO msp_db;
       
 CREATE TABLE operation (
     id bigint NOT NULL,
     orderId bigint NOT NULL,
     description text,
-    type character varying(255) NOT NULL
+    type character varying(255) NOT NULL,
+    createdate timestamp with time zone DEFAULT now()
 );
 ALTER TABLE ONLY operation
     ADD CONSTRAINT operation_pkey PRIMARY KEY (id);
@@ -111,7 +120,9 @@ ALTER TABLE ONLY operation
 CREATE TABLE account (
     id bigint NOT NULL,
     currency_id character varying(255) NOT NULL,
-    name character varying(255) NOT NULL
+    name character varying(255) NOT NULL,
+    createdate timestamp with time zone DEFAULT now(),
+    active boolean
 );
 ALTER TABLE ONLY account
     ADD CONSTRAINT account_pkey PRIMARY KEY (id);
@@ -120,8 +131,17 @@ ALTER TABLE account
   ADD CONSTRAINT account_currency FOREIGN KEY (currency_id)
       REFERENCES currency (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
-      
-      
+
+CREATE SEQUENCE msp_scheme.transaction_seq
+INCREMENT 1
+MINVALUE 1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+
+ALTER TABLE msp_scheme.transaction_seq
+OWNER TO msp_db;
+
 CREATE TABLE transaction (
     id bigint NOT NULL,
     operation_id bigint NOT NULL,

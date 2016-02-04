@@ -82,7 +82,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
 
     @Override
     public void delete(Currency entity) {
-        //TODO: not implemented yet
+        //not required implemented yet
     }
 
     private Currency createCurrency(Row row) {
