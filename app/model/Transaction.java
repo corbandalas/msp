@@ -11,22 +11,22 @@ import model.enums.TransactionType;
  */
 public class Transaction extends BaseEntity<Long> {
 
-    private Operation operation;
+    private Long operationId;
     private Long amount;
     private Currency currency;
-    private Account fromAccount;
-    private Account toAccount;
-    private Card card;
+    private Integer fromAccountId;
+    private Integer toAccountId;
+    private Long cardId;
     private Double fromExchangeRate;
     private Double toExchangeRate;
     private TransactionType type;
 
-    public Operation getOperation() {
-        return operation;
+    public Long getOperation() {
+        return operationId;
     }
 
-    public void setOperation(Operation operation) {
-        this.operation = operation;
+    public void setOperation(Long operationId) {
+        this.operationId = operationId;
     }
 
     public Long getAmount() {
@@ -45,28 +45,28 @@ public class Transaction extends BaseEntity<Long> {
         this.currency = currency;
     }
 
-    public Account getFromAccount() {
-        return fromAccount;
+    public Integer getFromAccountId() {
+        return fromAccountId;
     }
 
-    public void setFromAccount(Account fromAccount) {
-        this.fromAccount = fromAccount;
+    public void setFromAccount(Integer fromAccountId) {
+        this.fromAccountId = fromAccountId;
     }
 
-    public Account getToAccount() {
-        return toAccount;
+    public Integer getToAccountId() {
+        return toAccountId;
     }
 
-    public void setToAccount(Account toAccount) {
-        this.toAccount = toAccount;
+    public void setToAccount(Integer toAccountId) {
+        this.toAccountId = toAccountId;
     }
 
-    public Card getCard() {
-        return card;
+    public Long getCardId() {
+        return cardId;
     }
 
-    public void setCard(Card card) {
-        this.card = card;
+    public void setCard(Long cardId) {
+        this.cardId = cardId;
     }
 
     public Double getFromExchangeRate() {
@@ -88,12 +88,12 @@ public class Transaction extends BaseEntity<Long> {
     @Override
     public String toString() {
         return "Transaction{" +
-                "operation=" + operation +
+                "operationId=" + operationId +
                 ", amount=" + amount +
                 ", currency=" + currency +
-                ", fromAccount=" + fromAccount +
-                ", toAccount=" + toAccount +
-                ", card=" + card +
+                ", fromAccountId=" + fromAccountId +
+                ", toAccountId=" + toAccountId +
+                ", cardId=" + cardId +
                 ", fromExchangeRate=" + fromExchangeRate +
                 ", toExchangeRate=" + toExchangeRate +
                 '}';

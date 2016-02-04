@@ -14,14 +14,14 @@ import java.util.Date;
 public class Card extends BaseEntity<Long> {
 
     private String token;
-    private Customer customer;
+    private Integer customerId;
     private CardType type;
     private CardBrand brand;
     private Date createDate;
     private String alias;
     private Boolean active;
     private String info;
-    private Currency currency;
+    private String currencyId;
     private String deliveryAddress1;
     private String deliveryAddress2;
     private String deliveryAddress3;
@@ -35,12 +35,12 @@ public class Card extends BaseEntity<Long> {
         this.token = token;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public Integer getCustomer() {
+        return customerId;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setCustomerId(Integer customerId) {
+        this.customerId = customerId;
     }
 
     public CardType getType() {
@@ -91,12 +91,12 @@ public class Card extends BaseEntity<Long> {
         this.info = info;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public String getCurrencyId() {
+        return currencyId;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setCurrencyId(String currencyId) {
+        this.currencyId = currencyId;
     }
 
     public String getDeliveryAddress1() {
@@ -135,14 +135,14 @@ public class Card extends BaseEntity<Long> {
     public String toString() {
         return "Card{" +
                 "token='" + token + '\'' +
-                ", customer=" + customer +
+                ", customerId=" + customerId +
                 ", type=" + type +
                 ", brand=" + brand +
                 ", createDate=" + createDate +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
                 ", info='" + info + '\'' +
-                ", currency=" + currency +
+                ", currencyId=" + currencyId +
                 ", deliveryAddress1='" + deliveryAddress1 + '\'' +
                 ", deliveryAddress2='" + deliveryAddress2 + '\'' +
                 ", deliveryAddress3='" + deliveryAddress3 + '\'' +

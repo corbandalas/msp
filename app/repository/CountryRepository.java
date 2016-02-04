@@ -33,7 +33,7 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         final String query = "INSERT INTO " + connectionPool.getSchemaName() +
                 ".country(id, name, phonecode, active, currency_id) VALUES ($1, $2, $3, $4, $5)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getName(), entity.getPhoneCode(),
-                entity.getActive(), entity.getCurrency_id()), result -> promise.success(entity), promise::failure);
+                entity.getActive(), entity.getCurrencyId()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
@@ -72,7 +72,7 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         final String query = "UPDATE " + connectionPool.getSchemaName() +
                 ".country SET name=$2, phonecode=$3, active=$4, currency_id=$5 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getName(), entity.getPhoneCode(),
-                entity.getActive(), entity.getCurrency_id()), result -> promise.success(entity), promise::failure);
+                entity.getActive(), entity.getCurrencyId()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
