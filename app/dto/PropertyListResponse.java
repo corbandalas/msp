@@ -15,6 +15,10 @@ public class PropertyListResponse extends BaseAPIResponse{
 
     private List<Property> propertyList;
 
+    public PropertyListResponse() {
+        super("", "");
+    }
+
     public PropertyListResponse(String text, String code, List<Property> list) {
         super(text, code);
         propertyList = list;

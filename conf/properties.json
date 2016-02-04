@@ -1,0 +1,19 @@
+{
+
+  "propertyList": [
+    {
+      "id": "com.mysafepay.test.property.1",
+      "value": "test",
+      "description": "test_value",
+      "category": "GPS_INTEGRATION"
+    },
+
+    {
+      "id": "com.mysafepay.test.property.2",
+      "value": "test",
+      "description": "test_value",
+      "category": "GPS_INTEGRATION"
+    }
+  ]
+
+}

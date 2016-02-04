@@ -1,15 +1,29 @@
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
+import akka.actor.ActorSystem;
+import akka.dispatch.MessageDispatcher;
+import akka.dispatch.OnComplete;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.*;
+import dto.PropertyListResponse;
+import model.Property;
 import play.GlobalSettings;
 import play.Application;
+
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import play.Logger;
+import play.libs.Akka;
+import play.libs.F;
+import play.libs.Json;
 import play.mvc.Action;
 import play.mvc.Http.Request;
+import play.mvc.Result;
+import repository.PropertyRepository;
+import scala.concurrent.Future;
 import util.Utils;
 
 /**
@@ -21,6 +35,9 @@ import util.Utils;
 public class Global extends GlobalSettings {
 
     private Injector injector;
+
+    @Inject
+    public ActorSystem system;
 
     @Override
     public void onStart(Application application) {
@@ -34,6 +51,45 @@ public class Global extends GlobalSettings {
                 annotatedClasses.forEach(this::bind);
             }
         });
+
+
+        //Load properties from properties.json
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            PropertyListResponse propertyListResponse = mapper.readValue(new String(Files.readAllBytes(Paths.get("conf/properties.json"))), PropertyListResponse.class);
+
+            PropertyRepository propertyRepository = injector.getInstance(PropertyRepository.class);
+
+
+            for(Property property: propertyListResponse.getPropertyList()) {
+
+                Future<Property> propertyFuture = propertyRepository.retrieveById(property.getId());
+
+                propertyFuture.onComplete(new OnComplete<Property>() {
+                    public void onComplete(Throwable failure, Property result) {
+                        if (failure != null) {
+
+                            Logger.info("Property" + property.getId() + " doesn't exist in DB. Trying to insert it");
+
+                            propertyRepository.create(property);
+                        } else {
+
+                            Logger.info("Property" + property.getId() + " exists in DB. Trying to update it");
+
+                            propertyRepository.update(property);
+                        }
+                    }
+                },  application.getWrappedApplication().actorSystem().dispatcher());
+
+            }
+
+        } catch (IOException e) {
+            Logger.error("Error while parsing properties.json file", e);
+        }
+
+
     }
 
     public <T> T getControllerInstance(Class<T> aClass) throws Exception {
