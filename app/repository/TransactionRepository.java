@@ -89,6 +89,48 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         //not required yet
     }
 
+    public Future<List<Transaction>>retrieveByOperationId(Long operationId) {
+
+        final Promise<List<Transaction>> promise = Futures.promise();
+
+        String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction where operation_id=$1";
+        connectionPool.getConnection().query(query, asList(operationId), result -> {
+            final ArrayList<Transaction> transactions = new ArrayList<>();
+            result.forEach(row -> transactions.add(createTransaction(row)));
+            promise.success(transactions);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Transaction>>retrieveByFromAccountId(Long fromAccountId) {
+
+        final Promise<List<Transaction>> promise = Futures.promise();
+
+        String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction where from_account_id=$1";
+        connectionPool.getConnection().query(query, asList(fromAccountId), result -> {
+            final ArrayList<Transaction> transactions = new ArrayList<>();
+            result.forEach(row -> transactions.add(createTransaction(row)));
+            promise.success(transactions);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Transaction>>retrieveByToAccountId(Long toAccountId) {
+
+        final Promise<List<Transaction>> promise = Futures.promise();
+
+        String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction where to_account_id=$1";
+        connectionPool.getConnection().query(query, asList(toAccountId), result -> {
+            final ArrayList<Transaction> transactions = new ArrayList<>();
+            result.forEach(row -> transactions.add(createTransaction(row)));
+            promise.success(transactions);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     private Transaction createTransaction(Row row) {
         return new Transaction(row.getLong("id"), row.getLong("operation_id"), row.getLong("amount"), row.getString("currency_id"),
                 row.getInt("from_account_id"), row.getInt("to_account_id"), row.getLong("card_id"), row.getDouble("from_exchange_rate"),
