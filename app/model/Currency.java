@@ -2,12 +2,11 @@ package model;
 
 /**
  * Database stored entity for managing currencies across the project
- *
+ * <p>
  * Entity id - currency ISO-4217 3 letter code like USD, EUR. https://en.wikipedia.org/wiki/ISO_4217
  *
  * @author ra - created 03.02.2016
  * @since 0.1.0
- *
  */
 public class Currency extends BaseEntity<String> {
 
@@ -16,8 +15,17 @@ public class Currency extends BaseEntity<String> {
     private Double euroIndex;
     private Boolean active;
 
+    public Currency(String id, Short code, String displayText, Double euroIndex, Boolean active) {
+        this.setId(id);
+        this.code = code;
+        this.displayText = displayText;
+        this.euroIndex = euroIndex;
+        this.active = active;
+    }
+
     /**
      * Get currency ISO-4217 3 digit numeric code
+     *
      * @return code
      */
     public Short getCode() {
@@ -26,6 +34,7 @@ public class Currency extends BaseEntity<String> {
 
     /**
      * Set currency ISO-4217 3 digit numeric code
+     *
      * @param code
      */
     public void setCode(Short code) {

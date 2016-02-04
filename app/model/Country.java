@@ -13,7 +13,15 @@ public class Country extends BaseEntity<String> {
     private String name;
     private Short phoneCode;
     private Boolean active;
-    private Currency currency;
+    private String currency_id;
+
+    public Country(String id, String name, Short phoneCode, Boolean active, String currency_id) {
+        this.setId(id);
+        this.name = name;
+        this.phoneCode = phoneCode;
+        this.active = active;
+        this.currency_id = currency_id;
+    }
 
     public String getName() {
         return name;
@@ -47,12 +55,14 @@ public class Country extends BaseEntity<String> {
         this.active = active;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public String getCurrency_id() {
+        return currency_id;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public Currency getCurrency() {
+
+        //TODO: Not implemented yet
+        return null;
     }
 
     @Override
@@ -61,7 +71,7 @@ public class Country extends BaseEntity<String> {
                 "name='" + name + '\'' +
                 ", phoneCode=" + phoneCode +
                 ", active=" + active +
-                ", currency=" + currency +
+                ", currency_id=" + currency_id +
                 '}';
     }
 }
