@@ -1,4 +1,4 @@
-﻿CREATE SCHEMA msp_scheme;
+﻿--CREATE SCHEMA msp_scheme;
 ALTER SCHEMA msp_scheme OWNER TO msp_db;
 
 SET search_path = msp_scheme, pg_catalog;

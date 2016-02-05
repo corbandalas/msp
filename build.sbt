@@ -33,3 +33,5 @@ flywayUser := "msp_db"
 flywayPassword:="x13jkw34"
 
 flywayLocations := Seq("filesystem:db")
+
+flywaySchemas := Seq("msp_scheme")
