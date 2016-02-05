@@ -25,7 +25,25 @@ CREATE TABLE currency (
 ALTER TABLE ONLY currency
     ADD CONSTRAINT currency_pkey PRIMARY KEY (id);
 
+CREATE SEQUENCE exhange_rate_history_seq
+INCREMENT 1
+MINVALUE 1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
 
+CREATE TABLE exchange_rate_history
+(
+    id bigint NOT NULL,
+    euro_index numeric NOT NULL,
+    date timestamp without time zone NOT NULL,
+    currency_id character varying(3) NOT NULL,
+    CONSTRAINT exchange_rate_history_pkey PRIMARY KEY (id),
+    CONSTRAINT exchange_rate_history_currency_key FOREIGN KEY (currency_id)
+    REFERENCES currency (id) MATCH SIMPLE
+    ON UPDATE NO ACTION ON DELETE NO ACTION,
+    CONSTRAINT exchange_rate_history_key UNIQUE (currency_id, date)
+);
 
 CREATE TABLE customer (
     id bigint NOT NULL,
@@ -95,15 +113,12 @@ ALTER TABLE card
       REFERENCES currency (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
       
-CREATE SEQUENCE msp_scheme.operation_seq
+CREATE SEQUENCE operation_seq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 9223372036854775807
   START 1
   CACHE 1;
-
-ALTER TABLE msp_scheme.operation_seq
-  OWNER TO msp_db;
       
 CREATE TABLE operation (
     id bigint NOT NULL,
