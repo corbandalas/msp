@@ -32,14 +32,10 @@ public class CardRepository implements BaseCRUDRepository<Card> {
     public Future<Card> create(Card entity) {
 
         final Promise<Card> promise = Futures.promise();
-
-        connectionPool.getConnection().query("select nextval('hibernate_sequence')", idRes -> {
-            final Long id = idRes.row(0).getLong(0);
-            final String query = "INSERT INTO " + connectionPool.getSchemaName() +
-                    ".card(id, token, cardtype, brand, createDate, is_default, active, customer_id, alias, info, deliveryAddress1, deliveryAddress2, deliveryAddress3, deliveryCountry, currency_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)";
-            connectionPool.getConnection().query(query, asList(id, entity.getToken(), entity.getType(),
-                    entity.getBrand(), entity.getCreateDate(), entity.getCardDefault(), entity.getActive(), entity.getCustomerId(), entity.getAlias(), entity.getInfo(), entity.getDeliveryAddress1(), entity.getDeliveryAddress2(), entity.getDeliveryAddress3(), entity.getDeliveryCountry(), entity.getCurrencyId()), result -> promise.success(entity), promise::failure);
-        }, promise::failure);
+        final String query = "INSERT INTO " + connectionPool.getSchemaName() +
+                ".card(, token, cardtype, brand, createDate, is_default, active, customer_id, alias, info, deliveryAddress1, deliveryAddress2, deliveryAddress3, deliveryCountry, currency_id) VALUES (nextval('" + connectionPool.getSchemaName() + ".card_seq'), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)";
+        connectionPool.getConnection().query(query, asList(entity.getToken(), entity.getType(),
+                entity.getBrand(), entity.getCreateDate(), entity.getCardDefault(), entity.getActive(), entity.getCustomerId(), entity.getAlias(), entity.getInfo(), entity.getDeliveryAddress1(), entity.getDeliveryAddress2(), entity.getDeliveryAddress3(), entity.getDeliveryCountry(), entity.getCurrencyId()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }

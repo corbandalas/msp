@@ -81,7 +81,15 @@ ALTER TABLE country
       REFERENCES currency (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+CREATE SEQUENCE msp_scheme.card_seq
+INCREMENT 1
+MINVALUE 1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
 
+ALTER TABLE msp_scheme.card_seq
+OWNER TO msp_db;
 
 CREATE TABLE card (
     id bigint NOT NULL,
@@ -196,3 +204,23 @@ ALTER TABLE transaction
   ADD CONSTRAINT transaction_card FOREIGN KEY (card_id)
       REFERENCES card (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
+
+CREATE TABLE exchange_rate_history (
+    id bigint NOT NULL,
+    euro_index numeric(19,2) NOT NULL,
+    date timestamp without time zone NOT NULL,
+    currency_id character varying(255) NOT NULL
+);
+
+ALTER TABLE ONLY exchange_rate_history
+ADD CONSTRAINT exchange_rate_history_pkey PRIMARY KEY (id);
+
+ALTER TABLE exchange_rate_history
+ADD CONSTRAINT exchange_rate_history_currency FOREIGN KEY (currency_id)
+REFERENCES currency (id) MATCH SIMPLE
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE exchange_rate_history
+ADD CONSTRAINT exchange_rate_history_currency_key UNIQUE (currency_id, date);
