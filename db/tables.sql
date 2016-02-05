@@ -204,3 +204,14 @@ ALTER TABLE transaction
   ADD CONSTRAINT transaction_card FOREIGN KEY (card_id)
       REFERENCES card (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
+ALTER TABLE property OWNER TO msp_db;
+ALTER TABLE currency OWNER TO msp_db;
+ALTER TABLE exchange_rate_history OWNER TO msp_db;
+ALTER TABLE customer OWNER TO msp_db;
+ALTER TABLE country OWNER TO msp_db;
+ALTER TABLE card OWNER TO msp_db;
+ALTER TABLE operation OWNER TO msp_db;
+ALTER TABLE account OWNER TO msp_db;
+ALTER TABLE transaction OWNER TO msp_db;
