@@ -8,6 +8,8 @@ import model.ExchangeRateHistory;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -33,9 +35,10 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
         final String query = "INSERT INTO " + connectionPool.getSchemaName() +
                 ".exchange_rate_history(nextval('" + connectionPool.getSchemaName() + ".exchange_rate_history_seq')," +
                 " euro_index, date, currency_id) VALUES ($1, $2, $3);";
-        connectionPool.getConnection().query(query, asList(entity.getEuroIndex(), entity.getDate(), entity.getCurrencyId()),
-                result -> promise.success(entity), promise::failure);
 
+        connectionPool.getConnection().query(query, asList(entity.getEuroIndex(),
+                new Timestamp(entity.getDate().getTime()), entity.getCurrencyId()),
+                result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }

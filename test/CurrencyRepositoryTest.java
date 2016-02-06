@@ -12,6 +12,8 @@ import scala.concurrent.Future;
 
 import java.util.List;
 
+import static org.junit.Assert.fail;
+
 /**
  * @author ra created 06.02.2016.
  * @since 0.1.0
@@ -29,7 +31,7 @@ public class CurrencyRepositoryTest {
     }
 
     @Test
-    public void create() {
+    public void retrieveAll() {
         CurrencyRepository currencyRepository = application.injector().instanceOf(CurrencyRepository.class);
         Future<List<Currency>> listFuture = currencyRepository.retrieveAll();
         listFuture.onSuccess(new OnSuccess<List<Currency>>() {
@@ -43,6 +45,7 @@ public class CurrencyRepositoryTest {
             @Override
             public void onFailure(Throwable failure) throws Throwable {
                 failure.printStackTrace();
+                fail();
             }
         }, dispatcher);
     }

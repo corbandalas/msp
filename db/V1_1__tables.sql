@@ -25,7 +25,7 @@ CREATE TABLE currency (
 ALTER TABLE ONLY currency
     ADD CONSTRAINT currency_pkey PRIMARY KEY (id);
 
-CREATE SEQUENCE exhange_rate_history_seq
+CREATE SEQUENCE exchange_rate_history_seq
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9223372036854775807
