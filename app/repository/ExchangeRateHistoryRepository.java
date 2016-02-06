@@ -31,7 +31,7 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
         final Promise<ExchangeRateHistory> promise = Futures.promise();
 
         final String query = "INSERT INTO " + connectionPool.getSchemaName() +
-                ".exchange_rate_history(nextval('" + connectionPool.getSchemaName() + ".exhange_rate_history_seq')," +
+                ".exchange_rate_history(nextval('" + connectionPool.getSchemaName() + ".exchange_rate_history_seq')," +
                 " euro_index, date, currency_id) VALUES ($1, $2, $3);";
         connectionPool.getConnection().query(query, asList(entity.getEuroIndex(), entity.getDate(), entity.getCurrencyId()),
                 result -> promise.success(entity), promise::failure);
