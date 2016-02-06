@@ -18,7 +18,7 @@ ALTER TABLE ONLY property
 CREATE TABLE currency (
     id character varying(255) NOT NULL,
     displayText character varying(255) NOT NULL,
-    code character varying(255) NOT NULL,
+    code smallint NOT NULL,
     active boolean NOT NULL DEFAULT false,
     euroIndex integer NOT NULL
 );
@@ -69,7 +69,7 @@ ALTER TABLE ONLY customer
 CREATE TABLE country (
     id character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
-    phoneCode character varying(255) NOT NULL,
+    phoneCode SMALLINT NOT NULL,
     active boolean NOT NULL DEFAULT false,
     currency_id character varying(255) NOT NULL
 );

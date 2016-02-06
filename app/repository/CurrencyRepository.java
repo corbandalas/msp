@@ -43,7 +43,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
 
         final Promise<Currency> promise = Futures.promise();
 
-        final String query = "SELECT * FROM" + connectionPool.getSchemaName() + ".currency where id=$1";
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".currency where id=$1";
         connectionPool.getConnection().query(query, asList(id), result -> promise.success(
                 createCurrency(result.row(0))), promise::failure);
 
@@ -55,7 +55,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
 
         final Promise<List<Currency>> promise = Futures.promise();
 
-        final String query = "SELECT * FROM" + connectionPool.getSchemaName() + ".currency";
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".currency";
         connectionPool.getConnection().query(query, result -> {
             final ArrayList<Currency> currencies = new ArrayList<>();
             result.forEach(row->{
