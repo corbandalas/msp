@@ -20,7 +20,7 @@ CREATE TABLE currency (
     displayText character varying(255) NOT NULL,
     code smallint NOT NULL,
     active boolean NOT NULL DEFAULT false,
-    euroIndex integer NOT NULL
+    euroIndex numeric NOT NULL
 );
 ALTER TABLE ONLY currency
     ADD CONSTRAINT currency_pkey PRIMARY KEY (id);

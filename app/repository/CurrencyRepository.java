@@ -1,15 +1,27 @@
 package repository;
 
 import akka.dispatch.Futures;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pgasync.Row;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Response;
+import dto.CurrencyExchangeRatesResponse;
+import model.BaseEntity;
 import model.Currency;
+import model.ExchangeRateHistory;
+import play.Logger;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import scala.tools.cmd.gen.AnyVals;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -24,6 +36,9 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
 
     @Inject
     private ConnectionPool connectionPool;
+
+    @Inject
+    private ExchangeRateHistoryRepository exchangeRateHistoryRepository;
 
     @Override
     public Future<Currency> create(Currency entity) {
@@ -88,5 +103,70 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
     private Currency createCurrency(Row row) {
         return new Currency(row.getString("id"), row.getShort("code"), row.getString("displaytext"),
                 row.getDouble("euroindex"), row.getBoolean("active"));
+    }
+
+
+
+    public Future<CurrencyExchangeRatesResponse> updateCurrencyExchangeRates(final List<Currency> currencies, String url, String apiKey) {
+
+        final String query = url + "?access_key=" + apiKey + "&currencies=" + currencies.parallelStream().map(BaseEntity::getId).collect(Collectors.joining(","));
+
+        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+
+        final Promise<CurrencyExchangeRatesResponse> promise = Futures.promise();
+
+
+        asyncHttpClient.prepareGet(query).execute(new AsyncCompletionHandler<CurrencyExchangeRatesResponse>(){
+
+            @Override
+            public CurrencyExchangeRatesResponse onCompleted(Response response) throws Exception {
+
+                String responseBody = response.getResponseBody();
+                Logger.info("///Obtained currencies: " + responseBody);
+
+                ObjectMapper mapper = new ObjectMapper();
+                CurrencyExchangeRatesResponse ratesResponse = mapper.readValue(responseBody, CurrencyExchangeRatesResponse.class);
+
+
+                for (Currency c: currencies) {
+                    final BigDecimal rate = ratesResponse.getQuotes().get(ratesResponse.getSource() + c.getId());
+
+                    if (rate != null) {
+                        double oldIndex = c.getEuroIndex();
+
+//                        exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
+                        update(new Currency(c.getId(), c.getCode(), "Хуй вам!", c.getEuroIndex(), c.getActive()));
+                    }
+                }
+
+//                currencies.forEach(c-> {
+//                    final BigDecimal rate = ratesResponse.getQuotes().get(ratesResponse.getSource() + c.getId());
+//
+//                    if (rate != null) {
+//                        double oldIndex = c.getEuroIndex();
+//
+//                        exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
+//                        update(new Currency(c.getId(), c.getCode(), c.getDisplayText(), c.getEuroIndex(), c.getActive()));
+//                    }
+//
+//                });
+
+
+                promise.success(ratesResponse);
+
+
+                return ratesResponse;
+            }
+
+            @Override
+            public void onThrowable(Throwable t){
+                Logger.error("/////Error while retrieving currencies from API", t);
+
+                promise.failure(t);
+            }
+        });
+
+        return promise.future();
+
     }
 }

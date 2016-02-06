@@ -9,7 +9,7 @@ package model;
  */
 public enum PropertyCategory {
 
-    GPS_INTEGRATION("GPS_INTEGRATION");
+    GPS_INTEGRATION("GPS_INTEGRATION"), EXCHANGE_RATES_INTEGRATION("EXCHANGE_RATES_INTEGRATION");
 
     private String value;
 

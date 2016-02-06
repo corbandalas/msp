@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   jdbc ,
   cache ,
   ws   ,
+  javaWs,
   specs2 % Test,
   "com.github.alaisi.pgasync"%"postgres-async-driver"%"0.7",
   "com.ning" % "async-http-client" % "1.9.3",

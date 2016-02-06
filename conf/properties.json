@@ -2,17 +2,17 @@
 
   "propertyList": [
     {
-      "id": "com.mysafepay.test.property.1",
-      "value": "test",
-      "description": "test_value",
-      "category": "GPS_INTEGRATION"
+      "id": "com.currencylayer.api.key",
+      "value": "e8f56c3c938a77996c36730977beaba6",
+      "description": "API key for currencylayer service",
+      "category": "EXCHANGE_RATES_INTEGRATION"
     },
 
     {
-      "id": "com.mysafepay.test.property.2",
-      "value": "test",
-      "description": "test_value",
-      "category": "GPS_INTEGRATION"
+      "id": "com.currencylayer.api.url",
+      "value": "http://apilayer.net/api/live",
+      "description": "API URL for currencylayer service",
+      "category": "EXCHANGE_RATES_INTEGRATION"
     }
   ]
 
