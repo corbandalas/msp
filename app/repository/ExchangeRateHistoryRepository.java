@@ -81,7 +81,7 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
     }
 
     private ExchangeRateHistory createExchangeRateHistory(Row row) {
-        return new ExchangeRateHistory(row.getLong("id"), row.getDouble("euro_index"), row.getDate("date"),
+        return new ExchangeRateHistory(row.getLong("id"), row.getBigDecimal("euro_index"), row.getDate("date"),
                 row.getString("currency_id"));
     }
 }

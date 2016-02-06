@@ -1,5 +1,6 @@
 package model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -10,22 +11,22 @@ import java.util.Date;
  */
 public class ExchangeRateHistory extends BaseEntity<Long> {
 
-    private Double euroIndex;
+    private BigDecimal euroIndex;
     private Date date;
     private String currencyId;
 
-    public ExchangeRateHistory(Long id, Double euroIndex, Date date, String currencyId) {
+    public ExchangeRateHistory(Long id, BigDecimal euroIndex, Date date, String currencyId) {
         setId(id);
         this.euroIndex = euroIndex;
         this.date = date;
         this.currencyId = currencyId;
     }
 
-    public Double getEuroIndex() {
+    public BigDecimal getEuroIndex() {
         return euroIndex;
     }
 
-    public void setEuroIndex(Double euroIndex) {
+    public void setEuroIndex(BigDecimal euroIndex) {
         this.euroIndex = euroIndex;
     }
 

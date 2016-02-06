@@ -1,5 +1,7 @@
 package model;
 
+import java.math.BigDecimal;
+
 /**
  * Database stored entity for managing currencies across the project
  * <p>
@@ -12,10 +14,10 @@ public class Currency extends BaseEntity<String> {
 
     private Short code;
     private String displayText;
-    private Double euroIndex;
+    private BigDecimal euroIndex;
     private Boolean active;
 
-    public Currency(String id, Short code, String displayText, Double euroIndex, Boolean active) {
+    public Currency(String id, Short code, String displayText, BigDecimal euroIndex, Boolean active) {
         this.setId(id);
         this.code = code;
         this.displayText = displayText;
@@ -49,11 +51,11 @@ public class Currency extends BaseEntity<String> {
         this.displayText = displayText;
     }
 
-    public Double getEuroIndex() {
+    public BigDecimal getEuroIndex() {
         return euroIndex;
     }
 
-    public void setEuroIndex(Double euroIndex) {
+    public void setEuroIndex(BigDecimal euroIndex) {
         this.euroIndex = euroIndex;
     }
 

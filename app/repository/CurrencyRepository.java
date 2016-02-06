@@ -102,7 +102,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
 
     private Currency createCurrency(Row row) {
         return new Currency(row.getString("id"), row.getShort("code"), row.getString("displaytext"),
-                row.getDouble("euroindex"), row.getBoolean("active"));
+                row.getBigDecimal("euroindex"), row.getBoolean("active"));
     }
 
 
@@ -132,7 +132,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
                     final BigDecimal rate = ratesResponse.getQuotes().get(ratesResponse.getSource() + c.getId());
 
                     if (rate != null) {
-                        double oldIndex = c.getEuroIndex();
+                        BigDecimal oldIndex = c.getEuroIndex();
 
                         exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
                         update(new Currency(c.getId(), c.getCode(), c.getDisplayText(), c.getEuroIndex(), c.getActive()));
