@@ -7,11 +7,15 @@ import org.junit.Test;
 import play.api.Application;
 import play.api.inject.guice.GuiceApplicationBuilder;
 import repository.CurrencyRepository;
+import scala.concurrent.Await;
+import scala.concurrent.CanAwait;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -34,19 +38,11 @@ public class CurrencyRepositoryTest {
     public void retrieveAll() {
         CurrencyRepository currencyRepository = application.injector().instanceOf(CurrencyRepository.class);
         Future<List<Currency>> listFuture = currencyRepository.retrieveAll();
-        listFuture.onSuccess(new OnSuccess<List<Currency>>() {
-            @Override
-            public void onSuccess(List<Currency> result) throws Throwable {
-                System.out.println(result.get(0));
-            }
-        }, dispatcher);
-
-        listFuture.onFailure(new OnFailure() {
-            @Override
-            public void onFailure(Throwable failure) throws Throwable {
-                failure.printStackTrace();
-                fail();
-            }
-        }, dispatcher);
+        try {
+            List<Currency> currencies = Await.result(listFuture, Duration.apply("1000 ms"));
+            assertNotNull(currencies);
+        } catch (Exception e) {
+            fail();
+        }
     }
 }
