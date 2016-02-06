@@ -134,22 +134,10 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
                     if (rate != null) {
                         double oldIndex = c.getEuroIndex();
 
-//                        exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
-                        update(new Currency(c.getId(), c.getCode(), "Хуй вам!", c.getEuroIndex(), c.getActive()));
+                        exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
+                        update(new Currency(c.getId(), c.getCode(), c.getDisplayText(), c.getEuroIndex(), c.getActive()));
                     }
                 }
-
-//                currencies.forEach(c-> {
-//                    final BigDecimal rate = ratesResponse.getQuotes().get(ratesResponse.getSource() + c.getId());
-//
-//                    if (rate != null) {
-//                        double oldIndex = c.getEuroIndex();
-//
-//                        exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
-//                        update(new Currency(c.getId(), c.getCode(), c.getDisplayText(), c.getEuroIndex(), c.getActive()));
-//                    }
-//
-//                });
 
 
                 promise.success(ratesResponse);

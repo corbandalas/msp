@@ -112,7 +112,7 @@ public class Global extends GlobalSettings {
 
 
         //Exchange Rates trigger
-        Akka.system().scheduler().schedule(Duration.Zero(), Duration.create(60, TimeUnit.SECONDS),
+        Akka.system().scheduler().schedule(Duration.Zero(), Duration.create(240, TimeUnit.MINUTES),
                 injector.getInstance(ExchangeRatesTriggerJob.class), Akka.system().dispatcher());
     }
 
