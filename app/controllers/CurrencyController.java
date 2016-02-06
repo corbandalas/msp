@@ -1,29 +1,45 @@
 package controllers;
 
 import com.google.inject.Inject;
-import model.Currency;
-import play.libs.F;
+import com.wordnik.swagger.annotations.*;
+import dto.CurrencyListResponse;
+import play.Logger;
+import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.CurrencyRepository;
 
-import java.util.List;
-
 /**
+ * API currency controller
  * @author ra - created 06.02.2016.
  * @since 0.1.0
  */
+@Api(value = "/api/currency", description = "Operations to manage application currencies stored in DB")
 public class CurrencyController extends BaseController {
 
     @Inject
     CurrencyRepository currencyRepository;
 
-    public F.Promise<Result> retrieveAll() {
+    @ApiOperation(
+            nickname = "listAllCurrency",
+            value = "All currency list",
+            notes = "Obtain list of all currencies stored in DB",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = dto.CurrencyListResponse.class
+    )
 
-        F.Promise<List<Currency>> historyPromise = F.Promise.wrap(currencyRepository.retrieveAll());
+    @ApiResponses( value = {
+            @ApiResponse(code = 0, message = "OK", response = dto.CurrencyListResponse.class),
+            @ApiResponse(code = 1, message = "DB error"),
+    })
+    public Promise<Result> retrieveAll() {
 
-        historyPromise.onFailure(throwable->throwable.printStackTrace());
+        final Promise<Result> result = Promise.wrap(currencyRepository.retrieveAll()).map(currencies -> ok(Json.toJson(new CurrencyListResponse("0", "OK", currencies))));
 
-        return historyPromise.map(res->ok(Json.toJson(res)));
+        return result.recover(error -> {
+            Logger.error("Error:",error);
+            return ok(Json.toJson(createResponse("1", error.getMessage())));
+        });
     }
 }
