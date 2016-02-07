@@ -1,14 +1,12 @@
 import akka.actor.ActorSystem;
-import akka.dispatch.OnFailure;
-import akka.dispatch.OnSuccess;
 import model.Currency;
 import org.junit.Before;
 import org.junit.Test;
 import play.api.Application;
 import play.api.inject.guice.GuiceApplicationBuilder;
+import repository.ConnectionPool;
 import repository.CurrencyRepository;
 import scala.concurrent.Await;
-import scala.concurrent.CanAwait;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -22,16 +20,11 @@ import static org.junit.Assert.fail;
  * @author ra created 06.02.2016.
  * @since 0.1.0
  */
-public class CurrencyRepositoryTest {
-
-    private Application application;
-    private ExecutionContextExecutor dispatcher;
+public class CurrencyRepositoryTest extends BaseRepositoryTest{
 
     @Before
     public void setup() {
-        application = new GuiceApplicationBuilder().build();
-
-        dispatcher = application.injector().instanceOf(ActorSystem.class).dispatcher();
+        System.out.print("hello");
     }
 
     @Test

@@ -1,7 +1,9 @@
 ﻿--CREATE SCHEMA msp_scheme;
+--CREATE SCHEMA test_scheme;
 ALTER SCHEMA msp_scheme OWNER TO msp_db;
+ALTER SCHEMA test_scheme OWNER TO msp_db;
 
-SET search_path = msp_scheme, pg_catalog;
+/*SET search_path = msp_scheme, test_scheme, pg_catalog;*/
 
 
 CREATE TABLE property (
@@ -81,14 +83,14 @@ ALTER TABLE country
       REFERENCES currency (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-CREATE SEQUENCE msp_scheme.card_seq
+CREATE SEQUENCE card_seq
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9223372036854775807
 START 1
 CACHE 1;
 
-ALTER TABLE msp_scheme.card_seq
+ALTER TABLE card_seq
 OWNER TO msp_db;
 
 CREATE TABLE card (
@@ -155,14 +157,14 @@ ALTER TABLE account
       REFERENCES currency (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-CREATE SEQUENCE msp_scheme.transaction_seq
+CREATE SEQUENCE transaction_seq
 INCREMENT 1
 MINVALUE 1
 MAXVALUE 9223372036854775807
 START 1
 CACHE 1;
 
-ALTER TABLE msp_scheme.transaction_seq
+ALTER TABLE transaction_seq
 OWNER TO msp_db;
 
 CREATE TABLE transaction (

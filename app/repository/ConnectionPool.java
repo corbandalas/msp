@@ -55,4 +55,8 @@ public class ConnectionPool {
     public String getSchemaName() {
         return schemaName;
     }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
 }
