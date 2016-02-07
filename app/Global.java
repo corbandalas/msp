@@ -6,6 +6,7 @@ import dto.PropertyListResponse;
 import model.BaseEntity;
 import model.Currency;
 import model.Property;
+import model.PropertyCategory;
 import play.GlobalSettings;
 import play.Application;
 
@@ -25,6 +26,7 @@ import play.Logger;
 import play.api.libs.ws.WSClient;
 import play.api.libs.ws.WSResponse;
 import play.libs.Akka;
+import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http.Request;
 import repository.CurrencyRepository;
@@ -81,14 +83,6 @@ public class Global extends GlobalSettings {
 
             PropertyRepository propertyRepository = injector.getInstance(PropertyRepository.class);
 
-
-////            propertyListResponse.getPropertyList().stream().map(BaseEntity::getId).map(propertyRepository::retrieveById)//.collect(Collectors.toList()).stream().map(Promise::wrap);
-//
-//            final List<Future<Property>> list = propertyListResponse.getPropertyList().stream().map(p -> propertyRepository.retrieveById(p.getId())).collect(Collectors.toList());
-//
-//            list.parallelStream().peek(e-> e.fa)
-
-
             for(Property property: propertyListResponse.getPropertyList()) {
 
                 Future<Property> propertyFuture = propertyRepository.retrieveById(property.getId());
@@ -112,7 +106,7 @@ public class Global extends GlobalSettings {
 
 
         //Exchange Rates trigger
-        Akka.system().scheduler().schedule(Duration.Zero(), Duration.create(240, TimeUnit.MINUTES),
+        Akka.system().scheduler().schedule(Duration.create(5, TimeUnit.SECONDS), Duration.create(240, TimeUnit.MINUTES),
                 injector.getInstance(ExchangeRatesTriggerJob.class), Akka.system().dispatcher());
     }
 
