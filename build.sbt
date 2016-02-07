@@ -1,3 +1,7 @@
+import com.typesafe.config._
+
+val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
+
 name := "msp"
 
 version := "1.0"
@@ -16,7 +20,8 @@ libraryDependencies ++= Seq(
   "com.ning" % "async-http-client" % "1.9.3",
   "javax.inject" % "javax.inject" % "1",
   "pl.matisoft" %% "swagger-play24" % "1.4",
-  "postgresql" % "postgresql" % "9.1-901-1.jdbc4"
+  "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
+  "org.flywaydb" % "flyway-core" % "3.2.1"
 )
 
 libraryDependencies += filters
@@ -27,10 +32,12 @@ resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 seq(flywaySettings: _*)
 
-flywayUrl := "jdbc:postgresql://localhost:5432/msp_db"
+flywayUrl :=conf.getString("flywayUrl")
 
-flywayUser := "msp_db"
+flywayUser :=conf.getString("database.username")
 
-flywayPassword:="x13jkw34"
+flywayPassword:=conf.getString("database.password")
 
-flywayLocations := Seq("filesystem:db")
+flywayLocations := Seq(conf.getString("flywayLocations"))
+
+flywaySchemas := Seq(conf.getString("database.schema"))
