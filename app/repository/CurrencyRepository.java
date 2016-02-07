@@ -135,7 +135,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
                         BigDecimal oldIndex = c.getEuroIndex();
 
                         exchangeRateHistoryRepository.create(new ExchangeRateHistory(0L, oldIndex, new Date(), c.getId()));
-                        update(new Currency(c.getId(), c.getCode(), c.getDisplayText(), c.getEuroIndex(), c.getActive()));
+                        update(new Currency(c.getId(), c.getCode(), c.getDisplayText(), rate, c.getActive()));
                     }
                 }
 
