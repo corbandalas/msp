@@ -35,7 +35,7 @@ public class BaseRepositoryTest {
         application = new GuiceApplicationBuilder().build();
         dispatcher = application.injector().instanceOf(ActorSystem.class).dispatcher();
         ConnectionPool connectionPool = application.injector().instanceOf(ConnectionPool.class);
-        connectionPool.setSchemaName("test_scheme");
+        connectionPool.setSchemaName(conf.getString("database.test.schema"));
 
     }
 }
