@@ -54,7 +54,7 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(transaction.getId());
     }
 
-//    @Test
+    @Test
     public void update() throws Exception {
         Integer fromAccountId = 1;
         Integer toAccountId = 2;

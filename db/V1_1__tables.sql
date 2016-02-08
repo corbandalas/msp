@@ -174,7 +174,7 @@ CREATE TABLE transaction (
     currency_id character varying(255) NOT NULL,
     from_account_id integer NOT NULL,
     to_account_id integer NOT NULL,
-    card_id integer NOT NULL,
+    card_id integer,
     from_exchange_rate numeric,
     to_exchange_rate numeric,
     type character varying(255) NOT NULL
