@@ -16,7 +16,8 @@ import repository.*;
                 CardRepositoryTest.class,
                 CustomerRepositoryTest.class,
                 OperationRepositoryTest.class,
-                TransactionRepositoryTest.class
+                TransactionRepositoryTest.class,
+                ExchangeRateHistoryRepositoryTest.class
         }
 )
 public class AllTests extends TestSuite {

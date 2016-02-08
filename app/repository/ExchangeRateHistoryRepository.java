@@ -32,12 +32,21 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
     public Future<ExchangeRateHistory> create(ExchangeRateHistory entity) {
         final Promise<ExchangeRateHistory> promise = Futures.promise();
 
-        final String query = "INSERT INTO " + connectionPool.getSchemaName() +
-                ".exchange_rate_history(id, euro_index, date, currency_id) VALUES (nextval('" + connectionPool.getSchemaName()
-                + ".exchange_rate_history_seq'),$1, $2, $3);";
-        connectionPool.getConnection().query(query, asList(entity.getEuroIndex(),
-                new Timestamp(entity.getDate().getTime()), entity.getCurrencyId()),
-                result -> promise.success(entity), promise::failure);
+
+        connectionPool.getConnection().query("select nextval('" + connectionPool.getSchemaName() + ".exchange_rate_history_seq')",
+                idResult -> {
+                    final Long id = idResult.row(0).getLong(0);
+
+                    final String query = "INSERT INTO " + connectionPool.getSchemaName() +
+                            ".exchange_rate_history(id, euro_index, date, currency_id) VALUES ($1, $2, $3, $4);";
+                    connectionPool.getConnection().query(query,
+                            asList(id, entity.getEuroIndex(), new Timestamp(entity.getDate().getTime()),
+                                    entity.getCurrencyId()),
+                            result -> {
+                                entity.setId(idResult.row(0).getLong(0));
+                                promise.success(entity);
+                            }, promise::failure);
+                }, promise::failure);
 
         return promise.future();
     }
@@ -59,8 +68,8 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".exchange_rate_history";
         connectionPool.getConnection().query(query,
-                result -> StreamSupport.stream(result.spliterator(), true).map(row -> createExchangeRateHistory(row))
-                        .collect(Collectors.toList()), promise::failure);
+                result -> { promise.success(StreamSupport.stream(result.spliterator(), true).map(row -> createExchangeRateHistory(row))
+                        .collect(Collectors.toList()));}, promise::failure);
 
         return promise.future();
     }
@@ -70,8 +79,8 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
         final Promise<ExchangeRateHistory> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() +
-                " SET euro_index=$2, date=$3, currency_id=$4 WHERE id=$1";
-        connectionPool.getConnection().query(query, asList(entity.getCurrencyId(), entity.getEuroIndex(), entity.getDate(), entity.getCurrencyId()),
+                ".exchange_rate_history SET euro_index=$2, date=$3, currency_id=$4 WHERE id=$1";
+        connectionPool.getConnection().query(query, asList(entity.getId(), entity.getEuroIndex(), new Timestamp(entity.getDate().getTime()), entity.getCurrencyId()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -83,7 +92,7 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
     }
 
     private ExchangeRateHistory createExchangeRateHistory(Row row) {
-        return new ExchangeRateHistory(row.getLong("id"), row.getBigDecimal("euro_index"), row.getDate("date"),
+        return new ExchangeRateHistory(row.getLong("id"), row.getBigDecimal("euro_index"), row.getTimestamp("date"),
                 row.getString("currency_id"));
     }
 }
