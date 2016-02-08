@@ -4,12 +4,15 @@ import junit.framework.TestSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import repository.AccountRepositoryTest;
+import repository.CurrencyRepositoryTest;
 
 
 @RunWith(Suite.class)
 @SuiteClasses(
     {
-		CurrencyRepositoryTest.class
+		CurrencyRepositoryTest.class,
+            AccountRepositoryTest.class
     }
 )
 public class AllTests extends TestSuite {

@@ -1,3 +1,5 @@
+package repository;
+
 import akka.actor.ActorSystem;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -20,6 +22,7 @@ public class BaseRepositoryTest {
 
     protected Application application;
     protected ExecutionContextExecutor dispatcher;
+    protected ConnectionPool connectionPool;
 
     @Before
     public void init() {
@@ -34,7 +37,7 @@ public class BaseRepositoryTest {
 
         application = new GuiceApplicationBuilder().build();
         dispatcher = application.injector().instanceOf(ActorSystem.class).dispatcher();
-        ConnectionPool connectionPool = application.injector().instanceOf(ConnectionPool.class);
+        connectionPool = application.injector().instanceOf(ConnectionPool.class);
         connectionPool.setSchemaName(conf.getString("database.test.schema"));
 
     }

@@ -8,6 +8,7 @@ import model.Account;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
                 " createdate, active) VALUES ($1, $2, $3, $4, $5)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                entity.getCreateDate(), entity.getActive()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -72,7 +73,7 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final String query = "UPDATE " + connectionPool.getSchemaName() + ".account SET currency_id=$2, name=$3," +
                 " createdate=$4, active=$5 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                entity.getCreateDate(), entity.getActive()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -84,7 +85,7 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
     }
 
     private Account createAccount(Row row) {
-        return new Account(row.getInt("id"), row.getString("name"), row.getString("currency_id"), row.getDate("createdate"),
-                row.getBoolean("active"));
+        return new Account(row.getBigInteger("id").intValue(), row.getString("name"), row.getString("currency_id"),
+                row.getTimestamp("createdate"), row.getBoolean("active"));
     }
 }
