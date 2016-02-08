@@ -32,12 +32,19 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
         final Promise<Transaction> promise = Futures.promise();
 
-        String query = "INSERT INTO " + connectionPool.getSchemaName() + ".transaction(id, operation_id, amount, currency_id," +
-                " from_account_id, to_account_id, card_id, from_exchange_rate, to_exchange_rate, type)" +
-                " VALUES (nextval('" + connectionPool.getSchemaName() + ".transaction_seq'), $1, $2, $3, $4, $5, $6, $7, $8, $9)";
-        connectionPool.getConnection().query(query, asList(entity.getOperationId(), entity.getAmount(), entity.getCurrencyId(),
-                entity.getFromAccountId(), entity.getToAccountId(), entity.getCardId(), entity.getFromExchangeRate(),
-                entity.getToExchangeRate(), entity.getType().name()), result -> promise.success(entity), promise::failure);
+        connectionPool.getConnection().query("select nextval('" + connectionPool.getSchemaName() + ".transaction_seq')",
+                idResult -> {
+                    final Long id=idResult.row(0).getLong(0);
+
+                    String query = "INSERT INTO " + connectionPool.getSchemaName() + ".transaction(id, operation_id, amount, currency_id," +
+                            " from_account_id, to_account_id, card_id, from_exchange_rate, to_exchange_rate, type)" +
+                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
+                    connectionPool.getConnection().query(query, asList(id, entity.getOperationId(), entity.getAmount(), entity.getCurrencyId(),
+                            entity.getFromAccountId(), entity.getToAccountId(), entity.getCardId(), entity.getFromExchangeRate(),
+                            entity.getToExchangeRate(), entity.getType().name()), result -> {
+                        entity.setId(id);
+                        promise.success(entity);}, promise::failure);
+                }, promise::failure);
 
         return promise.future();
     }
@@ -89,7 +96,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         //not required yet
     }
 
-    public Future<List<Transaction>>retrieveByOperationId(Long operationId) {
+    public Future<List<Transaction>> retrieveByOperationId(Long operationId) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
 
@@ -103,7 +110,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
-    public Future<List<Transaction>>retrieveByFromAccountId(Long fromAccountId) {
+    public Future<List<Transaction>> retrieveByFromAccountId(Long fromAccountId) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
 
@@ -117,7 +124,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
-    public Future<List<Transaction>>retrieveByToAccountId(Long toAccountId) {
+    public Future<List<Transaction>> retrieveByToAccountId(Long toAccountId) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
 

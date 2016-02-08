@@ -31,11 +31,19 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
 
         final Promise<Operation> promise = Futures.promise();
 
-        final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".operation (, orderid, description, type," +
-                " createdate) VALUES (nextval('" + connectionPool.getSchemaName() + ".operation_seq'), $1, $2, $3, $4)";
-        connectionPool.getConnection().query(query, asList(entity.getOrderId(), entity.getDescription(),
-                entity.getType().name(), entity.getCreateDate()),
-                result -> promise.success(entity), promise::failure);
+        connectionPool.getConnection().query("select nextval('" + connectionPool.getSchemaName() + ".operation_seq')",
+                idResult -> {
+                    final Long id = idResult.row(0).getLong(0);
+
+                    final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".operation (id, orderid," +
+                            " description, type, createdate) VALUES ($1, $2, $3, $4, $5)";
+                    connectionPool.getConnection().query(query, asList(id, entity.getOrderId(), entity.getDescription(),
+                            entity.getType().name(), entity.getCreateDate()),
+                            result -> {
+                                entity.setId(idResult.row(0).getLong(0));
+                                promise.success(entity);
+                            }, promise::failure);
+                }, promise::failure);
 
         return promise.future();
     }
