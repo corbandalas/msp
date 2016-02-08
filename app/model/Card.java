@@ -14,7 +14,7 @@ import java.util.Date;
 public class Card extends BaseEntity<Long> {
 
     private String token;
-    private Integer customerId;
+    private String customerId;
     private CardType type;
     private CardBrand brand;
     private Boolean cardDefault;
@@ -28,7 +28,7 @@ public class Card extends BaseEntity<Long> {
     private String deliveryAddress3;
     private String deliveryCountry;
 
-    public Card(Long id, String token, Integer customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry) {
+    public Card(Long id, String token, String customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry) {
         this.setId(id);
         this.token = token;
         this.customerId = customerId;
@@ -62,11 +62,11 @@ public class Card extends BaseEntity<Long> {
         this.token = token;
     }
 
-    public Integer getCustomerId() {
+    public String getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(Integer customerId) {
+    public void setCustomerId(String customerId) {
         this.customerId = customerId;
     }
 

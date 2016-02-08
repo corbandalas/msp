@@ -11,7 +11,7 @@ import java.util.Date;
  * @author ra - created 03.02.2016
  * @since 0.1.0
  */
-public class Customer extends BaseEntity<Long> {
+public class Customer extends BaseEntity<String> {
 
     private Date registrationDate;
     private String title;
@@ -27,7 +27,7 @@ public class Customer extends BaseEntity<Long> {
     private KYC kyc;
     private String password;
 
-    public Customer(Long id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password) {
+    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password) {
         this.setId(id);
         this.registrationDate = registrationDate;
         this.title = title;
