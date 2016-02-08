@@ -110,7 +110,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
-    public Future<List<Transaction>> retrieveByFromAccountId(Long fromAccountId) {
+    public Future<List<Transaction>> retrieveByFromAccountId(Integer fromAccountId) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
 
@@ -124,7 +124,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
-    public Future<List<Transaction>> retrieveByToAccountId(Long toAccountId) {
+    public Future<List<Transaction>> retrieveByToAccountId(Integer toAccountId) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
 
