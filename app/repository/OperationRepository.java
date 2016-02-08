@@ -9,8 +9,11 @@ import model.enums.OperationType;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
 
@@ -38,7 +41,7 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
                     final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".operation (id, orderid," +
                             " description, type, createdate) VALUES ($1, $2, $3, $4, $5)";
                     connectionPool.getConnection().query(query, asList(id, entity.getOrderId(), entity.getDescription(),
-                            entity.getType().name(), entity.getCreateDate()),
+                            entity.getType().name(), new Timestamp(entity.getCreateDate().getTime())),
                             result -> {
                                 entity.setId(idResult.row(0).getLong(0));
                                 promise.success(entity);
@@ -54,10 +57,8 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
         final Promise<Operation> promise = Futures.promise();
 
         final String query = "Select * FROM " + connectionPool.getSchemaName() + ".operation WHERE id=$1";
-        connectionPool.getConnection().query(query, asList(id), result -> {
-            final ArrayList<Operation> accounts = new ArrayList<>();
-            result.forEach(row -> accounts.add(createOperation(result.row(0))));
-        }, promise::failure);
+        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createOperation(result.row(0)))
+                , promise::failure);
 
         return promise.future();
     }
@@ -69,8 +70,8 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
 
         final String query = "Select * FROM " + connectionPool.getSchemaName() + ".operation";
         connectionPool.getConnection().query(query, result -> {
-            final ArrayList<Operation> accounts = new ArrayList<>();
-            result.forEach(row -> accounts.add(createOperation(result.row(0))));
+            promise.success(StreamSupport.stream(result.spliterator(), true).map(row ->
+                    createOperation(row)).collect(Collectors.toList()));
         }, promise::failure);
 
         return promise.future();
@@ -84,7 +85,7 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
         final String query = "UPDATE " + connectionPool.getSchemaName() + ".operation SET orderid=$2, description=$3," +
                 " type=$4, createdate=$5 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getOrderId(), entity.getDescription(),
-                entity.getType().name(), entity.getCreateDate()),
+                entity.getType().name(), new Timestamp(entity.getCreateDate().getTime())),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -97,6 +98,6 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
 
     private Operation createOperation(Row row) {
         return new Operation(row.getLong("id"), OperationType.valueOf(row.getString("type")), row.getString("orderid"),
-                row.getString("description"), row.getDate("createdate"));
+                row.getString("description"), row.getTimestamp("createdate"));
     }
 }

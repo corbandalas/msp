@@ -1,7 +1,7 @@
 ﻿--CREATE SCHEMA msp_scheme;
 --CREATE SCHEMA test_scheme;
-ALTER SCHEMA msp_scheme OWNER TO msp_db;
-ALTER SCHEMA test_scheme OWNER TO msp_db;
+--ALTER SCHEMA msp_scheme OWNER TO msp_db;
+--ALTER SCHEMA test_scheme OWNER TO msp_db;
 
 /*SET search_path = msp_scheme, test_scheme, pg_catalog;*/
 
@@ -132,7 +132,7 @@ CREATE SEQUENCE operation_seq
       
 CREATE TABLE operation (
     id bigint NOT NULL,
-    orderId bigint NOT NULL,
+    orderId character varying(255) NOT NULL,
     description text,
     type character varying(255) NOT NULL,
     createdate timestamp with time zone DEFAULT now()

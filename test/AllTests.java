@@ -10,10 +10,10 @@ import repository.CurrencyRepositoryTest;
 
 @RunWith(Suite.class)
 @SuiteClasses(
-    {
-		CurrencyRepositoryTest.class,
-            AccountRepositoryTest.class
-    }
+        {
+                CurrencyRepositoryTest.class,
+                AccountRepositoryTest.class
+        }
 )
 public class AllTests extends TestSuite {
     public static Test suite() {

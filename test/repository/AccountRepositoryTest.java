@@ -44,8 +44,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
     @Test
     public void update() throws Exception {
         Integer id = 1;
-        final String name = "Test account";
-        final Account account = new Account(id, name, "USD", new Date(), true);
+        final Account account = new Account(id, "Test account", "USD", new Date(), true);
 
         assertNotNull(Await.result(accountRepository.create(account), Duration.apply("1000 ms")));
 
@@ -77,7 +76,6 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
     @After
     public void clean() {
         connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".account", resultSet -> {
-        }, throwable -> {
-        });
+        }, throwable -> {throwable.printStackTrace();});
     }
 }
