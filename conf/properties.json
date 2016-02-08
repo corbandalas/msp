@@ -13,6 +13,27 @@
       "value": "http://apilayer.net/api/live",
       "description": "API URL for currencylayer service",
       "category": "EXCHANGE_RATES_INTEGRATION"
+    },
+
+    {
+      "id": "cardprovider.gps.wsdl.url",
+      "value": "https://ws-test.globalprocessing.ae:10000/hyperion_its/Service.asmx?wsdl",
+      "description": "Global Processing WSDL URL",
+      "category": "GPS_INTEGRATION"
+    },
+
+    {
+      "id": "cardprovider.gps.wsdl.soap.header.username",
+      "value": "GPSDUMMY",
+      "description": "Global Processing SOAP header username",
+      "category": "GPS_INTEGRATION"
+    },
+
+    {
+      "id": "cardprovider.gps.wsdl.soap.header.password",
+      "value": "1nT3gr4t10N",
+      "description": "Global Processing SOAP header password",
+      "category": "GPS_INTEGRATION"
     }
   ]
 

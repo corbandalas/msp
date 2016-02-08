@@ -21,7 +21,8 @@ libraryDependencies ++= Seq(
   "javax.inject" % "javax.inject" % "1",
   "pl.matisoft" %% "swagger-play24" % "1.4",
   "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
-  "org.flywaydb" % "flyway-core" % "3.2.1"
+  "org.flywaydb" % "flyway-core" % "3.2.1",
+  "com.sun.xml.ws" % "jaxws-rt" % "2.2.10"
 )
 
 libraryDependencies += filters
