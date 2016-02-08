@@ -1,7 +1,8 @@
-import akka.actor.ActorSystem;
 import akka.dispatch.OnComplete;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.*;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import dto.PropertyListResponse;
 import model.Property;
 import play.Application;
@@ -10,6 +11,8 @@ import play.Logger;
 import play.libs.Akka;
 import play.mvc.Action;
 import play.mvc.Http.Request;
+import provider.CardProvider;
+import provider.CardProviderVendor;
 import repository.PropertyRepository;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -31,12 +34,10 @@ import java.util.concurrent.TimeUnit;
  * @author corbandalas - created 31.01.2016
  * @since 0.1.0
  */
+
 public class Global extends GlobalSettings {
 
     private Injector injector;
-
-    @Inject
-    public ActorSystem system;
 
     @Override
     public void onStart(Application application) {
@@ -55,6 +56,28 @@ public class Global extends GlobalSettings {
                 annotatedTriggerClasses.forEach(this::bind);
 
 
+                //Card provider binding
+                Config conf = ConfigFactory.load();
+
+                String cardProviderVendorName = conf.getString("card.provider.vendor");
+
+                Set<Class<?>> annotatedProviderVendorsClasses = Utils.getAnnotatedClasses("provider", CardProviderVendor.class);
+
+                for (Class classValue : annotatedProviderVendorsClasses) {
+
+                    CardProviderVendor annotation = (CardProviderVendor) classValue
+                            .getAnnotation(CardProviderVendor.class);
+
+                    String vendorValue = annotation.value();
+
+                    if (vendorValue.equalsIgnoreCase(cardProviderVendorName)) {
+
+                        bind(CardProvider.class).to(classValue);
+
+                        break;
+                    }
+
+                }
             }
         });
 

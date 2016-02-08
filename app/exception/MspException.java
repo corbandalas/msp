@@ -1,7 +1,7 @@
 package exception;
 
 /**
- * Commond MSP API exception
+ * General MSP API exception
  *
  * @author corbandalas - created 02.02.2016
  * @since 0.1.0
