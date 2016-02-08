@@ -31,9 +31,13 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
 
     @Test
     public void create() throws Exception {
-        final Operation operation = Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0001",
+        final String orderId = "00001";
+        final Operation operation = Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, orderId,
                 "test deposit", new Date())), Duration.apply("1000 ms"));
         assertNotNull(operation.getId());
+
+        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
+        assertEquals(orderId,operationById.getOrderId());
     }
 
     @Test

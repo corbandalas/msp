@@ -52,6 +52,9 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 100L, "USD", fromAccountId,
                 toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply("1000 ms"));
         assertNotNull(transaction.getId());
+
+        final Transaction transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply("1000 ms"));
+        assertNotNull(transactionById);
     }
 
     @Test
@@ -68,7 +71,7 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
                 "test deposit", new Date())), Duration.apply("1000 ms"));
         assertNotNull(operation.getId());
 
-        final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 10L, "USD", fromAccountId,
+        final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 200L, "USD", fromAccountId,
                 toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply("1000 ms"));
         assertNotNull(transaction.getId());
 
@@ -77,6 +80,28 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(Await.result(transactionRepository.update(transaction), Duration.apply("1000 ms")));
         final Transaction transactionUpdated = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply("1000 ms"));
         assertEquals(amount,transactionUpdated.getAmount());
+    }
+
+    @Test
+    public void retrieveById() throws Exception {
+        Integer fromAccountId = 1;
+        Integer toAccountId = 2;
+
+        assertNotNull(Await.result(accountRepository.create(new Account(fromAccountId, "test account from", "USD",
+                new Date(), true)), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(accountRepository.create(new Account(toAccountId, "test account to", "USD", new Date(),
+                true)), Duration.apply("1000 ms")));
+
+        final Operation operation = Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0001",
+                "test deposit", new Date())), Duration.apply("1000 ms"));
+        assertNotNull(operation.getId());
+
+        final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 300L, "USD", fromAccountId,
+                toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply("1000 ms"));
+        assertNotNull(transaction.getId());
+
+        final Transaction transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply("1000 ms"));
+        assertNotNull(transactionById);
     }
 
     @After
