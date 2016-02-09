@@ -1,6 +1,5 @@
 package repository;
 
-import junit.framework.Assert;
 import model.Card;
 import model.Customer;
 import model.enums.CardBrand;

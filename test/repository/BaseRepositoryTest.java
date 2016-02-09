@@ -7,10 +7,7 @@ import org.flywaydb.core.Flyway;
 import org.junit.Before;
 import play.api.Application;
 import play.api.inject.guice.GuiceApplicationBuilder;
-import repository.ConnectionPool;
 import scala.concurrent.ExecutionContextExecutor;
-
-import java.io.File;
 
 /**
  * Base class for tests, replace
@@ -35,10 +32,12 @@ public class BaseRepositoryTest {
         flyway.setLocations(conf.getString("flywayLocations"));
         flyway.migrate();
 
-        application = new GuiceApplicationBuilder().build();
+
+        GuiceApplicationBuilder guiceApplicationBuilder = new GuiceApplicationBuilder();
+        application = guiceApplicationBuilder.build();
+
         dispatcher = application.injector().instanceOf(ActorSystem.class).dispatcher();
         connectionPool = application.injector().instanceOf(ConnectionPool.class);
         connectionPool.setSchemaName(conf.getString("database.test.schema"));
-
     }
 }

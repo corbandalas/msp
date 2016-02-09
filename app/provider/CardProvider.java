@@ -1,13 +1,10 @@
 package provider;
 
 import ae.globalprocessing.hyperionweb.VirtualCards;
-import exception.CardProviderException;
 import model.Currency;
 import model.Customer;
 import play.libs.F;
-import scala.concurrent.Future;
 
-import java.rmi.RemoteException;
 
 /**
  * Card provider interface
@@ -17,18 +14,11 @@ import java.rmi.RemoteException;
  */
 public interface CardProvider {
 
-    Future<String> issuePlasticCard(Customer customer, String name, Currency currency) throws RemoteException,
-            CardProviderException;
+    F.Promise<VirtualCards> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency);
+    F.Promise<VirtualCards> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency);
+    F.Promise<VirtualCards> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency);
+    F.Promise<VirtualCards> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency);
 
-    F.Promise<VirtualCards> issueVirtualCard(Customer customer,
-                                             String name, Currency currency) throws RemoteException,
-            CardProviderException;
-
-    Future<String> fundVirtualCard(String virtualCardReference, long amount,
-                                   Currency currency) throws RemoteException, CardProviderException;
-
-    Future<String> fundPlasticCard(String plasticCardReference, long amount,
-                                   Currency currency) throws RemoteException, CardProviderException;
 
 
 }

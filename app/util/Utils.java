@@ -1,47 +1,27 @@
 package util;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import akka.dispatch.Futures;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
-import dto.CurrencyExchangeRatesResponse;
-import dto.PropertyListResponse;
 import exception.MspException;
-import model.BaseEntity;
-import model.Currency;
-import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-import play.Logger;
-import scala.concurrent.Future;
-import scala.concurrent.Promise;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.stream.Collectors;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Class to store util methods for common usage across the project
  *
  * @author corbandalas - created 02.02.2016
  * @since 0.1.0
- *
  */
 public final class Utils {
 
@@ -58,35 +38,35 @@ public final class Utils {
 
     private static final ThreadLocal<DateFormat> DATE_FORMAT
             = new ThreadLocal<DateFormat>() {
-                /**
-                 * @see java.lang.ThreadLocal#initialValue()
-                 */
-                @Override
-                protected DateFormat initialValue() {
-                    return new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-                }
-            };
+        /**
+         * @see java.lang.ThreadLocal#initialValue()
+         */
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+        }
+    };
 
     /**
      * Thread safe date time format
      */
     private static final ThreadLocal<DateFormat> DATE_TIME_FORMAT
             = new ThreadLocal<DateFormat>() {
-                /**
-                 * @see java.lang.ThreadLocal#initialValue()
-                 */
-                @Override
-                protected DateFormat initialValue() {
-                    return new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT);
-                }
-            };
+        /**
+         * @see java.lang.ThreadLocal#initialValue()
+         */
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT);
+        }
+    };
 
     private static String[] theSortedLocales;
 
     /**
      * Constructor.
      *
-     *  @since 0.1.0
+     * @since 0.1.0
      */
     private Utils() {
     }
@@ -126,19 +106,20 @@ public final class Utils {
 
     /**
      * Return a date formated in yyyy-MM-dd format.
+     *
      * @param date to format
-     * @return  the formatted date.
+     * @return the formatted date.
      */
     public static String formatDate(Date date) {
-        if(date == null) {
+        if (date == null) {
             return "";
         }
         return DATE_FORMAT.get().format(date);
     }
-    
+
     /**
      * Parse the supplied date.
-     * 
+     *
      * @param date
      * @return a date if able to parse the string.
      * @throws ParseException if unable to parse the date.
@@ -146,7 +127,7 @@ public final class Utils {
     public static Date parseDate(String date) throws ParseException {
         return DATE_FORMAT.get().parse(date);
     }
-    
+
     /**
      * The supplied date is formatted using the yyyy-MM-dd HH:mm:ss formatting pattern
      *
@@ -165,7 +146,7 @@ public final class Utils {
      * The supplied date is formatted using the yyyy-MM-dd HH:mm:ss formatting pattern
      *
      * @param millis a time represented as the number of milliseconds, between a point in time and midnight, January 1,
-     * 1970 UTC.
+     *               1970 UTC.
      * @return a formatted date and time string.
      * @since 1.0
      */
@@ -213,7 +194,7 @@ public final class Utils {
     /**
      * Scans package for annotated classes with specified annotation type.
      *
-     * @param packageName package name
+     * @param packageName    package name
      * @param annotatedClass Annotation class
      * @return a set of annotated classes
      * @since 0.1.0
@@ -231,7 +212,7 @@ public final class Utils {
      * Scan the given package for methods with the given annotation.
      *
      * @param packageName to search
-     * @param annotation to look for
+     * @param annotation  to look for
      * @return a set of methods with the annotation
      * @since 0.1.0
      */

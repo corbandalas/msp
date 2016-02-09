@@ -24,15 +24,22 @@
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.username",
-      "value": "GPSDUMMY",
+      "value": "SafePay Test",
       "description": "Global Processing SOAP header username",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.password",
-      "value": "1nT3gr4t10N",
+      "value": "S@F3PAyt3ST",
       "description": "Global Processing SOAP header password",
+      "category": "GPS_INTEGRATION"
+    },
+
+    {
+      "id": "cardprovider.gps.wsdl.api.settings",
+      "value": "SPA:1822:SPA-VL-001 SafePay SDD Velocity EUR:SPA-CU-001 SafePay Virtual Card Usage:SPA-AF-001 SafePay Auth Fee Group EUR",
+      "description": "Global Processing Card settings",
       "category": "GPS_INTEGRATION"
     }
   ]

@@ -14,16 +14,18 @@ public class Country extends BaseEntity<String> {
     private Short phoneCode;
     private Boolean active;
     private String currencyId;
+    private String code;
 
     public Country() {
     }
 
-    public Country(String id, String name, Short phoneCode, Boolean active, String currency_id) {
+    public Country(String id, String name, Short phoneCode, Boolean active, String currency_id, String code) {
         this.setId(id);
         this.name = name;
         this.phoneCode = phoneCode;
         this.active = active;
         this.currencyId = currency_id;
+        this.code = code;
     }
 
     public String getName() {
@@ -69,6 +71,15 @@ public class Country extends BaseEntity<String> {
                 ", phoneCode=" + phoneCode +
                 ", active=" + active +
                 ", currencyId=" + currencyId +
+                ", code =" + code +
                 '}';
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

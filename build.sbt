@@ -22,7 +22,11 @@ libraryDependencies ++= Seq(
   "pl.matisoft" %% "swagger-play24" % "1.4",
   "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
   "org.flywaydb" % "flyway-core" % "3.2.1",
-  "com.sun.xml.ws" % "jaxws-rt" % "2.2.10"
+  "com.sun.xml.ws" % "jaxws-rt" % "2.2.10",
+  "wsdl4j" % "wsdl4j" % "1.6.3",
+  "axis" % "axis-wsdl4j" % "1.5.1",
+  "org.apache.axis" % "axis" % "1.4",
+  "org.glassfish" % "javax.xml.rpc" % "10.0-b28"
 )
 
 libraryDependencies += filters

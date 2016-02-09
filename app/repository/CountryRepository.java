@@ -85,6 +85,6 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
     private Country createCountry(Row row) {
 
         return new Country(row.getString("id"), row.getString("name"), row.getShort("phonecode"), row.getBoolean("active"),
-                row.getString("currency_id"));
+                row.getString("currency_id"), row.getString("code"));
     }
 }
