@@ -26,8 +26,9 @@ public class Customer extends BaseEntity<String> {
     private Boolean active;
     private KYC kyc;
     private String password;
+    private String country_id;
 
-    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password) {
+    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id) {
         this.setId(id);
         this.registrationDate = registrationDate;
         this.title = title;
@@ -42,6 +43,7 @@ public class Customer extends BaseEntity<String> {
         this.active = active;
         this.kyc = kyc;
         this.password = password;
+        this.country_id = country_id;
     }
 
     public Date getRegistrationDate() {
@@ -148,6 +150,14 @@ public class Customer extends BaseEntity<String> {
         this.password = password;
     }
 
+    public String getCountry_id() {
+        return country_id;
+    }
+
+    public void setCountry_id(String country_id) {
+        this.country_id = country_id;
+    }
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -164,6 +174,7 @@ public class Customer extends BaseEntity<String> {
                 ", active=" + active +
                 ", kyc=" + kyc +
                 ", password='" + password + '\'' +
+                ", country_id='" + country_id + '\'' +
                 '}';
     }
 }

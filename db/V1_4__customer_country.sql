@@ -1,0 +1,1 @@
+alter table customer add COLUMN country_id character varying(255) not null

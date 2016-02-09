@@ -38,9 +38,9 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         final Promise<Customer> promise = Futures.promise();
 
             final String query = "INSERT INTO " + connectionPool.getSchemaName() +
-                    ".customer(id, title, firstName, lastName, registrationDate, dateBirth, active, address1, address2, postcode, city, email, kyc, password) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)";
+                    ".customer(id, title, firstName, lastName, registrationDate, dateBirth, active, address1, address2, postcode, city, email, kyc, password, country_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)";
             connectionPool.getConnection().query(query, asList(entity.getId(), entity.getTitle(), entity.getFirstName(),
-                    entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword()), result -> promise.success(entity), promise::failure);
+                    entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword(), entity.getCountry_id()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
@@ -77,9 +77,9 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         final Promise<Customer> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() +
-                ".customer SET title=$2, firstName=$3, lastName=$4, registrationDate=$5, dateBirth=$6, active=$7, address1=$8, address2=$9, postcode=$10, city=$11, email=$12, kyc=$13, password=$14 WHERE id=$1";
+                ".customer SET title=$2, firstName=$3, lastName=$4, registrationDate=$5, dateBirth=$6, active=$7, address1=$8, address2=$9, postcode=$10, city=$11, email=$12, kyc=$13, password=$14, country_id=$15 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getTitle(), entity.getFirstName(),
-                entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword()), result -> promise.success(entity), promise::failure);
+                entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword(),entity.getCountry_id()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
@@ -90,6 +90,6 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
     }
 
     private Customer createCustomer(Row row) {
-        return new Customer(row.getString("id"), row.getTimestamp("registrationDate"), row.getString("title"), row.getString("firstname"), row.getString("lastname"), row.getString("address1"), row.getString("address2"), row.getString("postcode"), row.getString("city"), row.getString("email"), row.getTimestamp("dateBirth"), row.getBoolean("active"), KYC.valueOf(row.getString("kyc")), row.getString("password"));
+        return new Customer(row.getString("id"), row.getTimestamp("registrationDate"), row.getString("title"), row.getString("firstname"), row.getString("lastname"), row.getString("address1"), row.getString("address2"), row.getString("postcode"), row.getString("city"), row.getString("email"), row.getTimestamp("dateBirth"), row.getBoolean("active"), KYC.valueOf(row.getString("kyc")), row.getString("password"), row.getString("country_id"));
     }
 }
