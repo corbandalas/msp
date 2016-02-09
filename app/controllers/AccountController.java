@@ -8,6 +8,7 @@ import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
+import play.mvc.With;
 import repository.AccountRepository;
 import util.SecurityUtil;
 
@@ -22,6 +23,7 @@ public class AccountController extends BaseController {
     @Inject
     private AccountRepository accountRepository;
 
+    @With(BaseMerchantApiAction.class)
     public F.Promise<Result> create() {
         final JsonNode jsonBody = (JsonNode) ctx().args.get("jsonBody");
         final Account authAccount = (Account) ctx().args.get("authAccount");
