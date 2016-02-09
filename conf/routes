@@ -21,8 +21,14 @@ GET        /api/property/list                                            @contro
 
 GET        /api/property/get/:propertyID                                 @controllers.PropertyController.retrieveByID(propertyID)
 
+GET        /api-docs/api/currency      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/currency")
+
 # Currency API
 GET       /api/currency/list                                             @controllers.CurrencyController.retrieveAll()
+
+GET       /api/currency/get/:currencyID                                  @controllers.CurrencyController.retrieveByID(currencyID)
+
+POST      /api/currency/update                                          @controllers.CurrencyController.update()
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

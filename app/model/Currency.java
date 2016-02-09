@@ -17,6 +17,9 @@ public class Currency extends BaseEntity<String> {
     private BigDecimal euroIndex;
     private Boolean active;
 
+    public Currency() {
+    }
+
     public Currency(String id, Short code, String displayText, BigDecimal euroIndex, Boolean active) {
         this.setId(id);
         this.code = code;

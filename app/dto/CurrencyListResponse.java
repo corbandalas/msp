@@ -6,12 +6,17 @@ import java.util.List;
 
 /**
  * Currency list API response
- * @author ra - created 06.02.2016.
+ *
+ * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
 public class CurrencyListResponse extends  BaseAPIResponse {
 
     private List<Currency> currencyList;
+
+    public CurrencyListResponse() {
+        super("", "");
+    }
 
     public CurrencyListResponse(String code, String text, List<Currency> currencyList) {
         super(text, code);
