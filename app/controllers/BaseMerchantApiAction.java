@@ -24,25 +24,31 @@ public class BaseMerchantApiAction extends Action.Simple {
 
     @Override
     public F.Promise<Result> call(Http.Context ctx) throws Throwable {
-        final JsonNode jsonNode = ctx.request().body().asJson();
-        final Authentication authData = Json.fromJson(jsonNode.get("authData"), Authentication.class);
+        final String accountId = ctx.request().getHeader("accountId");
+        if (!StringUtils.isNumeric(accountId)) {
+            Logger.error("accountId header is missing or not numeric");
 
-        if (authData == null || authData.getAccountId() == null || StringUtils.isBlank(authData.getEnckey())) {
-            Logger.error("Authentication data is missing");
-
-            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Authentication data is missing", "1"))));
+            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("accountId header is missing", "1"))));
         }
 
-        return F.Promise.wrap(accountRepository.retrieveById(authData.getAccountId())).flatMap(authAccount -> {
-            if(authAccount==null || ! authAccount.getActive()) {
+        final String enckey = ctx.request().getHeader("enckey");
+        if (StringUtils.isBlank(enckey)) {
+            Logger.error("enckey header is missing");
+
+            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("enckey header is missing", "1"))));
+        }
+
+
+        return F.Promise.wrap(accountRepository.retrieveById(Integer.parseInt(accountId))).flatMap(authAccount -> {
+            if (authAccount == null || !authAccount.getActive()) {
                 Logger.error("Specified account does not exist or inactive");
 
                 return F.Promise.throwing(new Exception("Specified account does not exist or inactive"));
             }
 
-            ctx.args.put("authAccount",authAccount);
-            ctx.args.put("authData",authData);
-            ctx.args.put("jsonBody",jsonNode);
+            final Authentication authData = new Authentication(authAccount, enckey);
+
+            ctx.args.put("authData", authData);
 
             return delegate.call(ctx);
         });
