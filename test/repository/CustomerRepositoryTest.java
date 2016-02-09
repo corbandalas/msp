@@ -8,6 +8,7 @@ import org.junit.Test;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -76,6 +77,27 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
         final List<Customer> result = Await.result(customerRepository.retrieveAll(), Duration.apply("1000 ms"));
         assertEquals(2,result.size());
     }
+
+
+    @Test
+    public void retrieveByRegistrationDate() throws Exception {
+        Date dsfas= new Date();
+        String startDate = "2016-02-03 00:00:00.000";
+        String endDate = "2016-03-12 00:00:00.000";
+        String dat2 = "2016-02-13 00:000:00.122";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date date1 = sdf.parse(startDate);
+        Date date2 = sdf.parse(endDate);
+        Date date3 = sdf.parse(dat2);
+
+
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", dsfas, "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", date3, "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
+
+        final List<Customer> result = Await.result(customerRepository.retrieveByRegistrationDate(date1, date2), Duration.apply("1000 ms"));
+        assertEquals(2, result.size());
+    }
+
 
 
     @After

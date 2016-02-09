@@ -13,9 +13,11 @@ import model.enums.KYC;
 import rx.Observable;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import util.Utils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -52,6 +54,18 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE id=$1";
         connectionPool.getConnection().query(query, asList(id), result -> promise.success(createCustomer(result.row(0))), promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Customer>> retrieveByRegistrationDate(Date startDate, Date endDate) {
+        final Promise<List<Customer>> promise = Futures.promise();
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE registrationDate BETWEEN $1 AND $2";
+        connectionPool.getConnection().query(query, asList(new Timestamp(Utils.getStartOfDay(startDate)), new Timestamp(Utils.getEndOfDay(endDate))),result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createCustomer(row)));
+            promise.success(customers);
+        }, promise::failure);
 
         return promise.future();
     }
