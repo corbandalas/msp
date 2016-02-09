@@ -1,0 +1,1 @@
+alter table account add COLUMN secret character varying(255) not null

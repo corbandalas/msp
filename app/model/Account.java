@@ -14,13 +14,15 @@ public class Account extends BaseEntity<Integer> {
     private String currencyId;
     private Date createDate;
     private Boolean active;
+    private String secret;
 
-    public Account(Integer id, String name, String currencyId, Date createDate, Boolean active) {
+    public Account(Integer id, String name, String currencyId, Date createDate, Boolean active, String secret) {
         this.setId(id);
         this.name = name;
         this.currencyId = currencyId;
         this.createDate = createDate;
         this.active = active;
+        this.secret = secret;
     }
 
     public String getName() {
@@ -53,6 +55,14 @@ public class Account extends BaseEntity<Integer> {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     @Override

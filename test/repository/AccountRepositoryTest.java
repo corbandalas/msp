@@ -35,7 +35,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
         Integer id = 1;
         final String name = "Test account";
 
-        assertNotNull(Await.result(accountRepository.create(new Account(id, name, "USD", new Date(), true)), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(accountRepository.create(new Account(id, name, "USD", new Date(), true, "1234567")), Duration.apply("1000 ms")));
 
         final Account account = Await.result(accountRepository.retrieveById(id), Duration.apply("1000 ms"));
         assertEquals(name, account.getName());
@@ -44,7 +44,7 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
     @Test
     public void update() throws Exception {
         Integer id = 1;
-        final Account account = new Account(id, "Test account", "USD", new Date(), true);
+        final Account account = new Account(id, "Test account", "USD", new Date(), true, "1234567");
 
         assertNotNull(Await.result(accountRepository.create(account), Duration.apply("1000 ms")));
 
@@ -59,15 +59,15 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
         Integer id = 1;
         final String name = "My test account";
 
-        assertNotNull(Await.result(accountRepository.create(new Account(id, name, "USD", new Date(), true)), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(accountRepository.create(new Account(id, name, "USD", new Date(), true, "1234567")), Duration.apply("1000 ms")));
         final Account account = Await.result(accountRepository.retrieveById(id), Duration.apply("1000 ms"));
         assertEquals(name, account.getName());
     }
 
     @Test
     public void retrieveAll() throws Exception {
-        assertNotNull(Await.result(accountRepository.create(new Account(1, "Test account 1", "USD", new Date(), true)), Duration.apply("1000 ms")));
-        assertNotNull(Await.result(accountRepository.create(new Account(2, "Test account 2", "USD", new Date(), true)), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(accountRepository.create(new Account(1, "Test account 1", "USD", new Date(), true, "1234567")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(accountRepository.create(new Account(2, "Test account 2", "USD", new Date(), true, "1234567")), Duration.apply("1000 ms")));
 
         final List<Account> result = Await.result(accountRepository.retrieveAll(), Duration.apply("1000 ms"));
         assertEquals(2,result.size());

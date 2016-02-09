@@ -32,9 +32,9 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final Promise<Account> promise = Futures.promise();
 
         final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
-                " createdate, active) VALUES ($1, $2, $3, $4, $5)";
+                " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                new Timestamp(entity.getCreateDate().getTime()), entity.getActive()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(),entity.getSecret()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -71,9 +71,9 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final Promise<Account> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() + ".account SET currency_id=$2, name=$3," +
-                " createdate=$4, active=$5 WHERE id=$1";
+                " createdate=$4, active=$5, secret=$6 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                new Timestamp(entity.getCreateDate().getTime()), entity.getActive()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(), entity.getSecret()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -86,6 +86,6 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
 
     private Account createAccount(Row row) {
         return new Account(row.getBigInteger("id").intValue(), row.getString("name"), row.getString("currency_id"),
-                row.getTimestamp("createdate"), row.getBoolean("active"));
+                row.getTimestamp("createdate"), row.getBoolean("active"), row.getString("secret"));
     }
 }
