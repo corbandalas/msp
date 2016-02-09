@@ -70,6 +70,21 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
+    public void retrieveByCurrencyId() throws Exception {
+        try {
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(11.24), new Date(), "EUR")), Duration.apply("1000 ms"));
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply("1000 ms"));
+
+            List<ExchangeRateHistory> result = Await.result(exchangeRateHistoryRepository.retrieveByCurrencyId("EUR"), Duration.apply("1000 ms"));
+            assertEquals(2,result.size());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+
+    @Test
     public void retrieveAll() throws Exception {
         Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
         Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply("1000 ms"));
