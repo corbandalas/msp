@@ -39,5 +39,10 @@ GET       /api/country/get/:countryID                                  @controll
 
 POST      /api/country/update                                          @controllers.CountryController.update()
 
+# ExchangeRateHistory API
+GET       /api-docs/api/exchangeRateHistory      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/exchangeRateHistory")
+
+GET       /api/exchangeRateHistory/get/:currencyID                      @controllers.ExchangeRateHistoryController.retrieveByCurrencyID(currencyID)
+
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

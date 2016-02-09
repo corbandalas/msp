@@ -62,6 +62,18 @@ public class ExchangeRateHistoryRepository implements BaseCRUDRepository<Exchang
         return promise.future();
     }
 
+    public Future<List<ExchangeRateHistory>> retrieveByCurrencyId(Object id) {
+        final Promise<List<ExchangeRateHistory>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".exchange_rate_history WHERE currency_id=$1";
+        connectionPool.getConnection().query(query,asList(id),
+                result -> { promise.success(StreamSupport.stream(result.spliterator(), true).map(row -> createExchangeRateHistory(row))
+                        .collect(Collectors.toList()));}, promise::failure);
+
+        return promise.future();
+    }
+
+
     @Override
     public Future<List<ExchangeRateHistory>> retrieveAll() {
         final Promise<List<ExchangeRateHistory>> promise = Futures.promise();
