@@ -9,10 +9,12 @@ import model.Account;
 public class Authentication {
     private Account account;
     private String enckey;
+    private String orderId;
 
-    public Authentication(Account account, String enckey) {
+    public Authentication(Account account, String enckey, String orderId) {
         this.account = account;
         this.enckey = enckey;
+        this.orderId=orderId;
     }
 
     public Account getAccount() {
@@ -21,6 +23,10 @@ public class Authentication {
 
     public String getEnckey() {
         return enckey;
+    }
+
+    public String getOrderId() {
+        return orderId;
     }
 
     @Override
