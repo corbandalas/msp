@@ -21,14 +21,23 @@ GET        /api/property/list                                            @contro
 
 GET        /api/property/get/:propertyID                                 @controllers.PropertyController.retrieveByID(propertyID)
 
+# Currency API
 GET        /api-docs/api/currency      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/currency")
 
-# Currency API
 GET       /api/currency/list                                             @controllers.CurrencyController.retrieveAll()
 
 GET       /api/currency/get/:currencyID                                  @controllers.CurrencyController.retrieveByID(currencyID)
 
 POST      /api/currency/update                                          @controllers.CurrencyController.update()
+
+# Country API
+GET        /api-docs/api/country      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/country")
+
+GET       /api/country/list                                             @controllers.CountryController.retrieveAll()
+
+GET       /api/country/get/:countryID                                  @controllers.CountryController.retrieveByID(countryID)
+
+POST      /api/country/update                                          @controllers.CountryController.update()
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

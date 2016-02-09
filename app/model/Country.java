@@ -15,6 +15,9 @@ public class Country extends BaseEntity<String> {
     private Boolean active;
     private String currencyId;
 
+    public Country() {
+    }
+
     public Country(String id, String name, Short phoneCode, Boolean active, String currency_id) {
         this.setId(id);
         this.name = name;
