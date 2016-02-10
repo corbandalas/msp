@@ -118,7 +118,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         customer.getAddress2(), customer.getAddress2(), customer.getCity(), customer.getPostcode(), countrySettingsTuple._2.getCode(),
                         customer.getId(), countrySettingsTuple._1.cardDesign, null, dob, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, loadValue, "" + currency.getCode(),
-                        null, null, 0, null, null,
+                        null, null, 0, null, countrySettingsTuple._1.loadSrc,
                         0, null, 0, type.getValue(),
                         null, activateNow ? 1 : 0, null, null,
                         cardName, countrySettingsTuple._1.limitGroup, null, countrySettingsTuple._1.permsGroup,
@@ -247,7 +247,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             String password = res._1._2.getValue();
             String[] split = res._2.getValue().split(":");
 
-            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4]);
+            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5]);
 
         });
     }
@@ -262,8 +262,9 @@ public class GlobalProcessingCardProvider implements CardProvider {
         private String limitGroup;
         private String permsGroup;
         private String feeGroup;
+        private String loadSrc;
 
-        public GPSSettings(String wsdlURL, String headerUsername, String headerPassword, String issCode, String cardDesign, String limitGroup, String permsGroup, String feeGroup) {
+        public GPSSettings(String wsdlURL, String headerUsername, String headerPassword, String issCode, String cardDesign, String limitGroup, String permsGroup, String feeGroup, String loadSrc) {
 
             this.wsdlURL = wsdlURL;
             this.headerUsername = headerUsername;
@@ -273,6 +274,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             this.limitGroup = limitGroup;
             this.permsGroup = permsGroup;
             this.feeGroup = feeGroup;
+            this.loadSrc = loadSrc;
 
         }
 
