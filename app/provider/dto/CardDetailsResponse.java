@@ -6,20 +6,19 @@ package provider.dto;
  * @author corbandalas - created 10.02.2016
  * @since 0.1.0
  */
-public class CardDetailsResponse {
+public class CardDetailsResponse extends BaseCardResponse{
 
     private String pan;
     private String expDate;
     private String cvv;
     private double bal;
-    private String actionCode;
 
     public CardDetailsResponse(String pan, String expDate, String cvv, double bal, String actionCode) {
+        super(actionCode);
         this.pan = pan;
         this.expDate = expDate;
         this.cvv = cvv;
         this.bal = bal;
-        this.actionCode = actionCode;
     }
 
     public String getPan() {
@@ -54,11 +53,4 @@ public class CardDetailsResponse {
         this.bal = bal;
     }
 
-    public String getActionCode() {
-        return actionCode;
-    }
-
-    public void setActionCode(String actionCode) {
-        this.actionCode = actionCode;
-    }
 }

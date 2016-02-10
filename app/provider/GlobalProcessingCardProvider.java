@@ -12,6 +12,7 @@ import play.libs.F;
 import provider.dto.CardBalanceResponse;
 import provider.dto.CardCreationResponse;
 import provider.dto.CardDetailsResponse;
+import provider.dto.CardLoadResponse;
 import repository.CountryRepository;
 import repository.PropertyRepository;
 import util.DateUtil;
@@ -78,6 +79,16 @@ public class GlobalProcessingCardProvider implements CardProvider {
     @Override
     public F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card) {
         return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardLoadResponse> loadVirtualCard(Card card, long amount, String description) {
+        return getGPSSettings().flatMap(res -> invokeCardLoad(res, card, amount, description)).map((res -> new CardLoadResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardLoadResponse> loadPlasticCard(Card card, long amount, String description) {
+        return getGPSSettings().flatMap(res -> invokeCardLoad(res, card, amount, description)).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
@@ -205,6 +216,39 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return cardDetails;
+        });
+    }
+
+
+    private F.Promise<LoadCard> invokeCardLoad(GPSSettings gpsSettings, Card card, long amount, String description) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            ServiceSoap serviceSoap = service.getServiceSoap();
+
+            createAuthSoapHeader((WSBindingProvider) serviceSoap, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+            LoadCard loadCard = null;
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Load service invocation. WSID #" + wsid);
+
+            try {
+
+                 loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "1", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, card.getCurrencyId(), "5", gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null);
+
+                Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return loadCard;
         });
     }
 

@@ -6,17 +6,16 @@ package provider.dto;
  * @author corbandalas - created 09.02.2016
  * @since 0.1.0
  */
-public class CardCreationResponse {
+public class CardCreationResponse extends BaseCardResponse{
 
     private String token;
-    private String resultCode;
     private String cvv;
     private String pan;
     private String expDate;
 
-    public CardCreationResponse(String token, String resultCode, String cvv, String pan, String expDate) {
+    public CardCreationResponse(String token, String actionCode, String cvv, String pan, String expDate) {
+        super(actionCode);
         this.token = token;
-        this.resultCode = resultCode;
         this.cvv = cvv;
         this.pan = pan;
         this.expDate = expDate;
@@ -28,14 +27,6 @@ public class CardCreationResponse {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public String getResultCode() {
-        return resultCode;
-    }
-
-    public void setResultCode(String resultCode) {
-        this.resultCode = resultCode;
     }
 
     public String getCvv() {

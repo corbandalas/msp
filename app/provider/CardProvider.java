@@ -7,6 +7,7 @@ import play.libs.F;
 import provider.dto.CardBalanceResponse;
 import provider.dto.CardCreationResponse;
 import provider.dto.CardDetailsResponse;
+import provider.dto.CardLoadResponse;
 
 
 /**
@@ -25,5 +26,6 @@ public interface CardProvider {
     F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card);
     F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card);
     F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card);
-
+    F.Promise<CardLoadResponse> loadVirtualCard(Card card, long amount, String description);
+    F.Promise<CardLoadResponse> loadPlasticCard(Card card, long amount, String description);
 }
