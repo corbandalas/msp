@@ -3,19 +3,19 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
-import dto.CountryListResponse;
-import dto.CountryResponse;
-import dto.CurrencyListResponse;
-import dto.CurrencyResponse;
+import dto.*;
 import model.Country;
 import model.Currency;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import play.mvc.With;
 import repository.CountryRepository;
 import repository.CurrencyRepository;
+import util.SecurityUtil;
 
 /**
  * API country controller
@@ -28,6 +28,7 @@ public class CountryController extends BaseController {
     @Inject
     CountryRepository countryRepository;
 
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "listAllCountries",
             value = "All countries list",
@@ -36,12 +37,23 @@ public class CountryController extends BaseController {
             httpMethod = "GET",
             response = CountryListResponse.class
     )
-
     @ApiResponses( value = {
             @ApiResponse(code = 0, message = "OK", response = CountryListResponse.class),
             @ApiResponse(code = 1, message = "DB error"),
     })
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public Promise<Result> retrieveAll() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+        }
 
         final Promise<Result> result = Promise.wrap(countryRepository.retrieveAll()).map(countries -> ok(Json.toJson(new CountryListResponse("0", "OK", countries))));
 
@@ -51,6 +63,7 @@ public class CountryController extends BaseController {
         });
     }
 
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
             value = "Retrieve country by ID",
@@ -66,9 +79,19 @@ public class CountryController extends BaseController {
             @ApiResponse(code = 2, message = "DB error")
     })
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "countryID", value = "Country ID to retrieve", required = true, dataType = "string", paramType = "path")
-    })
+            @ApiImplicitParam(name = "countryID", value = "Country ID to retrieve", required = true, dataType = "string", paramType = "path"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+countryID+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public Promise<Result> retrieveByID(String countryID) {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                countryID, authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+        }
 
         if (StringUtils.isBlank(countryID)) {
 
@@ -89,6 +112,7 @@ public class CountryController extends BaseController {
         );
     }
 
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateCountry",
             value = "Update existed country",
@@ -98,16 +122,19 @@ public class CountryController extends BaseController {
             httpMethod = "POST",
             response = dto.BaseAPIResponse.class
     )
-
     @ApiResponses( value = {
             @ApiResponse(code = 0, message = "Country was updated successfully"),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error"),
     })
-    @ApiImplicitParams(value = {@ApiImplicitParam(value = "Country request", required = true, dataType = "model.Country", paramType = "body")})
-
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Country request", required = true, dataType = "model.Country", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+country.code+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public Promise<Result> update() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
 
@@ -115,6 +142,12 @@ public class CountryController extends BaseController {
 
         try {
             country = Json.fromJson(jsonNode, Country.class);
+
+            if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                    country.getCode(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+                Logger.error("Provided and calculated enckeys do not match");
+                return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            }
 
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
