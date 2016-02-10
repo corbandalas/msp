@@ -1,11 +1,12 @@
 package provider;
 
-import ae.globalprocessing.hyperionweb.BalanceEnquire2;
-import ae.globalprocessing.hyperionweb.VirtualCards;
 import model.Card;
 import model.Currency;
 import model.Customer;
 import play.libs.F;
+import provider.dto.CardBalanceResponse;
+import provider.dto.CardCreationResponse;
+import provider.dto.CardDetailsResponse;
 
 
 /**
@@ -16,11 +17,13 @@ import play.libs.F;
  */
 public interface CardProvider {
 
-    F.Promise<VirtualCards> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency);
-    F.Promise<VirtualCards> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency);
-    F.Promise<VirtualCards> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency);
-    F.Promise<VirtualCards> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency);
-    F.Promise<BalanceEnquire2> getVirtualCardBalance(Card card);
-    F.Promise<BalanceEnquire2> getPlasticCardBalance(Card card);
+    F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency);
+    F.Promise<CardCreationResponse> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency);
+    F.Promise<CardCreationResponse> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency);
+    F.Promise<CardCreationResponse> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency);
+    F.Promise<CardBalanceResponse> getVirtualCardBalance(Card card);
+    F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card);
+    F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card);
+    F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card);
 
 }

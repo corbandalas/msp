@@ -9,6 +9,9 @@ import model.Card;
 import model.Customer;
 import play.Logger;
 import play.libs.F;
+import provider.dto.CardBalanceResponse;
+import provider.dto.CardCreationResponse;
+import provider.dto.CardDetailsResponse;
 import repository.CountryRepository;
 import repository.PropertyRepository;
 import util.DateUtil;
@@ -38,40 +41,51 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
 
     @Override
-    public F.Promise<VirtualCards> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
+    public F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
         return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, false);
     }
 
     @Override
-    public F.Promise<VirtualCards> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency) {
+    public F.Promise<CardCreationResponse> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency) {
         return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
     }
 
     @Override
-    public F.Promise<VirtualCards> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency) {
+    public F.Promise<CardCreationResponse> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency) {
         return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, false);
     }
 
     @Override
-    public F.Promise<VirtualCards> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency) {
+    public F.Promise<CardCreationResponse> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency) {
         return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
     }
 
     @Override
-    public F.Promise<BalanceEnquire2> getVirtualCardBalance(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardBalance(res, card));
+    public F.Promise<CardBalanceResponse> getVirtualCardBalance(Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardBalance(res, card)).map((res -> new CardBalanceResponse(res.getAvlBal(), res.getCurCode(), res.getActionCode())));
     }
 
     @Override
-    public F.Promise<BalanceEnquire2> getPlasticCardBalance(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardBalance(res, card));
+    public F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardBalance(res, card)).map((res -> new CardBalanceResponse(res.getAvlBal(), res.getCurCode(), res.getActionCode())));
     }
 
+    @Override
+    public F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card) {
+        return  getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
+    }
 
-    private F.Promise<VirtualCards> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow)  {
+    @Override
+    public F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
+    }
+
+    private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
-        return getGPSSettings().zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow));
+        return getGPSSettings().zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
+                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow)).
+                map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate()));
 
     }
 
@@ -94,9 +108,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             VirtualCards virtualCards = null;
 
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WsCreateCard service invocation. WSID #" + wsid);
+
             try {
 
-                virtualCards = service.getServiceSoap().wsCreateCard(System.currentTimeMillis(), countrySettingsTuple._1.issCode, "10",
+                virtualCards = service.getServiceSoap().wsCreateCard(wsid, countrySettingsTuple._1.issCode, "10",
                         null, customer.getTitle(), customer.getLastName(), customer.getFirstName(), customer.getAddress1(),
                         customer.getAddress2(), customer.getAddress2(), customer.getCity(), customer.getPostcode(), countrySettingsTuple._2.getCode(),
                         customer.getId(), countrySettingsTuple._1.cardDesign, null, dob, DateUtil.format(new Date(), "yyyy-MM-dd"),
@@ -110,11 +127,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, null, null, false,
                         countrySettingsTuple._1.feeGroup, null, customer.getAddress1(), customer.getAddress2(),
                         customer.getAddress2(), customer.getCity(), customer.getAddress2(), customer.getPostcode(),
-                        "826", null, "En", "1",
+                        countrySettingsTuple._2.getCode(), null, "En", "1",
                         null, null, null, null,
                         null, null, null, null,
                         null, null, null, customer.getEmail(), "0",
                         null, "0", null);
+
+
+                Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + " .Result code: " + virtualCards.getActionCode());
 
 
             } catch (Exception e) {
@@ -138,9 +158,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             BalanceEnquire2 balance = null;
 
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WsBalanceEnquiryV2 service invocation. WSID #" + wsid);
+
             try {
-                 balance = service.getServiceSoap().wsBalanceEnquiryV2(System.currentTimeMillis(), gpsSettings.issCode, "3", null, 4, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                balance = service.getServiceSoap().wsBalanceEnquiryV2(wsid, gpsSettings.issCode, "3", null, 4, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, "0");
+
+                Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + " .Result code: " + balance.getActionCode());
 
 
             } catch (Exception e) {
@@ -149,6 +174,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return balance;
+        });
+    }
+
+    private F.Promise<Card2> invokeCardDetails(GPSSettings gpsSettings, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            ServiceSoap serviceSoap = service.getServiceSoap();
+
+            createAuthSoapHeader((WSBindingProvider) serviceSoap, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+            Card2 cardDetails = null;
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WsEnquiry service invocation. WSID #" + wsid);
+
+            try {
+                 cardDetails = service.getServiceSoap().wsEnquiry(System.currentTimeMillis(), gpsSettings.issCode, "9", "1", null, null, null, card.getToken(), null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), 5, null, null, null, null, 0, null, 0);
+
+                Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + " .Result code: " + cardDetails.getActionCode());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return cardDetails;
         });
     }
 
