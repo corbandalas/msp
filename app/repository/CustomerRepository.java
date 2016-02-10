@@ -70,6 +70,30 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         return promise.future();
     }
 
+    public Future<List<Customer>> retrieveByKYC(KYC kyc) {
+        final Promise<List<Customer>> promise = Futures.promise();
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE kyc=$1";
+        connectionPool.getConnection().query(query, asList(kyc.toString()),result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createCustomer(row)));
+            promise.success(customers);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Customer>> retrieveByEmail(String email) {
+        final Promise<List<Customer>> promise = Futures.promise();
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE email=$1";
+        connectionPool.getConnection().query(query, asList(email),result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createCustomer(row)));
+            promise.success(customers);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<List<Customer>> retrieveAll() {
 

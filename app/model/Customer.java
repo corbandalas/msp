@@ -28,6 +28,9 @@ public class Customer extends BaseEntity<String> {
     private String password;
     private String country_id;
 
+    public Customer() {
+    }
+
     public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id) {
         this.setId(id);
         this.registrationDate = registrationDate;

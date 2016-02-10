@@ -79,7 +79,6 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
         assertEquals(2,result.size());
     }
 
-
     @Test
     public void retrieveByRegistrationDate() throws Exception {
         Calendar dateUser1 = Calendar.getInstance();
@@ -101,7 +100,25 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
         assertEquals(1, result.size());
     }
 
+    @Test
+    public void retrieveByKYC() throws Exception {
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055623", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
 
+        final List<Customer> result = Await.result(customerRepository.retrieveByKYC(KYC.FULL_DUE_DILIGENCE), Duration.apply("1000 ms"));
+        assertEquals(2, result.size());
+    }
+
+
+    @Test
+    public void retrieveByEmail() throws Exception {
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don2@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
+
+        final List<Customer> result = Await.result(customerRepository.retrieveByEmail("nihilist.don@gmail.com"), Duration.apply("1000 ms"));
+        assertEquals(1, result.size());
+    }
 
     @After
     public void clean() {
