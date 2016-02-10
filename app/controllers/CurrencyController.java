@@ -3,19 +3,24 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import dto.Authentication;
 import dto.CurrencyListResponse;
 import dto.CurrencyResponse;
 import model.Currency;
 import model.Property;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import play.mvc.With;
 import repository.CurrencyRepository;
+import util.SecurityUtil;
 
 /**
  * API currency controller
+ *
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
@@ -25,6 +30,7 @@ public class CurrencyController extends BaseController {
     @Inject
     CurrencyRepository currencyRepository;
 
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "listAllCurrency",
             value = "All currency list",
@@ -33,21 +39,33 @@ public class CurrencyController extends BaseController {
             httpMethod = "GET",
             response = dto.CurrencyListResponse.class
     )
-
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = dto.CurrencyListResponse.class),
             @ApiResponse(code = 1, message = "DB error"),
     })
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public Promise<Result> retrieveAll() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+        }
 
         final Promise<Result> result = Promise.wrap(currencyRepository.retrieveAll()).map(currencies -> ok(Json.toJson(new CurrencyListResponse("0", "OK", currencies))));
 
         return result.recover(error -> {
-            Logger.error("Error:",error);
+            Logger.error("Error:", error);
             return ok(Json.toJson(createResponse("1", error.getMessage())));
         });
     }
 
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
             value = "Retrieve currency by ID",
@@ -56,20 +74,29 @@ public class CurrencyController extends BaseController {
             httpMethod = "GET",
             response = dto.CurrencyResponse.class
     )
-
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = dto.CurrencyResponse.class),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error")
     })
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "currencyID", value = "Currency ID to retrieve", required = true, dataType = "string", paramType = "path")
-    })
+            @ApiImplicitParam(name = "currencyID", value = "Currency ID to retrieve", required = true, dataType = "string", paramType = "path"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+currencyID+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public Promise<Result> retrieveByID(String currencyID) {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
 
         if (StringUtils.isBlank(currencyID)) {
 
             return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currencyID,
+                authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         Promise<Currency> currencyPromise = Promise.wrap(currencyRepository.retrieveById(currencyID));
@@ -86,6 +113,7 @@ public class CurrencyController extends BaseController {
         );
     }
 
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateCurrency",
             value = "Update existed currency",
@@ -95,16 +123,19 @@ public class CurrencyController extends BaseController {
             httpMethod = "POST",
             response = dto.BaseAPIResponse.class
     )
-
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Currency was updated successfully"),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error"),
     })
-    @ApiImplicitParams(value = {@ApiImplicitParam(value = "Currency request", required = true, dataType = "model.Currency", paramType = "body")})
-
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Currency request", required = true, dataType = "model.Currency", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+currency.id+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public Promise<Result> update() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
 
@@ -112,6 +143,12 @@ public class CurrencyController extends BaseController {
 
         try {
             currency = Json.fromJson(jsonNode, Currency.class);
+
+            if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currency.getId(),
+                    authData.getOrderId(), authData.getAccount().getSecret()))) {
+                Logger.error("Provided and calculated enckeys do not match");
+                return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            }
 
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
