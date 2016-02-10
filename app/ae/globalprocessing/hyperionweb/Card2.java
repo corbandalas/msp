@@ -874,4 +874,40 @@ public class Card2 {
         this.fxGroup = value;
     }
 
+    @Override
+    public String toString() {
+        return "Card2{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", startDate='" + startDate + '\'' +
+                ", endDate='" + endDate + '\'' +
+                ", expDate='" + expDate + '\'' +
+                ", statCode='" + statCode + '\'' +
+                ", embossName='" + embossName + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", curCode='" + curCode + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", isLive=" + isLive +
+                ", scheme='" + scheme + '\'' +
+                ", product='" + product + '\'' +
+                ", maskedPAN='" + maskedPAN + '\'' +
+                ", limitGroup='" + limitGroup + '\'' +
+                ", mccGroup='" + mccGroup + '\'' +
+                ", permsGroup='" + permsGroup + '\'' +
+                ", feeGroup='" + feeGroup + '\'' +
+                ", schedFeeGroup='" + schedFeeGroup + '\'' +
+                ", wsFeeGroup='" + wsFeeGroup + '\'' +
+                ", linkageGroup='" + linkageGroup + '\'' +
+                ", primaryToken='" + primaryToken + '\'' +
+                ", authCalendarGroup='" + authCalendarGroup + '\'' +
+                ", fxGroup='" + fxGroup + '\'' +
+                '}';
+    }
 }

@@ -106,6 +106,26 @@ public class BalanceEnquire2 {
     @XmlElement(name = "LimitInfo")
     protected BalanceEnquire2 .LimitInfo limitInfo;
 
+    @Override
+    public String toString() {
+        return "BalanceEnquire2{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", curCode='" + curCode + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", pinStatus=" + pinStatus +
+                ", limitInfo=" + limitInfo +
+                '}';
+    }
+
     /**
      * Gets the value of the wsid property.
      * 
@@ -430,6 +450,9 @@ public class BalanceEnquire2 {
      * 
      * 
      */
+
+
+
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
         "any"

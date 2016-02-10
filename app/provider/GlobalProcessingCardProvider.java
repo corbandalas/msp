@@ -134,7 +134,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, "0", null);
 
 
-                Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + " .Result code: " + virtualCards.getActionCode());
+                Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + ". Result code: " + virtualCards.getActionCode() + " ." + virtualCards.toString());
 
 
             } catch (Exception e) {
@@ -165,7 +165,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 balance = service.getServiceSoap().wsBalanceEnquiryV2(wsid, gpsSettings.issCode, "3", null, 4, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, "0");
 
-                Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + " .Result code: " + balance.getActionCode());
+                Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + ". Result code: " + balance.getActionCode() + " ." + balance.toString());
 
 
             } catch (Exception e) {
@@ -196,7 +196,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                  cardDetails = service.getServiceSoap().wsEnquiry(System.currentTimeMillis(), gpsSettings.issCode, "9", "1", null, null, null, card.getToken(), null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), 5, null, null, null, null, 0, null, 0);
 
-                Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + " .Result code: " + cardDetails.getActionCode());
+                Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + ". Result code: " + cardDetails.getActionCode() + " ." + cardDetails.toString());
 
 
             } catch (Exception e) {
