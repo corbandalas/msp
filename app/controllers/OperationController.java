@@ -72,7 +72,7 @@ public class OperationController extends BaseController {
 
         if (operation.getCreateDate() == null) operation.setCreateDate(new Date());
 
-        final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "operation created successfully"))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -121,7 +121,7 @@ public class OperationController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(operationRepository.update(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.update(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "operation updated successfully"))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -147,17 +147,17 @@ public class OperationController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "operationID", value = "operation ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+operationId+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+operationID+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
-    public F.Promise<Result> retrieveById(Integer operationId) {
+    public F.Promise<Result> retrieveById(Integer operationID) {
         final Authentication authData = (Authentication) ctx().args.get("authData");
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
-                operationId.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+                operationID.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveById(operationId)).map(operation -> ok(Json.toJson(new OperationResponse("OK", "0", operation))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveById(operationID)).map(operation -> ok(Json.toJson(new OperationResponse("OK", "0", operation))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);

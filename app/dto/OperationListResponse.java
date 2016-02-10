@@ -5,22 +5,23 @@ import model.Operation;
 import java.util.List;
 
 /**
+ * API operation list response
  * @author ra created 10.02.2016.
  * @since 0.1.0
  */
 public class OperationListResponse extends BaseAPIResponse {
-    private List<Operation>operations;
+    private List<Operation> operationList;
 
     public OperationListResponse(String text, String code, List<Operation> operations) {
         super(text, code);
-        this.operations = operations;
+        this.operationList = operations;
     }
 
-    public List<Operation> getOperations() {
-        return operations;
+    public List<Operation> getOperationList() {
+        return operationList;
     }
 
-    public void setOperations(List<Operation> operations) {
-        this.operations = operations;
+    public void setOperationList(List<Operation> operationList) {
+        this.operationList = operationList;
     }
 }
