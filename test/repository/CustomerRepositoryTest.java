@@ -35,7 +35,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
     @Test
     public void create() {
         try {
-            assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
+            assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
         } catch (Exception e) {
             fail();
         }
@@ -44,7 +44,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
     @Test
     public void update() {
         try {
-            Customer customer = new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA");
+            Customer customer = new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
             assertNotNull(Await.result(customerRepository.create(customer), Duration.apply("1000 ms")));
             customer.setActive(false);
             customer.setFirstName("Dima");
@@ -62,7 +62,7 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
     public void retrieveById() throws Exception {
         try {
             String phone = "380953055621";
-            assertNotNull(Await.result(customerRepository.create(new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
+            assertNotNull(Await.result(customerRepository.create(new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
             final Customer customer = Await.result(customerRepository.retrieveById(phone), Duration.apply("1000 ms"));
             assertEquals(phone, customer.getId());
         } catch (Exception e) {
@@ -72,8 +72,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 
     @Test
     public void retrieveAll() throws Exception {
-        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
-        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
 
         final List<Customer> result = Await.result(customerRepository.retrieveAll(), Duration.apply("1000 ms"));
         assertEquals(2,result.size());
@@ -94,8 +94,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
         Calendar date_end = Calendar.getInstance();
         date_end.add(Calendar.DAY_OF_MONTH, +10);
 
-        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", dateUser1.getTime(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
-        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", dateUser2.getTime(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.BASIC, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", dateUser1.getTime(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", dateUser2.getTime(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms")));
 
         final List<Customer> result = Await.result(customerRepository.retrieveByRegistrationDate(date_start.getTime(), date_end.getTime()), Duration.apply("1000 ms"));
         assertEquals(1, result.size());
