@@ -1,16 +1,12 @@
 package provider;
 
-import ae.globalprocessing.hyperionweb.AuthSoapHeader;
-import ae.globalprocessing.hyperionweb.Service;
-import ae.globalprocessing.hyperionweb.ServiceSoap;
-import ae.globalprocessing.hyperionweb.VirtualCards;
+import ae.globalprocessing.hyperionweb.*;
 import com.google.inject.Inject;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.developer.WSBindingProvider;
-import model.Country;
-import model.Currency;
+import model.*;
+import model.Card;
 import model.Customer;
-import model.Property;
 import play.Logger;
 import play.libs.F;
 import repository.CountryRepository;
@@ -59,6 +55,16 @@ public class GlobalProcessingCardProvider implements CardProvider {
     @Override
     public F.Promise<VirtualCards> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency) {
         return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
+    }
+
+    @Override
+    public F.Promise<BalanceEnquire2> getVirtualCardBalance(Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardBalance(res, card));
+    }
+
+    @Override
+    public F.Promise<BalanceEnquire2> getPlasticCardBalance(Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardBalance(res, card));
     }
 
 
@@ -117,6 +123,32 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return virtualCards;
+        });
+    }
+
+    private F.Promise<BalanceEnquire2> invokeCardBalance(GPSSettings gpsSettings, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            ServiceSoap serviceSoap = service.getServiceSoap();
+
+            createAuthSoapHeader((WSBindingProvider) serviceSoap, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+            BalanceEnquire2 balance = null;
+
+            try {
+                 balance = service.getServiceSoap().wsBalanceEnquiryV2(System.currentTimeMillis(), gpsSettings.issCode, "3", null, 4, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, "0");
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return balance;
         });
     }
 
