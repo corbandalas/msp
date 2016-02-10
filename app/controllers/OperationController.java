@@ -3,38 +3,36 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
-import dto.AccountListResponse;
-import dto.AccountResponse;
-import dto.Authentication;
-import model.Account;
+import dto.*;
+import model.Operation;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
-import repository.AccountRepository;
+import repository.OperationRepository;
 import util.SecurityUtil;
 
 import java.util.Date;
 
 /**
- * API account controller
+ * API operation controller
  *
- * @author ra created 09.02.2016.
+ * @author ra created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/account", description = "Operations to manage application accounts stored in DB")
-public class AccountController extends BaseController {
+@Api(value = "/api/operation", description = "Methods to manage application operation stored in DB")
+public class OperationController extends BaseController {
 
     @Inject
-    private AccountRepository accountRepository;
+    private OperationRepository operationRepository;
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "createAccount",
-            value = "Create account",
-            notes = "Create account in DB",
+            nickname = "createOperation",
+            value = "Create operation",
+            notes = "Create operation in DB",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -42,14 +40,14 @@ public class AccountController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Account was created successfully"),
+            @ApiResponse(code = 0, message = "Operation was created successfully"),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error"),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
+            @ApiImplicitParam(value = "Operation request", required = true, dataType = "model.Operation", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+account.name+account.currencyId+orderId+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+operation.orderId+operation.description+operation.type+orderId+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> create() {
@@ -57,23 +55,24 @@ public class AccountController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Account account = Json.fromJson(jsonNode, Account.class);
+        final Operation operation = Json.fromJson(jsonNode, Operation.class);
 
-        if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
-                StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())) {
+        if (StringUtils.isBlank(operation.getDescription()) || StringUtils.isBlank(operation.getOrderId()) ||
+                operation.getType() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
-                account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+                operation.getOrderId(), operation.getDescription(), operation.getType().name(), authData.getOrderId(),
+                authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        if(account.getCreateDate()==null) account.setCreateDate(new Date());
+        if (operation.getCreateDate() == null) operation.setCreateDate(new Date());
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.create(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "operation created successfully"))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -83,9 +82,9 @@ public class AccountController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "updateAccount",
-            value = "Update account",
-            notes = "update account in DB",
+            nickname = "updateOperation",
+            value = "Update operation",
+            notes = "update operation in DB",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -93,34 +92,36 @@ public class AccountController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Account was updated successfully"),
+            @ApiResponse(code = 0, message = "Operation was updated successfully"),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error"),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
+            @ApiImplicitParam(value = "Operation request", required = true, dataType = "model.Operation", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+account.name+account.currencyId+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+operation.id+operation.orderId+operation.description+operation.type+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> update() {
+
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Account account = Json.fromJson(jsonNode, Account.class);
+        final Operation operation = Json.fromJson(jsonNode, Operation.class);
 
-        if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
-                StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())) {
+        if (operation.getId() == null || StringUtils.isBlank(operation.getDescription()) || StringUtils.isBlank(operation.getOrderId()) ||
+                operation.getType() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
-                account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+                operation.getId().toString(), operation.getOrderId(), operation.getDescription(), operation.getType().name(), authData.getOrderId(),
+                authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.update(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.update(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "operation updated successfully"))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -131,11 +132,11 @@ public class AccountController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve account by ID",
-            notes = "Get account by its ID",
+            value = "Retrieve operation by ID",
+            notes = "Get operation by its ID",
             produces = "application/json",
             httpMethod = "GET",
-            response = AccountResponse.class
+            response = OperationResponse.class
     )
 
     @ApiResponses(value = {
@@ -144,19 +145,19 @@ public class AccountController extends BaseController {
             @ApiResponse(code = 2, message = "DB error")
     })
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "accountID", value = "account ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
+            @ApiImplicitParam(name = "operationID", value = "operation ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+accountIdPathParam+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+operationID+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
-    public F.Promise<Result> retrieveById(Integer accountId) {
+    public F.Promise<Result> retrieveById(Integer operationID) {
         final Authentication authData = (Authentication) ctx().args.get("authData");
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
-                accountId.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+                operationID.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(accountId)).map(account -> ok(Json.toJson(new AccountResponse("OK", "0", account))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveById(operationID)).map(operation -> ok(Json.toJson(new OperationResponse("OK", "0", operation))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -166,12 +167,12 @@ public class AccountController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "listAllAccounts",
+            nickname = "listAllOperations",
             value = "All accounts list",
             notes = "Obtain list of all accounts stored in DB",
             produces = "application/json",
             httpMethod = "GET",
-            response = AccountListResponse.class
+            response = OperationListResponse.class
     )
 
     @ApiResponses(value = {
@@ -190,7 +191,7 @@ public class AccountController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveAll()).map(accounts -> ok(Json.toJson(new AccountListResponse("OK", "0", accounts))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveAll()).map(operations -> ok(Json.toJson(new OperationListResponse("OK", "0", operations))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);

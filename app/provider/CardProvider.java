@@ -1,6 +1,8 @@
 package provider;
 
+import ae.globalprocessing.hyperionweb.BalanceEnquire2;
 import ae.globalprocessing.hyperionweb.VirtualCards;
+import model.Card;
 import model.Currency;
 import model.Customer;
 import play.libs.F;
@@ -18,7 +20,7 @@ public interface CardProvider {
     F.Promise<VirtualCards> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency);
     F.Promise<VirtualCards> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency);
     F.Promise<VirtualCards> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency);
-
-
+    F.Promise<BalanceEnquire2> getVirtualCardBalance(Card card);
+    F.Promise<BalanceEnquire2> getPlasticCardBalance(Card card);
 
 }

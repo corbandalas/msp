@@ -51,5 +51,22 @@ POST    /api/account/update                                             @control
 GET     /api/account/get/:accountID                                     @controllers.AccountController.retrieveById(accountID:Int)
 GET     /api/account/list                                               @controllers.AccountController.retrieveAll()
 
+# Operation API
+GET     /api-docs/api/operation                                         @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/operation")
+POST    /api/operation/create                                           @controllers.OperationController.create()
+POST    /api/operation/update                                           @controllers.OperationController.update()
+GET     /api/operation/get/:operationID                                 @controllers.OperationController.retrieveById(operationID:Int)
+GET     /api/operation/list                                             @controllers.OperationController.retrieveAll()
+
+# Transaction API
+GET     /api-docs/api/transaction                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/transaction")
+POST    /api/transaction/create                                         @controllers.TransactionController.create()
+POST    /api/transaction/update                                         @controllers.TransactionController.update()
+GET     /api/transaction/get/:transactionID                             @controllers.TransactionController.retrieveById(transactionID:Int)
+GET     /api/transaction/list                                           @controllers.TransactionController.retrieveAll()
+GET     /api/transaction/listByOperation/:operationID                   @controllers.TransactionController.retrieveByOperationId(operationID:Long)
+
+
+
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)
