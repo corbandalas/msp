@@ -7,5 +7,5 @@ package model.enums;
  * @since 0.1.0
  */
 public enum KYC {
-    BASIC
+    SIMPLIFIED_DUE_DILIGENCE, FULL_DUE_DILIGENCE
 }
