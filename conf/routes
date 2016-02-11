@@ -28,7 +28,9 @@ GET       /api/currency/list                                             @contro
 
 GET       /api/currency/get/:currencyID                                  @controllers.CurrencyController.retrieveByID(currencyID)
 
-POST      /api/currency/update                                          @controllers.CurrencyController.update()
+POST      /api/currency/update                                           @controllers.CurrencyController.update()
+
+GET       /api/currency/exchange/:amount/:fromCurrencyID/:toCurrencyID   @controllers.CurrencyController.exchange(amount: Long, fromCurrencyID, toCurrencyID)
 
 # Country API
 GET        /api-docs/api/country      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/country")

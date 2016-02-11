@@ -14,7 +14,9 @@ import provider.dto.CardCreationResponse;
 import provider.dto.CardDetailsResponse;
 import provider.dto.CardLoadResponse;
 import repository.CountryRepository;
+import repository.CurrencyRepository;
 import repository.PropertyRepository;
+import util.CurrencyUtil;
 import util.DateUtil;
 
 import javax.xml.bind.JAXBContext;
@@ -40,6 +42,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
     @Inject
     private CountryRepository countryRepository;
 
+    @Inject
+    private CurrencyRepository currencyRepository;
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
@@ -82,13 +86,23 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardLoadResponse> loadVirtualCard(Card card, long amount, String description) {
-        return getGPSSettings().flatMap(res -> invokeCardLoad(res, card, amount, description)).map((res -> new CardLoadResponse(res.getActionCode())));
+    public F.Promise<CardLoadResponse> loadVirtualCardFromBank(Card card, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     @Override
-    public F.Promise<CardLoadResponse> loadPlasticCard(Card card, long amount, String description) {
-        return getGPSSettings().flatMap(res -> invokeCardLoad(res, card, amount, description)).map((res -> new CardLoadResponse(res.getActionCode())));
+    public F.Promise<CardLoadResponse> loadVirtualCardFromCard(Card card, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardLoadResponse> loadPlasticCardFromBank(Card card, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardLoadResponse> loadPlasticCardFromCard(Card card, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
@@ -220,7 +234,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-    private F.Promise<LoadCard> invokeCardLoad(GPSSettings gpsSettings, Card card, long amount, String description) {
+    private F.Promise<LoadCard> invokeCardLoad(GPSSettings gpsSettings, Card card, long amount, String description, String loadType) {
 
         return F.Promise.promise(() -> {
 
@@ -238,7 +252,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
                  loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "1", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, card.getCurrencyId(), "5", gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null);
+                        DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, card.getCurrencyId(), loadType, gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null);
 
                 Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
 
