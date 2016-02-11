@@ -26,6 +26,8 @@ public interface CardProvider {
     F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card);
     F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card);
     F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card);
-    F.Promise<CardLoadResponse> loadVirtualCard(Card card, long amount, String description);
-    F.Promise<CardLoadResponse> loadPlasticCard(Card card, long amount, String description);
+    F.Promise<CardLoadResponse> loadVirtualCardFromBank(Card card, long amount, Currency currency, String description);
+    F.Promise<CardLoadResponse> loadVirtualCardFromCard(Card card, long amount, Currency currency, String description);
+    F.Promise<CardLoadResponse> loadPlasticCardFromBank(Card card, long amount, Currency currency, String description);
+    F.Promise<CardLoadResponse> loadPlasticCardFromCard(Card card, long amount, Currency currency, String description);
 }
