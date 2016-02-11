@@ -9,10 +9,7 @@ import model.Card;
 import model.Customer;
 import play.Logger;
 import play.libs.F;
-import provider.dto.CardBalanceResponse;
-import provider.dto.CardCreationResponse;
-import provider.dto.CardDetailsResponse;
-import provider.dto.CardLoadResponse;
+import provider.dto.*;
 import repository.CountryRepository;
 import repository.CurrencyRepository;
 import repository.PropertyRepository;
@@ -105,6 +102,21 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
+    @Override
+    public F.Promise<CardUnloadResponse> unloadPlasticCard(Card card, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description) {
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(sourceCard.getCurrencyId()))).flatMap(res -> invokeCardTransfer(res._1, sourceCard, destinationCard, CurrencyUtil.convert(amount, currency, res._2), description)).map((res -> new CardTransferBalanceResponse(res.getActionCode())));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -118,11 +130,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(countrySettingsTuple._1.wsdlURL);
-
-            ServiceSoap serviceSoap = service.getServiceSoap();
-
-            createAuthSoapHeader((WSBindingProvider) serviceSoap, countrySettingsTuple._1.headerUsername, countrySettingsTuple._1.headerPassword);
+            Service service = getService(countrySettingsTuple._1.wsdlURL, countrySettingsTuple._1.headerUsername, countrySettingsTuple._1.headerPassword);
 
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, -25);
@@ -175,11 +183,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL);
-
-            ServiceSoap serviceSoap = service.getServiceSoap();
-
-            createAuthSoapHeader((WSBindingProvider) serviceSoap, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
 
             BalanceEnquire2 balance = null;
 
@@ -206,11 +210,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL);
-
-            ServiceSoap serviceSoap = service.getServiceSoap();
-
-            createAuthSoapHeader((WSBindingProvider) serviceSoap, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
 
             Card2 cardDetails = null;
 
@@ -238,11 +238,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL);
-
-            ServiceSoap serviceSoap = service.getServiceSoap();
-
-            createAuthSoapHeader((WSBindingProvider) serviceSoap, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
 
             LoadCard loadCard = null;
 
@@ -266,6 +262,63 @@ public class GlobalProcessingCardProvider implements CardProvider {
         });
     }
 
+    private F.Promise<UnLoad> invokeCardUnload(GPSSettings gpsSettings, Card card, long amount, String description, String loadType) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+            UnLoad unload  = null;
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_UnLoad service invocation. WSID #" + wsid);
+
+            try {
+
+                 unload = service.getServiceSoap().wsUnLoad(wsid, gpsSettings.issCode, "8", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, loadType, gpsSettings.loadSrc, (double) amount / 100, card.getCurrencyId(), 0, null, 0, null, description);
+
+                Logger.info("/////// Ws_UnLoad service invocation was ended. WSID #" + wsid + ". Result code: " + unload.getActionCode() + " ." + unload.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return unload;
+        });
+    }
+
+
+    private F.Promise<BalanceTransfer> invokeCardTransfer(GPSSettings gpsSettings, Card cardSource, Card cardDestination, long amount, String description) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+            BalanceTransfer balanceTransfer = null;
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Transfer service invocation. WSID #" + wsid);
+
+            try {
+
+                 balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "7", null, "1", null, null, cardSource.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, null, cardDestination.getToken(), (double) amount / 100, cardSource.getCurrencyId(), gpsSettings.loadSrc, 0, null, 0, description, null, null, null);
+
+                Logger.info("/////// Ws_Transfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return balanceTransfer;
+        });
+    }
+
 
     private void createAuthSoapHeader(WSBindingProvider bindingProvider, String soapHeaderUsername, String soapHeaderPassword) {
 
@@ -281,9 +334,16 @@ public class GlobalProcessingCardProvider implements CardProvider {
         }
     }
 
-    private Service getService(String wsdlURL) {
+    private Service getService(String wsdlURL, String headerUsername, String headerPassword) {
         try {
-            return new Service(new URL(wsdlURL));
+
+            Service service = new Service(new URL(wsdlURL));
+
+            ServiceSoap serviceSoap = service.getServiceSoap();
+
+            createAuthSoapHeader((WSBindingProvider) serviceSoap, headerUsername, headerPassword);
+
+            return service;
         } catch (MalformedURLException e) {
             Logger.error("Error while constructing service by WSDL" + wsdlURL);
         }

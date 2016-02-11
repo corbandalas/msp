@@ -418,4 +418,24 @@ public class BalanceTransfer {
         this.itemID = value;
     }
 
+    @Override
+    public String toString() {
+        return "BalanceTransfer{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", newPAN='" + newPAN + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", amtTxn=" + amtTxn +
+                ", curCode='" + curCode + '\'' +
+                ", itemID=" + itemID +
+                '}';
+    }
 }

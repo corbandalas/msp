@@ -390,4 +390,23 @@ public class UnLoad {
         this.curCode = value;
     }
 
+    @Override
+    public String toString() {
+        return "UnLoad{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", amtUnLoad=" + amtUnLoad +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", itemID=" + itemID +
+                ", curCode='" + curCode + '\'' +
+                '}';
+    }
 }

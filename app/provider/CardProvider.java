@@ -4,10 +4,7 @@ import model.Card;
 import model.Currency;
 import model.Customer;
 import play.libs.F;
-import provider.dto.CardBalanceResponse;
-import provider.dto.CardCreationResponse;
-import provider.dto.CardDetailsResponse;
-import provider.dto.CardLoadResponse;
+import provider.dto.*;
 
 
 /**
@@ -30,4 +27,7 @@ public interface CardProvider {
     F.Promise<CardLoadResponse> loadVirtualCardFromCard(Card card, long amount, Currency currency, String description);
     F.Promise<CardLoadResponse> loadPlasticCardFromBank(Card card, long amount, Currency currency, String description);
     F.Promise<CardLoadResponse> loadPlasticCardFromCard(Card card, long amount, Currency currency, String description);
+    F.Promise<CardUnloadResponse> unloadPlasticCard(Card card, long amount, Currency currency, String description);
+    F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description);
+    F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description);
 }
