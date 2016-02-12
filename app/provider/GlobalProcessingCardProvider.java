@@ -117,6 +117,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(sourceCard.getCurrencyId()))).flatMap(res -> invokeCardTransfer(res._1, sourceCard, destinationCard, CurrencyUtil.convert(amount, currency, res._2), description)).map((res -> new CardTransferBalanceResponse(res.getActionCode())));
     }
 
+    @Override
+    public F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard) {
+        return getGPSSettings().zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
+                flatMap(res -> invokeUpdateCardHolder(res, customer, defaultCard)).
+                map(res -> new UpdateCustomerResponse(res.getActionCode()));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -316,6 +323,42 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return balanceTransfer;
+        });
+    }
+
+
+    private F.Promise<CustomerUpdate> invokeUpdateCardHolder(F.Tuple<GPSSettings, Country> countrySettingsTuple, Customer customer, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            final GPSSettings gpsSettings = countrySettingsTuple._1;
+            final Country country = countrySettingsTuple._2;
+
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WS_Update_CardHolder service invocation. WSID #" + wsid);
+
+
+            CustomerUpdate customerUpdate = null;
+
+            try {
+
+                 customerUpdate = service.getServiceSoap().wsUpdateCardholderDetails(wsid, gpsSettings.issCode, "13", null, "1", null, null, null, null, null, null, null, customer.getLastName(), customer.getTitle(), customer.getFirstName(), customer.getAddress1(), customer.getAddress2(), customer.getCity(),
+                        customer.getPostcode(), country.getCode(), customer.getId(), null, null, null, null, null, null, null, null, null, customer.getEmail(), null, customer.getId(), null, null, null, null, null, null, null, null, null, null, null, null, null,
+                        null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 0, 0, 0, 0, null, 0, card.getToken(), 0, null, null, null);
+
+
+                Logger.info("/////// WS_Update_CardHolder service invocation was ended. WSID #" + wsid + ". Result code: " + customerUpdate.getActionCode() + " ." + customerUpdate.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return customerUpdate;
         });
     }
 

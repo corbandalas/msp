@@ -30,4 +30,5 @@ public interface CardProvider {
     F.Promise<CardUnloadResponse> unloadPlasticCard(Card card, long amount, Currency currency, String description);
     F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description);
     F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description);
+    F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard);
 }
