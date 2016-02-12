@@ -49,7 +49,7 @@ public class AccountController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+account.name+account.currencyId+orderId+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+account.id+account.name+account.currencyId+orderId+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> create() {
@@ -66,7 +66,7 @@ public class AccountController extends BaseController {
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
-                account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+                account.getId().toString(), account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
@@ -109,7 +109,7 @@ public class AccountController extends BaseController {
         final Account account = Json.fromJson(jsonNode, Account.class);
 
         if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
-                StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())) {
+                StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())||account.getCreateDate()==null) {
             Logger.error("Missing params");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }

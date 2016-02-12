@@ -25,6 +25,9 @@ public class Account extends BaseEntity<Integer> {
         this.secret = secret;
     }
 
+    public Account() {
+    }
+
     public String getName() {
         return name;
     }
