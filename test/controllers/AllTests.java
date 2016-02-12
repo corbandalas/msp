@@ -1,3 +1,5 @@
+package controllers;
+
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -10,15 +12,11 @@ import repository.*;
 @RunWith(Suite.class)
 @SuiteClasses(
         {
-                CurrencyRepositoryTest.class,
-                AccountRepositoryTest.class,
-                CountryRepositoryTest.class,
-                CardRepositoryTest.class,
-                CustomerRepositoryTest.class,
-                OperationRepositoryTest.class,
-                TransactionRepositoryTest.class,
-                ExchangeRateHistoryRepositoryTest.class,
-                PropertyRepositoryTest.class
+                ExchangeRateHistoryControllerTest.class,
+                CustomerControllerTest.class,
+                CurrencyControllerTest.class,
+                CountryControllerTest.class,
+                AccountControllerTest.class
         }
 )
 public class AllTests extends TestSuite {

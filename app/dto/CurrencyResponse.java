@@ -12,7 +12,7 @@ public class CurrencyResponse extends BaseAPIResponse {
 
     private Currency currency;
 
-    public CurrencyResponse(String text, String code, Currency currency) {
+    public CurrencyResponse(String code, String text, Currency currency) {
         super(text, code);
         this.currency = currency;
     }

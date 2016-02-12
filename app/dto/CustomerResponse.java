@@ -12,7 +12,7 @@ public class CustomerResponse extends BaseAPIResponse {
 
     private Customer customer;
 
-    public CustomerResponse(String text, String code, Customer customer) {
+    public CustomerResponse(String code, String text, Customer customer) {
         super(text, code);
         this.customer = customer;
     }

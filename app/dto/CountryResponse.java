@@ -12,7 +12,7 @@ public class CountryResponse extends BaseAPIResponse {
 
     private Country country;
 
-    public CountryResponse(String text, String code, Country country) {
+    public CountryResponse(String code, String text, Country country) {
         super(text, code);
         this.country = country;
     }
