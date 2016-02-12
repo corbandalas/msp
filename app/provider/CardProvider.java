@@ -6,6 +6,8 @@ import model.Customer;
 import play.libs.F;
 import provider.dto.*;
 
+import java.util.Date;
+
 
 /**
  * Card provider interface
@@ -31,4 +33,5 @@ public interface CardProvider {
     F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description);
     F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description);
     F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard);
+    F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
 }

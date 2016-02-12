@@ -74,7 +74,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card) {
-        return  getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
+        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
     }
 
     @Override
@@ -122,6 +122,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
                 flatMap(res -> invokeUpdateCardHolder(res, customer, defaultCard)).
                 map(res -> new UpdateCustomerResponse(res.getActionCode()));
+    }
+
+    @Override
+    public F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Card card, Date convertDate, boolean applyFee, Date expDate) {
+        return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate)).map((rez -> new ConvertVirtualToPlasticResponse(rez.getActionCode())));
     }
 
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
@@ -225,7 +230,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             Logger.info("/////// WsEnquiry service invocation. WSID #" + wsid);
 
             try {
-                 cardDetails = service.getServiceSoap().wsEnquiry(System.currentTimeMillis(), gpsSettings.issCode, "9", "1", null, null, null, card.getToken(), null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                cardDetails = service.getServiceSoap().wsEnquiry(System.currentTimeMillis(), gpsSettings.issCode, "9", "1", null, null, null, card.getToken(), null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), 5, null, null, null, null, 0, null, 0);
 
                 Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + ". Result code: " + cardDetails.getActionCode() + " ." + cardDetails.toString());
@@ -254,7 +259,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                 loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "1", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "1", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, card.getCurrencyId(), loadType, gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null);
 
                 Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
@@ -275,14 +280,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
 
-            UnLoad unload  = null;
+            UnLoad unload = null;
 
             long wsid = System.currentTimeMillis();
             Logger.info("/////// Ws_UnLoad service invocation. WSID #" + wsid);
 
             try {
 
-                 unload = service.getServiceSoap().wsUnLoad(wsid, gpsSettings.issCode, "8", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                unload = service.getServiceSoap().wsUnLoad(wsid, gpsSettings.issCode, "8", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, loadType, gpsSettings.loadSrc, (double) amount / 100, card.getCurrencyId(), 0, null, 0, null, description);
 
                 Logger.info("/////// Ws_UnLoad service invocation was ended. WSID #" + wsid + ". Result code: " + unload.getActionCode() + " ." + unload.toString());
@@ -311,7 +316,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                 balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "7", null, "1", null, null, cardSource.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "7", null, "1", null, null, cardSource.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, null, cardDestination.getToken(), (double) amount / 100, cardSource.getCurrencyId(), gpsSettings.loadSrc, 0, null, 0, description, null, null, null);
 
                 Logger.info("/////// Ws_Transfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
@@ -345,7 +350,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                 customerUpdate = service.getServiceSoap().wsUpdateCardholderDetails(wsid, gpsSettings.issCode, "13", null, "1", null, null, null, null, null, null, null, customer.getLastName(), customer.getTitle(), customer.getFirstName(), customer.getAddress1(), customer.getAddress2(), customer.getCity(),
+                customerUpdate = service.getServiceSoap().wsUpdateCardholderDetails(wsid, gpsSettings.issCode, "13", null, "1", null, null, null, null, null, null, null, customer.getLastName(), customer.getTitle(), customer.getFirstName(), customer.getAddress1(), customer.getAddress2(), customer.getCity(),
                         customer.getPostcode(), country.getCode(), customer.getId(), null, null, null, null, null, null, null, null, null, customer.getEmail(), null, customer.getId(), null, null, null, null, null, null, null, null, null, null, null, null, null,
                         null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 0, 0, 0, 0, null, 0, card.getToken(), 0, null, null, null);
 
@@ -359,6 +364,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return customerUpdate;
+        });
+    }
+
+
+    private F.Promise<ConvertCard> invokeChangeVirtualToPlastic(GPSSettings gpsSettings, Card card, Date convertDate, boolean applyFee, Date expDate) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+
+            ConvertCard convertCard = null;
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Convert_Card service invocation. WSID #" + wsid);
+
+
+            try {
+
+                convertCard = service.getServiceSoap().wsConvertCard(card.getToken(), DateUtil.format(convertDate, "yyyy-MM-dd"), applyFee ? 1 : 0, DateUtil.format(expDate, "yyyy-MM-dd"));
+
+
+                Logger.info("/////// Ws_Convert_Card service invocation was ended. WSID #" + wsid + ". Result code: " + convertCard.getActionCode() + " ." + convertCard.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return convertCard;
         });
     }
 
