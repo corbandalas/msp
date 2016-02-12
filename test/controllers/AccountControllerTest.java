@@ -1,3 +1,5 @@
+package controllers;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 import play.libs.ws.WS;
@@ -24,6 +26,25 @@ public class AccountControllerTest extends WithServer {
         final JsonNode response = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
                 .setHeader("orderId", orderId).get().get(timeout).asJson();
 
+        assertEquals("0",response.get("code").asText());
         assertEquals("God account",response.get("account").get("name").asText());
     }
+
+    @Test
+    public void retrieveAll() throws Exception {
+        String url = "http://localhost:" + this.testServer.port() + "/api/account/list";
+        final int timeout = 1000;
+
+        final String accountId="42";
+        final String orderId="1";
+        final String enckey= SecurityUtil.generateKeyFromArray(accountId+orderId+"OMG");
+
+        final JsonNode response = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).get().get(timeout).asJson();
+
+        assertEquals("0",response.get("code").asText());
+        assertEquals(true,response.get("accounts").isArray());
+    }
+
+
 }
