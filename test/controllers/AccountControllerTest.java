@@ -16,6 +16,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * Holds operation controller tests
  * @author ra created 12.02.2016.
  * @since 0.1.0
  */

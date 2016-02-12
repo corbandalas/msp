@@ -72,7 +72,8 @@ public class OperationController extends BaseController {
 
         if (operation.getCreateDate() == null) operation.setCreateDate(new Date());
 
-        final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "operation created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(res ->
+                ok(Json.toJson(new OperationResponse("operation created successfully","0",res))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -109,7 +110,7 @@ public class OperationController extends BaseController {
         final Operation operation = Json.fromJson(jsonNode, Operation.class);
 
         if (operation.getId() == null || StringUtils.isBlank(operation.getDescription()) || StringUtils.isBlank(operation.getOrderId()) ||
-                operation.getType() == null) {
+                operation.getType() == null || operation.getCreateDate()==null) {
             Logger.error("Missing params");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }

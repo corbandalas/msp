@@ -26,6 +26,9 @@ public class Operation extends BaseEntity<Long> {
         this.createDate = createDate;
     }
 
+    public Operation() {
+    }
+
     public OperationType getType() {
         return type;
     }
