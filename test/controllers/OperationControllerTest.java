@@ -24,7 +24,7 @@ public class OperationControllerTest extends WithServer {
     @Test
     public void retrieveById() throws Exception {
         final String orderId = "xxx";
-        final JsonNode createResult = create(new Operation(null, OperationType.DEPOSIT, orderId, "test operation", null));
+        final JsonNode createResult = create(new Operation(null, OperationType.DEPOSIT, orderId, "test operation", null), this.testServer.port());
         assertEquals("0", createResult.get("code").asText());
 
         final JsonNode result = retrieveById(createResult.get("operation").get("id").asText());
@@ -51,7 +51,7 @@ public class OperationControllerTest extends WithServer {
     public void createAndUpdate() throws Exception {
         String operationOrderId="xxx";
         final Operation operation = new Operation(null, OperationType.DEPOSIT, operationOrderId, "test operation", null);
-        final JsonNode createResult = create(operation);
+        final JsonNode createResult = create(operation, this.testServer.port());
 
         assertEquals("0", createResult.get("code").asText());
 
@@ -96,8 +96,8 @@ public class OperationControllerTest extends WithServer {
                 .setHeader("orderId", orderId).get().get(timeout).asJson();
     }
 
-    private JsonNode create(Operation operation) {
-        final java.lang.String url = "http://localhost:" + this.testServer.port() + "/api/operation/create";
+    public static JsonNode create(Operation operation, int port) {
+        final java.lang.String url = "http://localhost:" + port + "/api/operation/create";
         final int timeout = 1000;
 
         final java.lang.String accountId = "42";

@@ -73,8 +73,8 @@ public class TransactionController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.create(transaction)).map(transaction1 ->
-                ok(Json.toJson(createResponse("0", "transaction created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.create(transaction)).map(res ->
+                ok(Json.toJson(new TransactionResponse("transaction created successfully","0",res))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);

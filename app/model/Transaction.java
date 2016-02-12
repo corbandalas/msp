@@ -34,6 +34,9 @@ public class Transaction extends BaseEntity<Long> {
         this.type = type;
     }
 
+    public Transaction() {
+    }
+
     public Long getOperationId() {
         return operationId;
     }
