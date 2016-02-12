@@ -48,7 +48,8 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
             assertNotNull(exchangeRateHistory.getId());
             exchangeRateHistory.setCurrencyId("EUR");
 
-            ExchangeRateHistory exchangeRateHistoryUpdated = Await.result(exchangeRateHistoryRepository.update(exchangeRateHistory), Duration.apply("1000 ms"));
+            Await.result(exchangeRateHistoryRepository.update(exchangeRateHistory), Duration.apply("1000 ms"));
+            final ExchangeRateHistory exchangeRateHistoryUpdated = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply("1000 ms"));
             assertEquals(exchangeRateHistoryUpdated.getCurrencyId(), exchangeRateHistory.getCurrencyId());
         } catch (Exception e) {
             fail();
