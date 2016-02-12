@@ -34,4 +34,5 @@ public interface CardProvider {
     F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description);
     F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard);
     F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
+    F.Promise<PhoneActivateResponse> activateCardByPhone(Card card);
 }

@@ -162,4 +162,15 @@ public class PhoneActivate {
         this.pinStatus = value;
     }
 
+
+    @Override
+    public String toString() {
+        return "PhoneActivate{" +
+                "publicToken='" + publicToken + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", isLive=" + isLive +
+//                ", pinBlock='" + pinBlock + '\'' +
+                ", pinStatus=" + pinStatus +
+                '}';
+    }
 }
