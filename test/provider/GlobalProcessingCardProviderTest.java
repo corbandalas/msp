@@ -6,6 +6,7 @@ import model.Currency;
 import model.Customer;
 import model.enums.KYC;
 import module.PropertyLoader;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.Logger;
@@ -50,11 +51,13 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
     @Test
     public void issueVirtualCard() throws Exception {
 
+        Thread.currentThread().sleep(1000);
+
         final Currency currencyUSD = Await.result(currencyRepository.retrieveById("USD"), Duration.apply("10000 ms"));
 
         try {
 
-            globalProcessingCardProvider.issueEmptyVirtualCard(new Customer("380632426303", new Date(), "Mr", "Corban", "Dallas",
+            globalProcessingCardProvider.issueEmptyPlasticCard(new Customer("380632426303", new Date(), "Mr", "Corban", "Dallas",
                     "adress1", "adress2", "83004", "Donetsk", "me@corbandalas.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "UA"), "Vasya", currencyUSD).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error", e);
@@ -65,11 +68,11 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
     }
 
 
-//    @After
-//    public void clean() {
-//        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".property;", resultSet -> {
-//        }, throwable -> {
-//            throwable.printStackTrace();
-//        });
-//    }
+    @After
+    public void clean() {
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".property;", resultSet -> {
+        }, throwable -> {
+            throwable.printStackTrace();
+        });
+    }
 }
