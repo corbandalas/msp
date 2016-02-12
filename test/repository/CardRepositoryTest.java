@@ -8,6 +8,7 @@ import model.enums.KYC;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import play.Logger;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
@@ -43,6 +44,7 @@ public class CardRepositoryTest extends BaseRepositoryTest {
             final Card card = Await.result(cardRepository.create(new Card(null,"token",customer.getId(), CardType.VIRTUAL, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
             assertNotNull(card.getId());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }
@@ -56,10 +58,12 @@ public class CardRepositoryTest extends BaseRepositoryTest {
             assertNotNull(card.getId());
             card.setActive(false);
             card.setBrand(CardBrand.MASTERCARD);
-            final Card updatedCard = Await.result(cardRepository.update(card), Duration.apply("5000 ms"));
+            final Card newCard = Await.result(cardRepository.update(card), Duration.apply("5000 ms"));
+            final Card updatedCard = Await.result(cardRepository.retrieveById(newCard.getId()), Duration.apply("1000 ms"));
             assertEquals(false, updatedCard.getActive());
             assertEquals(CardBrand.MASTERCARD, updatedCard.getBrand());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }
@@ -76,6 +80,7 @@ public class CardRepositoryTest extends BaseRepositoryTest {
             final Card cardById = Await.result(cardRepository.retrieveById(card.getId()), Duration.apply("1000 ms"));
             assertEquals(cardById.getId(), card.getId());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }

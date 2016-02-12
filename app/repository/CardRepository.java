@@ -84,7 +84,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         final Promise<Card> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() +
-                ".country SET token=$2, cardtype=$3, brand=$4, createDate=$5, is_default=$6, active=$7, customer_id=$8, alias=$9, info=$10, deliveryAddress1=$11, deliveryAddress2=$12, deliveryAddress3=$13, deliveryCountry=$14, currency_id=$15 WHERE id=$1";
+                ".card SET token=$2, cardtype=$3, brand=$4, createDate=$5, is_default=$6, active=$7, customer_id=$8, alias=$9, info=$10, deliveryAddress1=$11, deliveryAddress2=$12, deliveryAddress3=$13, deliveryCountry=$14, currency_id=$15 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getToken(), entity.getType().toString(),
                 entity.getBrand().toString(), new Timestamp(entity.getCreateDate().getTime()), entity.getCardDefault(), entity.getActive(), entity.getCustomerId(), entity.getAlias(), entity.getInfo(), entity.getDeliveryAddress1(), entity.getDeliveryAddress2(), entity.getDeliveryAddress3(), entity.getDeliveryCountry(), entity.getCurrencyId()), result -> promise.success(entity), promise::failure);
 
