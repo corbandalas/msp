@@ -135,6 +135,36 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokePlasticCardActivation(res, card)).map((rez -> new PhoneActivateResponse(rez.getActionCode(), rez.isIsLive(), rez.getPinBlock(), "" + rez.getPINStatus())));
     }
 
+    @Override
+    public F.Promise<CardStatusChangeResponseResponse> blockCard(Card card, String reason) {
+        return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "05", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardStatusChangeResponseResponse> activateCard(Card card, String reason) {
+        return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "00", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardStatusChangeResponseResponse> reportCardLost(Card card, String reason) {
+        return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "41", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardStatusChangeResponseResponse> reportCardStolen(Card card, String reason) {
+        return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "43", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardStatusChangeResponseResponse> reportCardDamaged(Card card, String reason) {
+        return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "83", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+    private F.Promise<CardStatusChangeResponseResponse> cardStatusChange(Card card, String statCode, String reason) {
+        return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, statCode, reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -433,6 +463,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return phoneActivate;
+        });
+    }
+
+
+    private F.Promise<StatusChange> invokeStatusChange(GPSSettings gpsSettings, Card card, String statCode, String reason) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WS_StatusChange service invocation. WSID #" + wsid);
+
+            StatusChange statusChange = null;
+
+            try {
+
+                statusChange = service.getServiceSoap().wsStatusChange(wsid, gpsSettings.issCode, "2", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), statCode, reason, 2, null, 0, null, 0, null);
+
+                Logger.info("/////// WS_StatusChange service invocation was ended. WSID #" + wsid + ". Result code: " + statusChange.getActionCode() + " ." + statusChange.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return statusChange;
         });
     }
 

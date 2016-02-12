@@ -35,4 +35,9 @@ public interface CardProvider {
     F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard);
     F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
     F.Promise<PhoneActivateResponse> activateCardByPhone(Card card);
+    F.Promise<CardStatusChangeResponseResponse> blockCard(Card card, String reason);
+    F.Promise<CardStatusChangeResponseResponse> activateCard(Card card, String reason);
+    F.Promise<CardStatusChangeResponseResponse> reportCardLost(Card card, String reason);
+    F.Promise<CardStatusChangeResponseResponse> reportCardStolen(Card card, String reason);
+    F.Promise<CardStatusChangeResponseResponse> reportCardDamaged(Card card, String reason);
 }
