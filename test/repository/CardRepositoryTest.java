@@ -97,7 +97,47 @@ public class CardRepositoryTest extends BaseRepositoryTest {
         assertEquals(2,result.size());
     }
 
+    @Test
+    public void retrieveListByCardBrand() throws Exception {
+        Customer customer = Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms"));
+        assertNotNull(customer);
 
+        Await.result(cardRepository.create(new Card(null,"token2",customer.getId(), CardType.VIRTUAL, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+        Await.result(cardRepository.create(new Card(null,"token3",customer.getId(), CardType.VIRTUAL, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+        Await.result(cardRepository.create(new Card(null,"token4",customer.getId(), CardType.PLASTIC, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+
+        final List<Card> result = Await.result(cardRepository.retrieveListByCardBrand(CardBrand.VISA), Duration.apply("1000 ms"));
+        assertEquals(2,result.size());
+    }
+
+    @Test
+    public void retrieveListByCardType() throws Exception {
+        Customer customer = Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms"));
+        assertNotNull(customer);
+
+        Await.result(cardRepository.create(new Card(null,"token2",customer.getId(), CardType.VIRTUAL, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+        Await.result(cardRepository.create(new Card(null,"token3",customer.getId(), CardType.PLASTIC, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+        Await.result(cardRepository.create(new Card(null,"token4",customer.getId(), CardType.PLASTIC, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+
+        final List<Card> result = Await.result(cardRepository.retrieveListByCardType(CardType.PLASTIC), Duration.apply("1000 ms"));
+        assertEquals(2,result.size());
+    }
+
+    @Test
+    public void retrieveListByCustomerId() throws Exception {
+        Customer customer = Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms"));
+        assertNotNull(customer);
+
+        Customer customer2 = Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply("1000 ms"));
+        assertNotNull(customer);
+
+        Await.result(cardRepository.create(new Card(null,"token2",customer.getId(), CardType.VIRTUAL, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+        Await.result(cardRepository.create(new Card(null,"token3",customer.getId(), CardType.PLASTIC, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+        Await.result(cardRepository.create(new Card(null,"token4",customer2.getId(), CardType.PLASTIC, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply("5000 ms"));
+
+        final List<Card> result = Await.result(cardRepository.retrieveListByCustomerId(customer.getId()), Duration.apply("1000 ms"));
+        assertEquals(2,result.size());
+    }
 
     @After
     public void clean() {

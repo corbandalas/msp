@@ -78,6 +78,49 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         return promise.future();
     }
 
+    public Future<List<Card>> retrieveListByCardBrand(CardBrand cardBrand) {
+
+        final Promise<List<Card>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card where brand=$1";
+        connectionPool.getConnection().query(query, asList(cardBrand.toString()), result -> {
+            final ArrayList<Card> cards = new ArrayList<>();
+            result.forEach(row -> cards.add(createCard(row)));
+            promise.success(cards);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+
+    public Future<List<Card>> retrieveListByCardType(CardType cardType) {
+
+        final Promise<List<Card>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card where cardtype=$1";
+        connectionPool.getConnection().query(query, asList(cardType.toString()), result -> {
+            final ArrayList<Card> cards = new ArrayList<>();
+            result.forEach(row -> cards.add(createCard(row)));
+            promise.success(cards);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Card>> retrieveListByCustomerId(String customerID) {
+
+        final Promise<List<Card>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card where customer_id=$1";
+        connectionPool.getConnection().query(query, asList(customerID), result -> {
+            final ArrayList<Card> cards = new ArrayList<>();
+            result.forEach(row -> cards.add(createCard(row)));
+            promise.success(cards);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<Card> update(Card entity) {
 

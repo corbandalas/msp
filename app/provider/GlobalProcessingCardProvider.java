@@ -129,6 +129,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate)).map((rez -> new ConvertVirtualToPlasticResponse(rez.getActionCode())));
     }
 
+
+    @Override
+    public F.Promise<PhoneActivateResponse> activateCardByPhone(Card card) {
+        return getGPSSettings().flatMap(res -> invokePlasticCardActivation(res, card)).map((rez -> new PhoneActivateResponse(rez.getActionCode(), rez.isIsLive(), rez.getPinBlock(), "" + rez.getPINStatus())));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -395,6 +401,38 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return convertCard;
+        });
+    }
+
+
+
+    private F.Promise<PhoneActivate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Card_Phone_Activation service invocation. WSID #" + wsid);
+
+            PhoneActivate phoneActivate = null;
+
+
+            try {
+
+                phoneActivate = service.getServiceSoap().wsPhoneActivation(null, card.getToken(), 0, 1, "1");
+
+                Logger.info("/////// Ws_Card_Phone_Activation service invocation was ended. WSID #" + wsid + ". Result code: " + phoneActivate.getActionCode() + " ." + phoneActivate.toString());
+
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                F.Promise.throwing(e);
+            }
+
+            return phoneActivate;
         });
     }
 

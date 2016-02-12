@@ -28,6 +28,9 @@ public class Card extends BaseEntity<Long> {
     private String deliveryAddress3;
     private String deliveryCountry;
 
+    public Card() {
+    }
+
     public Card(Long id, String token, String customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry) {
         this.setId(id);
         this.token = token;

@@ -122,4 +122,13 @@ public class ConvertCard {
         this.convertDate = value;
     }
 
+
+    @Override
+    public String toString() {
+        return "ConvertCard{" +
+                "actionCode='" + actionCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", convertDate='" + convertDate + '\'' +
+                '}';
+    }
 }
