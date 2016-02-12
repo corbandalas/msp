@@ -28,6 +28,7 @@ public interface ServiceSoap {
      * 
      * @param memorableDate
      * @param memorablePlace
+     * @param authSoapHeader
      * @param phone
      * @param issCode
      * @param memorableName
@@ -54,12 +55,15 @@ public interface ServiceSoap {
         @WebParam(name = "ActivationCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String activationCode,
         @WebParam(name = "Phone", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String phone);
+        String phone,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param memorableDate
      * @param memorablePlace
+     * @param authSoapHeader
      * @param phone
      * @param issCode
      * @param memorableName
@@ -86,10 +90,13 @@ public interface ServiceSoap {
         @WebParam(name = "ActivationCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String activationCode,
         @WebParam(name = "Phone", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String phone);
+        String phone,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
+     * @param authSoapHeader
      * @param issCode
      * @param lastModifiedType
      * @param token
@@ -106,10 +113,13 @@ public interface ServiceSoap {
         @WebParam(name = "LastModifiedType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String lastModifiedType,
         @WebParam(name = "Token", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String token);
+        String token,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
+     * @param authSoapHeader
      * @param issCode
      * @param token
      * @return
@@ -123,11 +133,14 @@ public interface ServiceSoap {
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issCode,
         @WebParam(name = "Token", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String token);
+        String token,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param lockMode
+     * @param authSoapHeader
      * @param processName
      * @param issCode
      * @return
@@ -143,7 +156,9 @@ public interface ServiceSoap {
         @WebParam(name = "Process_Name", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String processName,
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode);
+        String issCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -171,6 +186,7 @@ public interface ServiceSoap {
      * @param firstName
      * @param accCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -238,7 +254,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "SMSBalance", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String smsBalance);
+        String smsBalance,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -265,6 +283,7 @@ public interface ServiceSoap {
      * @param loadFundsType
      * @param smsRequired
      * @param brnCode
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -330,34 +349,37 @@ public interface ServiceSoap {
         @WebParam(name = "Sms_Required", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String smsRequired,
         @WebParam(name = "BrnCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String brnCode);
+        String brnCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
-     * @param track2
      * @param lastName
-     * @param cvv
      * @param currCode
      * @param secValPos
      * @param locTime
      * @param description
+     * @param loadSrc
+     * @param locDate
+     * @param publicToken
+     * @param amtUnLoad
+     * @param authType
+     * @param pan
+     * @param track2
+     * @param cvv
      * @param secVal
      * @param terminalID
-     * @param loadSrc
      * @param secID
-     * @param locDate
      * @param txnCode
      * @param accCode
      * @param loadFundsType
-     * @param publicToken
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
      * @param dob
-     * @param amtUnLoad
-     * @param authType
-     * @param pan
      * @return
      *     returns ae.globalprocessing.hyperionweb.UnLoad
      */
@@ -413,7 +435,9 @@ public interface ServiceSoap {
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String loadedBy,
         @WebParam(name = "Description", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String description);
+        String description,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -434,6 +458,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param smsRequired
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -490,7 +515,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "Sms_Required", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String smsRequired);
+        String smsRequired,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -507,6 +534,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -558,7 +586,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -584,6 +614,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param brnCode
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -650,7 +681,9 @@ public interface ServiceSoap {
         @WebParam(name = "FeeWaiver", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String feeWaiver,
         @WebParam(name = "BrnCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String brnCode);
+        String brnCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -669,6 +702,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param itemSrc
      * @param getLimits
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -721,7 +755,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -737,6 +773,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param itemSrc
      * @param getLimits
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -783,7 +820,9 @@ public interface ServiceSoap {
         @WebParam(name = "TerminalID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String terminalID,
         @WebParam(name = "GetLimits", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String getLimits);
+        String getLimits,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -796,6 +835,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -836,7 +876,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locDate,
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locTime);
+        String locTime,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -860,6 +902,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -922,7 +965,9 @@ public interface ServiceSoap {
         @WebParam(name = "DataSrc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int dataSrc,
         @WebParam(name = "DescriptionDelimiter", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String descriptionDelimiter);
+        String descriptionDelimiter,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -932,6 +977,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param currCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param accNo
@@ -966,7 +1012,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locTime,
         @WebParam(name = "ItemSrc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int itemSrc);
+        int itemSrc,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -976,6 +1024,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param currCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param locTime
      * @param pan
@@ -1007,7 +1056,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locTime,
         @WebParam(name = "ItemSrc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int itemSrc);
+        int itemSrc,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1049,6 +1100,7 @@ public interface ServiceSoap {
      * @param mobTel
      * @param pobox
      * @param mailShots
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param svcStatus
@@ -1086,6 +1138,7 @@ public interface ServiceSoap {
      * @param workcity
      * @param sex
      * @param addr3
+     * @param carrierType
      * @param secVal
      * @param dlvMethod
      * @param crdprogram
@@ -1288,7 +1341,11 @@ public interface ServiceSoap {
         @WebParam(name = "VanityName", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String vanityName,
         @WebParam(name = "addr3", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String addr3);
+        String addr3,
+        @WebParam(name = "CarrierType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
+        String carrierType,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1314,6 +1371,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -1377,7 +1435,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadedBy);
+        String loadedBy,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1418,6 +1478,7 @@ public interface ServiceSoap {
      * @param loadFundsType
      * @param brnCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -1517,34 +1578,37 @@ public interface ServiceSoap {
         @WebParam(name = "Description", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String description,
         @WebParam(name = "BrnCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String brnCode);
+        String brnCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
-     * @param track2
      * @param lastName
-     * @param cvv
      * @param secValPos
      * @param amtAdjustment
      * @param locTime
      * @param description
+     * @param locDate
+     * @param publicToken
+     * @param debOrCred
+     * @param curCode
+     * @param authType
+     * @param pan
+     * @param track2
+     * @param cvv
      * @param secVal
      * @param secID
-     * @param locDate
      * @param txnCode
      * @param accCode
-     * @param publicToken
      * @param extCode
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
      * @param dob
-     * @param debOrCred
      * @param forcePost
-     * @param curCode
-     * @param authType
-     * @param pan
      * @return
      *     returns ae.globalprocessing.hyperionweb.BalanceAdjust
      */
@@ -1600,7 +1664,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadedBy);
+        String loadedBy,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1618,6 +1684,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -1668,7 +1735,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1686,6 +1755,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -1736,7 +1806,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1753,6 +1825,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param clientCode
@@ -1801,7 +1874,9 @@ public interface ServiceSoap {
         @WebParam(name = "secVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1818,6 +1893,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param authType
@@ -1863,11 +1939,14 @@ public interface ServiceSoap {
         @WebParam(name = "secVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
+     * @param authSoapHeader
      * @param activateIfNot
      * @param securityCode
      * @param pan
@@ -1889,10 +1968,13 @@ public interface ServiceSoap {
         @WebParam(name = "ActivateIfNot", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int activateIfNot,
         @WebParam(name = "AuthType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String authType);
+        String authType,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
+     * @param authSoapHeader
      * @param doc
      * @return
      *     returns ae.globalprocessing.hyperionweb.BulkCards
@@ -1903,10 +1985,13 @@ public interface ServiceSoap {
     @ResponseWrapper(localName = "Ws_BulkCreationResponse", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsBulkCreationResponse")
     public BulkCards wsBulkCreation(
         @WebParam(name = "doc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        ae.globalprocessing.hyperionweb.WsBulkCreation.Doc doc);
+        ae.globalprocessing.hyperionweb.WsBulkCreation.Doc doc,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
+     * @param authSoapHeader
      * @param issCode
      * @param req
      * @return
@@ -1920,11 +2005,14 @@ public interface ServiceSoap {
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issCode,
         @WebParam(name = "Req", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        ae.globalprocessing.hyperionweb.WsBulkWalletCreation.Req req);
+        ae.globalprocessing.hyperionweb.WsBulkWalletCreation.Req req,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param isscode
      * @return
      *     returns ae.globalprocessing.hyperionweb.WsResult
@@ -1937,7 +2025,9 @@ public interface ServiceSoap {
         @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         long wsid,
         @WebParam(name = "Isscode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String isscode);
+        String isscode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1945,6 +2035,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param publicToken
      * @param procCode
+     * @param authSoapHeader
      * @param issCode
      * @param fee
      * @param locTime
@@ -1975,7 +2066,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locTime,
         @WebParam(name = "Fee", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        double fee);
+        double fee,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -1983,6 +2076,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param itemId
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param locTime
      * @param pan
@@ -2010,7 +2104,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locDate,
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locTime);
+        String locTime,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2027,6 +2123,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -2078,7 +2175,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2095,6 +2194,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param smsRequired
      * @param func
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -2143,7 +2243,9 @@ public interface ServiceSoap {
         @WebParam(name = "LastName", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String lastName,
         @WebParam(name = "FeeWaiver", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String feeWaiver);
+        String feeWaiver,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2175,6 +2277,7 @@ public interface ServiceSoap {
      * @param coBrand
      * @param logoFrontId
      * @param smsRequired
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param cardDesign
@@ -2391,7 +2494,9 @@ public interface ServiceSoap {
         @WebParam(name = "Quantity", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String quantity,
         @WebParam(name = "LoadToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadToken);
+        String loadToken,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2420,6 +2525,7 @@ public interface ServiceSoap {
      * @param coBrand
      * @param logoFrontId
      * @param smsRequired
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param cardDesign
@@ -2600,13 +2706,16 @@ public interface ServiceSoap {
         @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String publicToken,
         @WebParam(name = "ExternalAuth", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String externalAuth);
+        String externalAuth,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
      * @param smsRequired
      * @param mailOrSMS
+     * @param authSoapHeader
      * @param regenType
      * @param smsContent
      * @param terminalID
@@ -2632,11 +2741,14 @@ public interface ServiceSoap {
         @WebParam(name = "TerminalID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String terminalID,
         @WebParam(name = "MailOrSMS", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String mailOrSMS);
+        String mailOrSMS,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
+     * @param authSoapHeader
      * @param applyFee
      * @param convertDate
      * @param expDate
@@ -2655,7 +2767,9 @@ public interface ServiceSoap {
         @WebParam(name = "Apply_Fee", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int applyFee,
         @WebParam(name = "ExpDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String expDate);
+        String expDate,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2670,6 +2784,7 @@ public interface ServiceSoap {
      * @param currentWSFeeGroup
      * @param locDate
      * @param currentPERMSGroup
+     * @param authSoapHeader
      * @param permsGroup
      * @param wsFeeGroup
      * @param issCode
@@ -2726,11 +2841,14 @@ public interface ServiceSoap {
         @WebParam(name = "LinkageGroup", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String linkageGroup,
         @WebParam(name = "CurrentLinkageGroup", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String currentLinkageGroup);
+        String currentLinkageGroup,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.Check
@@ -2743,7 +2861,9 @@ public interface ServiceSoap {
         @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         long wsid,
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode);
+        String issCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2762,6 +2882,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param destinationToken
      * @param note
+     * @param authSoapHeader
      * @param destinationPAN
      * @param issCode
      * @param sourcePAN
@@ -2795,7 +2916,9 @@ public interface ServiceSoap {
         @WebParam(name = "AmtTxn", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         double amtTxn,
         @WebParam(name = "Note", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String note);
+        String note,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -2804,6 +2927,7 @@ public interface ServiceSoap {
      * @param itemID
      * @param note
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param locTime
      * @param pan
@@ -2830,11 +2954,14 @@ public interface ServiceSoap {
         @WebParam(name = "ItemID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int itemID,
         @WebParam(name = "Note", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String note);
+        String note,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param issCode
      * @param rates
      * @param groupFxID
@@ -2853,13 +2980,16 @@ public interface ServiceSoap {
         @WebParam(name = "GroupFxID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int groupFxID,
         @WebParam(name = "Rates", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        ArrayOfRates rates);
+        ArrayOfRates rates,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param publicToken
      * @param newToken
+     * @param authSoapHeader
      * @param issCode
      * @param newPAN
      * @param pan
@@ -2882,12 +3012,15 @@ public interface ServiceSoap {
         @WebParam(name = "NewPAN", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String newPAN,
         @WebParam(name = "NewToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String newToken);
+        String newToken,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param groupType
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.GroupList
@@ -2902,11 +3035,14 @@ public interface ServiceSoap {
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issCode,
         @WebParam(name = "GroupType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int groupType);
+        int groupType,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.ProductList
@@ -2919,12 +3055,15 @@ public interface ServiceSoap {
         @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         long wsid,
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode);
+        String issCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.CardRequestResponse
@@ -2939,12 +3078,15 @@ public interface ServiceSoap {
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issCode,
         @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String publicToken);
+        String publicToken,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.CardRequestStatus
@@ -2959,12 +3101,15 @@ public interface ServiceSoap {
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issCode,
         @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String publicToken);
+        String publicToken,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param cardAcceptors
+     * @param authSoapHeader
      * @param issCode
      * @param whiteList
      * @return
@@ -2982,12 +3127,15 @@ public interface ServiceSoap {
         @WebParam(name = "WhiteList", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String whiteList,
         @WebParam(name = "CardAcceptors", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        ArrayOfCardAcceptorModifier cardAcceptors);
+        ArrayOfCardAcceptorModifier cardAcceptors,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param cardAcceptors
+     * @param authSoapHeader
      * @param issCode
      * @param blackList
      * @return
@@ -3005,11 +3153,14 @@ public interface ServiceSoap {
         @WebParam(name = "BlackList", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String blackList,
         @WebParam(name = "CardAcceptors", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        ArrayOfCardAcceptorModifier cardAcceptors);
+        ArrayOfCardAcceptorModifier cardAcceptors,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param newToken
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param curCode
@@ -3034,7 +3185,9 @@ public interface ServiceSoap {
         @WebParam(name = "CurCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String curCode,
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadedBy);
+        String loadedBy,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3047,6 +3200,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param accCode
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param authType
@@ -3084,12 +3238,15 @@ public interface ServiceSoap {
         @WebParam(name = "EventId", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int eventId,
         @WebParam(name = "MailOrSMS", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int mailOrSMS);
+        int mailOrSMS,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param pan
      * @param feeProcessingCode
@@ -3110,11 +3267,14 @@ public interface ServiceSoap {
         @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String publicToken,
         @WebParam(name = "FeeProcessingCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String feeProcessingCode);
+        String feeProcessingCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.WSResult2
@@ -3127,12 +3287,15 @@ public interface ServiceSoap {
         @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         long wsid,
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode);
+        String issCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param pan
      * @return
@@ -3150,11 +3313,14 @@ public interface ServiceSoap {
         @WebParam(name = "PAN", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String pan,
         @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String publicToken);
+        String publicToken,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param issCode
      * @return
      *     returns ae.globalprocessing.hyperionweb.CardResult
@@ -3167,12 +3333,15 @@ public interface ServiceSoap {
         @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         long wsid,
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode);
+        String issCode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param password
+     * @param authSoapHeader
      * @param issCode
      * @param sftp
      * @param custAccount
@@ -3193,7 +3362,9 @@ public interface ServiceSoap {
         @WebParam(name = "Password", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String password,
         @WebParam(name = "SFTP", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String sftp);
+        String sftp,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3221,6 +3392,7 @@ public interface ServiceSoap {
      * @param firstName
      * @param accCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -3288,34 +3460,37 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "SMSBalance", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String smsBalance);
+        String smsBalance,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
-     * @param loadValue
-     * @param track2
      * @param lastName
-     * @param cvv
      * @param currCode
      * @param secValPos
      * @param locTime
-     * @param secVal
-     * @param terminalID
      * @param loadSrc
-     * @param secID
      * @param locDate
      * @param loadFee
+     * @param publicToken
+     * @param authType
+     * @param pan
+     * @param loadValue
+     * @param track2
+     * @param cvv
+     * @param secVal
+     * @param terminalID
+     * @param secID
      * @param txnCode
      * @param accCode
      * @param loadFundsType
-     * @param publicToken
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
      * @param dob
-     * @param authType
-     * @param pan
      * @return
      *     returns ae.globalprocessing.hyperionweb.LoadCard
      */
@@ -3371,7 +3546,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadedBy);
+        String loadedBy,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3390,6 +3567,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param publicToken
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -3448,7 +3626,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadedBy);
+        String loadedBy,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3468,6 +3648,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -3522,7 +3703,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3539,6 +3722,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -3590,7 +3774,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3611,6 +3797,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -3670,7 +3857,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3688,6 +3877,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -3738,34 +3928,37 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
-     * @param track2
      * @param lastName
-     * @param cvv
      * @param secValPos
      * @param endDate
      * @param locTime
+     * @param locDate
+     * @param publicToken
+     * @param authType
+     * @param pan
+     * @param numTxn
+     * @param dataSrc
+     * @param track2
+     * @param cvv
      * @param txnFilter
      * @param secVal
      * @param terminalID
      * @param secID
-     * @param locDate
      * @param txnCode
      * @param accCode
-     * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
-     * @param authType
-     * @param pan
-     * @param numTxn
      * @param startDate
-     * @param dataSrc
      * @return
      *     returns ae.globalprocessing.hyperionweb.CardStatement
      */
@@ -3821,7 +4014,9 @@ public interface ServiceSoap {
         @WebParam(name = "NumTxn", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int numTxn,
         @WebParam(name = "DataSrc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int dataSrc);
+        int dataSrc,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -3862,6 +4057,7 @@ public interface ServiceSoap {
      * @param mobTel
      * @param pobox
      * @param mailShots
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param svcStatus
@@ -4093,7 +4289,9 @@ public interface ServiceSoap {
         @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String publicToken,
         @WebParam(name = "SmsBalance", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int smsBalance);
+        int smsBalance,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4119,6 +4317,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -4182,7 +4381,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String loadedBy);
+        String loadedBy,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4221,6 +4422,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -4316,7 +4518,9 @@ public interface ServiceSoap {
         @WebParam(name = "CustAccount", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String custAccount,
         @WebParam(name = "SMSBalance", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String smsBalance);
+        String smsBalance,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4335,6 +4539,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param extCode
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -4396,7 +4601,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4414,6 +4621,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -4464,7 +4672,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4482,6 +4692,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -4532,7 +4743,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4549,6 +4762,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param clientCode
@@ -4597,11 +4811,14 @@ public interface ServiceSoap {
         @WebParam(name = "secVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
+     * @param authSoapHeader
      * @param activateIfNot
      * @param securityCode
      * @param pan
@@ -4623,10 +4840,13 @@ public interface ServiceSoap {
         @WebParam(name = "ActivateIfNot", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int activateIfNot,
         @WebParam(name = "AuthType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String authType);
+        String authType,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
+     * @param authSoapHeader
      * @param doc
      * @return
      *     returns ae.globalprocessing.hyperionweb.BulkCards
@@ -4637,11 +4857,14 @@ public interface ServiceSoap {
     @ResponseWrapper(localName = "Ws_GiftCard_BulkCreationResponse", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsGiftCardBulkCreationResponse")
     public BulkCards wsGiftCardBulkCreation(
         @WebParam(name = "doc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        ae.globalprocessing.hyperionweb.WsGiftCardBulkCreation.Doc doc);
+        ae.globalprocessing.hyperionweb.WsGiftCardBulkCreation.Doc doc,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param isscode
      * @return
      *     returns ae.globalprocessing.hyperionweb.WsResult
@@ -4654,7 +4877,9 @@ public interface ServiceSoap {
         @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         long wsid,
         @WebParam(name = "Isscode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String isscode);
+        String isscode,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4662,6 +4887,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param publicToken
      * @param procCode
+     * @param authSoapHeader
      * @param issCode
      * @param fee
      * @param locTime
@@ -4692,7 +4918,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locTime,
         @WebParam(name = "Fee", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        double fee);
+        double fee,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4700,6 +4928,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param itemId
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param locTime
      * @param pan
@@ -4727,7 +4956,9 @@ public interface ServiceSoap {
         @WebParam(name = "LocDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locDate,
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locTime);
+        String locTime,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4749,6 +4980,7 @@ public interface ServiceSoap {
      * @param publicToken
      * @param itemSrc
      * @param func
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param clientCode
@@ -4807,7 +5039,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecVal", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String secVal,
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int secValPos);
+        int secValPos,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4836,6 +5070,7 @@ public interface ServiceSoap {
      * @param firstName
      * @param accCode
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -4905,7 +5140,9 @@ public interface ServiceSoap {
         @WebParam(name = "SecValPos", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int secValPos,
         @WebParam(name = "SmsBalance", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        boolean smsBalance);
+        boolean smsBalance,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -4929,6 +5166,7 @@ public interface ServiceSoap {
      * @param txnCode
      * @param accCode
      * @param loadFundsType
+     * @param authSoapHeader
      * @param loadedBy
      * @param sourceDesc
      * @param issCode
@@ -4994,7 +5232,9 @@ public interface ServiceSoap {
         @WebParam(name = "Source_desc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String sourceDesc,
         @WebParam(name = "FeeOverride", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        double feeOverride);
+        double feeOverride,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5014,6 +5254,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param publicToken
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -5074,7 +5315,9 @@ public interface ServiceSoap {
         @WebParam(name = "LoadedBy", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String loadedBy,
         @WebParam(name = "Reason", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String reason);
+        String reason,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5114,6 +5357,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param sourceDesc
      * @param issCode
@@ -5214,7 +5458,9 @@ public interface ServiceSoap {
         @WebParam(name = "Source_desc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String sourceDesc,
         @WebParam(name = "SmsBalance", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        boolean smsBalance);
+        boolean smsBalance,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5245,6 +5491,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param sourceDesc
      * @param issCode
@@ -5327,12 +5574,15 @@ public interface ServiceSoap {
         @WebParam(name = "Source_desc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String sourceDesc,
         @WebParam(name = "ExpDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String expDate);
+        String expDate,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
      * @param smsRequired
+     * @param authSoapHeader
      * @param regenType
      * @param smsContent
      * @return
@@ -5350,11 +5600,14 @@ public interface ServiceSoap {
         @WebParam(name = "Sms_Required", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int smsRequired,
         @WebParam(name = "Sms_Content", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int smsContent);
+        int smsContent,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
+     * @param authSoapHeader
      * @param applyFee
      * @param convertDate
      * @param expDate
@@ -5373,7 +5626,9 @@ public interface ServiceSoap {
         @WebParam(name = "Apply_Fee", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int applyFee,
         @WebParam(name = "ExpDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String expDate);
+        String expDate,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5381,6 +5636,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param publicToken
      * @param procCode
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param locTime
@@ -5411,11 +5667,14 @@ public interface ServiceSoap {
         @WebParam(name = "ProcCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String procCode,
         @WebParam(name = "switch_on", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        boolean switchOn);
+        boolean switchOn,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
+     * @param authSoapHeader
      * @param securityCode
      * @param pan
      * @param authType
@@ -5434,11 +5693,14 @@ public interface ServiceSoap {
         @WebParam(name = "SecurityCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int securityCode,
         @WebParam(name = "AuthType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String authType);
+        String authType,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
+     * @param authSoapHeader
      * @param activateIfNot
      * @param securityCode
      * @param pan
@@ -5460,7 +5722,9 @@ public interface ServiceSoap {
         @WebParam(name = "ActivateIfNot", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int activateIfNot,
         @WebParam(name = "AuthType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String authType);
+        String authType,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5499,6 +5763,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param issCode
      * @param clientCode
@@ -5594,7 +5859,9 @@ public interface ServiceSoap {
         @WebParam(name = "CustAccount", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String custAccount,
         @WebParam(name = "Adv_Permissions", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String advPermissions);
+        String advPermissions,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5637,6 +5904,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param loadFundsType
      * @param itemSrc
+     * @param authSoapHeader
      * @param loadedBy
      * @param permsGroup
      * @param issCode
@@ -5746,13 +6014,16 @@ public interface ServiceSoap {
         @WebParam(name = "SchedFeeGroup", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String schedFeeGroup,
         @WebParam(name = "WSFeeGroup", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String wsFeeGroup);
+        String wsFeeGroup,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param locDate
      * @param publicToken
+     * @param authSoapHeader
      * @param advPermissions
      * @param isscode
      * @param locTime
@@ -5778,12 +6049,15 @@ public interface ServiceSoap {
         @WebParam(name = "LocDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String locDate,
         @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locTime);
+        String locTime,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param publicToken
      * @param smsRequired
+     * @param authSoapHeader
      * @param regenType
      * @param smsContent
      * @return
@@ -5801,7 +6075,9 @@ public interface ServiceSoap {
         @WebParam(name = "Sms_Required", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int smsRequired,
         @WebParam(name = "Sms_Content", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int smsContent);
+        int smsContent,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5820,6 +6096,7 @@ public interface ServiceSoap {
      * @param accCode
      * @param publicToken
      * @param itemSrc
+     * @param authSoapHeader
      * @param issCode
      * @param clientCode
      * @param dob
@@ -5881,7 +6158,9 @@ public interface ServiceSoap {
         @WebParam(name = "NumTxn", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int numTxn,
         @WebParam(name = "DataSrc", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int dataSrc);
+        int dataSrc,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5893,6 +6172,7 @@ public interface ServiceSoap {
      * @param linkageGroup
      * @param locDate
      * @param publicToken
+     * @param authSoapHeader
      * @param permsGroup
      * @param wsFeeGroup
      * @param issCode
@@ -5934,13 +6214,16 @@ public interface ServiceSoap {
         @WebParam(name = "LinkageGroup", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String linkageGroup,
         @WebParam(name = "AuthCalendarGroup", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String authCalendarGroup);
+        String authCalendarGroup,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param locDate
      * @param publicToken
+     * @param authSoapHeader
      * @param issCode
      * @param locTime
      * @param blackList
@@ -5969,7 +6252,9 @@ public interface ServiceSoap {
         @WebParam(name = "BlackList", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String blackList,
         @WebParam(name = "WhiteList", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String whiteList);
+        String whiteList,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -5977,6 +6262,7 @@ public interface ServiceSoap {
      * @param locDate
      * @param currentWhiteList
      * @param currentBlackList
+     * @param authSoapHeader
      * @param cardSelector
      * @param issCode
      * @param locTime
@@ -6010,7 +6296,9 @@ public interface ServiceSoap {
         @WebParam(name = "CurrentBlackList", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String currentBlackList,
         @WebParam(name = "CurrentWhiteList", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String currentWhiteList);
+        String currentWhiteList,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -6023,6 +6311,7 @@ public interface ServiceSoap {
      * @param title
      * @param firstName
      * @param documentNo
+     * @param authSoapHeader
      * @param issCode
      * @param surname
      * @param dob
@@ -6066,13 +6355,16 @@ public interface ServiceSoap {
         @WebParam(name = "MobileNo", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String mobileNo,
         @WebParam(name = "ClientIDValue", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String clientIDValue);
+        String clientIDValue,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param documentNo
      * @param surName
+     * @param authSoapHeader
      * @param clientIDValue
      * @param dob
      * @param issuingCountry
@@ -6101,22 +6393,25 @@ public interface ServiceSoap {
         @WebParam(name = "IssuingCountry", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issuingCountry,
         @WebParam(name = "ClientIDValue", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String clientIDValue);
+        String clientIDValue,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param passportNo
      * @param documentExpirydate
-     * @param firstName
      * @param surName
      * @param clientIDValue
+     * @param sex
+     * @param title
+     * @param firstName
+     * @param authSoapHeader
      * @param issCode
      * @param issuingCountry
      * @param dob
-     * @param sex
      * @param checkDigits
-     * @param title
      * @return
      *     returns ae.globalprocessing.hyperionweb.KYC
      */
@@ -6148,7 +6443,9 @@ public interface ServiceSoap {
         @WebParam(name = "DOB", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String dob,
         @WebParam(name = "ClientIDValue", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String clientIDValue);
+        String clientIDValue,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -6156,6 +6453,7 @@ public interface ServiceSoap {
      * @param firstName
      * @param lastName
      * @param nationality
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param address1
@@ -6183,7 +6481,9 @@ public interface ServiceSoap {
         @WebParam(name = "Postcode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String postcode,
         @WebParam(name = "Address1", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String address1);
+        String address1,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
@@ -6193,6 +6493,7 @@ public interface ServiceSoap {
      * @param address
      * @param nationality
      * @param checkLevel
+     * @param authSoapHeader
      * @param issCode
      * @param dob
      * @param postcode
@@ -6221,11 +6522,14 @@ public interface ServiceSoap {
         @WebParam(name = "Address", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String address,
         @WebParam(name = "checkLevel", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String checkLevel);
+        String checkLevel,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
+     * @param authSoapHeader
      * @param issCode
      * @param id
      * @return
@@ -6241,11 +6545,14 @@ public interface ServiceSoap {
         @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String issCode,
         @WebParam(name = "ID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        long id);
+        long id,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param flag
+     * @param authSoapHeader
      * @param endDate
      * @param issCode
      * @param listType
@@ -6267,12 +6574,15 @@ public interface ServiceSoap {
         @WebParam(name = "EndDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         String endDate,
         @WebParam(name = "Flag", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String flag);
+        String flag,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
     /**
      * 
      * @param wsid
      * @param flag
+     * @param authSoapHeader
      * @param issCode
      * @param comment
      * @param id
@@ -6293,7 +6603,8 @@ public interface ServiceSoap {
         @WebParam(name = "Flag", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
         int flag,
         @WebParam(name = "Comment", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String comment);
-
+        String comment,
+        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
+        AuthSoapHeader authSoapHeader);
 
 }
