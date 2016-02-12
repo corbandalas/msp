@@ -24,14 +24,14 @@
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.username",
-      "value": "SafePay Test",
+      "value": "Safepaytest",
       "description": "Global Processing SOAP header username",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.password",
-      "value": "S@F3PAyt3ST",
+      "value": "Safepaytest123321",
       "description": "Global Processing SOAP header password",
       "category": "GPS_INTEGRATION"
     },

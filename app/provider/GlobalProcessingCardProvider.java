@@ -171,7 +171,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(countrySettingsTuple._1.wsdlURL, countrySettingsTuple._1.headerUsername, countrySettingsTuple._1.headerPassword);
+            Service service = getService(countrySettingsTuple._1.wsdlURL);
 
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.YEAR, -25);
@@ -229,7 +229,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
             BalanceEnquire2 balance = null;
 
@@ -259,7 +259,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
             Card2 cardDetails = null;
 
@@ -290,7 +290,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
             LoadCard loadCard = null;
 
@@ -321,7 +321,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
             UnLoad unload = null;
 
@@ -353,7 +353,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
             BalanceTransfer balanceTransfer = null;
 
@@ -388,8 +388,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             final GPSSettings gpsSettings = countrySettingsTuple._1;
             final Country country = countrySettingsTuple._2;
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
-
+            Service service = getService(gpsSettings.wsdlURL);
 
             long wsid = System.currentTimeMillis();
             Logger.info("/////// WS_Update_CardHolder service invocation. WSID #" + wsid);
@@ -424,7 +423,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
 
             ConvertCard convertCard = null;
@@ -459,7 +458,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
 
 
@@ -493,7 +492,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
+            Service service = getService(gpsSettings.wsdlURL);
 
 
 
@@ -562,14 +561,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return authHeader;
     }
 
-    private Service getService(String wsdlURL, String headerUsername, String headerPassword) {
+    private Service getService(String wsdlURL) {
         try {
 
-            Service service = new Service(new URL(wsdlURL));
-
-            ServiceSoap serviceSoap = service.getServiceSoap();
-
-            return service;
+            return new Service(new URL(wsdlURL));
         } catch (MalformedURLException e) {
             Logger.error("Error while constructing service by WSDL" + wsdlURL);
         }
