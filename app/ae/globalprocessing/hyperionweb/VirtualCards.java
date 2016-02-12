@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Arrays;
 
 
 /**
@@ -501,4 +502,28 @@ public class VirtualCards {
         this.image = value;
     }
 
+
+    @Override
+    public String toString() {
+        return "VirtualCards{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", externalRef='" + externalRef + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", itemID=" + itemID +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", loadValue=" + loadValue +
+                ", isLive=" + isLive +
+                ", startDate='" + startDate + '\'' +
+                ", expDate='" + expDate + '\'' +
+                ", cvv='" + cvv + '\'' +
+                ", maskedPAN='" + maskedPAN + '\'' +
+                ", image=" + Arrays.toString(image) +
+                '}';
+    }
 }

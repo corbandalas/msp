@@ -295,4 +295,19 @@ public class LoadCard {
         this.actionCode = value;
     }
 
+    @Override
+    public String toString() {
+        return "LoadCard{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", itemID=" + itemID +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                '}';
+    }
 }

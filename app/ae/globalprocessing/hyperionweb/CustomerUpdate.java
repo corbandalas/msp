@@ -247,4 +247,17 @@ public class CustomerUpdate {
         this.actionCode = value;
     }
 
+    @Override
+    public String toString() {
+        return "CustomerUpdate{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", crdProduct='" + crdProduct + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                '}';
+    }
 }

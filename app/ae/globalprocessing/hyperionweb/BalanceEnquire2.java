@@ -460,4 +460,23 @@ public class BalanceEnquire2 {
 
     }
 
+    @Override
+    public String toString() {
+        return "BalanceEnquire2{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", curCode='" + curCode + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", pinStatus=" + pinStatus +
+                ", limitInfo=" + limitInfo +
+                '}';
+    }
 }
