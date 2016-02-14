@@ -1,10 +1,18 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import junit.framework.TestCase;
+import model.Customer;
+import model.Operation;
+import model.enums.KYC;
+import model.enums.OperationType;
 import org.junit.Test;
+import play.libs.Json;
 import play.libs.ws.WS;
 import play.test.WithServer;
 import util.SecurityUtil;
+
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,6 +25,64 @@ import static org.junit.Assert.assertEquals;
  */
 public class CustomerControllerTest extends WithServer {
 
+    //TODO: add clean test
+
+    @Test
+    public void createAndUpdate() throws Exception {
+        String email = "nihilist.don@gmail.com";
+        final Customer customer = new Customer("380953055623", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
+        final JsonNode createResult = create(customer, this.testServer.port());
+
+        TestCase.assertEquals("0", createResult.get("code").asText());
+
+        final JsonNode afterCreate = retrieveByPhone(createResult.get("customer").get("id").asText());
+        TestCase.assertEquals("0", afterCreate.get("code").asText());
+        TestCase.assertEquals(email, afterCreate.get("customer").get("email").asText());
+
+        final String updatedEmail = "nihilist.don2@gmail.com";
+        customer.setEmail(updatedEmail);
+
+        final java.lang.String url = "http://localhost:" + this.testServer.port() + "/api/customer/update";
+        final int timeout = 1000;
+
+        final java.lang.String accountId = "42";
+        final java.lang.String orderId = "1";
+        final java.lang.String enckey = SecurityUtil.generateKeyFromArray(accountId, customer.getId(), orderId, "OMG");
+
+        final String updateEnckey = SecurityUtil.generateKeyFromArray(accountId, customer.getId(), orderId, "OMG");
+
+        final JsonNode updateResult = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", updateEnckey)
+                .setHeader("orderId", orderId).post(Json.toJson(customer)).get(timeout).asJson();
+        TestCase.assertEquals("0", updateResult.get("code").asText());
+
+        final JsonNode afterUpdate = retrieveByPhone(customer.getId());
+        TestCase.assertEquals("0", afterUpdate.get("code").asText());
+        TestCase.assertEquals(updatedEmail, afterUpdate.get("customer").get("email").asText());
+    }
+
+    private JsonNode retrieveByPhone(String phone) {
+        final java.lang.String url = "http://localhost:" + this.testServer.port() + "/api/customer/getByPhone/" + phone;
+        final int timeout = 1000;
+
+        final java.lang.String accountId = "42";
+        final java.lang.String orderId = "1";
+        final java.lang.String enckey = SecurityUtil.generateKeyFromArray(accountId, phone, orderId, "OMG");
+
+        return WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).get().get(timeout).asJson();
+    }
+
+    public static JsonNode create(Customer customer, int port) {
+        final java.lang.String url = "http://localhost:" + port + "/api/customer/create";
+        final int timeout = 1000;
+
+        final java.lang.String accountId = "42";
+        final java.lang.String orderId = "1";
+        final java.lang.String enckey = SecurityUtil.generateKeyFromArray(accountId, customer.getId(), customer.getFirstName(), orderId, "OMG");
+
+        return WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).post(Json.toJson(customer)).get(timeout).asJson();
+    }
 
     @Test
     public void retrieveByPhone() throws Exception {

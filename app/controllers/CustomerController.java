@@ -5,9 +5,11 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import dto.*;
 import model.Customer;
+import model.Operation;
 import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -264,19 +266,18 @@ public class CustomerController extends BaseController {
         );
     }
 
-
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "updateCountry",
-            value = "Update existed country",
-            notes = "Update existed application country in DB",
+            nickname = "updateCustomer",
+            value = "Update existed customer",
+            notes = "Update existed application customer in DB",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
             response = BaseAPIResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Country was updated successfully"),
+            @ApiResponse(code = 0, message = "Customer was updated successfully"),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error"),
     })
@@ -320,6 +321,58 @@ public class CustomerController extends BaseController {
 
                 }
         );
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "createCustomer",
+            value = "Create customer",
+            notes = "Create customer in DB",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = dto.BaseAPIResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 0, message = "Customer was created successfully"),
+            @ApiResponse(code = 1, message = "Wrong request format"),
+            @ApiResponse(code = 2, message = "DB error"),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Customer request", required = true, dataType = "model.Customer", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+customer.id+customer.firstName+orderId+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> create() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final Customer customer = Json.fromJson(jsonNode, Customer.class);
+
+        if (StringUtils.isBlank(customer.getId()) || StringUtils.isBlank(customer.getAddress1()) || StringUtils.isBlank(customer.getAddress2())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                customer.getId(), customer.getFirstName(), authData.getOrderId(),
+                authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+        }
+
+        if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
+
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.create(customer)).map(res ->
+                ok(Json.toJson(new CustomerResponse("0", "Customer created successfully", res))));
+
+        return result.recover(error -> {
+            Logger.error("Error: ", error);
+            return ok(Json.toJson(createResponse("2", error.getMessage())));
+        });
     }
 
 }

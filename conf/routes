@@ -77,6 +77,7 @@ GET     /api/customer/getByEmail/:email                              @controller
 GET     /api/customer/getByRegistrationDate/:startDate/:endDate      @controllers.CustomerController.retrieveByRegistrationDate(startDate, endDate)
 GET     /api/customer/list                                           @controllers.CustomerController.retrieveAll()
 POST    /api/customer/update                                         @controllers.CustomerController.update()
+POST    /api/customer/create                                         @controllers.CustomerController.create()
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)
