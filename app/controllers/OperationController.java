@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import dto.*;
 import model.Operation;
+import model.enums.OperationType;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -14,6 +15,8 @@ import play.mvc.With;
 import repository.OperationRepository;
 import util.SecurityUtil;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -73,7 +76,7 @@ public class OperationController extends BaseController {
         if (operation.getCreateDate() == null) operation.setCreateDate(new Date());
 
         final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(res ->
-                ok(Json.toJson(new OperationResponse("operation created successfully","0",res))));
+                ok(Json.toJson(new OperationResponse("operation created successfully", "0", res))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
@@ -110,7 +113,7 @@ public class OperationController extends BaseController {
         final Operation operation = Json.fromJson(jsonNode, Operation.class);
 
         if (operation.getId() == null || StringUtils.isBlank(operation.getDescription()) || StringUtils.isBlank(operation.getOrderId()) ||
-                operation.getType() == null || operation.getCreateDate()==null) {
+                operation.getType() == null || operation.getCreateDate() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
@@ -169,6 +172,66 @@ public class OperationController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "listAllOperations",
+            value = "All operations list",
+            notes = "Obtain list of all operations stored in DB",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = OperationListResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 0, message = "OK", response = AccountListResponse.class),
+            @ApiResponse(code = 1, message = "DB error"),
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+dateFrom+dateTo+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId"),
+            @ApiImplicitParam(value = "Filter object with restriction params", required = true, dataType = "dto.OperationFilter", paramType = "body")})
+    public F.Promise<Result> retrieveFiltered() {
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final OperationFilter filter = Json.fromJson(jsonNode, OperationFilter.class);
+
+        Date parsedFromDate;
+        Date parsedToDate;
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            parsedFromDate = simpleDateFormat.parse(filter.getDateFrom());
+            parsedToDate = simpleDateFormat.parse(filter.getDateTo());
+        } catch (ParseException e) {
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+        }
+
+        final OperationType operationType;
+        if (StringUtils.isNotBlank(filter.getType())) {
+            operationType = OperationType.valueOf(filter.getType());
+            if (operationType == null) {
+                Logger.error("Specified operation type does not exist");
+                return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Specified operation type does not exist"))));
+            }
+        } else operationType = null;
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                filter.getDateFrom(), filter.getDateTo(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+        }
+
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveByDateAndType(parsedFromDate, parsedToDate,
+                operationType, filter.getLimit(), filter.getOffset()))
+                .map(operations -> ok(Json.toJson(new OperationListResponse("OK", "0", operations))));
+
+        return result.recover(error -> {
+            Logger.error("Error: ", error);
+            return ok(Json.toJson(createResponse("2", error.getMessage())));
+        });
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "listAllOperationsByDate",
             value = "All accounts list",
             notes = "Obtain list of all accounts stored in DB",
             produces = "application/json",

@@ -11,6 +11,7 @@ import scala.concurrent.Promise;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -73,6 +74,24 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
             promise.success(StreamSupport.stream(result.spliterator(), true).map(row ->
                     createOperation(row)).collect(Collectors.toList()));
         }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Operation>> retrieveByDateAndType(Date dateFrom, Date dateTo, OperationType type, Short limit, Long offset) {
+
+        final Promise<List<Operation>> promise = Futures.promise();
+
+        final StringBuilder queryBuilder = new StringBuilder("Select * FROM ").append(connectionPool.getSchemaName())
+                .append(".operation where createdate between $1 and $2");
+
+        if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
+
+        queryBuilder.append(" limit $3 offset $4");
+
+        connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
+                new Timestamp(dateTo.getTime()), limit, offset), result -> promise.success(StreamSupport
+                .stream(result.spliterator(), true).map(this::createOperation).collect(Collectors.toList())), promise::failure);
 
         return promise.future();
     }

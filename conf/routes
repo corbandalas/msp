@@ -59,6 +59,7 @@ POST    /api/operation/create                                           @control
 POST    /api/operation/update                                           @controllers.OperationController.update()
 GET     /api/operation/get/:operationID                                 @controllers.OperationController.retrieveById(operationID:Int)
 GET     /api/operation/list                                             @controllers.OperationController.retrieveAll()
+POST    /api/operation/list/filtered                                    @controllers.OperationController.retrieveFiltered()
 
 # Transaction API
 GET     /api-docs/api/transaction                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/transaction")

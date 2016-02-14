@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dto.OperationFilter;
 import model.Operation;
 import model.enums.OperationType;
 import org.junit.Test;
@@ -9,6 +10,8 @@ import play.libs.ws.WS;
 import play.test.WithServer;
 import util.SecurityUtil;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import static junit.framework.TestCase.assertEquals;
@@ -34,7 +37,7 @@ public class OperationControllerTest extends WithServer {
 
     @Test
     public void retrieveAll() throws Exception {
-        final java.lang.String url = "http://localhost:" + this.testServer.port() + "/api/operation/list";
+        final String url = "http://localhost:" + this.testServer.port() + "/api/operation/list";
         final int timeout = 1000;
 
         final java.lang.String accountId = "42";
@@ -48,8 +51,38 @@ public class OperationControllerTest extends WithServer {
     }
 
     @Test
+    public void retrieveFiltered() throws Exception {
+        final String url = "http://localhost:" + this.testServer.port() + "/api/operation/list/filtered";
+        final int timeout = 1000;
+
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        final OperationFilter filter = new OperationFilter();
+        filter.setDateFrom(simpleDateFormat.format(new Date()));
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        filter.setDateTo(simpleDateFormat.format(calendar.getTime()));
+
+        final String accountId = "42";
+        final String orderId = "1";
+        final String enckey = SecurityUtil.generateKeyFromArray(accountId, filter.getDateFrom(), filter.getDateTo(), orderId, "OMG");
+
+        final JsonNode result = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).post(Json.toJson(filter)).get(timeout).asJson();
+        assertEquals("0", result.get("code").asText());
+        assertEquals(true, result.get("operationList").isArray());
+
+        filter.setType(OperationType.DEPOSIT.name());
+
+        final JsonNode resultWithType = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).post(Json.toJson(filter)).get(timeout).asJson();
+        assertEquals("0", resultWithType.get("code").asText());
+        assertEquals(true, resultWithType.get("operationList").isArray());
+    }
+
+    @Test
     public void createAndUpdate() throws Exception {
-        String operationOrderId="xxx";
+        String operationOrderId = "xxx";
         final Operation operation = new Operation(null, OperationType.DEPOSIT, operationOrderId, "test operation", null);
         final JsonNode createResult = create(operation, this.testServer.port());
 

@@ -37,7 +37,7 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation.getId());
 
         final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
-        assertEquals(orderId,operationById.getOrderId());
+        assertEquals(orderId, operationById.getOrderId());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
         assertNotNull(Await.result(operationRepository.update(operation), Duration.apply("1000 ms")));
         final Operation operationUpdated = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
 
-        assertEquals(orderId,operationUpdated.getOrderId());
+        assertEquals(orderId, operationUpdated.getOrderId());
     }
 
     @Test
@@ -62,18 +62,45 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation.getId());
 
         final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
-        assertEquals(orderId,operationById.getOrderId());
+        assertEquals(orderId, operationById.getOrderId());
     }
 
     @Test
     public void retrieveAll() throws Exception {
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0001",
-                "test deposit 1", new Date())),Duration.apply("1000 ms")));
+                "test deposit 1", new Date())), Duration.apply("1000 ms")));
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0002",
-                "test deposit 2", new Date())),Duration.apply("1000 ms")));
+                "test deposit 2", new Date())), Duration.apply("1000 ms")));
 
         final List<Operation> operations = Await.result(operationRepository.retrieveAll(), Duration.apply("1000 ms"));
-        assertEquals(2,operations.size());
+        assertEquals(2, operations.size());
+    }
+
+    @Test
+    public void retrieveByDateAndType() throws Exception {
+        final Date startDate = new Date();
+
+        assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0001",
+                "test deposit 1", new Date())), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0002",
+                "test deposit 2", new Date())), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.WITHDRAW, "0002",
+                "test withdraw 1", new Date())), Duration.apply("1000 ms")));
+
+        final Date endDate = new Date();
+
+        Thread.sleep(10);
+
+        assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0002",
+                "test deposit 3", new Date())), Duration.apply("1000 ms")));
+
+        final List<Operation> operations = Await.result(operationRepository.retrieveByDateAndType(startDate, endDate,
+                null, (short) 100, 0L), Duration.apply("1000 ms"));
+        assertEquals(3, operations.size());
+
+        final List<Operation> deposits = Await.result(operationRepository.retrieveByDateAndType(startDate, endDate,
+                OperationType.DEPOSIT, (short) 100, 0L), Duration.apply("1000 ms"));
+        assertEquals(2, deposits.size());
     }
 
     @After
