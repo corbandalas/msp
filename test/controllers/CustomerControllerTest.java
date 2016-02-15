@@ -6,14 +6,17 @@ import model.Customer;
 import model.Operation;
 import model.enums.KYC;
 import model.enums.OperationType;
+import org.junit.After;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
 import play.test.WithServer;
+import repository.ConnectionPool;
 import util.SecurityUtil;
 
 import java.util.Date;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -25,12 +28,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class CustomerControllerTest extends WithServer {
 
-    //TODO: add clean test
+    private String phone = "380953055623";
+    private String email = "nihilist.don@gmail.com";
 
     @Test
     public void createAndUpdate() throws Exception {
-        String email = "nihilist.don@gmail.com";
-        final Customer customer = new Customer("380953055623", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
+        final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
         final JsonNode createResult = create(customer, this.testServer.port());
 
         TestCase.assertEquals("0", createResult.get("code").asText());
@@ -95,9 +98,45 @@ public class CustomerControllerTest extends WithServer {
 
         final JsonNode response = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
                 .setHeader("orderId", orderId).get().get(timeout).asJson();
-
         assertEquals("0",response.get("code").asText());
-        assertEquals("83004",response.get("customer").get("postcode").asText());
+
+        final JsonNode result = retrieveByPhone(response.get("customer").get("id").asText());
+        assertEquals("0",result.get("code").asText());
+        assertEquals("83004",result.get("customer").get("postcode").asText());
+    }
+
+    @Test
+    public void retrieveByEmail() throws Exception {
+        String url = "http://localhost:" + this.testServer.port() + "/api/customer/getByEmail/".concat(email);
+        final int timeout = 5000;
+
+        final String accountId="42";
+        final String orderId="1";
+        final String enckey= SecurityUtil.generateKeyFromArray(accountId+email+orderId+"OMG");
+
+        final JsonNode response = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).get().get(timeout).asJson();
+        assertEquals("0",response.get("code").asText());
+
+        final JsonNode result = retrieveByPhone(response.get("customerList").get(1).get("id").asText());
+        assertEquals("0",result.get("code").asText());
+
+        assertEquals("83004",result.get("customer").get("postcode").asText());
+    }
+
+    @Test
+    public void retrieveByKYC() throws Exception {
+        String url = "http://localhost:" + this.testServer.port() + "/api/customer/getByKYC/FULL_DUE_DILIGENCE";
+        final int timeout = 5000;
+
+        final String accountId="42";
+        final String orderId="1";
+        final String enckey= SecurityUtil.generateKeyFromArray(accountId+"FULL_DUE_DILIGENCE"+orderId+"OMG");
+
+        final JsonNode response = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
+                .setHeader("orderId", orderId).get().get(timeout).asJson();
+        assertEquals("0",response.get("code").asText());
+
     }
 
     @Test
@@ -132,14 +171,14 @@ public class CustomerControllerTest extends WithServer {
         assertEquals(true,response.get("customerList").isArray());
     }
 
-    @Test
-    public void update() throws Exception {
-        //TODO: later...
-    }
-
-    @Test
-    public void exchange() throws Exception {
-        //TODO: later...
+    @After
+    public void clean() {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".customer where id=$1", asList(phone),
+                resultSet -> {
+                }, throwable -> {
+                    throwable.printStackTrace();
+                });
     }
 
 }
