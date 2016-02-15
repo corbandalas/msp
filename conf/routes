@@ -79,5 +79,15 @@ GET     /api/customer/list                                           @controller
 POST    /api/customer/update                                         @controllers.CustomerController.update()
 POST    /api/customer/create                                         @controllers.CustomerController.create()
 
+# Card API
+GET     /api-docs/api/card                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/card")
+GET     /api/card/get/:cardID                                        @controllers.CardController.retrieveById(cardID)
+GET     /api/card/getByCustomerID/:customerID                        @controllers.CardController.retrieveByCustomerID(customerID)
+GET     /api/card/getByCardType/:cardType                            @controllers.CardController.retrieveByCardType(cardType)
+GET     /api/card/getByCardBrand/:cardBrand                          @controllers.CardController.retrieveByCardBrand(cardBrand)
+GET     /api/card/list                                               @controllers.CardController.retrieveAll()
+POST    /api/card/update                                             @controllers.CardController.update()
+POST    /api/card/create                                             @controllers.CardController.create()
+
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

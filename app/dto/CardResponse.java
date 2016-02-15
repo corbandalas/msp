@@ -12,7 +12,7 @@ public class CardResponse extends BaseAPIResponse {
 
     private Card card;
 
-    public CardResponse(String text, String code, Card card) {
+    public CardResponse(String code, String text, Card card) {
         super(text, code);
         this.card = card;
     }

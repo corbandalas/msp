@@ -52,14 +52,4 @@ public class CurrencyControllerTest extends WithServer {
         assertEquals(true,response.get("currencyList").isArray());
     }
 
-    @Test
-    public void update() throws Exception {
-        //TODO: later...
-    }
-
-    @Test
-    public void exchange() throws Exception {
-        //TODO: later...
-    }
-
 }

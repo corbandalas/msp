@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class CountryControllerTest extends WithServer {
 
-    private Integer newAccountId;
-
     @Test
     public void retrieveById() throws Exception {
         String url = "http://localhost:" + this.testServer.port() + "/api/country/get/UA";
@@ -53,21 +51,5 @@ public class CountryControllerTest extends WithServer {
         assertEquals("0",response.get("code").asText());
         assertEquals(true,response.get("countryList").isArray());
     }
-
-    @Test
-    public void update() throws Exception {
-        //TODO: later...
-    }
-
-    @After
-    public void clean() {
-        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
-        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".account where id=$1", asList(newAccountId),
-                resultSet -> {
-                }, throwable -> {
-                    throwable.printStackTrace();
-                });
-    }
-
 
 }
