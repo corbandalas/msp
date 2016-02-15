@@ -1,15 +1,18 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
-import dto.*;
+import configs.Constants;
+import controllers.BaseController;
+import dto.Authentication;
+import dto.BaseAPIResponse;
+import dto.CustomerListResponse;
+import dto.CustomerResponse;
 import model.Customer;
-import model.Operation;
 import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -27,7 +30,7 @@ import java.util.Date;
  * @author nihilist - created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/customer", description = "Operations to manage application customers stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/customer", description = "Operations to manage application customers stored in DB")
 public class CustomerController extends BaseController {
 
     @Inject
@@ -331,7 +334,7 @@ public class CustomerController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
@@ -345,7 +348,7 @@ public class CustomerController extends BaseController {
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+customer.id+customer.firstName+orderId+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
-    public F.Promise<Result> create() {
+    public Promise<Result> create() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
@@ -354,19 +357,19 @@ public class CustomerController extends BaseController {
 
         if (StringUtils.isBlank(customer.getId()) || StringUtils.isBlank(customer.getAddress1()) || StringUtils.isBlank(customer.getAddress2())) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 customer.getId(), customer.getFirstName(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.create(customer)).map(res ->
+        final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
                 ok(Json.toJson(new CustomerResponse("0", "Customer created successfully", res))));
 
         return result.recover(error -> {

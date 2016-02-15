@@ -17,15 +17,15 @@ import java.util.List;
 
 public class BaseController extends play.mvc.Controller {
 
-    BaseAPIResponse createResponse(String code, String text) {
+    protected BaseAPIResponse createResponse(String code, String text) {
         return new BaseAPIResponse(text, code);
     }
 
-    PropertyListResponse createResponse(String code, String text, List<Property> propertyList)  {
+    protected PropertyListResponse createResponse(String code, String text, List<Property> propertyList)  {
         return new PropertyListResponse(text, code, propertyList);
     }
 
-    PropertyResponse createResponse(String code, String text, Property property)  {
+    protected PropertyResponse createResponse(String code, String text, Property property)  {
         return new PropertyResponse(text, code, property);
     }
 }

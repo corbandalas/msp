@@ -42,7 +42,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
-        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, false);
+        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.MASTER_VIRTUAL, false);
     }
 
     @Override

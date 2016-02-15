@@ -58,6 +58,17 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         return promise.future();
     }
 
+    public Future<Customer> retrieveByIdAndPassword(Object id, String password) {
+
+        final Promise<Customer> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE id=$1 AND password=$2";
+        connectionPool.getConnection().query(query, asList(id, password), result -> promise.success(createCustomer(result.row(0))), promise::failure);
+
+        return promise.future();
+    }
+
+
     public Future<List<Customer>> retrieveByRegistrationDate(Date startDate, Date endDate) {
         final Promise<List<Customer>> promise = Futures.promise();
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE registrationDate BETWEEN $1 AND $2";

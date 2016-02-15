@@ -75,6 +75,20 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
     }
 
     @Test
+    public void retrieveByIdAndPassword() throws Exception {
+        try {
+            String phone = "380953055621";
+            String password = "101dog101";
+            assertNotNull(Await.result(customerRepository.create(new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA")), Duration.apply("1000 ms")));
+            final Customer customer = Await.result(customerRepository.retrieveByIdAndPassword(phone, password), Duration.apply("1000 ms"));
+            assertEquals(phone, customer.getId());
+            assertEquals(password, customer.getPassword());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
     public void retrieveAll() throws Exception {
         assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay)));

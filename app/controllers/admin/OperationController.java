@@ -1,8 +1,10 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import configs.Constants;
+import controllers.BaseController;
 import dto.*;
 import model.Operation;
 import model.enums.OperationType;
@@ -25,7 +27,7 @@ import java.util.Date;
  * @author ra created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/operation", description = "Methods to manage application operation stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/operation", description = "Methods to manage application operation stored in DB")
 public class OperationController extends BaseController {
 
     @Inject
@@ -39,7 +41,7 @@ public class OperationController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
@@ -92,7 +94,7 @@ public class OperationController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {

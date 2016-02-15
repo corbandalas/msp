@@ -1,8 +1,10 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import configs.Constants;
+import controllers.BaseController;
 import dto.*;
 import model.Transaction;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +22,7 @@ import util.SecurityUtil;
  * @author ra created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/transaction", description = "Methods to manage application transaction stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/transaction", description = "Methods to manage application transaction stored in DB")
 public class TransactionController extends BaseController {
 
     @Inject
@@ -74,7 +76,7 @@ public class TransactionController extends BaseController {
         }
 
         final F.Promise<Result> result = F.Promise.wrap(transactionRepository.create(transaction)).map(res ->
-                ok(Json.toJson(new TransactionResponse("transaction created successfully","0",res))));
+                ok(Json.toJson(new TransactionResponse("transaction created successfully", "0", res))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);

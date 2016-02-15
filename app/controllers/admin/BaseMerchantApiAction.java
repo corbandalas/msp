@@ -1,4 +1,4 @@
-package controllers;
+package controllers.admin;
 
 import com.google.inject.Inject;
 import dto.Authentication;
@@ -13,7 +13,8 @@ import play.mvc.Result;
 import repository.AccountRepository;
 
 /**
- * This action validates merchant authorization headers and saves its in context for future use.
+ * This action validates merchant authorization headers and saves them in context for future use.
+ *
  * @author ra created 09.02.2016.
  * @since 0.1.0
  */
@@ -60,7 +61,7 @@ public class BaseMerchantApiAction extends Action.Simple {
         });
 
         return result.recover(throwable -> {
-            Logger.error("Error: ",throwable);
+            Logger.error("Error: ", throwable);
             return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "2")));
         });
     }

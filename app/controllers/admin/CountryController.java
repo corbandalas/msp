@@ -1,28 +1,31 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
-import dto.*;
+import configs.Constants;
+import controllers.BaseController;
+import dto.Authentication;
+import dto.BaseAPIResponse;
+import dto.CountryListResponse;
+import dto.CountryResponse;
 import model.Country;
-import model.Currency;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.CountryRepository;
-import repository.CurrencyRepository;
 import util.SecurityUtil;
 
 /**
  * API country controller
+ *
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/country", description = "Operations to manage application countries stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/country", description = "Operations to manage application countries stored in DB")
 public class CountryController extends BaseController {
 
     @Inject
@@ -37,7 +40,7 @@ public class CountryController extends BaseController {
             httpMethod = "GET",
             response = CountryListResponse.class
     )
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = CountryListResponse.class),
             @ApiResponse(code = 1, message = "DB error"),
     })
@@ -52,13 +55,13 @@ public class CountryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         final Promise<Result> result = Promise.wrap(countryRepository.retrieveAll()).map(countries -> ok(Json.toJson(new CountryListResponse("0", "OK", countries))));
 
         return result.recover(error -> {
-            Logger.error("Error:",error);
+            Logger.error("Error:", error);
             return ok(Json.toJson(createResponse("1", error.getMessage())));
         });
     }
@@ -73,7 +76,7 @@ public class CountryController extends BaseController {
             response = CountryResponse.class
     )
 
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = CountryResponse.class),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error")
@@ -90,7 +93,7 @@ public class CountryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 countryID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         if (StringUtils.isBlank(countryID)) {
@@ -120,9 +123,9 @@ public class CountryController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
-    @ApiResponses( value = {
+    @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Country was updated successfully"),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error"),
@@ -146,7 +149,7 @@ public class CountryController extends BaseController {
             if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                     country.getCode(), authData.getOrderId(), authData.getAccount().getSecret()))) {
                 Logger.error("Provided and calculated enckeys do not match");
-                return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+                return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
             }
 
         } catch (Exception e) {

@@ -10,84 +10,94 @@ GET        /swagger               @controllers.SwaggerController.swagger()
 # Index
 GET     /                           @controllers.Application.index
 
+#Merchant API(admin)
+
 # Property API
-GET        /api-docs/api/property      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/property")
+GET        /api-docs/api/admin/property      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/property")
 
-POST       /api/property/create                                          @controllers.PropertyController.create()
+POST       /api/admin/property/create                                          @controllers.admin.PropertyController.create()
 
-POST       /api/property/update                                          @controllers.PropertyController.update()
+POST       /api/admin/property/update                                          @controllers.admin.PropertyController.update()
 
-GET        /api/property/list                                            @controllers.PropertyController.retrieveAll()
+GET        /api/admin/property/list                                            @controllers.admin.PropertyController.retrieveAll()
 
-GET        /api/property/get/:propertyID                                 @controllers.PropertyController.retrieveByID(propertyID)
+GET        /api/admin/property/get/:propertyID                                 @controllers.admin.PropertyController.retrieveByID(propertyID)
 
 # Currency API
-GET        /api-docs/api/currency      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/currency")
+GET        /api-docs/api/admin/currency      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/currency")
 
-GET       /api/currency/list                                             @controllers.CurrencyController.retrieveAll()
+GET       /api/admin/currency/list                                             @controllers.admin.CurrencyController.retrieveAll()
 
-GET       /api/currency/get/:currencyID                                  @controllers.CurrencyController.retrieveByID(currencyID)
+GET       /api/admin/currency/get/:currencyID                                  @controllers.admin.CurrencyController.retrieveByID(currencyID)
 
-POST      /api/currency/update                                           @controllers.CurrencyController.update()
+POST      /api/admin/currency/update                                           @controllers.admin.CurrencyController.update()
 
-GET       /api/currency/exchange/:amount/:fromCurrencyID/:toCurrencyID   @controllers.CurrencyController.exchange(amount: Long, fromCurrencyID, toCurrencyID)
+GET       /api/admin/currency/exchange/:amount/:fromCurrencyID/:toCurrencyID   @controllers.admin.CurrencyController.exchange(amount: Long, fromCurrencyID, toCurrencyID)
 
 # Country API
-GET        /api-docs/api/country      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/country")
+GET        /api-docs/api/admin/country      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/country")
 
-GET       /api/country/list                                             @controllers.CountryController.retrieveAll()
+GET       /api/admin/country/list                                             @controllers.admin.CountryController.retrieveAll()
 
-GET       /api/country/get/:countryID                                  @controllers.CountryController.retrieveByID(countryID)
+GET       /api/admin/country/get/:countryID                                  @controllers.admin.CountryController.retrieveByID(countryID)
 
-POST      /api/country/update                                          @controllers.CountryController.update()
+POST      /api/admin/country/update                                          @controllers.admin.CountryController.update()
 
 # ExchangeRateHistory API
-GET       /api-docs/api/exchangeRateHistory      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/exchangeRateHistory")
+GET       /api-docs/api/admin/exchangeRateHistory      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/exchangeRateHistory")
 
-GET       /api/exchangeRateHistory/get/:currencyID                      @controllers.ExchangeRateHistoryController.retrieveByCurrencyID(currencyID)
+GET       /api/admin/exchangeRateHistory/get/:currencyID                      @controllers.admin.ExchangeRateHistoryController.retrieveByCurrencyID(currencyID)
 
 # Account API
-GET     /api-docs/api/account                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/account")
-POST    /api/account/create                                             @controllers.AccountController.create()
-POST    /api/account/update                                             @controllers.AccountController.update()
-GET     /api/account/get/:accountID                                     @controllers.AccountController.retrieveById(accountID:Int)
-GET     /api/account/list                                               @controllers.AccountController.retrieveAll()
+GET     /api-docs/api/admin/account                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/account")
+POST    /api/admin/account/create                                             @controllers.admin.AccountController.create()
+POST    /api/admin/account/update                                             @controllers.admin.AccountController.update()
+GET     /api/admin/account/get/:accountID                                     @controllers.admin.AccountController.retrieveById(accountID:Int)
+GET     /api/admin/account/list                                               @controllers.admin.AccountController.retrieveAll()
 
 # Operation API
-GET     /api-docs/api/operation                                         @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/operation")
-POST    /api/operation/create                                           @controllers.OperationController.create()
-POST    /api/operation/update                                           @controllers.OperationController.update()
-GET     /api/operation/get/:operationID                                 @controllers.OperationController.retrieveById(operationID:Int)
-GET     /api/operation/list                                             @controllers.OperationController.retrieveAll()
-POST    /api/operation/list/filtered                                    @controllers.OperationController.retrieveFiltered()
+GET     /api-docs/api/admin/operation                                         @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/operation")
+POST    /api/admin/operation/create                                           @controllers.admin.OperationController.create()
+POST    /api/admin/operation/update                                           @controllers.admin.OperationController.update()
+GET     /api/admin/operation/get/:operationID                                 @controllers.admin.OperationController.retrieveById(operationID:Int)
+GET     /api/admin/operation/list                                             @controllers.admin.OperationController.retrieveAll()
+POST    /api/admin/operation/list/filtered                                    @controllers.admin.OperationController.retrieveFiltered()
 
 # Transaction API
-GET     /api-docs/api/transaction                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/transaction")
-POST    /api/transaction/create                                         @controllers.TransactionController.create()
-POST    /api/transaction/update                                         @controllers.TransactionController.update()
-GET     /api/transaction/get/:transactionID                             @controllers.TransactionController.retrieveById(transactionID:Int)
-GET     /api/transaction/list                                           @controllers.TransactionController.retrieveAll()
-GET     /api/transaction/listByOperation/:operationID                   @controllers.TransactionController.retrieveByOperationId(operationID:Long)
+GET     /api-docs/api/admin/transaction                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/transaction")
+POST    /api/admin/transaction/create                                         @controllers.admin.TransactionController.create()
+POST    /api/admin/transaction/update                                         @controllers.admin.TransactionController.update()
+GET     /api/admin/transaction/get/:transactionID                             @controllers.admin.TransactionController.retrieveById(transactionID:Int)
+GET     /api/admin/transaction/list                                           @controllers.admin.TransactionController.retrieveAll()
+GET     /api/admin/transaction/listByOperation/:operationID                   @controllers.admin.TransactionController.retrieveByOperationId(operationID:Long)
 
 # Customer API
-GET     /api-docs/api/customer                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer")
-GET     /api/customer/getByPhone/:phone                              @controllers.CustomerController.retrieveByPhone(phone)
-GET     /api/customer/getByKYC/:kyc                                  @controllers.CustomerController.retrieveByKYC(kyc)
-GET     /api/customer/getByEmail/:email                              @controllers.CustomerController.retrieveByEmail(email)
-GET     /api/customer/getByRegistrationDate/:startDate/:endDate      @controllers.CustomerController.retrieveByRegistrationDate(startDate, endDate)
-GET     /api/customer/list                                           @controllers.CustomerController.retrieveAll()
-POST    /api/customer/update                                         @controllers.CustomerController.update()
-POST    /api/customer/create                                         @controllers.CustomerController.create()
+GET     /api-docs/api/admin/customer                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/customer")
+GET     /api/admin/customer/getByPhone/:phone                              @controllers.admin.CustomerController.retrieveByPhone(phone)
+GET     /api/admin/customer/getByKYC/:kyc                                  @controllers.admin.CustomerController.retrieveByKYC(kyc)
+GET     /api/admin/customer/getByEmail/:email                              @controllers.admin.CustomerController.retrieveByEmail(email)
+GET     /api/admin/customer/getByRegistrationDate/:startDate/:endDate      @controllers.admin.CustomerController.retrieveByRegistrationDate(startDate, endDate)
+GET     /api/admin/customer/list                                           @controllers.admin.CustomerController.retrieveAll()
+POST    /api/admin/customer/update                                         @controllers.admin.CustomerController.update()
+POST    /api/admin/customer/create                                         @controllers.admin.CustomerController.create()
 
 # Card API
-GET     /api-docs/api/card                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/card")
-GET     /api/card/get/:cardID                                        @controllers.CardController.retrieveById(cardID)
-GET     /api/card/getByCustomerID/:customerID                        @controllers.CardController.retrieveByCustomerID(customerID)
-GET     /api/card/getByCardType/:cardType                            @controllers.CardController.retrieveByCardType(cardType)
-GET     /api/card/getByCardBrand/:cardBrand                          @controllers.CardController.retrieveByCardBrand(cardBrand)
-GET     /api/card/list                                               @controllers.CardController.retrieveAll()
-POST    /api/card/update                                             @controllers.CardController.update()
-POST    /api/card/create                                             @controllers.CardController.create()
+GET     /api-docs/api/admin/card                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/card")
+GET     /api/admin/card/get/:cardID                                        @controllers.admin.CardController.retrieveById(cardID)
+GET     /api/admin/card/getByCustomerID/:customerID                        @controllers.admin.CardController.retrieveByCustomerID(customerID)
+GET     /api/admin/card/getByCardType/:cardType                            @controllers.admin.CardController.retrieveByCardType(cardType)
+GET     /api/admin/card/getByCardBrand/:cardBrand                          @controllers.admin.CardController.retrieveByCardBrand(cardBrand)
+GET     /api/admin/card/list                                               @controllers.admin.CardController.retrieveAll()
+POST    /api/admin/card/update                                             @controllers.admin.CardController.update()
+POST    /api/admin/card/create                                             @controllers.admin.CardController.create()
+
+
+#Customer API(web site & mobile clients)
+# Customer API
+GET     /api-docs/api/customer/login                                  @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/login")
+POST    /api/customer/login                                           @controllers.customer.CustomerLoginController.login()
+
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

@@ -1,27 +1,26 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
-import dto.*;
+import configs.Constants;
+import controllers.BaseController;
+import dto.Authentication;
+import dto.BaseAPIResponse;
+import dto.CardListResponse;
+import dto.CardResponse;
 import model.Card;
-import model.Customer;
 import model.enums.CardBrand;
 import model.enums.CardType;
-import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.CardRepository;
-import repository.CustomerRepository;
 import util.SecurityUtil;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -30,7 +29,7 @@ import java.util.Date;
  * @author nihilist - created 12.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/card", description = "Operations to manage application cards stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/card", description = "Operations to manage application cards stored in DB")
 public class CardController extends BaseController {
 
     @Inject
@@ -309,7 +308,7 @@ public class CardController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
@@ -323,7 +322,7 @@ public class CardController extends BaseController {
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+card.customerId+orderId+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
-    public F.Promise<Result> create() {
+    public Promise<Result> create() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
@@ -332,19 +331,19 @@ public class CardController extends BaseController {
 
         if (StringUtils.isBlank(card.getAlias()) || StringUtils.isBlank(card.getCurrencyId()) || StringUtils.isBlank(card.getCustomerId()) || card.getType() == null || card.getBrand() == null || card.getActive() == null || card.getCardDefault() == null || StringUtils.isBlank(card.getInfo()) || StringUtils.isBlank(card.getDeliveryAddress1()) || StringUtils.isBlank(card.getDeliveryAddress2()) || StringUtils.isBlank(card.getDeliveryAddress3()) || StringUtils.isBlank(card.getDeliveryCountry())) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 card.getCustomerId(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
         if (card.getCreateDate() == null) card.setCreateDate(new Date());
 
-        final F.Promise<Result> result = F.Promise.wrap(cardRepository.create(card)).map(res ->
+        final Promise<Result> result = Promise.wrap(cardRepository.create(card)).map(res ->
                 ok(Json.toJson(new CardResponse("0", "Card created successfully", res))));
 
         return result.recover(error -> {

@@ -1,18 +1,15 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import model.Account;
+import controllers.BaseControllerTest;
 import model.Property;
 import model.PropertyCategory;
 import org.junit.After;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
-import play.test.WithServer;
 import repository.ConnectionPool;
 import util.SecurityUtil;
-
-import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -23,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  * @author ra created 12.02.2016.
  * @since 0.1.0
  */
-public class PropertyControllerTest extends WithServer {
+public class PropertyControllerTest extends BaseControllerTest {
 
     private String newPropertyId;
 
@@ -37,15 +34,11 @@ public class PropertyControllerTest extends WithServer {
 
     @Test
     public void retrieveAll() throws Exception {
-        final String url = "http://localhost:" + this.testServer.port() + "/api/property/list";
-        final int timeout = 1000;
+        final String url = getAdminApiUrl("/property/list");
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, SECRET);
 
-        final String accountId = "42";
-        final String orderId = "1";
-        final String enckey = SecurityUtil.generateKeyFromArray(accountId, orderId, "OMG");
-
-        final JsonNode response = WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
-                .setHeader("orderId", orderId).get().get(timeout).asJson();
+        final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
 
         assertEquals("0", response.get("code").asText());
         assertEquals(true, response.get("propertyList").isArray());
@@ -53,21 +46,18 @@ public class PropertyControllerTest extends WithServer {
 
     @Test
     public void createAndUpdate() throws Exception {
-        final String createUrl = "http://localhost:" + this.testServer.port() + "/api/property/create";
-        final int timeout = 1000;
+        final String createUrl = getAdminApiUrl("/property/create");
 
         newPropertyId = "test.property";
 
         final String value = "test property value";
         final Property property = new Property(newPropertyId, value, "test property description", PropertyCategory.GPS_INTEGRATION);
 
-        final String accountId = "42";
-        final String orderId = "1";
-        final String enckey = SecurityUtil.generateKeyFromArray(accountId, property.getId(), property.getValue(),
-                property.getDescription(), property.getCategory().name(), orderId, "OMG");
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, property.getId(), property.getValue(),
+                property.getDescription(), property.getCategory().name(), ORDER_ID, SECRET);
 
-        final JsonNode createResponse = WS.url(createUrl).setHeader("accountId", accountId).setHeader("enckey", enckey)
-                .setHeader("orderId", orderId).post(Json.toJson(property)).get(timeout).asJson();
+        final JsonNode createResponse = WS.url(createUrl).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(property)).get(TIMEOUT).asJson();
 
         assertEquals("0", createResponse.get("code").asText());
 
@@ -75,15 +65,15 @@ public class PropertyControllerTest extends WithServer {
         assertEquals("0", afterCreateResponse.get("code").asText());
         assertEquals(value, afterCreateResponse.get("property").get("value").asText());
 
-        final String updateUrl = "http://localhost:" + this.testServer.port() + "/api/property/update";
+        final String updateUrl = getAdminApiUrl("/property/update");
 
         final String newValue = "updated property value";
         property.setValue(newValue);
 
-        final String updateEnckey = SecurityUtil.generateKeyFromArray(accountId, property.getId(), property.getValue(),
-                property.getDescription(), property.getCategory().name(), orderId, "OMG");
-        final JsonNode updateResponse = WS.url(updateUrl).setHeader("accountId", accountId).setHeader("enckey", updateEnckey)
-                .setHeader("orderId", orderId).post(Json.toJson(property)).get(timeout).asJson();
+        final String updateEnckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, property.getId(), property.getValue(),
+                property.getDescription(), property.getCategory().name(), ORDER_ID, SECRET);
+        final JsonNode updateResponse = WS.url(updateUrl).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", updateEnckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(property)).get(TIMEOUT).asJson();
         assertEquals("0", updateResponse.get("code").asText());
 
         final JsonNode afterUpdateResponse = retrieveById(newPropertyId);
@@ -92,15 +82,11 @@ public class PropertyControllerTest extends WithServer {
     }
 
     private JsonNode retrieveById(String id) {
-        final String url = "http://localhost:" + this.testServer.port() + "/api/property/get/" + id;
-        final int timeout = 1000;
+        final String url = getAdminApiUrl("/property/get/" + id);
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, id, ORDER_ID, SECRET);
 
-        final String accountId = "42";
-        final String orderId = "1";
-        final String enckey = SecurityUtil.generateKeyFromArray(accountId, id, orderId, "OMG");
-
-        return WS.url(url).setHeader("accountId", accountId).setHeader("enckey", enckey)
-                .setHeader("orderId", orderId).get().get(timeout).asJson();
+        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
     }
 
     @After

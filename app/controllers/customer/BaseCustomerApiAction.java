@@ -1,4 +1,4 @@
-package controllers;
+package controllers.customer;
 
 import com.google.inject.Inject;
 import dto.BaseAPIResponse;

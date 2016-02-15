@@ -1,13 +1,13 @@
-package controllers;
+package controllers.admin;
 
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import configs.Constants;
+import controllers.BaseController;
 import dto.Authentication;
-import dto.CurrencyListResponse;
 import dto.ExchangeRateHistoryListResponse;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -21,7 +21,7 @@ import util.SecurityUtil;
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/exchangeRateHistory", description = "Operations to manage exchangeRateHistory stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/exchangeRateHistory", description = "Operations to manage exchangeRateHistory stored in DB")
 public class ExchangeRateHistoryController extends BaseController {
 
     @Inject
@@ -59,7 +59,7 @@ public class ExchangeRateHistoryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currencyID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         final Promise<Result> result = Promise.wrap(exchangeRateHistoryRepository.retrieveByCurrencyId(currencyID)).map(exchangeRateHistories -> ok(Json.toJson(new ExchangeRateHistoryListResponse("0", "OK", exchangeRateHistories))));

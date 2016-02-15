@@ -1,19 +1,19 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import configs.Constants;
+import controllers.BaseController;
 import dto.Authentication;
+import model.Property;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.libs.F;
+import play.libs.F.Promise;
+import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.PropertyRepository;
-
-import model.Property;
-import play.libs.F.Promise;
-import play.libs.Json;
 import util.SecurityUtil;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
  * @since 0.1.0
  */
 
-@Api(value = "/api/property", description = "Operations to manage application properties stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/property", description = "Operations to manage application properties stored in DB")
 public class PropertyController extends BaseController {
 
     @Inject
@@ -75,14 +75,14 @@ public class PropertyController extends BaseController {
         if (StringUtils.isBlank(property.getId()) || StringUtils.isBlank(property.getDescription())
                 || StringUtils.isBlank(property.getValue()) || property.getCategory() == null) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , property.getId(), property.getValue(), property.getDescription(), property.getCategory().name(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
         final Promise<Property> propertyPromise = Promise.wrap(propertyRepository.create(property));
@@ -141,14 +141,14 @@ public class PropertyController extends BaseController {
         if (StringUtils.isBlank(property.getId()) || StringUtils.isBlank(property.getDescription())
                 || StringUtils.isBlank(property.getValue()) || property.getCategory() == null) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , property.getId(), property.getValue(), property.getDescription(), property.getCategory().name(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
         final Promise<Property> propertyPromise = Promise.wrap(propertyRepository.update(property));
@@ -191,7 +191,7 @@ public class PropertyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
         final Promise<List<Property>> propertyPromise = Promise.wrap(propertyRepository.retrieveAll());
@@ -242,7 +242,7 @@ public class PropertyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , propertyID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
         Promise<Property> propertyPromise = Promise.wrap(propertyRepository.retrieveById(propertyID));

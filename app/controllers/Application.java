@@ -2,7 +2,7 @@ package controllers;
 
 
 import play.mvc.Result;
-import views.html.*;
+import views.html.index;
 
 /**
  * Index Play controller

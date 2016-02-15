@@ -1,17 +1,17 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import configs.Constants;
+import controllers.BaseController;
 import dto.Authentication;
 import dto.CurrencyExchangeResponse;
 import dto.CurrencyListResponse;
 import dto.CurrencyResponse;
 import model.Currency;
-import model.Property;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -26,7 +26,7 @@ import util.SecurityUtil;
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/currency", description = "Operations to manage application currencies stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/currency", description = "Operations to manage application currencies stored in DB")
 public class CurrencyController extends BaseController {
 
     @Inject
@@ -39,10 +39,10 @@ public class CurrencyController extends BaseController {
             notes = "Obtain list of all currencies stored in DB",
             produces = "application/json",
             httpMethod = "GET",
-            response = dto.CurrencyListResponse.class
+            response = CurrencyListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = dto.CurrencyListResponse.class),
+            @ApiResponse(code = 0, message = "OK", response = CurrencyListResponse.class),
             @ApiResponse(code = 1, message = "DB error"),
     })
     @ApiImplicitParams({
@@ -56,7 +56,7 @@ public class CurrencyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         final Promise<Result> result = Promise.wrap(currencyRepository.retrieveAll()).map(currencies -> ok(Json.toJson(new CurrencyListResponse("0", "OK", currencies))));
@@ -74,10 +74,10 @@ public class CurrencyController extends BaseController {
             notes = "Get currency by its ID",
             produces = "application/json",
             httpMethod = "GET",
-            response = dto.CurrencyResponse.class
+            response = CurrencyResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = dto.CurrencyResponse.class),
+            @ApiResponse(code = 0, message = "OK", response = CurrencyResponse.class),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error")
     })
@@ -98,7 +98,7 @@ public class CurrencyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currencyID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         Promise<Currency> currencyPromise = Promise.wrap(currencyRepository.retrieveById(currencyID));
@@ -149,7 +149,7 @@ public class CurrencyController extends BaseController {
             if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currency.getId(),
                     authData.getOrderId(), authData.getAccount().getSecret()))) {
                 Logger.error("Provided and calculated enckeys do not match");
-                return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+                return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
             }
 
         } catch (Exception e) {
@@ -180,10 +180,10 @@ public class CurrencyController extends BaseController {
             notes = "Convert provided amount from one currency to another based on stored currency exchange rates",
             produces = "application/json",
             httpMethod = "GET",
-            response = dto.CurrencyExchangeResponse.class
+            response = CurrencyExchangeResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = dto.CurrencyExchangeResponse.class),
+            @ApiResponse(code = 0, message = "OK", response = CurrencyExchangeResponse.class),
             @ApiResponse(code = 1, message = "Wrong request format"),
             @ApiResponse(code = 2, message = "DB error")
     })
@@ -206,7 +206,7 @@ public class CurrencyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), fromCurrencyID, toCurrencyID, "" + amount,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
         Promise<Currency> currencyFromPromise = Promise.wrap(currencyRepository.retrieveById(fromCurrencyID));

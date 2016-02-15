@@ -1,8 +1,10 @@
-package controllers;
+package controllers.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
+import configs.Constants;
+import controllers.BaseController;
 import dto.AccountListResponse;
 import dto.AccountResponse;
 import dto.Authentication;
@@ -24,7 +26,7 @@ import java.util.Date;
  * @author ra created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = "/api/account", description = "Operations to manage application accounts stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/account", description = "Operations to manage application accounts stored in DB")
 public class AccountController extends BaseController {
 
     @Inject
@@ -71,7 +73,7 @@ public class AccountController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        if(account.getCreateDate()==null) account.setCreateDate(new Date());
+        if (account.getCreateDate() == null) account.setCreateDate(new Date());
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.create(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
 
@@ -109,7 +111,7 @@ public class AccountController extends BaseController {
         final Account account = Json.fromJson(jsonNode, Account.class);
 
         if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
-                StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())||account.getCreateDate()==null) {
+                StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret()) || account.getCreateDate() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
         }
