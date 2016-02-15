@@ -13,6 +13,7 @@ import play.mvc.Result;
 import repository.AccountRepository;
 
 /**
+ * This action validates merchant authorization headers and saves its in context for future use.
  * @author ra created 09.02.2016.
  * @since 0.1.0
  */
