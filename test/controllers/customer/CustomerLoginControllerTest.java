@@ -16,6 +16,8 @@ import util.SecurityUtil;
 import java.util.Date;
 
 import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test for CustomerLoginController
@@ -28,7 +30,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
     private String phone = "4524607605";
 
     @Test
-    public void login() throws Exception {
+    public void correctLogin() throws Exception {
 
         String password = "101dog101";
 
@@ -49,7 +51,35 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
 
+        assertEquals("0", loginResponse.get("code").asText());
+        assertNotNull(loginResponse.get("token").asText());
+    }
 
+
+    @Test
+    public void incorrectLogin() throws Exception {
+
+        String password = "101dog101";
+        String password2 = "101dog10";
+
+        final Customer customer = new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2", "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA");
+        final JsonNode createResult = create(customer);
+
+        TestCase.assertEquals("0", createResult.get("code").asText());
+
+        final String url = getCustomerApiUrl("/login");
+
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, phone, password2, SECRET);
+
+        CustomerLogin customerLogin = new CustomerLogin();
+
+        customerLogin.setPhone(phone);
+        customerLogin.setHashedPassword(password2);
+
+        final JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("2", loginResponse.get("code").asText());
     }
 
     private JsonNode create(Customer customer) {

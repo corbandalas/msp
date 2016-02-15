@@ -12,7 +12,7 @@ import util.SecurityUtil;
 /**
  * Base API controller test
  *
- * @author ra created 15.02.2016.
+ * @author corbandalas created 15.02.2016.
  * @since 0.2.0
  */
 public class BaseControllerTest extends WithServer {
