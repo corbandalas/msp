@@ -53,7 +53,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
         Thread.currentThread().sleep(1000);
 
-        final Currency currencyUSD = Await.result(currencyRepository.retrieveById("USD"), Duration.apply("10000 ms"));
+        final Currency currencyUSD = Await.result(currencyRepository.retrieveById("USD"), Duration.apply("1000 ms"));
 
         try {
 

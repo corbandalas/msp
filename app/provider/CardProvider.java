@@ -40,4 +40,5 @@ public interface CardProvider {
     F.Promise<CardStatusChangeResponseResponse> reportCardLost(Card card, String reason);
     F.Promise<CardStatusChangeResponseResponse> reportCardStolen(Card card, String reason);
     F.Promise<CardStatusChangeResponseResponse> reportCardDamaged(Card card, String reason);
+    F.Promise<CardTransactionListResponse> getCardTransactions(Card card, Date startDate, Date endDate);
 }

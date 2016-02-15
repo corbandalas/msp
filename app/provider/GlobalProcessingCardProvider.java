@@ -158,6 +158,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "83", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
     }
 
+    @Override
+    public F.Promise<CardTransactionListResponse> getCardTransactions(Card card, Date startDate, Date endDate) {
+        return getGPSSettings().flatMap(res -> invokeCardStatement(res, card, startDate, endDate)).map((res -> new CardTransactionListResponse(res.getActionCode(), res.getTransactions().getTransaction2())));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -522,36 +527,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-//    private F.Promise<StatusChange> invokeCardStatement(GPSSettings gpsSettings, Card card, Date startDate, Date endDate) {
-//
-//        return F.Promise.promise(() -> {
-//
-//            Service service = getService(gpsSettings.wsdlURL, gpsSettings.headerUsername, gpsSettings.headerPassword);
-//
-//
-//            long wsid = System.currentTimeMillis();
-//            Logger.info("/////// Ws_Card_Statement service invocation. WSID #" + wsid);
-//
-//
-//            try {
-//
-//
-//                service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, )
-//
-//                Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + statusChange.getActionCode() + " ." + statusChange.toString());
-//
-//                if (!StringUtils.equals("000", statusChange.getActionCode())) {
-//                    throw new CardProviderException("Bad Response");
-//                }
-//
-//            } catch (Exception e) {
-//                Logger.error("GPS connection error: ", e);
-//                throw new CardProviderException("GPS error");
-//            }
-//
-//            return statusChange;
-//        });
-//    }
+    private F.Promise<CardStatement2> invokeCardStatement(GPSSettings gpsSettings, Card card, Date startDate, Date endDate) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Card_Statement service invocation. WSID #" + wsid);
+
+            CardStatement2 cardStatement = null;
+
+            try {
+
+                 cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "0", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
+
+                if (!StringUtils.equals("000", cardStatement.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return cardStatement;
+        });
+    }
 
     private AuthSoapHeader createAuthHeader(String soapHeaderUsername, String soapHeaderPassword) {
         AuthSoapHeader authHeader = new AuthSoapHeader();
