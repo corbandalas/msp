@@ -1,11 +1,15 @@
 package repository;
 
+import akka.dispatch.Futures;
+import model.Operation;
 import model.Property;
 import model.PropertyCategory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import play.Logger;
 import scala.concurrent.Await;
+import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.util.List;
@@ -33,8 +37,8 @@ public class PropertyRepositoryTest extends BaseRepositoryTest {
         String id = "msp.test";
         final String value = "test property value";
         assertNotNull(Await.result(propertyRepository.create(new Property(id, value, "test property description",
-                PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply("1000 ms")));
-        final Property property = Await.result(propertyRepository.retrieveById(id), Duration.apply("1000 ms"));
+                PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply(defaultDelay)));
+        final Property property = Await.result(propertyRepository.retrieveById(id), Duration.apply(defaultDelay));
         assertEquals(value, property.getValue());
     }
 
@@ -42,13 +46,13 @@ public class PropertyRepositoryTest extends BaseRepositoryTest {
     public void update() throws Exception {
         final Property property = new Property("msp.test", "test property value", "test property description",
                 PropertyCategory.EXCHANGE_RATES_INTEGRATION);
-        assertNotNull(Await.result(propertyRepository.create(property), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(propertyRepository.create(property), Duration.apply(defaultDelay)));
 
         final String value = "new property value";
         property.setValue(value);
-        assertNotNull(Await.result(propertyRepository.update(property), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(propertyRepository.update(property), Duration.apply(defaultDelay)));
 
-        final Property propertyById = Await.result(propertyRepository.retrieveById(property.getId()), Duration.apply("1000 ms"));
+        final Property propertyById = Await.result(propertyRepository.retrieveById(property.getId()), Duration.apply(defaultDelay));
         assertEquals(value, propertyById.getValue());
     }
 
@@ -57,25 +61,30 @@ public class PropertyRepositoryTest extends BaseRepositoryTest {
         String id = "test.property";
         final String value = "test property value";
         assertNotNull(Await.result(propertyRepository.create(new Property(id, value, "test property description",
-                PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply("1000 ms")));
-        final Property property = Await.result(propertyRepository.retrieveById(id), Duration.apply("1000 ms"));
+                PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply(defaultDelay)));
+        final Property property = Await.result(propertyRepository.retrieveById(id), Duration.apply(defaultDelay));
         assertEquals(value, property.getValue());
     }
 
     @Test
     public void retrieveAll() throws Exception {
         assertNotNull(Await.result(propertyRepository.create(new Property("test.property.one", "test property 1 value",
-                "test property 1 description", PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply("1000 ms")));
+                "test property 1 description", PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(propertyRepository.create(new Property("test.property.two", "test property 1 value",
-                "test property 1 description", PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply("1000 ms")));
+                "test property 1 description", PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply(defaultDelay)));
 
-        final List<Property> properties = Await.result(propertyRepository.retrieveAll(), Duration.apply("1000 ms"));
+        final List<Property> properties = Await.result(propertyRepository.retrieveAll(), Duration.apply(defaultDelay));
         assertEquals(2, properties.size());
     }
 
     @After
     public void clean() {
-        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".property", resultSet -> {
-        }, Throwable::printStackTrace);
+        final Promise<Property> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".property", resultSet -> promise.success(null), promise::failure);
+        try {
+            Await.result(promise.future(), Duration.apply(defaultDelay));
+        } catch (Exception e) {
+            Logger.error("Error", e);
+        }
     }
 }

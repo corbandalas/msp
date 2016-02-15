@@ -33,7 +33,7 @@ public class CurrencyRepositoryTest extends BaseRepositoryTest {
     public void retrieveAll() throws Exception {
 
         Future<List<Currency>> listFuture = currencyRepository.retrieveAll();
-        List<Currency> currencies = Await.result(listFuture, Duration.apply("1000 ms"));
+        List<Currency> currencies = Await.result(listFuture, Duration.apply(defaultDelay));
         assertNotNull(currencies);
     }
 
@@ -41,20 +41,20 @@ public class CurrencyRepositoryTest extends BaseRepositoryTest {
     public void retrieveById() throws Exception {
 
         Future<Currency> usdFuture = currencyRepository.retrieveById("USD");
-        Currency usd = Await.result(usdFuture, Duration.apply("1000 ms"));
+        Currency usd = Await.result(usdFuture, Duration.apply(defaultDelay));
         assertNotNull(usd);
     }
 
     @Test
     public void update() throws Exception {
 
-        final Currency usd = Await.result(currencyRepository.retrieveById("USD"), Duration.apply("1000 ms"));
+        final Currency usd = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
 
         final BigDecimal euroIndexUpdated = new BigDecimal(1.2);
         usd.setEuroIndex(euroIndexUpdated);
-        assertNotNull(Await.result(currencyRepository.update(usd), Duration.apply("1000 ms")));
+        assertNotNull(Await.result(currencyRepository.update(usd), Duration.apply(defaultDelay)));
 
-        final Currency usdUpdated = Await.result(currencyRepository.retrieveById("USD"), Duration.apply("1000 ms"));
+        final Currency usdUpdated = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
         assertEquals(euroIndexUpdated, usdUpdated.getEuroIndex());
     }
 }

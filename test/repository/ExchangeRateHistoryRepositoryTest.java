@@ -1,10 +1,14 @@
 package repository;
 
+import akka.dispatch.Futures;
+import model.Customer;
 import model.ExchangeRateHistory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import play.Logger;
 import scala.concurrent.Await;
+import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.math.BigDecimal;
@@ -33,9 +37,10 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
     @Test
     public void create() {
         try {
-            ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
+            ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
             assertNotNull(exchangeRateHistory.getId());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }
@@ -44,14 +49,15 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
     @Test
     public void update() {
         try {
-            ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
+            ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
             assertNotNull(exchangeRateHistory.getId());
             exchangeRateHistory.setCurrencyId("EUR");
 
-            Await.result(exchangeRateHistoryRepository.update(exchangeRateHistory), Duration.apply("1000 ms"));
-            final ExchangeRateHistory exchangeRateHistoryUpdated = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply("1000 ms"));
+            Await.result(exchangeRateHistoryRepository.update(exchangeRateHistory), Duration.apply(defaultDelay));
+            final ExchangeRateHistory exchangeRateHistoryUpdated = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply(defaultDelay));
             assertEquals(exchangeRateHistoryUpdated.getCurrencyId(), exchangeRateHistory.getCurrencyId());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }
@@ -60,12 +66,13 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveById() throws Exception {
         try {
-            ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
+            ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
             assertNotNull(exchangeRateHistory.getId());
 
-            final ExchangeRateHistory exchangeRateHistoryById = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply("1000 ms"));
+            final ExchangeRateHistory exchangeRateHistoryById = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply(defaultDelay));
             assertEquals(exchangeRateHistoryById.getId(), exchangeRateHistory.getId());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }
@@ -73,13 +80,14 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveByCurrencyId() throws Exception {
         try {
-            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
-            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(11.24), new Date(), "EUR")), Duration.apply("1000 ms"));
-            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply("1000 ms"));
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(11.24), new Date(), "EUR")), Duration.apply(defaultDelay));
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply(defaultDelay));
 
-            List<ExchangeRateHistory> result = Await.result(exchangeRateHistoryRepository.retrieveByCurrencyId("EUR"), Duration.apply("1000 ms"));
-            assertEquals(2,result.size());
+            List<ExchangeRateHistory> result = Await.result(exchangeRateHistoryRepository.retrieveByCurrencyId("EUR"), Duration.apply(defaultDelay));
+            assertEquals(2, result.size());
         } catch (Exception e) {
+            Logger.error("Error", e);
             fail();
         }
     }
@@ -87,17 +95,22 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
 
     @Test
     public void retrieveAll() throws Exception {
-        Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply("1000 ms"));
-        Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply("1000 ms"));
+        Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
+        Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply(defaultDelay));
 
-        final List<ExchangeRateHistory> result = Await.result(exchangeRateHistoryRepository.retrieveAll(), Duration.apply("1000 ms"));
-        assertEquals(2,result.size());
+        final List<ExchangeRateHistory> result = Await.result(exchangeRateHistoryRepository.retrieveAll(), Duration.apply(defaultDelay));
+        assertEquals(2, result.size());
     }
 
 
     @After
     public void clean() {
-        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".exchange_rate_history;",resultSet -> {},throwable -> {throwable.printStackTrace();});
+        final Promise<ExchangeRateHistory> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".exchange_rate_history", resultSet -> promise.success(null), promise::failure);
+        try {
+            Await.result(promise.future(), Duration.apply(defaultDelay));
+        } catch (Exception e) {
+            Logger.error("Error", e);
+        }
     }
-
 }

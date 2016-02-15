@@ -20,6 +20,7 @@ public class BaseRepositoryTest {
     protected Application application;
     protected ExecutionContextExecutor dispatcher;
     protected ConnectionPool connectionPool;
+    protected String defaultDelay = "2000 ms";
 
     @Before
     public void init() {

@@ -34,7 +34,7 @@ public class CountryRepositoryTest extends BaseRepositoryTest {
 
         Future<List<Country>> listFuture = countryRepository.retrieveAll();
         try {
-            List<Country> countries = Await.result(listFuture, Duration.apply("1000 ms"));
+            List<Country> countries = Await.result(listFuture, Duration.apply(defaultDelay));
             assertNotNull(countries);
         } catch (Exception e) {
             fail();
@@ -45,7 +45,7 @@ public class CountryRepositoryTest extends BaseRepositoryTest {
     public void retrieveById() throws Exception {
 
         Future<Country> ruFuture = countryRepository.retrieveById("RU");
-        Country ru = Await.result(ruFuture, Duration.apply("1000 ms"));
+        Country ru = Await.result(ruFuture, Duration.apply(defaultDelay));
         assertNotNull(ru);
     }
 

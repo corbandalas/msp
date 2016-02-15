@@ -1,11 +1,15 @@
 package repository;
 
+import akka.dispatch.Futures;
+import model.ExchangeRateHistory;
 import model.Operation;
 import model.enums.OperationType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import play.Logger;
 import scala.concurrent.Await;
+import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.util.Date;
@@ -33,23 +37,23 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
     public void create() throws Exception {
         final String orderId = "00001";
         final Operation operation = Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, orderId,
-                "test deposit", new Date())), Duration.apply("1000 ms"));
+                "test deposit", new Date())), Duration.apply(defaultDelay));
         assertNotNull(operation.getId());
 
-        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
+        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
         assertEquals(orderId, operationById.getOrderId());
     }
 
     @Test
     public void update() throws Exception {
         final Operation operation = Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT,
-                "0001", "test deposit", new Date())), Duration.apply("1000 ms"));
+                "0001", "test deposit", new Date())), Duration.apply(defaultDelay));
         assertNotNull(operation.getId());
 
         final String orderId = "0002";
         operation.setOrderId(orderId);
-        assertNotNull(Await.result(operationRepository.update(operation), Duration.apply("1000 ms")));
-        final Operation operationUpdated = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
+        assertNotNull(Await.result(operationRepository.update(operation), Duration.apply(defaultDelay)));
+        final Operation operationUpdated = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
 
         assertEquals(orderId, operationUpdated.getOrderId());
     }
@@ -58,21 +62,21 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
     public void retrieveById() throws Exception {
         final String orderId = "0001";
         final Operation operation = Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, orderId,
-                "test deposit", new Date())), Duration.apply("1000 ms"));
+                "test deposit", new Date())), Duration.apply(defaultDelay));
         assertNotNull(operation.getId());
 
-        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply("1000 ms"));
+        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
         assertEquals(orderId, operationById.getOrderId());
     }
 
     @Test
     public void retrieveAll() throws Exception {
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0001",
-                "test deposit 1", new Date())), Duration.apply("1000 ms")));
+                "test deposit 1", new Date())), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0002",
-                "test deposit 2", new Date())), Duration.apply("1000 ms")));
+                "test deposit 2", new Date())), Duration.apply(defaultDelay)));
 
-        final List<Operation> operations = Await.result(operationRepository.retrieveAll(), Duration.apply("1000 ms"));
+        final List<Operation> operations = Await.result(operationRepository.retrieveAll(), Duration.apply(defaultDelay));
         assertEquals(2, operations.size());
     }
 
@@ -81,33 +85,36 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
         final Date startDate = new Date();
 
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0001",
-                "test deposit 1", new Date())), Duration.apply("1000 ms")));
+                "test deposit 1", new Date())), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0002",
-                "test deposit 2", new Date())), Duration.apply("1000 ms")));
+                "test deposit 2", new Date())), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.WITHDRAW, "0002",
-                "test withdraw 1", new Date())), Duration.apply("1000 ms")));
+                "test withdraw 1", new Date())), Duration.apply(defaultDelay)));
 
         final Date endDate = new Date();
 
         Thread.sleep(10);
 
         assertNotNull(Await.result(operationRepository.create(new Operation(null, OperationType.DEPOSIT, "0002",
-                "test deposit 3", new Date())), Duration.apply("1000 ms")));
+                "test deposit 3", new Date())), Duration.apply(defaultDelay)));
 
         final List<Operation> operations = Await.result(operationRepository.retrieveByDateAndType(startDate, endDate,
-                null, (short) 100, 0L), Duration.apply("1000 ms"));
+                null, (short) 100, 0L), Duration.apply(defaultDelay));
         assertEquals(3, operations.size());
 
         final List<Operation> deposits = Await.result(operationRepository.retrieveByDateAndType(startDate, endDate,
-                OperationType.DEPOSIT, (short) 100, 0L), Duration.apply("1000 ms"));
+                OperationType.DEPOSIT, (short) 100, 0L), Duration.apply(defaultDelay));
         assertEquals(2, deposits.size());
     }
 
     @After
     public void clean() {
-        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".operation", resultSet -> {
-        }, throwable -> {
-            throwable.printStackTrace();
-        });
+        final Promise<Operation> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".operation", resultSet -> promise.success(null), promise::failure);
+        try {
+            Await.result(promise.future(), Duration.apply(defaultDelay));
+        } catch (Exception e) {
+            Logger.error("Error", e);
+        }
     }
 }
