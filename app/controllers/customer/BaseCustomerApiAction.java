@@ -2,6 +2,7 @@ package controllers.customer;
 
 import com.google.inject.Inject;
 import dto.BaseAPIResponse;
+import model.Customer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.cache.CacheApi;
@@ -10,7 +11,6 @@ import play.libs.Json;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
-import repository.CustomerRepository;
 
 /**
  * This action validates customer authorization token and saves Customer entity in context for future use.
@@ -22,9 +22,6 @@ public class BaseCustomerApiAction extends Action.Simple {
     @Inject
     CacheApi cache;
 
-    @Inject
-    CustomerRepository customerRepository;
-
     @Override
     public F.Promise<Result> call(Http.Context ctx) throws Throwable {
         final String token = ctx.request().getHeader("token");
@@ -33,24 +30,14 @@ public class BaseCustomerApiAction extends Action.Simple {
             return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Missing authorization token header", "1"))));
         }
 
-        final String phone = cache.get(token);
-        if (StringUtils.isBlank(phone)) {
+        final Customer customer = cache.get(token);
+        if (customer == null) {
             Logger.error("Authorization token was not found");
             return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Authorization token was not found", "1"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).flatMap(customer -> {
-            if (!customer.getActive()) {
-                Logger.error("Customer for specified token is not active");
-                return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Customer for specified token is not active", "1"))));
-            }
-            ctx.args.put("customer", customer);
-            return delegate.call(ctx);
-        });
+        ctx.args.put("customer", customer);
 
-        return result.recover(throwable -> {
-            Logger.error("Error: ",throwable);
-            return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "2")));
-        });
+        return delegate.call(ctx);
     }
 }
