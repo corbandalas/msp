@@ -22,6 +22,8 @@ import w2globaldata.W2GlobaldataClient;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import java.util.Date;
+
 import static org.junit.Assert.fail;
 
 /**
@@ -32,7 +34,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
     private W2GlobaldataClient w2GlobaldataClient;
 
-   // @Before
+   //@Before
     public void setup() {
         Config conf = ConfigFactory.load();
         w2GlobaldataClient = application.injector().instanceOf(W2GlobaldataClient.class);
@@ -81,7 +83,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
    // @Test
     public void SISPlusService() throws Exception {
         try {
-            w2GlobaldataClient.SISPlusService("Robert Mugabe", null, null, null, null, null).get(10000000L);
+            w2GlobaldataClient.SISPlusService("Robert Mugabe", null, null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error SISPlusService", e);
             fail();
@@ -91,7 +93,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
     //@Test
     public void W2DataEkycUk007Service() throws Exception {
         try {
-            w2GlobaldataClient.W2DataEkycUk007Service("Moray", null, "Abdiou", 11, 12, 1924, "68", null, null, null, null, null, "LN4 7AT").get(10000000L);
+            w2GlobaldataClient.W2DataEkycUk007Service("Moray", null, "Abdiou", 11, 12, 1924, "68", null, null, null, null, null, "LN4 7AT", true).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error W2DataEkycUk007Service", e);
             fail();
@@ -101,7 +103,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
     //@Test
     public void SPFPlusService() throws Exception {
         try {
-            w2GlobaldataClient.SPFPlusService("David Cameron", null, null, null, null, null).get(10000000L);
+            w2GlobaldataClient.SPFPlusService("David Cameron", null, null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error SPFPlusService", e);
             fail();
@@ -111,7 +113,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
     //@Test
     public void W2DataAddressLookup007Service() throws Exception {
         try {
-            w2GlobaldataClient.W2DataAddressLookup007Service("68", "RH13 3HE", null, null, null, null).get(10000000L);
+            w2GlobaldataClient.W2DataAddressLookup007Service("68", "RH13 3HE", null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error W2DataAddressLookup007Service", e);
             fail();
@@ -121,9 +123,19 @@ public class GlobalDataTest extends BaseRepositoryTest {
     //@Test
     public void W2DATAIDVCHECKService() throws Exception {
         try {
-            w2GlobaldataClient.W2DATAIDVCHECKService("Louie", "Ellis", "92", "PE12 0WS", 19, 2, 1944, "GBR", null, null, null, null, null, null).get(10000000L);
+            w2GlobaldataClient.W2DATAIDVCHECKService("Louie", "Ellis", "92", "PE12 0WS", 19, 2, 1944, "GBR", null, null, null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error W2DataAddressLookup007Service", e);
+            fail();
+        }
+    }
+
+   //@Test
+    public void uploadDocument() throws Exception {
+        try {
+            w2GlobaldataClient.uploadDocument("Document data", "reference", "JPEG", new Date(), true).get(10000000L);
+        } catch (Exception e) {
+            Logger.error("Error uploadDocument", e);
             fail();
         }
     }
