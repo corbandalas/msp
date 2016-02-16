@@ -49,19 +49,20 @@ CREATE TABLE exchange_rate_history
 
 CREATE TABLE customer (
     id character varying(255) NOT NULL,
-    title character varying(255) NOT NULL,
-    firstName character varying(255) NOT NULL,
-    lastName character varying(255) NOT NULL,
+    title character varying(255),
+    firstName character varying(255),
+    lastName character varying(255),
     registrationDate timestamp with time zone DEFAULT now(),
-    dateBirth timestamp with time zone DEFAULT now(),
+    dateBirth timestamp with time zone,
     active boolean,
-    address1 character varying(255) NOT NULL,
-    address2 character varying(255) NOT NULL,
-    postcode character varying(255) NOT NULL,
-    city character varying(255) NOT NULL,
-    email character varying(255) NOT NULL,
+    address1 character varying(255),
+    address2 character varying(255),
+    postcode character varying(255),
+    city character varying(255),
+    email character varying(255),
     kyc character varying(255) NOT NULL,
-    password character varying(255) NOT NULL
+    password character varying(255) NOT NULL,
+    tempPassword boolean
 );
 ALTER TABLE ONLY customer
     ADD CONSTRAINT customer_pkey PRIMARY KEY (id);
