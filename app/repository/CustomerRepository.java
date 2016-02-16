@@ -13,6 +13,7 @@ import model.enums.KYC;
 import rx.Observable;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import util.DateUtil;
 import util.Utils;
 
 import java.sql.Timestamp;
@@ -72,7 +73,7 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
     public Future<List<Customer>> retrieveByRegistrationDate(Date startDate, Date endDate) {
         final Promise<List<Customer>> promise = Futures.promise();
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE registrationDate BETWEEN $1 AND $2";
-        connectionPool.getConnection().query(query, asList(new Timestamp(Utils.getStartOfDay(startDate)), new Timestamp(Utils.getEndOfDay(endDate))),result -> {
+        connectionPool.getConnection().query(query, asList(new Timestamp(DateUtil.getStartOfDay(startDate)), new Timestamp(DateUtil.getEndOfDay(endDate))), result -> {
             final ArrayList<Customer> customers = new ArrayList<>();
             result.forEach(row -> customers.add(createCustomer(row)));
             promise.success(customers);

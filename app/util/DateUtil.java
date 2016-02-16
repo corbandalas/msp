@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -13,7 +14,6 @@ import java.util.Locale;
  *
  * @author corbandalas - created 09.02.2016
  * @since 0.1.0
- *
  */
 public class DateUtil {
 
@@ -75,6 +75,34 @@ public class DateUtil {
         }
 
         return threadLocalDateFormat.get().parse(datePresentation);
+    }
+
+    public static Date checkDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if (calendar.get(Calendar.MILLISECOND) == 0)
+            calendar.set(Calendar.MILLISECOND, 1);
+        return calendar.getTime();
+    }
+
+    public static long getEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTime().getTime();
+    }
+
+    public static long getStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime().getTime();
     }
 
 }
