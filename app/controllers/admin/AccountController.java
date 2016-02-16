@@ -8,6 +8,7 @@ import controllers.BaseController;
 import dto.AccountListResponse;
 import dto.AccountResponse;
 import dto.Authentication;
+import dto.BaseAPIResponse;
 import model.Account;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -46,8 +47,10 @@ public class AccountController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Account was created successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = 1, message = "Missing parameters"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
@@ -60,7 +63,13 @@ public class AccountController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Account account = Json.fromJson(jsonNode, Account.class);
+        final Account account;
+        try {
+            account = Json.fromJson(jsonNode, Account.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        }
 
         if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
                 StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())) {
@@ -71,7 +80,7 @@ public class AccountController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 account.getId().toString(), account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         if (account.getCreateDate() == null) account.setCreateDate(new Date());
@@ -80,7 +89,7 @@ public class AccountController extends BaseController {
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -97,8 +106,10 @@ public class AccountController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Account was updated successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = 1, message = "Missing parameters"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
@@ -109,7 +120,13 @@ public class AccountController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Account account = Json.fromJson(jsonNode, Account.class);
+        final Account account;
+        try {
+            account = Json.fromJson(jsonNode, Account.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        }
 
         if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
                 StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret()) || account.getCreateDate() == null) {
@@ -120,14 +137,14 @@ public class AccountController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.update(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -143,8 +160,9 @@ public class AccountController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = AccountResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 4, message = "Specified account does not exist"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "accountID", value = "account ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
@@ -156,14 +174,15 @@ public class AccountController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 accountId.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(accountId)).map(account -> ok(Json.toJson(new AccountResponse("OK", "0", account))));
+        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(accountId)).map(accountOpt
+                -> accountOpt.map(account -> ok(Json.toJson(account))).orElse(ok(Json.toJson(createResponse("4", "Specified account does not exist")))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -179,7 +198,8 @@ public class AccountController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = AccountListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error"),
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -190,14 +210,15 @@ public class AccountController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveAll()).map(accounts -> ok(Json.toJson(new AccountListResponse("OK", "0", accounts))));
+        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveAll()).map(accounts -> ok(Json
+                .toJson(new AccountListResponse("OK", "0", accounts))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 }

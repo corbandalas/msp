@@ -47,8 +47,10 @@ public class OperationController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Operation was created successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = 1, message = "Missing parameters"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Operation request", required = true, dataType = "model.Operation", paramType = "body"),
@@ -61,7 +63,13 @@ public class OperationController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Operation operation = Json.fromJson(jsonNode, Operation.class);
+        final Operation operation;
+        try{
+            operation = Json.fromJson(jsonNode, Operation.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ",ex);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        }
 
         if (StringUtils.isBlank(operation.getDescription()) || StringUtils.isBlank(operation.getOrderId()) ||
                 operation.getType() == null) {
@@ -73,7 +81,7 @@ public class OperationController extends BaseController {
                 operation.getOrderId(), operation.getDescription(), operation.getType().name(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         if (operation.getCreateDate() == null) operation.setCreateDate(new Date());
@@ -83,7 +91,7 @@ public class OperationController extends BaseController {
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -100,8 +108,10 @@ public class OperationController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Operation was updated successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = 1, message = "Missing parameters"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Operation request", required = true, dataType = "model.Operation", paramType = "body"),
@@ -113,7 +123,13 @@ public class OperationController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Operation operation = Json.fromJson(jsonNode, Operation.class);
+        final Operation operation;
+        try{
+            operation = Json.fromJson(jsonNode, Operation.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ",ex);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        }
 
         if (operation.getId() == null || StringUtils.isBlank(operation.getDescription()) || StringUtils.isBlank(operation.getOrderId()) ||
                 operation.getType() == null || operation.getCreateDate() == null) {
@@ -125,14 +141,14 @@ public class OperationController extends BaseController {
                 operation.getId().toString(), operation.getOrderId(), operation.getDescription(), operation.getType().name(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         final F.Promise<Result> result = F.Promise.wrap(operationRepository.update(operation)).map(account1 -> ok(Json.toJson(createResponse("0", "operation updated successfully"))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -148,8 +164,8 @@ public class OperationController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = AccountResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = 4, message = "Specified operation does not exist"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "operationID", value = "operation ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
@@ -164,11 +180,13 @@ public class OperationController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveById(operationID)).map(operation -> ok(Json.toJson(new OperationResponse("OK", "0", operation))));
+        final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveById(operationID)).map(operationOpt
+                -> operationOpt.map(operation -> ok(Json.toJson(new OperationResponse("OK", "0", operation))))
+                .orElse(ok(Json.toJson(createResponse("4", "Specified operation does not exist")))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -184,7 +202,10 @@ public class OperationController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = AccountListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = 1, message = "Missing parameters"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -195,7 +216,13 @@ public class OperationController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final OperationFilter filter = Json.fromJson(jsonNode, OperationFilter.class);
+        final OperationFilter filter;
+        try{
+            filter = Json.fromJson(jsonNode, OperationFilter.class);
+        }catch (Exception e) {
+            Logger.error("Wrong request format: ",e);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        }
 
         Date parsedFromDate;
         Date parsedToDate;
@@ -204,7 +231,7 @@ public class OperationController extends BaseController {
             parsedFromDate = simpleDateFormat.parse(filter.getDateFrom());
             parsedToDate = simpleDateFormat.parse(filter.getDateTo());
         } catch (ParseException e) {
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
         }
 
         final OperationType operationType;
@@ -212,14 +239,14 @@ public class OperationController extends BaseController {
             operationType = OperationType.valueOf(filter.getType());
             if (operationType == null) {
                 Logger.error("Specified operation type does not exist");
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Specified operation type does not exist"))));
+                return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Specified operation type does not exist"))));
             }
         } else operationType = null;
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 filter.getDateFrom(), filter.getDateTo(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         final F.Promise<Result> result = F.Promise.wrap(operationRepository.retrieveByDateAndType(parsedFromDate, parsedToDate,
@@ -228,7 +255,7 @@ public class OperationController extends BaseController {
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -244,7 +271,7 @@ public class OperationController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = AccountListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = 6, message = "General error"),
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -262,7 +289,7 @@ public class OperationController extends BaseController {
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 }

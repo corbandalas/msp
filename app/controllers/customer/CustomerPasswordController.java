@@ -42,10 +42,11 @@ public class CustomerPasswordController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = BaseAPIResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
-            @ApiResponse(code = 3, message = "Old password does not match with existing"),
-            @ApiResponse(code = 4, message = "Specified password equals to existing")
+            @ApiResponse(code = 1, message = "Missing parameters"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 4, message = "Old password does not match with existing"),
+            @ApiResponse(code = 5, message = "Specified password equals to existing"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Change pin request", required = true, dataType = "dto.customer.CustomerChangePassword", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
@@ -61,7 +62,7 @@ public class CustomerPasswordController extends BaseController {
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
         }
 
         if (StringUtils.isBlank(request.getHashedPassword()) || StringUtils.isBlank(request.getOldHashedPassword())) {
@@ -73,13 +74,13 @@ public class CustomerPasswordController extends BaseController {
         if (!customer.getPassword().equals(request.getOldHashedPassword())) {
             Logger.error("Specified old password does not match with existing");
 
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("3", "Specified old password does not match with existing"))));
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("4", "Specified old password does not match with existing"))));
         }
 
         if(customer.getPassword().equals(request.getHashedPassword())) {
             Logger.error("Specified password equals to existing");
 
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("4", "Specified password equals to existing"))));
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Specified password equals to existing"))));
         }
 
         customer.setPassword(request.getHashedPassword());
@@ -89,7 +90,7 @@ public class CustomerPasswordController extends BaseController {
 
         return result.recover(throwable -> {
             Logger.error("Error: ", throwable);
-            return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "2")));
+            return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "6")));
         });
     }
 }
