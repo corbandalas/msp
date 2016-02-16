@@ -44,4 +44,17 @@ public class CountryControllerTest extends BaseControllerTest {
         assertEquals(true, response.get("countryList").isArray());
     }
 
+    @Test
+    public void retrieveActive() throws Exception {
+        String url = getAdminApiUrl("/country/list/active");
+        final int timeout = 10000;
+
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID + ORDER_ID + SECRET);
+
+        final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
+
+        assertEquals("0", response.get("code").asText());
+        assertEquals(true, response.get("countryList").isArray());
+    }
 }

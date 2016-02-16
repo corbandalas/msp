@@ -38,6 +38,7 @@ GET       /api/admin/currency/exchange/:amount/:fromCurrencyID/:toCurrencyID   @
 GET        /api-docs/api/admin/country      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/country")
 
 GET       /api/admin/country/list                                             @controllers.admin.CountryController.retrieveAll()
+GET       /api/admin/country/list/active                                      @controllers.admin.CountryController.retrieveActive()
 
 GET       /api/admin/country/get/:countryID                                  @controllers.admin.CountryController.retrieveByID(countryID)
 

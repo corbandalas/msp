@@ -64,6 +64,19 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         return promise.future();
     }
 
+    public Future<List<Country>> retrieveByActive(Boolean active) {
+        final Promise<List<Country>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".country WHERE active=$1";
+        connectionPool.getConnection().query(query, asList(active), result -> {
+            final ArrayList<Country> countries = new ArrayList<>();
+            result.forEach(row -> countries.add(createCountry(row)));
+            promise.success(countries);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<Country> update(Country entity) {
 

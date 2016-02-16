@@ -49,4 +49,24 @@ public class CountryRepositoryTest extends BaseRepositoryTest {
         assertNotNull(ru);
     }
 
+    @Test
+    public void retrieveByActive() {
+
+        final Future<List<Country>> listActive = countryRepository.retrieveByActive(true);
+        try {
+            List<Country> countries = Await.result(listActive, Duration.apply(defaultDelay));
+            assertNotNull(countries);
+        } catch (Exception e) {
+            fail();
+        }
+
+        final Future<List<Country>> listInactive = countryRepository.retrieveByActive(false);
+        try {
+            List<Country> countries = Await.result(listInactive, Duration.apply(defaultDelay));
+            assertNotNull(countries);
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
 }

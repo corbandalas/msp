@@ -68,6 +68,41 @@ public class CountryController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
+            nickname = "listAllActiveCountries",
+            value = "All active countries list",
+            notes = "Obtain list of all active countries stored in DB",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = CountryListResponse.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 0, message = "OK", response = CountryListResponse.class),
+            @ApiResponse(code = 1, message = "DB error"),
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public Promise<Result> retrieveActive() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+        }
+
+        final Promise<Result> result = Promise.wrap(countryRepository.retrieveByActive(true)).map(countries -> ok(Json.toJson(new CountryListResponse("0", "OK", countries))));
+
+        return result.recover(error -> {
+            Logger.error("Error:", error);
+            return ok(Json.toJson(createResponse("1", error.getMessage())));
+        });
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
             nickname = "retrieveById",
             value = "Retrieve country by ID",
             notes = "Get country by its ID",
