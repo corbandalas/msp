@@ -20,6 +20,8 @@ import repository.CurrencyRepository;
 import util.CurrencyUtil;
 import util.SecurityUtil;
 
+import java.util.Optional;
+
 /**
  * API currency controller
  *
@@ -79,7 +81,9 @@ public class CurrencyController extends BaseController {
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = CurrencyResponse.class),
             @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 4, message = "Specified currency does not exist"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "currencyID", value = "Currency ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -98,18 +102,18 @@ public class CurrencyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currencyID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
-        Promise<Currency> currencyPromise = Promise.wrap(currencyRepository.retrieveById(currencyID));
-
-        Promise<Result> result = currencyPromise.map(res -> ok(Json.toJson(new CurrencyResponse("0", "OK", res))));
+        Promise<Result> result = Promise.wrap(currencyRepository.retrieveById(currencyID)).map(res -> res.map(curr
+                -> ok(Json.toJson(new CurrencyResponse("0", "OK", curr)))).orElse(ok(Json.toJson(
+                createResponse("4", "Specified currency does not exist")))));
 
         return result.recover(error -> {
 
                     Logger.error("Error:", error);
 
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
+                    return ok(Json.toJson(createResponse("6", error.getMessage())));
 
                 }
         );
@@ -209,8 +213,8 @@ public class CurrencyController extends BaseController {
             return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
-        Promise<Currency> currencyFromPromise = Promise.wrap(currencyRepository.retrieveById(fromCurrencyID));
-        Promise<Currency> currencyToPromise = Promise.wrap(currencyRepository.retrieveById(toCurrencyID));
+        Promise<Optional<Currency>> currencyFromPromise = Promise.wrap(currencyRepository.retrieveById(fromCurrencyID));
+        Promise<Optional<Currency>> currencyToPromise = Promise.wrap(currencyRepository.retrieveById(toCurrencyID));
 
         Promise<Result> result = currencyFromPromise.zip(currencyToPromise).map(res -> CurrencyUtil.convert(amount, res._1, res._2)).
                 map(res -> ok(Json.toJson(new CurrencyExchangeResponse("0", "" + (double) amount / 100 + " " + fromCurrencyID + " equals to " + (double) res / 100 + " " + toCurrencyID, fromCurrencyID, toCurrencyID, amount, res))));
