@@ -15,6 +15,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.OperationRepository;
+import util.DateUtil;
 import util.SecurityUtil;
 
 import java.text.ParseException;
@@ -75,7 +76,7 @@ public class OperationController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        if (operation.getCreateDate() == null) operation.setCreateDate(new Date());
+        if (operation.getCreateDate() == null) operation.setCreateDate(DateUtil.checkDate(new Date()));
 
         final F.Promise<Result> result = F.Promise.wrap(operationRepository.create(operation)).map(res ->
                 ok(Json.toJson(new OperationResponse("operation created successfully", "0", res))));
