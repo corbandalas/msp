@@ -3,21 +3,19 @@ package repository;
 import akka.dispatch.Futures;
 import model.Account;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import play.Logger;
-import repository.AccountRepository;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Holds account repository tests
@@ -41,8 +39,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
         assertNotNull(Await.result(accountRepository.create(new Account(id, name, "USD", new Date(), true, "1234567")), Duration.apply(defaultDelay)));
 
-        final Account account = Await.result(accountRepository.retrieveById(id), Duration.apply(defaultDelay));
-        assertEquals(name, account.getName());
+        final Optional<Account> account = Await.result(accountRepository.retrieveById(id), Duration.apply(defaultDelay));
+        assertEquals(name, account.get().getName());
     }
 
     @Test
@@ -54,8 +52,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
 
         account.setActive(false);
         assertNotNull(Await.result(accountRepository.update(account), Duration.apply(defaultDelay)));
-        final Account accountUpdated = Await.result(accountRepository.retrieveById(id), Duration.apply(defaultDelay));
-        assertEquals(false, accountUpdated.getActive());
+        final Optional<Account> accountUpdated = Await.result(accountRepository.retrieveById(id), Duration.apply(defaultDelay));
+        assertEquals(false, accountUpdated.get().getActive());
     }
 
     @Test
@@ -64,8 +62,8 @@ public class AccountRepositoryTest extends BaseRepositoryTest {
         final String name = "My test account";
 
         assertNotNull(Await.result(accountRepository.create(new Account(id, name, "USD", new Date(), true, "1234567")), Duration.apply(defaultDelay)));
-        final Account account = Await.result(accountRepository.retrieveById(id), Duration.apply(defaultDelay));
-        assertEquals(name, account.getName());
+        final Optional<Account> account = Await.result(accountRepository.retrieveById(id), Duration.apply(defaultDelay));
+        assertEquals(name, account.get().getName());
     }
 
     @Test

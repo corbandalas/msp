@@ -14,6 +14,7 @@ import scala.concurrent.duration.Duration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -40,8 +41,8 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
                 "test deposit", new Date())), Duration.apply(defaultDelay));
         assertNotNull(operation.getId());
 
-        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
-        assertEquals(orderId, operationById.getOrderId());
+        final Optional<Operation> operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
+        assertEquals(orderId, operationById.get().getOrderId());
     }
 
     @Test
@@ -53,9 +54,9 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
         final String orderId = "0002";
         operation.setOrderId(orderId);
         assertNotNull(Await.result(operationRepository.update(operation), Duration.apply(defaultDelay)));
-        final Operation operationUpdated = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
+        final Optional<Operation> operationUpdated = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
 
-        assertEquals(orderId, operationUpdated.getOrderId());
+        assertEquals(orderId, operationUpdated.get().getOrderId());
     }
 
     @Test
@@ -65,8 +66,8 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
                 "test deposit", new Date())), Duration.apply(defaultDelay));
         assertNotNull(operation.getId());
 
-        final Operation operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
-        assertEquals(orderId, operationById.getOrderId());
+        final Optional<Operation> operationById = Await.result(operationRepository.retrieveById(operation.getId()), Duration.apply(defaultDelay));
+        assertEquals(orderId, operationById.get().getOrderId());
     }
 
     @Test

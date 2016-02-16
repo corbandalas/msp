@@ -1,5 +1,6 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import model.enums.KYC;
 
 import java.util.Date;
@@ -27,6 +28,7 @@ public class Customer extends BaseEntity<String> {
     private KYC kyc;
     private String password;
     private String country_id;
+    private Boolean temppassword;
 
     public Customer() {
     }
@@ -47,6 +49,26 @@ public class Customer extends BaseEntity<String> {
         this.kyc = kyc;
         this.password = password;
         this.country_id = country_id;
+        this.temppassword = false;
+    }
+
+    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword) {
+        this.setId(id);
+        this.registrationDate = registrationDate;
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.postcode = postcode;
+        this.city = city;
+        this.email = email;
+        this.dateBirth = dateBirth;
+        this.active = active;
+        this.kyc = kyc;
+        this.password = password;
+        this.country_id = country_id;
+        this.temppassword = temppassword;
     }
 
     public Date getRegistrationDate() {
@@ -161,6 +183,19 @@ public class Customer extends BaseEntity<String> {
         this.country_id = country_id;
     }
 
+    public Boolean getTemppassword() {
+        return temppassword;
+    }
+
+    public void setTemppassword(Boolean temppassword) {
+        this.temppassword = temppassword;
+    }
+
+    @JsonIgnore
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -178,6 +213,7 @@ public class Customer extends BaseEntity<String> {
                 ", kyc=" + kyc +
                 ", password='" + password + '\'' +
                 ", country_id='" + country_id + '\'' +
+                ", temppassword='" + temppassword + '\'' +
                 '}';
     }
 }

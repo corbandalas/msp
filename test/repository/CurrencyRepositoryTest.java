@@ -10,6 +10,7 @@ import scala.concurrent.duration.Duration;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,21 +41,20 @@ public class CurrencyRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveById() throws Exception {
 
-        Future<Currency> usdFuture = currencyRepository.retrieveById("USD");
-        Currency usd = Await.result(usdFuture, Duration.apply(defaultDelay));
+        Optional<Currency> usd = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
         assertNotNull(usd);
     }
 
     @Test
     public void update() throws Exception {
 
-        final Currency usd = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
+        final Optional<Currency> usd = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
 
         final BigDecimal euroIndexUpdated = new BigDecimal(1.2);
-        usd.setEuroIndex(euroIndexUpdated);
-        assertNotNull(Await.result(currencyRepository.update(usd), Duration.apply(defaultDelay)));
+        usd.get().setEuroIndex(euroIndexUpdated);
+        assertNotNull(Await.result(currencyRepository.update(usd.get()), Duration.apply(defaultDelay)));
 
-        final Currency usdUpdated = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
-        assertEquals(euroIndexUpdated, usdUpdated.getEuroIndex());
+        final Optional<Currency> usdUpdated = Await.result(currencyRepository.retrieveById("USD"), Duration.apply(defaultDelay));
+        assertEquals(euroIndexUpdated, usdUpdated.get().getEuroIndex());
     }
 }

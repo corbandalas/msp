@@ -5,7 +5,6 @@ import com.github.pgasync.Row;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import model.Card;
-import model.Country;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import scala.concurrent.Future;
@@ -14,6 +13,7 @@ import scala.concurrent.Promise;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 
@@ -53,12 +53,12 @@ public class CardRepository implements BaseCRUDRepository<Card> {
     }
 
     @Override
-    public Future<Card> retrieveById(Object id) {
+    public Future<Optional<Card>> retrieveById(Object id) {
 
-        final Promise<Card> promise = Futures.promise();
+        final Promise<Optional<Card>> promise = Futures.promise();
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card WHERE id=$1";
-        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createCard(result.row(0))), promise::failure);
+        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createEntity(result)), promise::failure);
 
         return promise.future();
     }
@@ -71,7 +71,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card";
         connectionPool.getConnection().query(query, result -> {
             final ArrayList<Card> cards = new ArrayList<>();
-            result.forEach(row -> cards.add(createCard(row)));
+            result.forEach(row -> cards.add(createEntity(row)));
             promise.success(cards);
         }, promise::failure);
 
@@ -85,7 +85,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card where brand=$1";
         connectionPool.getConnection().query(query, asList(cardBrand.toString()), result -> {
             final ArrayList<Card> cards = new ArrayList<>();
-            result.forEach(row -> cards.add(createCard(row)));
+            result.forEach(row -> cards.add(createEntity(row)));
             promise.success(cards);
         }, promise::failure);
 
@@ -100,7 +100,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card where cardtype=$1";
         connectionPool.getConnection().query(query, asList(cardType.toString()), result -> {
             final ArrayList<Card> cards = new ArrayList<>();
-            result.forEach(row -> cards.add(createCard(row)));
+            result.forEach(row -> cards.add(createEntity(row)));
             promise.success(cards);
         }, promise::failure);
 
@@ -114,7 +114,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card where customer_id=$1";
         connectionPool.getConnection().query(query, asList(customerID), result -> {
             final ArrayList<Card> cards = new ArrayList<>();
-            result.forEach(row -> cards.add(createCard(row)));
+            result.forEach(row -> cards.add(createEntity(row)));
             promise.success(cards);
         }, promise::failure);
 
@@ -139,7 +139,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
 
     }
 
-    private Card createCard(Row row) {
+    public Card createEntity(Row row) {
 
         return new Card(row.getLong("id"), row.getString("token"), row.getString("customer_id"), CardType.valueOf(row.getString("cardtype")),
                 CardBrand.valueOf(row.getString("brand")), row.getBoolean("is_default"), row.getTimestamp("createDate"), row.getString("alias"), row.getBoolean("active"), row.getString("info"), row.getString("currency_id"), row.getString("deliveryAddress1"), row.getString("deliveryAddress2"), row.getString("deliveryAddress3"), row.getString("deliveryCountry"));

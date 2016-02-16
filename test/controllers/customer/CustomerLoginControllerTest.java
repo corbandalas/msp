@@ -79,7 +79,20 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
 
-        assertEquals("3", loginResponse.get("code").asText());
+        assertEquals("5", loginResponse.get("code").asText());
+
+
+        customerLogin = new CustomerLogin();
+
+        customerLogin.setPhone(phone + "1");
+        customerLogin.setHashedPassword(password2);
+
+        final String enckey2 = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, phone + "1", password2, SECRET);
+
+        final JsonNode loginResponse2 = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey2)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("4", loginResponse2.get("code").asText());
     }
 
     private JsonNode create(Customer customer) {

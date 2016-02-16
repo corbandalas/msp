@@ -6,6 +6,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import provider.CardProvider;
 import provider.CardProviderVendor;
+import sms.SmsGateway;
+import sms.SmsGatewayImpl;
 import util.Utils;
 
 import java.util.Set;
@@ -55,5 +57,7 @@ public class MspModule extends AbstractModule {
         }
 
         bind(PropertyLoader.class);
+
+        bind(SmsGateway.class).to(SmsGatewayImpl.class);
     }
 }

@@ -14,6 +14,7 @@ import scala.concurrent.duration.Duration;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -54,8 +55,8 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
             exchangeRateHistory.setCurrencyId("EUR");
 
             Await.result(exchangeRateHistoryRepository.update(exchangeRateHistory), Duration.apply(defaultDelay));
-            final ExchangeRateHistory exchangeRateHistoryUpdated = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply(defaultDelay));
-            assertEquals(exchangeRateHistoryUpdated.getCurrencyId(), exchangeRateHistory.getCurrencyId());
+            final Optional<ExchangeRateHistory> exchangeRateHistoryUpdated = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply(defaultDelay));
+            assertEquals(exchangeRateHistoryUpdated.get().getCurrencyId(), exchangeRateHistory.getCurrencyId());
         } catch (Exception e) {
             Logger.error("Error", e);
             fail();
@@ -69,8 +70,8 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
             ExchangeRateHistory exchangeRateHistory = Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
             assertNotNull(exchangeRateHistory.getId());
 
-            final ExchangeRateHistory exchangeRateHistoryById = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply(defaultDelay));
-            assertEquals(exchangeRateHistoryById.getId(), exchangeRateHistory.getId());
+            final Optional<ExchangeRateHistory> exchangeRateHistoryById = Await.result(exchangeRateHistoryRepository.retrieveById(exchangeRateHistory.getId()), Duration.apply(defaultDelay));
+            assertEquals(exchangeRateHistoryById.get().getId(), exchangeRateHistory.getId());
         } catch (Exception e) {
             Logger.error("Error", e);
             fail();

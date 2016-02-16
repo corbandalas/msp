@@ -1,7 +1,6 @@
 package repository;
 
 import akka.dispatch.Futures;
-import model.Account;
 import model.Customer;
 import model.enums.KYC;
 import org.junit.After;
@@ -12,11 +11,12 @@ import scala.concurrent.Await;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -53,9 +53,9 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
             customer.setActive(false);
             customer.setFirstName("Dima");
             assertNotNull(Await.result(customerRepository.update(customer), Duration.apply(defaultDelay)));
-            final Customer customerUpdated = Await.result(customerRepository.retrieveById("380953055621"), Duration.apply(defaultDelay));
-            assertEquals(false, customerUpdated.getActive());
-            assertEquals("Dima", customerUpdated.getFirstName());
+            final Optional<Customer> customerUpdated = Await.result(customerRepository.retrieveById("380953055621"), Duration.apply(defaultDelay));
+            assertEquals(false, customerUpdated.get().getActive());
+            assertEquals("Dima", customerUpdated.get().getFirstName());
         } catch (Exception e) {
             fail();
         }
@@ -67,8 +67,8 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
         try {
             String phone = "380953055621";
             assertNotNull(Await.result(customerRepository.create(new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay)));
-            final Customer customer = Await.result(customerRepository.retrieveById(phone), Duration.apply(defaultDelay));
-            assertEquals(phone, customer.getId());
+            final Optional<Customer> customer = Await.result(customerRepository.retrieveById(phone), Duration.apply(defaultDelay));
+            assertEquals(phone, customer.get().getId());
         } catch (Exception e) {
             fail();
         }
@@ -136,6 +136,15 @@ public class CustomerRepositoryTest extends BaseRepositoryTest {
 
         final List<Customer> result = Await.result(customerRepository.retrieveByEmail("nihilist.don@gmail.com"), Duration.apply(defaultDelay));
         assertEquals(1, result.size());
+    }
+
+    @Test
+    public void isRegistered() throws Exception {
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay)));
+        assertNotNull(Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Dmitriy", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don2@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay)));
+
+        assertTrue(Await.result(customerRepository.isRegistered("380953055621"), Duration.apply(defaultDelay)));
+        assertTrue(!Await.result(customerRepository.isRegistered("380953055629"), Duration.apply(defaultDelay)));
     }
 
     @After

@@ -17,6 +17,7 @@ import scala.concurrent.duration.Duration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -58,8 +59,8 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
                 toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
         assertNotNull(transaction.getId());
 
-        final Transaction transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
-        assertNotNull(transactionById);
+        final Optional<Transaction> transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
+        assertNotNull(transactionById.get());
     }
 
     @Test
@@ -83,8 +84,8 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         Long amount = 2000L;
         transaction.setAmount(amount);
         assertNotNull(Await.result(transactionRepository.update(transaction), Duration.apply(defaultDelay)));
-        final Transaction transactionUpdated = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
-        assertEquals(amount, transactionUpdated.getAmount());
+        final Optional<Transaction> transactionUpdated = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
+        assertEquals(amount, transactionUpdated.get().getAmount());
     }
 
     @Test
@@ -105,8 +106,8 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
                 toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
         assertNotNull(transaction.getId());
 
-        final Transaction transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
-        assertNotNull(transactionById);
+        final Optional<Transaction> transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
+        assertNotNull(transactionById.get());
     }
 
     @Test

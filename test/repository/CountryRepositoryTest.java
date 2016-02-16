@@ -10,9 +10,12 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
+import javax.validation.constraints.AssertTrue;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -44,9 +47,15 @@ public class CountryRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveById() throws Exception {
 
-        Future<Country> ruFuture = countryRepository.retrieveById("RU");
-        Country ru = Await.result(ruFuture, Duration.apply(defaultDelay));
-        assertNotNull(ru);
+        Optional<Country> ru = Await.result(countryRepository.retrieveById("RU"), Duration.apply(defaultDelay));
+        assertNotNull(ru.get());
+    }
+
+    @Test
+    public void checkCountry() throws Exception {
+
+        assertTrue(Await.result(countryRepository.checkCountry("RU"), Duration.apply(defaultDelay)));
+        assertTrue(!Await.result(countryRepository.checkCountry("RUBL"), Duration.apply(defaultDelay)));
     }
 
     @Test

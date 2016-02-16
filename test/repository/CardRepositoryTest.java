@@ -17,6 +17,7 @@ import scala.concurrent.duration.Duration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -62,9 +63,9 @@ public class CardRepositoryTest extends BaseRepositoryTest {
             card.setActive(false);
             card.setBrand(CardBrand.MASTERCARD);
             final Card newCard = Await.result(cardRepository.update(card), Duration.apply(defaultDelay));
-            final Card updatedCard = Await.result(cardRepository.retrieveById(newCard.getId()), Duration.apply(defaultDelay));
-            assertEquals(false, updatedCard.getActive());
-            assertEquals(CardBrand.MASTERCARD, updatedCard.getBrand());
+            final Optional<Card> updatedCard = Await.result(cardRepository.retrieveById(newCard.getId()), Duration.apply(defaultDelay));
+            assertEquals(false, updatedCard.get().getActive());
+            assertEquals(CardBrand.MASTERCARD, updatedCard.get().getBrand());
         } catch (Exception e) {
             Logger.error("Error", e);
             fail();
@@ -80,8 +81,8 @@ public class CardRepositoryTest extends BaseRepositoryTest {
             Card card = Await.result(cardRepository.create(new Card(null,"token",customer.getId(), CardType.VIRTUAL, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply(defaultDelay));
             assertNotNull(card.getId());
 
-            final Card cardById = Await.result(cardRepository.retrieveById(card.getId()), Duration.apply(defaultDelay));
-            assertEquals(cardById.getId(), card.getId());
+            final Optional<Card> cardById = Await.result(cardRepository.retrieveById(card.getId()), Duration.apply(defaultDelay));
+            assertEquals(cardById.get().getId(), card.getId());
         } catch (Exception e) {
             Logger.error("Error", e);
             fail();

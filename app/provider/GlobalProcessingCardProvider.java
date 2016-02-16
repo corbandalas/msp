@@ -3,6 +3,8 @@ package provider;
 import ae.globalprocessing.hyperionweb.*;
 import com.google.inject.Inject;
 import exception.CardProviderException;
+import exception.WrongCountryException;
+import exception.WrongPropertyException;
 import model.*;
 import model.Card;
 import model.Currency;
@@ -82,37 +84,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardLoadResponse> loadVirtualCardFromBank(Card card, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardLoadResponse> loadVirtualCardFromCard(Card card, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardLoadResponse> loadPlasticCardFromBank(Card card, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardLoadResponse> loadPlasticCardFromCard(Card card, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "3")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardUnloadResponse> unloadPlasticCard(Card card, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, currency, res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description) {
-        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(sourceCard.getCurrencyId()))).flatMap(res -> invokeCardTransfer(res._1, sourceCard, destinationCard, CurrencyUtil.convert(amount, currency, res._2), description)).map((res -> new CardTransferBalanceResponse(res.getActionCode())));
+        return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(sourceCard.getCurrencyId()))).flatMap(res -> invokeCardTransfer(res._1, sourceCard, destinationCard, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description)).map((res -> new CardTransferBalanceResponse(res.getActionCode())));
     }
 
     @Override
@@ -172,7 +174,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     }
 
-    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Country> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
+    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
         return F.Promise.promise(() -> {
 
@@ -195,7 +197,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 virtualCards = service.getServiceSoap().wsCreateCard(wsid, countrySettingsTuple._1.issCode, "10",
                         null, customer.getTitle(), customer.getLastName(), customer.getFirstName(), customer.getAddress1(),
-                        customer.getAddress2(), customer.getAddress2(), customer.getCity(), customer.getPostcode(), countrySettingsTuple._2.getCode(),
+                        customer.getAddress2(), customer.getAddress2(), customer.getCity(), customer.getPostcode(), countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(),
                         customer.getId(), countrySettingsTuple._1.cardDesign, null, dob, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, loadValue, "" + currency.getCode(),
                         null, null, 0, null, countrySettingsTuple._1.loadSrc,
@@ -207,7 +209,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, null, null, false,
                         countrySettingsTuple._1.feeGroup, null, customer.getAddress1(), customer.getAddress2(),
                         customer.getAddress2(), customer.getCity(), customer.getAddress2(), customer.getPostcode(),
-                        countrySettingsTuple._2.getCode(), null, "En", "1",
+                        countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), null, "En", "1",
                         null, null, null, null,
                         null, null, null, null,
                         null, null, null, customer.getEmail(), "0",
@@ -386,12 +388,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-    private F.Promise<CustomerUpdate> invokeUpdateCardHolder(F.Tuple<GPSSettings, Country> countrySettingsTuple, Customer customer, Card card) {
+    private F.Promise<CustomerUpdate> invokeUpdateCardHolder(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, Card card) {
 
         return F.Promise.promise(() -> {
 
             final GPSSettings gpsSettings = countrySettingsTuple._1;
-            final Country country = countrySettingsTuple._2;
+            final Country country = countrySettingsTuple._2.orElseThrow(WrongCountryException::new);
 
             Service service = getService(gpsSettings.wsdlURL);
 
@@ -458,13 +460,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-
     private F.Promise<PhoneActivate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card) {
 
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
-
 
 
             long wsid = System.currentTimeMillis();
@@ -498,7 +498,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
-
 
 
             long wsid = System.currentTimeMillis();
@@ -541,7 +540,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                 cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "0", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
@@ -580,17 +579,17 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<GPSSettings> getGPSSettings() {
 
-        final F.Promise<Property> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
-        final F.Promise<Property> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
-        final F.Promise<Property> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
-        final F.Promise<Property> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.api.settings"));
+        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
+        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
+        final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
+        final F.Promise<Optional<Property>> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.api.settings"));
 
         return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
 
-            String url = res._1._1._1.getValue();
-            String userName = res._1._1._2.getValue();
-            String password = res._1._2.getValue();
-            String[] split = res._2.getValue().split(":");
+            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+            String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String[] split = res._2.orElseThrow(WrongPropertyException::new).getValue().split(":");
 
             return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5]);
 

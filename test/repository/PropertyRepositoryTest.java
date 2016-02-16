@@ -13,6 +13,7 @@ import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.util.List;
+import java.util.Optional;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -38,8 +39,8 @@ public class PropertyRepositoryTest extends BaseRepositoryTest {
         final String value = "test property value";
         assertNotNull(Await.result(propertyRepository.create(new Property(id, value, "test property description",
                 PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply(defaultDelay)));
-        final Property property = Await.result(propertyRepository.retrieveById(id), Duration.apply(defaultDelay));
-        assertEquals(value, property.getValue());
+        final Optional<Property> property = Await.result(propertyRepository.retrieveById(id), Duration.apply(defaultDelay));
+        assertEquals(value, property.get().getValue());
     }
 
     @Test
@@ -52,8 +53,8 @@ public class PropertyRepositoryTest extends BaseRepositoryTest {
         property.setValue(value);
         assertNotNull(Await.result(propertyRepository.update(property), Duration.apply(defaultDelay)));
 
-        final Property propertyById = Await.result(propertyRepository.retrieveById(property.getId()), Duration.apply(defaultDelay));
-        assertEquals(value, propertyById.getValue());
+        final Optional<Property> propertyById = Await.result(propertyRepository.retrieveById(property.getId()), Duration.apply(defaultDelay));
+        assertEquals(value, propertyById.get().getValue());
     }
 
     @Test
@@ -62,8 +63,8 @@ public class PropertyRepositoryTest extends BaseRepositoryTest {
         final String value = "test property value";
         assertNotNull(Await.result(propertyRepository.create(new Property(id, value, "test property description",
                 PropertyCategory.EXCHANGE_RATES_INTEGRATION)), Duration.apply(defaultDelay)));
-        final Property property = Await.result(propertyRepository.retrieveById(id), Duration.apply(defaultDelay));
-        assertEquals(value, property.getValue());
+        final Optional<Property> property = Await.result(propertyRepository.retrieveById(id), Duration.apply(defaultDelay));
+        assertEquals(value, property.get().getValue());
     }
 
     @Test

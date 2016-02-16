@@ -11,6 +11,7 @@ import scala.concurrent.Promise;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 
@@ -34,19 +35,19 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
                 " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(),entity.getSecret()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(), entity.getSecret()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
 
     @Override
-    public Future<Account> retrieveById(Object id) {
+    public Future<Optional<Account>> retrieveById(Object id) {
 
-        final Promise<Account> promise = Futures.promise();
+        final Promise<Optional<Account>> promise = Futures.promise();
 
         final String query = "SELECT * FROM  " + connectionPool.getSchemaName() + ".account WHERE id=$1";
-        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createAccount(result.row(0))), promise::failure);
+        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createEntity(result)), promise::failure);
 
         return promise.future();
     }
@@ -59,7 +60,7 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final String query = "SELECT * FROM  " + connectionPool.getSchemaName() + ".account";
         connectionPool.getConnection().query(query, result -> {
             final ArrayList<Account> accounts = new ArrayList<>();
-            result.forEach(row -> accounts.add(createAccount(row)));
+            result.forEach(row -> accounts.add(createEntity(row)));
             promise.success(accounts);
         }, promise::failure);
 
@@ -84,8 +85,9 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         //Not required yet
     }
 
-    private Account createAccount(Row row) {
+    public Account createEntity(Row row) {
         return new Account(row.getBigInteger("id").intValue(), row.getString("name"), row.getString("currency_id"),
                 row.getTimestamp("createdate"), row.getBoolean("active"), row.getString("secret"));
     }
+
 }

@@ -98,6 +98,10 @@ POST    /api/admin/card/create                                             @cont
 GET     /api-docs/api/customer/login                                  @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/login")
 POST    /api/customer/login                                           @controllers.customer.CustomerLoginController.login()
 
+GET     /api-docs/api/customer/register                                  @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/register")
+POST    /api/customer/register                                        @controllers.customer.CustomerRegisterController.register()
+
+
 GET     /api-docs/api/customer/password                               @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/password")
 POST    /api/customer/password/change                                 @controllers.customer.CustomerPasswordController.change()
 

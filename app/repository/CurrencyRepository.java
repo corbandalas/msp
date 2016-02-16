@@ -15,12 +15,12 @@ import model.ExchangeRateHistory;
 import play.Logger;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
-import scala.tools.cmd.gen.AnyVals;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -54,13 +54,13 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
     }
 
     @Override
-    public Future<Currency> retrieveById(Object id) {
+    public Future<Optional<Currency>> retrieveById(Object id) {
 
-        final Promise<Currency> promise = Futures.promise();
+        final Promise<Optional<Currency>> promise = Futures.promise();
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".currency where id=$1";
         connectionPool.getConnection().query(query, asList(id), result -> promise.success(
-                createCurrency(result.row(0))), promise::failure);
+                createEntity(result)), promise::failure);
 
         return promise.future();
     }
@@ -73,8 +73,8 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".currency";
         connectionPool.getConnection().query(query, result -> {
             final ArrayList<Currency> currencies = new ArrayList<>();
-            result.forEach(row->{
-                currencies.add(createCurrency(row));
+            result.forEach(row -> {
+                currencies.add(createEntity(row));
             });
             promise.success(currencies);
         }, promise::failure);
@@ -100,11 +100,10 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
         //not required implemented yet
     }
 
-    private Currency createCurrency(Row row) {
+    public Currency createEntity(Row row) {
         return new Currency(row.getString("id"), row.getShort("code"), row.getString("displaytext"),
                 row.getBigDecimal("euroindex"), row.getBoolean("active"));
     }
-
 
 
     public Future<CurrencyExchangeRatesResponse> updateCurrencyExchangeRates(final List<Currency> currencies, String url, String apiKey) {
@@ -116,7 +115,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
         final Promise<CurrencyExchangeRatesResponse> promise = Futures.promise();
 
 
-        asyncHttpClient.prepareGet(query).execute(new AsyncCompletionHandler<CurrencyExchangeRatesResponse>(){
+        asyncHttpClient.prepareGet(query).execute(new AsyncCompletionHandler<CurrencyExchangeRatesResponse>() {
 
             @Override
             public CurrencyExchangeRatesResponse onCompleted(Response response) throws Exception {
@@ -128,7 +127,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
                 CurrencyExchangeRatesResponse ratesResponse = mapper.readValue(responseBody, CurrencyExchangeRatesResponse.class);
 
 
-                for (Currency c: currencies) {
+                for (Currency c : currencies) {
                     final BigDecimal rate = ratesResponse.getQuotes().get(ratesResponse.getSource() + c.getId());
 
                     if (rate != null) {
@@ -147,7 +146,7 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
             }
 
             @Override
-            public void onThrowable(Throwable t){
+            public void onThrowable(Throwable t) {
                 Logger.error("/////Error while retrieving currencies from API", t);
 
                 promise.failure(t);

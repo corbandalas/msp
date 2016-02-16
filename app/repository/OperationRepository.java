@@ -10,9 +10,9 @@ import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -53,12 +53,12 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
     }
 
     @Override
-    public Future<Operation> retrieveById(Object id) {
+    public Future<Optional<Operation>> retrieveById(Object id) {
 
-        final Promise<Operation> promise = Futures.promise();
+        final Promise<Optional<Operation>> promise = Futures.promise();
 
         final String query = "Select * FROM " + connectionPool.getSchemaName() + ".operation WHERE id=$1";
-        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createOperation(result.row(0)))
+        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createEntity(result))
                 , promise::failure);
 
         return promise.future();
@@ -72,7 +72,7 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
         final String query = "Select * FROM " + connectionPool.getSchemaName() + ".operation";
         connectionPool.getConnection().query(query, result -> {
             promise.success(StreamSupport.stream(result.spliterator(), true).map(row ->
-                    createOperation(row)).collect(Collectors.toList()));
+                    createEntity(row)).collect(Collectors.toList()));
         }, promise::failure);
 
         return promise.future();
@@ -91,7 +91,7 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
 
         connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
                 new Timestamp(dateTo.getTime()), limit, offset), result -> promise.success(StreamSupport
-                .stream(result.spliterator(), true).map(this::createOperation).collect(Collectors.toList())), promise::failure);
+                .stream(result.spliterator(), true).map(this::createEntity).collect(Collectors.toList())), promise::failure);
 
         return promise.future();
     }
@@ -115,7 +115,7 @@ public class OperationRepository implements BaseCRUDRepository<Operation> {
         //not required
     }
 
-    private Operation createOperation(Row row) {
+    public Operation createEntity(Row row) {
         return new Operation(row.getLong("id"), OperationType.valueOf(row.getString("type")), row.getString("orderid"),
                 row.getString("description"), row.getTimestamp("createdate"));
     }

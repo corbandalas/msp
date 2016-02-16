@@ -1,8 +1,10 @@
 package util;
 
+import exception.WrongCurrencyException;
 import model.Currency;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * Helper class to convert currencies
@@ -14,7 +16,11 @@ public class CurrencyUtil {
 
     private static int SCALE = 15;
 
-    public static Long convert(Long amount, Currency currencyFrom, Currency currencyTo) {
+    public static Long convert(Long amount, Optional<Currency> currencyFromOptional, Optional<Currency> currencyToOptional) throws WrongCurrencyException {
+
+        Currency currencyFrom = currencyFromOptional.orElseThrow(WrongCurrencyException::new);
+        Currency currencyTo = currencyToOptional.orElseThrow(WrongCurrencyException::new);
+
         BigDecimal euroIndexFrom = currencyFrom.getEuroIndex();
         BigDecimal euroIndexTo = currencyTo.getEuroIndex();
 

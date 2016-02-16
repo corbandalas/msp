@@ -1,15 +1,18 @@
 package repository;
 
 import akka.dispatch.Futures;
+import com.github.pgasync.ResultSet;
 import com.github.pgasync.Row;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import model.Card;
 import model.Country;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 
@@ -39,12 +42,22 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
     }
 
     @Override
-    public Future<Country> retrieveById(Object id) {
+    public Future<Optional<Country>> retrieveById(Object id) {
 
-        final Promise<Country> promise = Futures.promise();
+        final Promise<Optional<Country>> promise = Futures.promise();
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".country WHERE id=$1";
-        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createCountry(result.row(0))), promise::failure);
+        connectionPool.getConnection().query(query, asList(id), result -> promise.success(createEntity(result)), promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<Boolean> checkCountry(Object id) {
+
+        final Promise<Boolean> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".country WHERE id=$1 and active = true";
+        connectionPool.getConnection().query(query, asList(id), result -> promise.success(result.size() > 0), promise::failure);
 
         return promise.future();
     }
@@ -57,7 +70,7 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".country";
         connectionPool.getConnection().query(query, result -> {
             final ArrayList<Country> countries = new ArrayList<>();
-            result.forEach(row -> countries.add(createCountry(row)));
+            result.forEach(row -> countries.add(createEntity(row)));
             promise.success(countries);
         }, promise::failure);
 
@@ -70,7 +83,7 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".country WHERE active=$1";
         connectionPool.getConnection().query(query, asList(active), result -> {
             final ArrayList<Country> countries = new ArrayList<>();
-            result.forEach(row -> countries.add(createCountry(row)));
+            result.forEach(row -> countries.add(createEntity(row)));
             promise.success(countries);
         }, promise::failure);
 
@@ -95,9 +108,11 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         //Not required yet
     }
 
-    private Country createCountry(Row row) {
+    public Country createEntity(Row row) {
 
         return new Country(row.getString("id"), row.getString("name"), row.getShort("phonecode"), row.getBoolean("active"),
                 row.getString("currency_id"), row.getString("code"));
     }
+
+
 }
