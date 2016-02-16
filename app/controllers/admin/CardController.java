@@ -206,8 +206,10 @@ public class CardController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = CardResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 4, message = "Specified card does not exist"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cardID", value = "Card ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -221,17 +223,17 @@ public class CardController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 cardID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         if (StringUtils.isBlank(cardID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
         }
 
-        Promise<Card> cardPromise = Promise.wrap(cardRepository.retrieveById(cardID));
-
-        Promise<Result> result = cardPromise.map(res -> ok(Json.toJson(new CardResponse("0", "OK", res))));
+        Promise<Result> result = Promise.wrap(cardRepository.retrieveById(cardID)).map(res -> res.map(card
+                -> ok(Json.toJson(new CardResponse("0", "OK", card)))).orElse(ok(Json.toJson(createResponse("4",
+                "Specified card does not exist")))));
 
         return result.recover(error -> {
 

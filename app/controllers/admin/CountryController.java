@@ -113,8 +113,10 @@ public class CountryController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = CountryResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 4, message = "Specified country does not exist"),
+            @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "countryID", value = "Country ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -128,23 +130,23 @@ public class CountryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 countryID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         if (StringUtils.isBlank(countryID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
         }
 
-        Promise<Country> countryPromise = Promise.wrap(countryRepository.retrieveById(countryID));
-
-        Promise<Result> result = countryPromise.map(res -> ok(Json.toJson(new CountryResponse("0", "OK", res))));
+        Promise<Result> result = Promise.wrap(countryRepository.retrieveById(countryID)).map(res -> res.map(country
+                -> ok(Json.toJson(new CountryResponse("0", "OK", country)))).orElse(ok(Json.toJson(
+                createResponse("4", "Specified country does not exist")))));
 
         return result.recover(error -> {
 
                     Logger.error("Error:", error);
 
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
+                    return ok(Json.toJson(createResponse("6", error.getMessage())));
 
                 }
         );
