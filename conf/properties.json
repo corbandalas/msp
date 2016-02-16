@@ -41,6 +41,13 @@
       "value": "SPA:1822:SPA-VL-001 SafePay SDD Velocity EUR:SPA-CU-001 SafePay Virtual Card Usage:SPA-AF-001 SafePay Auth Fee Group EUR:14",
       "description": "Global Processing Card settings",
       "category": "GPS_INTEGRATION"
+    },
+
+    {
+      "id": "w2.globaldata.wsdl.url",
+      "value": "https://apiv3.w2globaldata.com/Service.svc?singleWsdl",
+      "description": "W2 Globaldata WSDL URL",
+      "category": "W2_INTEGRATION"
     }
 
   ]
