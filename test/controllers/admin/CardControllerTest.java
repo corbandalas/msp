@@ -126,7 +126,7 @@ public class CardControllerTest extends BaseControllerTest {
         String url = getAdminApiUrl("/card/getByCardBrand/VISA");
         final int timeout = 5000;
 
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID + "VISA" + ORDER_ID + ORDER_ID);
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID + "VISA" + ORDER_ID + SECRET);
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();

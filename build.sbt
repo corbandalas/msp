@@ -15,7 +15,8 @@ libraryDependencies ++= Seq(
   cache ,
   ws   ,
   javaWs,
-  specs2 % Test,
+  "com.novocode" % "junit-interface" % "0.11" % "test",
+  "junit" % "junit" % "4.11",
   "com.github.alaisi.pgasync"%"postgres-async-driver"%"0.7",
   "com.ning" % "async-http-client" % "1.9.3",
   "javax.inject" % "javax.inject" % "1",
@@ -25,8 +26,6 @@ libraryDependencies ++= Seq(
   "com.sun.xml.ws" % "jaxws-rt" % "2.2.10")
 
 libraryDependencies += filters
-
-unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
@@ -41,3 +40,5 @@ flywayPassword:=conf.getString("database.password")
 flywayLocations := Seq(conf.getString("flywayLocations"))
 
 flywaySchemas := Seq(conf.getString("database.schema"))
+
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v", "--ignore-runners=org.junit.runners.Suite")
