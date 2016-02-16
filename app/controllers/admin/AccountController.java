@@ -74,7 +74,7 @@ public class AccountController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
         }
 
-        if (account.getCreateDate() == null) account.setCreateDate(DateUtil.checkDate(new Date()));
+        if (account.getCreateDate() == null) account.setCreateDate(new Date());
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.create(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
 
