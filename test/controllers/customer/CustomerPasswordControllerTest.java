@@ -95,7 +95,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
     }
 
     private JsonNode createCustomer(Customer customer) {
-        final String url = getAdminApiUrl("/customer/createCustomer");
+        final String url = getAdminApiUrl("/customer/create");
 
         final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, customer.getId(), customer.getFirstName(), ORDER_ID, SECRET);
 
