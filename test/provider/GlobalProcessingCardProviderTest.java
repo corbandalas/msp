@@ -17,6 +17,7 @@ import scala.concurrent.duration.Duration;
 import static org.junit.Assert.fail;
 
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * Global processing card provider test
@@ -53,12 +54,12 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
         Thread.currentThread().sleep(1000);
 
-        final Currency currencyUSD = Await.result(currencyRepository.retrieveById("DKK"), Duration.apply("1000 ms"));
+        final Optional<Currency> currencyUSD = Await.result(currencyRepository.retrieveById("DKK"), Duration.apply("1000 ms"));
 
         try {
 
             globalProcessingCardProvider.issueEmptyVirtualCard(new Customer("380632426303", new Date(), "Mr", "Corban", "Dallas",
-                    "adress1", "adress2", "83004", "Donetsk", "me@corbandalas.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "UA"), "Vasya", currencyUSD).get(10000000L);
+                    "adress1", "adress2", "83004", "Donetsk", "me@corbandalas.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "UA"), "Vasya", currencyUSD.get()).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error", e);
             fail();
