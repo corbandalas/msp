@@ -91,13 +91,22 @@ public class CustomerLoginController extends BaseController {
             return F.Promise.pure(ok(Json.toJson(createResponse("2", "Provided and calculated enckeys do not match"))));
         }
 
-        final Promise<Customer> propertyPromise = Promise.wrap(customerRepository.retrieveByIdAndPassword(customerLogin.getPhone(), customerLogin.getHashedPassword()));
+        final String password = customerLogin.getHashedPassword();
+
+        final Promise<Customer> propertyPromise = Promise.wrap(customerRepository.retrieveById(customerLogin.getPhone()));
 
         Promise<Result> result = propertyPromise.map(customer -> {
+
             if (customer == null || !customer.getActive()) {
                 Logger.error("Specified customer does not exist or inactive");
 
                 return ok(Json.toJson(createResponse("3", "Authorization failed. Specified account does not exist or inactive")));
+            }
+
+            if (!customer.getPassword().equals(password)) {
+                Logger.error("Password doesn't match");
+
+                return ok(Json.toJson(createResponse("3", "Password doesn't match")));
             }
 
             String token = RandomStringUtils.randomAlphanumeric(10);

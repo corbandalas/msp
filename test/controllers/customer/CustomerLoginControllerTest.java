@@ -79,7 +79,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
 
-        assertEquals("2", loginResponse.get("code").asText());
+        assertEquals("3", loginResponse.get("code").asText());
     }
 
     private JsonNode create(Customer customer) {
