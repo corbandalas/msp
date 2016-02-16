@@ -1,5 +1,6 @@
 package controllers.admin;
 
+import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import junit.framework.TestCase;
@@ -11,6 +12,9 @@ import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
 import repository.ConnectionPool;
+import scala.concurrent.Await;
+import scala.concurrent.Promise;
+import scala.concurrent.duration.Duration;
 import util.SecurityUtil;
 
 import java.util.Date;
@@ -135,13 +139,12 @@ public class CardControllerTest extends BaseControllerTest {
     }
 
     @After
-    public void clean() {
+    public void clean() throws Exception {
         final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
         connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".card where id=$1", asList(newCardId),
-                resultSet -> {
-                }, throwable -> {
-                    throwable.printStackTrace();
-                });
+                promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT,"ms"));
     }
 
 }

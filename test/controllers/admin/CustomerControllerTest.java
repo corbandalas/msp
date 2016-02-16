@@ -100,7 +100,7 @@ public class CustomerControllerTest extends BaseControllerTest {
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
         assertEquals("0", response.get("code").asText());
 
-        final JsonNode result = retrieveByPhone(response.get("customerList").get(1).get("id").asText());
+        final JsonNode result = retrieveByPhone(response.get("customerList").get(0).get("id").asText());
         assertEquals("0", result.get("code").asText());
 
         assertEquals("83004", result.get("customer").get("postcode").asText());
