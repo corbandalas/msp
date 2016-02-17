@@ -129,7 +129,7 @@ public class CustomerLoginController extends BaseController {
 
                     Logger.error("Error:", error);
                     if (error instanceof CustomerNotRegisteredException) {
-                        return ok(Json.toJson(createResponse("6", "Specified account does not exist or inactive")));
+                        return ok(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
                     }
 
 
