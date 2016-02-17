@@ -34,7 +34,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
     private W2GlobaldataClient w2GlobaldataClient;
 
-   //@Before
+  //@Before
     public void setup() {
         Config conf = ConfigFactory.load();
         w2GlobaldataClient = application.injector().instanceOf(W2GlobaldataClient.class);
@@ -80,40 +80,41 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
     }
 
-   // @Test
-    public void SISPlusService() throws Exception {
+    //@Test
+    public void standardInternationalSanctionsService() throws Exception {
         try {
-            w2GlobaldataClient.SISPlusService("Robert Mugabe", null, null, null, null, null, true).get(10000000L);
+            w2GlobaldataClient.standardInternationalSanctionsService("Robert Mugabe", null, null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
-            Logger.error("Error SISPlusService", e);
+            Logger.error("Error standardInternationalSanctionsService", e);
             fail();
         }
     }
 
     //@Test
-    public void W2DataEkycUk007Service() throws Exception {
+    public void eKYC_UKService() throws Exception {
         try {
-            w2GlobaldataClient.W2DataEkycUk007Service("Moray", null, "Abdiou", 11, 12, 1924, "68", null, null, null, null, null, "LN4 7AT", true).get(10000000L);
+            Thread.currentThread().sleep(1000);
+            w2GlobaldataClient.eKYC_UKService("Moray", null, "Abdiou", 11, 12, 1924, "68", null, null, null, null, null, "LN4 7AT", true).get(10000000L);
         } catch (Exception e) {
-            Logger.error("Error W2DataEkycUk007Service", e);
+            Logger.error("Error eKYC_UKService", e);
             fail();
         }
     }
 
     //@Test
-    public void SPFPlusService() throws Exception {
+    public void seniorPoliticalFiguresService() throws Exception {
         try {
-            w2GlobaldataClient.SPFPlusService("David Cameron", null, null, null, null, null, true).get(10000000L);
+            w2GlobaldataClient.seniorPoliticalFiguresService("David Cameron", null, null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
-            Logger.error("Error SPFPlusService", e);
+            Logger.error("Error seniorPoliticalFiguresService", e);
             fail();
         }
     }
 
     //@Test
-    public void W2DataAddressLookup007Service() throws Exception {
+    public void internationalAddressLookupService() throws Exception {
         try {
-            w2GlobaldataClient.W2DataAddressLookup007Service("68", "RH13 3HE", null, null, null, null, true).get(10000000L);
+            w2GlobaldataClient.internationalAddressLookupService("68", "RH13 3HE", null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
             Logger.error("Error W2DataAddressLookup007Service", e);
             fail();
@@ -121,11 +122,11 @@ public class GlobalDataTest extends BaseRepositoryTest {
     }
 
     //@Test
-    public void W2DATAIDVCHECKService() throws Exception {
+    public void manualValidationService() throws Exception {
         try {
-            w2GlobaldataClient.W2DATAIDVCHECKService("Louie", "Ellis", "92", "PE12 0WS", 19, 2, 1944, "GBR", null, null, null, null, null, null, true).get(10000000L);
+            w2GlobaldataClient.manualValidationService("Louie", "Ellis", "92", "PE12 0WS", 19, 2, 1944, "GBR", null, null, null, null, null, null, true).get(10000000L);
         } catch (Exception e) {
-            Logger.error("Error W2DataAddressLookup007Service", e);
+            Logger.error("Error manualValidationService", e);
             fail();
         }
     }
