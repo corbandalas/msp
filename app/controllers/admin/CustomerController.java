@@ -5,14 +5,12 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.Authentication;
-import dto.BaseAPIResponse;
-import dto.CustomerListResponse;
-import dto.CustomerResponse;
+import dto.*;
 import model.Customer;
 import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -64,11 +62,11 @@ public class CustomerController extends BaseController {
             return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveAll()).map(countries -> ok(Json.toJson(new CustomerListResponse("0", "OK", countries))));
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveAll()).map(customers -> ok(Json.toJson(new CustomerListResponse("0", "OK", customers))));
 
         return result.recover(error -> {
             Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
@@ -107,9 +105,9 @@ public class CustomerController extends BaseController {
             return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
-        Promise<Optional<Customer>> customerPromise = Promise.wrap(customerRepository.retrieveById(phone));
-
-        Promise<Result> result = customerPromise.map(res -> ok(Json.toJson(new CustomerResponse("0", "OK", res.get()))));
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).map(operationOpt
+                -> operationOpt.map(customer -> ok(Json.toJson(new CustomerResponse("0", "OK", customer))))
+                .orElse(ok(Json.toJson(createResponse("4", "Specified operation does not exist")))));
 
         return result.recover(error -> {
 
@@ -369,6 +367,8 @@ public class CustomerController extends BaseController {
         }
 
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
+
+        customer.setTemppassword(true);
 
         final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
                 ok(Json.toJson(new CustomerResponse("0", "Customer created successfully", res))));

@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class CustomerControllerTest extends BaseControllerTest {
 
-    private String phone = "380953055623";
+    private String phone = "380953055621";
     private String email = "nihilist.don@gmail.com";
 
     @Test
@@ -75,6 +75,10 @@ public class CustomerControllerTest extends BaseControllerTest {
 
     @Test
     public void retrieveByPhone() throws Exception {
+        final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
+        final JsonNode createResult = create(customer, this.testServer.port());
+        TestCase.assertEquals("0", createResult.get("code").asText());
+
         String url = getAdminApiUrl("/customer/getByPhone/380953055621");
         final int timeout = 5000;
 
@@ -91,6 +95,10 @@ public class CustomerControllerTest extends BaseControllerTest {
 
     @Test
     public void retrieveByEmail() throws Exception {
+        final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
+        final JsonNode createResult = create(customer, this.testServer.port());
+        TestCase.assertEquals("0", createResult.get("code").asText());
+
         String url = getAdminApiUrl("/customer/getByEmail/".concat(email));
         final int timeout = 5000;
 
