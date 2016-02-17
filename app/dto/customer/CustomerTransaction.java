@@ -27,7 +27,7 @@ public class CustomerTransaction {
     private long wsid;
 
     public CustomerTransaction(Transaction2 transaction2) {
-        BeanUtils.copyProperties(transaction2,transaction2);
+        BeanUtils.copyProperties(transaction2,this);
     }
 
     public String getTxnDate() {

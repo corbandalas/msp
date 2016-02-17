@@ -108,6 +108,9 @@ POST    /api/customer/password/change                                 @controlle
 GET     /api-docs/api/customer/transaction                             @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/transaction")
 POST    /api/customer/transaction/list                                 @controllers.customer.CustomerTransactionController.retrieveByCard()
 
+GET     /api-docs/api/customer/profile                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/profile")
+GET     /api/customer/profile/get                                      @controllers.customer.CustomerProfileController.retrieve()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

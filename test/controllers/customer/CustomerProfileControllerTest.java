@@ -3,7 +3,6 @@ package controllers.customer;
 import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
-import dto.customer.CustomerTransactionFilter;
 import model.Customer;
 import model.enums.KYC;
 import org.junit.After;
@@ -21,16 +20,16 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 /**
- * API customer transaction test
+ * API customer profile tests
  * @author ra created 17.02.2016.
  * @since 0.1.0
  */
-public class CustomerTransactionControllerTest extends BaseControllerTest {
+public class CustomerProfileControllerTest extends BaseControllerTest {
 
     private String phone = "4524607605";
 
     @Test
-    public void listWrongCard() throws Exception {
+    public void get() throws Exception {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
@@ -41,15 +40,10 @@ public class CustomerTransactionControllerTest extends BaseControllerTest {
 
         final String token = authorizeResponse.get("token").asText();
 
-        final CustomerTransactionFilter request = new CustomerTransactionFilter();
-        request.setCardId(1L);
-        request.setFromDate("2016-02-17");
-        request.setToDate("2016-02-18");
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
 
-        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/transaction/list")).setHeader("token", token)
-                .post(Json.toJson(request)).get(TIMEOUT).asJson();
-
-        assertEquals("4",changeResponse.get("code").asText());
+        assertEquals("0",changeResponse.get("code").asText());
     }
 
     @After
