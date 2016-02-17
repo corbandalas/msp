@@ -84,7 +84,12 @@ public class CustomerTransactionController extends BaseController {
         final F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveById(transactionFilter.getCardId()));
 
         final F.Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
-            Card card = data._1.orElseThrow(WrongCardException::new);
+            final Card card;
+            if(data._1.isPresent())
+                card=data._1.get();
+            else
+                return F.Promise.pure(badRequest(Json.toJson(createResponse("4", "Specified card does not exist"))));
+
             if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
                 return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Specified card doesn't belong for authorized customer cards"))));
             }
@@ -99,13 +104,8 @@ public class CustomerTransactionController extends BaseController {
                 {
                     Logger.error("Error: ", throwable);
 
-                    if (throwable instanceof WrongCardException) {
-                        return ok(Json.toJson(createResponse("4", "Specified card does not exist")));
-                    }
-
                     return ok(Json.toJson(createResponse("6", "General error")));
                 }
-
         );
     }
 }
