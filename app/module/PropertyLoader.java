@@ -42,12 +42,14 @@ public class PropertyLoader {
 
                 propertyFuture.onComplete(new OnComplete<Optional<Property>>() {
                     public void onComplete(Throwable failure, Optional<Property> result) {
-                        if (failure != null) {
 
+                        if (!result.isPresent()) {
                             Logger.info("Property" + property.getId() + " doesn't exist in DB. Trying to insert it");
 
                             propertyRepository.create(property);
                         }
+
+
                     }
                 }, executionContextExecutor);
 
