@@ -31,7 +31,7 @@ public class CustomerControllerTest extends BaseControllerTest {
     @Test
     public void createAndUpdate() throws Exception {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
-        final JsonNode createResult = create(customer, this.testServer.port());
+        final JsonNode createResult = createCustomer(customer);
 
         TestCase.assertEquals("0", createResult.get("code").asText());
 
@@ -65,18 +65,10 @@ public class CustomerControllerTest extends BaseControllerTest {
                 .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
     }
 
-    public JsonNode create(Customer customer, int port) {
-        final String url = getAdminApiUrl("/customer/create");
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, customer.getId(), customer.getFirstName(), ORDER_ID, SECRET);
-
-        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-                .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
-    }
-
     @Test
     public void retrieveByPhone() throws Exception {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
-        final JsonNode createResult = create(customer, this.testServer.port());
+        final JsonNode createResult = createCustomer(customer);
         TestCase.assertEquals("0", createResult.get("code").asText());
 
         String url = getAdminApiUrl("/customer/getByPhone/380953055621");
@@ -96,7 +88,7 @@ public class CustomerControllerTest extends BaseControllerTest {
     @Test
     public void retrieveByEmail() throws Exception {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
-        final JsonNode createResult = create(customer, this.testServer.port());
+        final JsonNode createResult = createCustomer(customer);
         TestCase.assertEquals("0", createResult.get("code").asText());
 
         String url = getAdminApiUrl("/customer/getByEmail/".concat(email));

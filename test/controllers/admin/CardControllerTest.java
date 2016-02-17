@@ -38,15 +38,6 @@ public class CardControllerTest extends BaseControllerTest {
     private String alias = "alias";
     private String newCardId;
 
-    public JsonNode createCustomer(Customer customer) {
-        final String url = getAdminApiUrl("/customer/create");
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, customer.getId(), customer.getFirstName(), ORDER_ID, SECRET);
-
-        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-                .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
-    }
-
-
     @Test
     public void createAndUpdate() throws Exception {
         final Customer customer = new Customer(customer_id, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");

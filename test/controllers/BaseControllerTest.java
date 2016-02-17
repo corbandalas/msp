@@ -7,6 +7,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import configs.Constants;
 import dto.customer.CustomerLogin;
+import model.Account;
 import model.Customer;
 import model.Operation;
 import org.junit.After;
@@ -102,6 +103,13 @@ public class BaseControllerTest extends WithServer {
 
         return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
+    }
+
+    protected JsonNode createAccount(Account account) {
+        final String url = getAdminApiUrl("/account/create");
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, account.getId().toString(), account.getName(), account.getCurrencyId(), ORDER_ID, SECRET);
+        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(account)).get(TIMEOUT).asJson();
     }
 
     protected JsonNode authorizeCustomer(String phone, String password) {

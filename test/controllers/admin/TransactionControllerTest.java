@@ -3,11 +3,13 @@ package controllers.admin;
 import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
+import model.Account;
 import model.Operation;
 import model.Transaction;
 import model.enums.OperationType;
 import model.enums.TransactionType;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import play.libs.Json;
@@ -34,13 +36,9 @@ public class TransactionControllerTest extends BaseControllerTest {
 
     @Before
     public void insertAccount() throws Exception {
-        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
-        final Promise<Object> promise = Futures.promise();
-        connectionPool.getConnection().query("INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
-                        " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)", asList(ACCOUNT_2_ID, "USD", "God account",
-                new Timestamp(new Date().getTime()), true, SECRET),
-                promise::success, promise::failure);
-        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+        final Account account = new Account(Integer.parseInt(ACCOUNT_2_ID), "God account", "USD", null, true, SECRET);
+        final JsonNode createResponse = createAccount(account);
+        Assert.assertEquals("0", createResponse.get("code").asText());
     }
 
     @Test

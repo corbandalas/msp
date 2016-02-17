@@ -52,20 +52,12 @@ public class AccountControllerTest extends BaseControllerTest {
 
     @Test
     public void createAndUpdate() throws Exception {
-        final String createUrl = getAdminApiUrl("/account/create");
-
         newAccountId = 1;
         final String name = "test account";
 
         final Account account = new Account(newAccountId, name, "USD", null, true, "mySecret");
 
-        final String orderId = "1";
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, account.getId().toString(), account.getName(), account.getCurrencyId(),
-                orderId, SECRET);
-
-        final JsonNode createResponse = WS.url(createUrl).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-                .setHeader("orderId", orderId).post(Json.toJson(account)).get(TIMEOUT).asJson();
-
+        final JsonNode createResponse = createAccount(account);
         assertEquals("0", createResponse.get("code").asText());
 
         final JsonNode afterCreateResponse = retrieveById(newAccountId.toString());
@@ -79,9 +71,9 @@ public class AccountControllerTest extends BaseControllerTest {
         account.setCreateDate(new Date());
 
         final String updateEnckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID,
-                account.getName(), account.getCurrencyId(), orderId, SECRET);
+                account.getName(), account.getCurrencyId(), ORDER_ID, SECRET);
         final JsonNode updateResponse = WS.url(updateUrl).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", updateEnckey)
-                .setHeader("orderId", orderId).post(Json.toJson(account)).get(TIMEOUT).asJson();
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(account)).get(TIMEOUT).asJson();
         assertEquals("0", updateResponse.get("code").asText());
 
         final JsonNode afterUpdateResponse = retrieveById(newAccountId.toString());
