@@ -3,6 +3,7 @@ package w2globaldata;
 import com.google.inject.Inject;
 import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfKeyValueOfstringstring;
 import exception.W2GlobaldataException;
+import exception.WrongPropertyException;
 import model.Property;
 import org.datacontract.schemas._2004._07.databaselibrary.DocumentTypeEnum;
 import org.datacontract.schemas._2004._07.databaselibrary.IsoCountriesEnum;
@@ -12,11 +13,10 @@ import org.datacontract.schemas._2004._07.neuromancerlibrary_datacontracts.Docum
 import org.datacontract.schemas._2004._07.neuromancerlibrary_datacontracts.DocumentUploadResponse;
 import org.tempuri.IService;
 import org.tempuri.Service;
-import org.tempuri.UploadDocumentResponse;
 import play.Logger;
 import play.libs.F;
 import repository.PropertyRepository;
-import util.CryptUtil;
+import util.SecurityUtil;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeFactory;
@@ -25,6 +25,7 @@ import javax.xml.namespace.QName;
 import java.net.URL;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 
 /**
  * W2 Global data client
@@ -354,7 +355,7 @@ public class W2GlobaldataClient {
 
                 DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest();
 
-                documentUploadRequest.setDocumentData(new JAXBElement<>(new QName("d4p1"), String.class, CryptUtil.encodeString(documentData)));
+                documentUploadRequest.setDocumentData(new JAXBElement<>(new QName("d4p1"), String.class, SecurityUtil.encodeString(documentData)));
 
                 GregorianCalendar c = new GregorianCalendar();
                 c.setTime(documentExpiry);
@@ -395,11 +396,11 @@ public class W2GlobaldataClient {
 
     private F.Promise<W2GlobaldataSettings> getW2GlobaldataSettings() {
 
-        final F.Promise<Property> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.wsdl.url"));
+        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.wsdl.url"));
 
         return wsdlPromise.map(res -> {
 
-            String url = res.getValue();
+            String url = res.orElseThrow(WrongPropertyException::new).getValue();
 
             return new W2GlobaldataSettings(url);
 
