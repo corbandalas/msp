@@ -12,6 +12,7 @@ import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -81,9 +82,14 @@ public class ExchangeRateHistoryRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveByCurrencyId() throws Exception {
         try {
-            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), new Date(), "USD")), Duration.apply(defaultDelay));
-            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(11.24), new Date(), "EUR")), Duration.apply(defaultDelay));
-            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), new Date(), "EUR")), Duration.apply(defaultDelay));
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(10.24), calendar.getTime(), "USD")), Duration.apply(defaultDelay));
+            calendar.add(Calendar.MINUTE, 1);
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(11.24), calendar.getTime(), "EUR")), Duration.apply(defaultDelay));
+            calendar.add(Calendar.MINUTE, 1);
+            Await.result(exchangeRateHistoryRepository.create(new ExchangeRateHistory(null, new BigDecimal(12.24), calendar.getTime(), "EUR")), Duration.apply(defaultDelay));
 
             List<ExchangeRateHistory> result = Await.result(exchangeRateHistoryRepository.retrieveByCurrencyId("EUR"), Duration.apply(defaultDelay));
             assertEquals(2, result.size());

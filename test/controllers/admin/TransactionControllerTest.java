@@ -1,16 +1,27 @@
 package controllers.admin;
 
+import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import model.Operation;
 import model.Transaction;
 import model.enums.OperationType;
 import model.enums.TransactionType;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
+import repository.ConnectionPool;
+import scala.concurrent.Await;
+import scala.concurrent.Promise;
+import scala.concurrent.duration.Duration;
 import util.SecurityUtil;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
+import static java.util.Arrays.asList;
 import static junit.framework.TestCase.assertEquals;
 
 /**
@@ -20,6 +31,17 @@ import static junit.framework.TestCase.assertEquals;
  * @since 0.1.0
  */
 public class TransactionControllerTest extends BaseControllerTest {
+
+    @Before
+    public void insertAccount() throws Exception {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
+        connectionPool.getConnection().query("INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
+                        " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)", asList(ACCOUNT_2_ID, "USD", "God account",
+                new Timestamp(new Date().getTime()), true, SECRET),
+                promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+    }
 
     @Test
     public void retrieveById() throws Exception {
@@ -132,4 +154,15 @@ public class TransactionControllerTest extends BaseControllerTest {
         return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(transaction)).get(TIMEOUT).asJson();
     }
+
+
+    @After
+    public void clean() throws Exception {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".transaction; delete from " + connectionPool.getSchemaName() + ".operation; delete from " + connectionPool.getSchemaName() + ".account;",
+                promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+    }
+
 }

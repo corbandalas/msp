@@ -5,10 +5,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import junit.framework.TestCase;
 import model.Card;
+import model.Customer;
+import model.Operation;
 import model.enums.CardBrand;
 import model.enums.CardType;
+import model.enums.KYC;
 import org.junit.After;
 import org.junit.Test;
+import play.Logger;
 import play.libs.Json;
 import play.libs.ws.WS;
 import repository.ConnectionPool;
@@ -34,8 +38,21 @@ public class CardControllerTest extends BaseControllerTest {
     private String alias = "alias";
     private String newCardId;
 
+    public JsonNode createCustomer(Customer customer) {
+        final String url = getAdminApiUrl("/customer/create");
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, customer.getId(), customer.getFirstName(), ORDER_ID, SECRET);
+
+        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
+    }
+
+
     @Test
     public void createAndUpdate() throws Exception {
+        final Customer customer = new Customer(customer_id, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
+        final JsonNode createResultCustomer = createCustomer(customer);
+        TestCase.assertEquals("0", createResultCustomer.get("code").asText());
+
         final Card card = new Card(null, "token", customer_id, CardType.VIRTUAL, CardBrand.VISA, true, new Date(), alias, true, "info", "USD", "adress1", "adress2", "adress3", "USA");
         final JsonNode createResult = create(card, this.testServer.port());
 
@@ -139,12 +156,14 @@ public class CardControllerTest extends BaseControllerTest {
     }
 
     @After
-    public void clean() throws Exception {
-        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
-        final Promise<Object> promise = Futures.promise();
-        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".card where id=$1", asList(newCardId),
-                promise::success, promise::failure);
-        Await.result(promise.future(), Duration.apply(TIMEOUT,"ms"));
+    public void clean() {
+        final Promise<Operation> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".card; delete from " + connectionPool.getSchemaName() + ".customer", resultSet -> promise.success(null), promise::failure);
+        try {
+            Await.result(promise.future(), Duration.apply(String.valueOf(TIMEOUT)));
+        } catch (Exception e) {
+            Logger.error("Error", e);
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package controllers.admin;
 import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
+import model.Customer;
 import model.Property;
 import model.PropertyCategory;
 import org.junit.After;
@@ -26,14 +27,20 @@ import static org.junit.Assert.assertEquals;
  */
 public class PropertyControllerTest extends BaseControllerTest {
 
-    private String newPropertyId;
+    private String newPropertyId = "test.property";
+    private String newPropertyValue = "test property value";
 
     @Test
     public void retrieveById() throws Exception {
-        final JsonNode response = retrieveById("cardprovider.gps.wsdl.soap.header.username");
+
+        final Property property = new Property(newPropertyId, newPropertyValue, "test property description", PropertyCategory.GPS_INTEGRATION);
+        final JsonNode createResponse = create(property);
+        assertEquals("0", createResponse.get("code").asText());
+
+        final JsonNode response = retrieveById(newPropertyId);
 
         assertEquals("0", response.get("code").asText());
-        assertEquals("Safepaytest", response.get("property").get("value").asText());
+        assertEquals("test property value", response.get("property").get("value").asText());
     }
 
     @Test
@@ -50,24 +57,13 @@ public class PropertyControllerTest extends BaseControllerTest {
 
     @Test
     public void createAndUpdate() throws Exception {
-        final String createUrl = getAdminApiUrl("/property/create");
-
-        newPropertyId = "test.property";
-
-        final String value = "test property value";
-        final Property property = new Property(newPropertyId, value, "test property description", PropertyCategory.GPS_INTEGRATION);
-
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, property.getId(), property.getValue(),
-                property.getDescription(), property.getCategory().name(), ORDER_ID, SECRET);
-
-        final JsonNode createResponse = WS.url(createUrl).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-                .setHeader("orderId", ORDER_ID).post(Json.toJson(property)).get(TIMEOUT).asJson();
-
+        final Property property = new Property(newPropertyId, newPropertyValue, "test property description", PropertyCategory.GPS_INTEGRATION);
+        final JsonNode createResponse = create(property);
         assertEquals("0", createResponse.get("code").asText());
 
         final JsonNode afterCreateResponse = retrieveById(newPropertyId);
         assertEquals("0", afterCreateResponse.get("code").asText());
-        assertEquals(value, afterCreateResponse.get("property").get("value").asText());
+        assertEquals(newPropertyValue, afterCreateResponse.get("property").get("value").asText());
 
         final String updateUrl = getAdminApiUrl("/property/update");
 
@@ -83,6 +79,15 @@ public class PropertyControllerTest extends BaseControllerTest {
         final JsonNode afterUpdateResponse = retrieveById(newPropertyId);
         assertEquals("0", afterUpdateResponse.get("code").asText());
         assertEquals(newValue, afterUpdateResponse.get("property").get("value").asText());
+    }
+
+    public JsonNode create(Property property) {
+        final String url = getAdminApiUrl("/property/create");
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, property.getId(), property.getValue(),
+                property.getDescription(), property.getCategory().name(), ORDER_ID, SECRET);
+
+        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(property)).get(TIMEOUT).asJson();
     }
 
     private JsonNode retrieveById(String id) {
