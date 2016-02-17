@@ -1,5 +1,7 @@
 package util;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -12,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
  */
 
 public class SecurityUtil {
+
+    private static final Base64 theBase64Codec = new Base64();
 
     public static String generateKeyFromArray(String... params) {
         try {
@@ -62,5 +66,13 @@ public class SecurityUtil {
             sb.append(end.toUpperCase());
         }
         return sb.toString();
+    }
+
+    public static String encodeString(String str) {
+        return new String(theBase64Codec.encode(str.getBytes())).trim();
+    }
+
+    public static String decodeString(String str) {
+        return new String(theBase64Codec.decode(str.getBytes()));
     }
 }

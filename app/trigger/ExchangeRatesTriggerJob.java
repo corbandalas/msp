@@ -2,6 +2,7 @@ package trigger;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import exception.WrongPropertyException;
 import model.Currency;
 import model.Property;
 import play.Logger;
@@ -9,6 +10,7 @@ import play.libs.F;
 import repository.CurrencyRepository;
 import repository.PropertyRepository;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Exchange rates trigger job
@@ -34,22 +36,22 @@ public class ExchangeRatesTriggerJob implements Runnable {
 
 
         final F.Promise<List<Currency>> listCurrencyPromise = F.Promise.wrap(currencyRepository.retrieveAll());
-        final F.Promise<Property> apiKeyPromise = F.Promise.wrap(propertyRepository.retrieveById("com.currencylayer.api.key"));
-        final F.Promise<Property> apiUrlPromise = F.Promise.wrap(propertyRepository.retrieveById("com.currencylayer.api.url"));
+        final F.Promise<Optional<Property>> apiKeyPromise = F.Promise.wrap(propertyRepository.retrieveById("com.currencylayer.api.key"));
+        final F.Promise<Optional<Property>> apiUrlPromise = F.Promise.wrap(propertyRepository.retrieveById("com.currencylayer.api.url"));
 
 
-        final F.Promise<F.Tuple<F.Tuple<List<Currency>, Property>, Property>> zip = listCurrencyPromise.zip(apiKeyPromise).zip(apiUrlPromise);
+        final F.Promise<F.Tuple<F.Tuple<List<Currency>, Optional<Property>>, Optional<Property>>> zip = listCurrencyPromise.zip(apiKeyPromise).zip(apiUrlPromise);
 
 
         zip.flatMap(result -> {
 
 
-            final F.Tuple<List<Currency>, Property> listPropertyTuple2 = result._1;
-            final Property urlKeyProperty = result._2;
+            final F.Tuple<List<Currency>, Optional<Property>> listPropertyTuple2 = result._1;
+            final Optional<Property> urlKeyProperty = result._2;
             final List<Currency> currencies = listPropertyTuple2._1;
-            final Property apiKeyProperty = listPropertyTuple2._2;
+            final Optional<Property> apiKeyProperty = listPropertyTuple2._2;
 
-            return F.Promise.wrap(currencyRepository.updateCurrencyExchangeRates(currencies, urlKeyProperty.getValue(), apiKeyProperty.getValue()));
+            return F.Promise.wrap(currencyRepository.updateCurrencyExchangeRates(currencies, urlKeyProperty.orElseThrow(WrongPropertyException::new).getValue(), apiKeyProperty.orElseThrow(WrongPropertyException::new).getValue()));
 
         });
 

@@ -14,6 +14,7 @@ import scala.concurrent.Future;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * Application properties loader
@@ -37,10 +38,10 @@ public class PropertyLoader {
 
             for (Property property : propertyListResponse.getPropertyList()) {
 
-                Future<Property> propertyFuture = propertyRepository.retrieveById(property.getId());
+                Future<Optional<Property>> propertyFuture = propertyRepository.retrieveById(property.getId());
 
-                propertyFuture.onComplete(new OnComplete<Property>() {
-                    public void onComplete(Throwable failure, Property result) {
+                propertyFuture.onComplete(new OnComplete<Optional<Property>>() {
+                    public void onComplete(Throwable failure, Optional<Property> result) {
                         if (failure != null) {
 
                             Logger.info("Property" + property.getId() + " doesn't exist in DB. Trying to insert it");
