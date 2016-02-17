@@ -31,7 +31,8 @@ public class CustomerProfileControllerTest extends BaseControllerTest {
     @Test
     public void get() throws Exception {
         final String password = "hashedpass";
-        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+        final String name = "Ivan";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", name, "Petrenko", "adress1", "adress2",
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
         assertEquals("0", createResponse.get("code").asText());
 
@@ -40,10 +41,11 @@ public class CustomerProfileControllerTest extends BaseControllerTest {
 
         final String token = authorizeResponse.get("token").asText();
 
-        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
                 .get().get(TIMEOUT).asJson();
 
-        assertEquals("0",changeResponse.get("code").asText());
+        assertEquals("0",profileResponse.get("code").asText());
+        assertEquals(name,profileResponse.get("firstName").asText());
     }
 
     @After

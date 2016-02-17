@@ -109,7 +109,3 @@ public class CustomerTransactionController extends BaseController {
         );
     }
 }
-
-class CardAndCustomerDoesntMatchException extends Exception {
-
-}

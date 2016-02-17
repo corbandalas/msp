@@ -338,8 +338,10 @@ public class CustomerController extends BaseController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "Customer was created successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = 1, message = "Missing parameter"),
+            @ApiResponse(code = 2, message = "Wrong request format"),
+            @ApiResponse(code = 3, message = "Wrong enckey"),
+            @ApiResponse(code = 6, message = "General error"),
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Customer request", required = true, dataType = "model.Customer", paramType = "body"),
@@ -352,7 +354,13 @@ public class CustomerController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Customer customer = Json.fromJson(jsonNode, Customer.class);
+        final Customer customer;
+        try {
+            customer = Json.fromJson(jsonNode, Customer.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ",e);
+            return Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        }
 
         if (StringUtils.isBlank(customer.getId()) || StringUtils.isBlank(customer.getAddress1()) || StringUtils.isBlank(customer.getAddress2())) {
             Logger.error("Missing params");
@@ -363,7 +371,7 @@ public class CustomerController extends BaseController {
                 customer.getId(), customer.getFirstName(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
@@ -375,7 +383,7 @@ public class CustomerController extends BaseController {
 
         return result.recover(error -> {
             Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
+            return ok(Json.toJson(createResponse("6", error.getMessage())));
         });
     }
 
