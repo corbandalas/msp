@@ -368,6 +368,8 @@ public class CustomerController extends BaseController {
 
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
 
+        customer.setTemppassword(true);
+
         final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
                 ok(Json.toJson(new CustomerResponse("0", "Customer created successfully", res))));
 

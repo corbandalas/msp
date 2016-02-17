@@ -101,11 +101,11 @@ public class OperationRepositoryTest extends BaseRepositoryTest {
 
         final List<Operation> operations = Await.result(operationRepository.retrieveByDateAndType(startDate, endDate,
                 null, (short) 100, 0L), Duration.apply(defaultDelay));
-        assertEquals(3, operations.size());
+        assertEquals(4, operations.size());
 
         final List<Operation> deposits = Await.result(operationRepository.retrieveByDateAndType(startDate, endDate,
                 OperationType.DEPOSIT, (short) 100, 0L), Duration.apply(defaultDelay));
-        assertEquals(2, deposits.size());
+        assertEquals(3, deposits.size());
     }
 
     @After

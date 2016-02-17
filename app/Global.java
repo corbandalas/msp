@@ -38,8 +38,11 @@ public class Global extends GlobalSettings {
         propertyLoader.load("conf/properties.json", Play.application().getWrappedApplication().actorSystem().dispatcher());
 
         //Exchange Rates trigger
-        Akka.system().scheduler().schedule(Duration.create(20, TimeUnit.MINUTES), Duration.create(240, TimeUnit.MINUTES),
-                injector.getInstance(ExchangeRatesTriggerJob.class), Akka.system().dispatcher());
+        if (application.isDev() || application.isProd()) {
+
+            Akka.system().scheduler().schedule(Duration.create(20, TimeUnit.MINUTES), Duration.create(240, TimeUnit.MINUTES),
+                    injector.getInstance(ExchangeRatesTriggerJob.class), Akka.system().dispatcher());
+        }
     }
 
     public <T> T getControllerInstance(Class<T> aClass) throws Exception {
