@@ -38,9 +38,8 @@ public class CustomerCardListController extends BaseController {
             nickname = "cardList",
             value = "Get customer cards list",
             notes = "Allows to obtain all cards list for specified customer",
-            consumes = "application/json",
             produces = "application/json",
-            httpMethod = "POST",
+            httpMethod = "GET",
             response = CustomerCardListResponse.class
     )
 
@@ -60,7 +59,7 @@ public class CustomerCardListController extends BaseController {
 
 
         Promise<List<Card>> wrap = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
-        Promise<Result> result = wrap.flatMap(res -> Promise.sequence(res.stream().map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), s))).collect(Collectors.toList())).map(z -> ok(Json.toJson(new CustomerCardListResponse("0", "Succesfull card list retrieval", z)))));
+        Promise<Result> result = wrap.flatMap(res -> Promise.sequence(res.stream().map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), s))).collect(Collectors.toList())).map(z -> ok(Json.toJson(new CustomerCardListResponse("0", "Successful card list retrieval", z)))));
 
         return result.recover(error -> {
 
