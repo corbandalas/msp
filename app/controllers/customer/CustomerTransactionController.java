@@ -6,6 +6,7 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BaseAPIResponse;
+import dto.customer.CustomerLoginResponse;
 import dto.customer.CustomerTransaction;
 import dto.customer.CustomerTransactionFilter;
 import dto.customer.CustomerTransactionResponse;
@@ -43,6 +44,15 @@ public class CustomerTransactionController extends BaseController {
     CardRepository cardRepository;
 
     @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "listCustomerTransactions",
+            value = "Get customer transactions by card",
+            notes = "Allows customer to retrieve card transactions",
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "POST",
+            response = CustomerTransactionResponse.class
+    )
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = BaseAPIResponse.class),
             @ApiResponse(code = 1, message = "Missing parameters"),

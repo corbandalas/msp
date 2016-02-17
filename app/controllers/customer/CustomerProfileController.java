@@ -5,6 +5,7 @@ import configs.Constants;
 import controllers.BaseController;
 import dto.BaseAPIResponse;
 import dto.customer.CustomerProfileResponse;
+import dto.customer.CustomerTransactionResponse;
 import model.Customer;
 import play.libs.F;
 import play.libs.Json;
@@ -20,6 +21,15 @@ import play.mvc.With;
 public class CustomerProfileController extends BaseController {
 
     @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "getProfile",
+            value = "Get customer profile",
+            notes = "Allows customer to retrieve his profile",
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = CustomerProfileResponse.class
+    )
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = BaseAPIResponse.class),
     })
