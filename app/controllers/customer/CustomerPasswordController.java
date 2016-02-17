@@ -84,6 +84,7 @@ public class CustomerPasswordController extends BaseController {
         }
 
         customer.setPassword(request.getHashedPassword());
+        customer.setTemppassword(false);
 
         final F.Promise<Result> result = F.Promise.wrap(customerRepository.update(customer)).map(updCustomer ->
                 ok(Json.toJson(new BaseAPIResponse("Password was updated successfully", "0"))));

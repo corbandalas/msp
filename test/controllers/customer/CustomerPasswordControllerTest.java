@@ -71,7 +71,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final JsonNode changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("3",changeResponse.get("code").asText());
+        assertEquals("4",changeResponse.get("code").asText());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final JsonNode changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("4",changeResponse.get("code").asText());
+        assertEquals("5",changeResponse.get("code").asText());
     }
 
     @After
