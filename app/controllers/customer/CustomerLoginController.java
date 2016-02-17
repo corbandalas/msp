@@ -119,7 +119,7 @@ public class CustomerLoginController extends BaseController {
 
             String token = RandomStringUtils.randomAlphanumeric(10);
 
-            cache.set(token,  customer.getId());
+            cache.set(token,customer.getId());
 
             return ok(Json.toJson(new CustomerLoginResponse("0", "Authorization is OK", token, customer.getTemppassword())));
         });
