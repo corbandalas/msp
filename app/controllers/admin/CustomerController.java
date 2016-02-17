@@ -23,6 +23,7 @@ import util.SecurityUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * API customer controller
@@ -106,9 +107,9 @@ public class CustomerController extends BaseController {
             return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
         }
 
-        Promise<Customer> customerPromise = Promise.wrap(customerRepository.retrieveById(phone));
+        Promise<Optional<Customer>> customerPromise = Promise.wrap(customerRepository.retrieveById(phone));
 
-        Promise<Result> result = customerPromise.map(res -> ok(Json.toJson(new CustomerResponse("0", "OK", res))));
+        Promise<Result> result = customerPromise.map(res -> ok(Json.toJson(new CustomerResponse("0", "OK", res.get()))));
 
         return result.recover(error -> {
 

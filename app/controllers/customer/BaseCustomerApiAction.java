@@ -2,6 +2,8 @@ package controllers.customer;
 
 import com.google.inject.Inject;
 import dto.BaseAPIResponse;
+import exception.CustomerNotRegisteredException;
+import model.Customer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.cache.CacheApi;
@@ -39,7 +41,10 @@ public class BaseCustomerApiAction extends Action.Simple {
             return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Authorization token was not found", "1"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).flatMap(customer -> {
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).flatMap(customerOptional -> {
+
+            Customer customer = customerOptional.orElseThrow(CustomerNotRegisteredException::new);
+
             if (!customer.getActive()) {
                 Logger.error("Customer for specified token is not active");
                 return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Customer for specified token is not active", "1"))));

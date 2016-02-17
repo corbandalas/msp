@@ -22,7 +22,7 @@ public class BaseControllerTest extends WithServer {
     public final String ACCOUNT_2_ID = "43";
     public final String SECRET = "OMG";
     public final String ACCOUNT_NAME = "God account";
-    public final long TIMEOUT = 1000;
+    public final long TIMEOUT = 3000;
 
     public String getAdminApiUrl(String locaApiUrl) {
         return "http://localhost:" + this.testServer.port() + Constants.ADMIN_API_PATH + locaApiUrl;
