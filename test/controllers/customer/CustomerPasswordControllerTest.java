@@ -4,7 +4,6 @@ import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import dto.customer.CustomerChangePassword;
-import dto.customer.CustomerLogin;
 import model.Customer;
 import model.enums.KYC;
 import org.junit.After;
@@ -15,7 +14,6 @@ import repository.ConnectionPool;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
-import util.SecurityUtil;
 
 import java.util.Date;
 
@@ -39,7 +37,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
         assertEquals("0", createResponse.get("code").asText());
 
-        final JsonNode authorizeResponse = authorize(phone, password);
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
         assertEquals("0", authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
@@ -61,7 +59,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
         assertEquals("0", createResponse.get("code").asText());
 
-        final JsonNode authorizeResponse = authorize(phone, password);
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
         assertEquals("0", authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
@@ -83,7 +81,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
         assertEquals("0", createResponse.get("code").asText());
 
-        final JsonNode authorizeResponse = authorize(phone, password);
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
         assertEquals("0", authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
@@ -96,29 +94,6 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
         assertEquals("4",changeResponse.get("code").asText());
-    }
-
-    private JsonNode createCustomer(Customer customer) {
-        final String url = getAdminApiUrl("/customer/create");
-
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, customer.getId(), customer.getFirstName(), ORDER_ID, SECRET);
-
-        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-                .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
-    }
-
-    private JsonNode authorize(String phone, String password) {
-        final String url = getCustomerApiUrl("/login");
-
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, phone, password, SECRET);
-
-        CustomerLogin customerLogin = new CustomerLogin();
-
-        customerLogin.setPhone(phone);
-        customerLogin.setHashedPassword(password);
-
-        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
     }
 
     @After

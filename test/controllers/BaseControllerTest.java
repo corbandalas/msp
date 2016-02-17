@@ -3,6 +3,8 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import configs.Constants;
+import dto.customer.CustomerLogin;
+import model.Customer;
 import model.Operation;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -39,5 +41,28 @@ public class BaseControllerTest extends WithServer {
 
         return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(operation)).get(TIMEOUT).asJson();
+    }
+
+    protected JsonNode createCustomer(Customer customer) {
+        final String url = getAdminApiUrl("/customer/create");
+
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, customer.getId(), customer.getFirstName(), ORDER_ID, SECRET);
+
+        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
+    }
+
+    protected JsonNode authorizeCustomer(String phone, String password) {
+        final String url = getCustomerApiUrl("/login");
+
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, phone, password, SECRET);
+
+        CustomerLogin customerLogin = new CustomerLogin();
+
+        customerLogin.setPhone(phone);
+        customerLogin.setHashedPassword(password);
+
+        return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
     }
 }
