@@ -45,9 +45,10 @@ public class PropertyLoader {
 
                         if (!result.isPresent()) {
 
-                            Logger.info("Property" + property.getId() + " doesn't exist in DB. Trying to insert it");
+                            Logger.info("Property " + property.getId() + " doesn't exist in DB. Trying to insert it");
 
                             propertyRepository.create(property);
+
                         }
 
 
