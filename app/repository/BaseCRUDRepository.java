@@ -36,9 +36,9 @@ public interface BaseCRUDRepository<T extends BaseEntity> {
 
     default Optional<T> createEntity(ResultSet resultSet) {
 
-        Row row = resultSet.row(0);
 
         if (resultSet.size() > 0) {
+            Row row = resultSet.row(0);
 
             return Optional.of(createEntity(row));
 
