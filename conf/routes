@@ -114,6 +114,8 @@ GET     /api/customer/profile/get                                      @controll
 GET     /api-docs/api/customer/card/list                                @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/list")
 GET     /api/customer/card/list                                         @controllers.customer.CustomerCardListController.cardList()
 
+GET     /api-docs/api/customer/card/balance                             @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/balance")
+GET     /api/customer/card/balance/:cardID                              @controllers.customer.CustomerCardBalanceController.cardBalance(cardID:Long)
 
 
 # Map static resources from the /public folder to the /assets URL path
