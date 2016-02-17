@@ -48,6 +48,7 @@ public class CustomerTransactionController extends BaseController {
             @ApiResponse(code = 1, message = "Missing parameters"),
             @ApiResponse(code = 2, message = "Wrong request format"),
             @ApiResponse(code = 4, message = "Specified card does not exist"),
+            @ApiResponse(code = 5, message = "Specified card doesn't belong for authorized customer cards"),
             @ApiResponse(code = 6, message = "General error")
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.CustomerTransactionFilter", paramType = "body"),
@@ -85,7 +86,7 @@ public class CustomerTransactionController extends BaseController {
         final F.Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
             Card card = data._1.orElseThrow(WrongCardException::new);
             if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+                return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Specified card doesn't belong for authorized customer cards"))));
             }
 
             return cardProvider.getCardTransactions(card, parsedFromDate, parsedToDate).map(transactionListResponse
