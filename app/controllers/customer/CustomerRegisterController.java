@@ -115,7 +115,7 @@ public class CustomerRegisterController extends BaseController {
                 throw new WrongCountryException("Country is not exist or inactive");
             }
 
-            if (!rez._2) {
+            if (rez._2) {
                 Logger.error("Customer is already registered");
 
                 throw new CustomerAlreadyRegisteredException("Customer is already registered");
@@ -126,10 +126,11 @@ public class CustomerRegisterController extends BaseController {
 
             customer.setActive(true);
             customer.setCountry_id(country);
-            customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+            customer.setKyc(KYC.NONE);
             customer.setPassword(SecurityUtil.generateKeyFromArray(password));
             customer.setId(phone);
             customer.setRegistrationDate(new Date());
+            customer.setDateBirth(new Date());
             customer.setTemppassword(true);
 
             return Promise.wrap(customerRepository.create(customer)).zip(Promise.pure(password));
