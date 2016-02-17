@@ -10,6 +10,7 @@ import dto.customer.CustomerTransaction;
 import dto.customer.CustomerTransactionFilter;
 import dto.customer.CustomerTransactionResponse;
 import exception.WrongCardException;
+import model.Card;
 import model.Customer;
 import play.Logger;
 import play.libs.F;
@@ -23,6 +24,8 @@ import repository.CardRepository;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -76,21 +79,36 @@ public class CustomerTransactionController extends BaseController {
             return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
         }
 
-        final F.Promise<CardTransactionListResponse> transactionListResponsePromise = F.Promise
-                .wrap(cardRepository.retrieveById(transactionFilter.getCardId())).flatMap(cardOpt ->
-                        cardProvider.getCardTransactions(cardOpt.orElseThrow(WrongCardException::new), parsedFromDate, parsedToDate));
-        final F.Promise<Result> result = transactionListResponsePromise.map(transactionListResponse -> ok(Json
-                .toJson(new CustomerTransactionResponse("OK", "0", transactionListResponse.getList().stream()
-                        .map(CustomerTransaction::new).collect(Collectors.toList())))));
+        final F.Promise<List<Card>> cardListPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
+        final F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveById(transactionFilter.getCardId()));
 
-        return result.recover(throwable -> {
-            Logger.error("Error: ",throwable);
-
-            if(throwable instanceof WrongCardException) {
-                return ok(Json.toJson(createResponse("4","Specified card does not exist")));
+        final F.Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
+            Card card = data._1.orElseThrow(WrongCardException::new);
+            if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
+                return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
             }
 
-            return ok(Json.toJson(createResponse("6","General error")));
+            return cardProvider.getCardTransactions(card, parsedFromDate, parsedToDate).map(transactionListResponse
+                    -> ok(Json.toJson(new CustomerTransactionResponse("OK", "0", transactionListResponse.getList().stream()
+                    .map(CustomerTransaction::new).collect(Collectors.toList())))));
         });
+
+        return result.recover(throwable ->
+
+                {
+                    Logger.error("Error: ", throwable);
+
+                    if (throwable instanceof WrongCardException) {
+                        return ok(Json.toJson(createResponse("4", "Specified card does not exist")));
+                    }
+
+                    return ok(Json.toJson(createResponse("6", "General error")));
+                }
+
+        );
     }
+}
+
+class CardAndCustomerDoesntMatchException extends Exception {
+
 }
