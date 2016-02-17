@@ -88,13 +88,13 @@ public class CustomerLoginController extends BaseController {
 
         if (customerLogin == null || StringUtils.isBlank(customerLogin.getPhone()) || StringUtils.isBlank(customerLogin.getHashedPassword())) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong parameters"))));
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong parameters"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), customerLogin.getPhone(), customerLogin.getHashedPassword(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(badRequest(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
         }
 
         final String password = customerLogin.getHashedPassword();
@@ -108,13 +108,13 @@ public class CustomerLoginController extends BaseController {
             if (!customer.getActive()) {
                 Logger.error("Specified customer does not exist or inactive");
 
-                return ok(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
+                return badRequest(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
             }
 
             if (!customer.getPassword().equals(password)) {
                 Logger.error("Password doesn't match");
 
-                return ok(Json.toJson(createResponse("5", "Password doesn't match")));
+                return badRequest(Json.toJson(createResponse("5", "Password doesn't match")));
             }
 
             String token = RandomStringUtils.randomAlphanumeric(10);
@@ -129,11 +129,11 @@ public class CustomerLoginController extends BaseController {
 
                     Logger.error("Error:", error);
                     if (error instanceof CustomerNotRegisteredException) {
-                        return ok(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
+                        return badRequest(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
                     }
 
 
-                    return ok(Json.toJson(createResponse("6", error.getMessage())));
+                    return badRequest(Json.toJson(createResponse("6", error.getMessage())));
 
                 }
         );

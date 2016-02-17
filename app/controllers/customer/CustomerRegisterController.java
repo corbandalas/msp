@@ -69,7 +69,7 @@ public class CustomerRegisterController extends BaseController {
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Registration request", required = true, dataType = "dto.customer.CustomerRegister", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+country++secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+country+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
 
@@ -93,13 +93,13 @@ public class CustomerRegisterController extends BaseController {
 
         if (customerRegister == null || StringUtils.isBlank(customerRegister.getPhone()) || StringUtils.isBlank(customerRegister.getCountry())) {
             Logger.error("Missing params");
-            return Promise.pure(ok(Json.toJson(createResponse("2", "Missing params"))));
+            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Missing params"))));
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), customerRegister.getPhone(), customerRegister.getCountry(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Wrong enckey"))));
+            return Promise.pure(badRequest(Json.toJson(createResponse("3", "Wrong enckey"))));
         }
 
         final String country = customerRegister.getCountry();
@@ -147,14 +147,14 @@ public class CustomerRegisterController extends BaseController {
                     Logger.error("Error:", error);
 
                     if (error instanceof WrongCountryException) {
-                        return ok(Json.toJson(createResponse("4", error.getMessage())));
+                        return badRequest(Json.toJson(createResponse("4", error.getMessage())));
                     }
 
                     if (error instanceof CustomerAlreadyRegisteredException) {
-                        return ok(Json.toJson(createResponse("5", error.getMessage())));
+                        return badRequest(Json.toJson(createResponse("5", error.getMessage())));
                     }
 
-                    return ok(Json.toJson(createResponse("6", "General error")));
+                    return badRequest(Json.toJson(createResponse("6", "General error")));
 
                 }
         );
