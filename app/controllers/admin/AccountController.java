@@ -178,7 +178,7 @@ public class AccountController extends BaseController {
         }
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(accountId)).map(accountOpt
-                -> accountOpt.map(account -> ok(Json.toJson(account))).orElse(ok(Json.toJson(createResponse("4", "Specified account does not exist")))));
+                -> accountOpt.map(account -> ok(Json.toJson(new AccountResponse("0", "OK", account)))).orElse(ok(Json.toJson(createResponse("4", "Specified account does not exist")))));
 
         return result.recover(error -> {
             Logger.error("Error: ", error);

@@ -1,13 +1,34 @@
 package controllers;
 
 
+import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import configs.Constants;
+import junit.framework.Assert;
+import model.Account;
 import model.Operation;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.internal.runners.statements.Fail;
 import play.libs.Json;
 import play.libs.ws.WS;
 import play.test.WithServer;
+import repository.ConnectionPool;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.Promise;
+import scala.concurrent.duration.Duration;
 import util.SecurityUtil;
+
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.logging.Logger;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Base API controller test
@@ -23,6 +44,39 @@ public class BaseControllerTest extends WithServer {
     public final String SECRET = "OMG";
     public final String ACCOUNT_NAME = "God account";
     public final long TIMEOUT = 3000;
+
+    public ConnectionPool connectionPool;
+
+    @Before
+    public void init() {
+        Config conf = ConfigFactory.load();
+        connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        connectionPool.setSchemaName(conf.getString("database.test.schema"));
+        try {
+            insertAccount();
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    private void insertAccount() throws Exception {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
+        connectionPool.getConnection().query("INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
+                        " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)", asList(ACCOUNT_ID, "USD", "God account",
+                new Timestamp(new Date().getTime()), true, SECRET),
+                promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+    }
+
+    @After
+    public void delete() throws Exception {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".account where id=$1", asList(ACCOUNT_ID),
+                promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+    }
 
     public String getAdminApiUrl(String locaApiUrl) {
         return "http://localhost:" + this.testServer.port() + Constants.ADMIN_API_PATH + locaApiUrl;

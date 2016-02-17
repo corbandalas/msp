@@ -11,7 +11,7 @@ public class AccountResponse extends BaseAPIResponse {
 
     private Account account;
 
-    public AccountResponse(String text, String code, Account account) {
+    public AccountResponse(String code, String text, Account account) {
         super(text, code);
         this.account = account;
     }
