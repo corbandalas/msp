@@ -44,6 +44,7 @@ public class PropertyLoader {
                     public void onComplete(Throwable failure, Optional<Property> result) {
 
                         if (!result.isPresent()) {
+
                             Logger.info("Property" + property.getId() + " doesn't exist in DB. Trying to insert it");
 
                             propertyRepository.create(property);
