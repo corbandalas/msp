@@ -3,6 +3,10 @@ package controllers.admin;
 import com.google.inject.Inject;
 import dto.Authentication;
 import dto.BaseAPIResponse;
+import exception.AccountNotFoundException;
+import exception.CustomerNotRegisteredException;
+import model.Account;
+import model.Customer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -46,8 +50,11 @@ public class BaseMerchantApiAction extends Action.Simple {
             return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("enckey header is missing", "1"))));
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(Integer.parseInt(accountId))).flatMap(authAccount -> {
-            if (authAccount == null || !authAccount.getActive()) {
+        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(Integer.parseInt(accountId))).flatMap(authAccountOptional -> {
+
+            Account authAccount = authAccountOptional.orElseThrow(AccountNotFoundException::new);
+
+            if (!authAccount.getActive()) {
                 Logger.error("Specified account does not exist or inactive");
 
                 return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Specified account does not exist or inactive", "1"))));
@@ -61,7 +68,13 @@ public class BaseMerchantApiAction extends Action.Simple {
         });
 
         return result.recover(throwable -> {
+
             Logger.error("Error: ", throwable);
+
+            if (throwable instanceof AccountNotFoundException) {
+                return ok(Json.toJson(new BaseAPIResponse("Specified account does not exist or inactive", "1")));
+            }
+
             return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "2")));
         });
     }
