@@ -51,15 +51,15 @@ public class W2GlobaldataClient {
     }
 
 
-    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth, Boolean sandbox) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(nameQuery, nameQueryMatchThreshold, dateOfBirthMatchThreshold, dayOfBirth, monthOfBirth, yearOfBirth), sandbox));
+    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(nameQuery, nameQueryMatchThreshold, dateOfBirthMatchThreshold, dayOfBirth, monthOfBirth, yearOfBirth)));
     }
 
-    public F.Promise<ServiceResponse> seniorPoliticalFiguresService(String nameQuery, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth, Boolean sandbox) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(nameQuery, nameQueryMatchThreshold, dateOfBirthMatchThreshold, dayOfBirth, monthOfBirth, yearOfBirth), sandbox));
+    public F.Promise<ServiceResponse> seniorPoliticalFiguresService(String nameQuery, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(nameQuery, nameQueryMatchThreshold, dateOfBirthMatchThreshold, dayOfBirth, monthOfBirth, yearOfBirth)));
     }
 
-    public F.Promise<ServiceResponse> eKYC_UKService(String forename, String middleNames, String surname, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth, String houseNameNumber, String street, String region, String county, String country, String city, String postcode, Boolean sandbox) {
+    public F.Promise<ServiceResponse> eKYC_UKService(String forename, String middleNames, String surname, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth, String houseNameNumber, String street, String region, String county, String country, String city, String postcode) {
         QueryData queryData = new QueryData();
         queryData.setForename(new JAXBElement<>(new QName("d4p1"), String.class, forename));
         queryData.setMiddleNames(new JAXBElement<>(new QName("d4p1"), String.class, middleNames));
@@ -76,10 +76,10 @@ public class W2GlobaldataClient {
         queryData.setCity(new JAXBElement<>(new QName("d4p1"), String.class, city));
         queryData.setPostcode(new JAXBElement<>(new QName("d4p1"), String.class, postcode));
 
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData, sandbox));
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData));
     }
 
-    public F.Promise<ServiceResponse> internationalAddressLookupService(String houseNameNumber, String postcode, String street, String county, String city, String country, Boolean sandbox) {
+    public F.Promise<ServiceResponse> internationalAddressLookupService(String houseNameNumber, String postcode, String street, String county, String city, String country) {
         QueryData queryData = new QueryData();
         queryData.setHouseNameNumber(new JAXBElement<>(new QName("d4p1"), String.class, houseNameNumber));
         queryData.setPostcode(new JAXBElement<>(new QName("d4p1"), String.class, postcode));
@@ -89,10 +89,10 @@ public class W2GlobaldataClient {
         queryData.setCountry(IsoCountriesEnum.valueOf("country"));
         queryData.setCountry(null);
 
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData, sandbox));
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData));
     }
 
-    public F.Promise<ServiceResponse> manualValidationService(String forename, String surname, String houseNameNumber, String postcode, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth, String country, String gender, String phoneNumber, String mobileNumber, String flat, String city, String county, Boolean sandbox) {
+    public F.Promise<ServiceResponse> manualValidationService(String forename, String surname, String houseNameNumber, String postcode, Integer dayOfBirth, Integer monthOfBirth, Integer yearOfBirth, String country, String gender, String phoneNumber, String mobileNumber, String flat, String city, String county) {
         QueryData queryData = new QueryData();
         queryData.setForename(new JAXBElement<>(new QName("d4p1"), String.class, forename));
         queryData.setSurname(new JAXBElement<>(new QName("d4p1"), String.class, surname));
@@ -109,14 +109,14 @@ public class W2GlobaldataClient {
         queryData.setCity(new JAXBElement<>(new QName("d4p1"), String.class, city));
         queryData.setCounty(new JAXBElement<>(new QName("d4p1"), String.class, county));
 
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData, sandbox));
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData));
     }
 
-    public F.Promise<DocumentUploadResponse> uploadDocument(String documentData, String documentReference, String documentType, Date documentExpiry, Boolean sandbox) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeUploadDocument(res, documentData, documentReference, documentType, documentExpiry, sandbox));
+    public F.Promise<DocumentUploadResponse> uploadDocument(String documentData, String documentReference, String documentType, Date documentExpiry) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeUploadDocument(res, documentData, documentReference, documentType, documentExpiry));
     }
 
-    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, Boolean sandbox) {
+    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData) {
         return F.Promise.promise(() -> {
             try {
 
@@ -131,7 +131,7 @@ public class W2GlobaldataClient {
                 final ArrayOfKeyValueOfstringstring queryOptions = new ArrayOfKeyValueOfstringstring();
                 final ArrayOfKeyValueOfstringstring.KeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstring.KeyValueOfstringstring();
 
-                if (sandbox) {
+                if (w2GlobaldataSettings.sandbox) {
                     queryOption.setKey("Sandbox");
                     queryOption.setValue("true");
                 }
@@ -157,7 +157,7 @@ public class W2GlobaldataClient {
         });
     }
 
-    private F.Promise<DocumentUploadResponse> invokeUploadDocument(W2GlobaldataSettings w2GlobaldataSettings, String documentData, String documentReference, String documentType, Date documentExpiry, Boolean sandbox) {
+    private F.Promise<DocumentUploadResponse> invokeUploadDocument(W2GlobaldataSettings w2GlobaldataSettings, String documentData, String documentReference, String documentType, Date documentExpiry) {
         return F.Promise.promise(() -> {
             try {
 
@@ -180,7 +180,7 @@ public class W2GlobaldataClient {
                 final ArrayOfKeyValueOfstringstring queryOptions = new ArrayOfKeyValueOfstringstring();
                 final ArrayOfKeyValueOfstringstring.KeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstring.KeyValueOfstringstring();
 
-                if (sandbox) {
+                if (w2GlobaldataSettings.sandbox) {
                     queryOption.setKey("Sandbox");
                     queryOption.setValue("true");
                 }
@@ -208,21 +208,25 @@ public class W2GlobaldataClient {
     private F.Promise<W2GlobaldataSettings> getW2GlobaldataSettings() {
 
         final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.wsdl.url"));
+        final F.Promise<Optional<Property>> sandboxPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.sandbox.mode"));
 
-        return wsdlPromise.map(res -> {
+        return wsdlPromise.zip(sandboxPromise).map(res -> {
 
-            String url = res.orElseThrow(WrongPropertyException::new).getValue();
+            String url = res._1.orElseThrow(WrongPropertyException::new).getValue();
+            Boolean sandbox = Boolean.parseBoolean(res._2.orElseThrow(WrongPropertyException::new).getValue());
 
-            return new W2GlobaldataSettings(url);
+            return new W2GlobaldataSettings(url, sandbox);
 
         });
     }
 
     private class W2GlobaldataSettings {
         private String wsdlURL;
+        private Boolean sandbox;
 
-        public W2GlobaldataSettings(String wsdlURL) {
+        public W2GlobaldataSettings(String wsdlURL, Boolean sandbox) {
             this.wsdlURL = wsdlURL;
+            this.sandbox = sandbox;
         }
     }
 

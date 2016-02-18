@@ -48,6 +48,13 @@
       "value": "https://apiv3.w2globaldata.com/Service.svc?singleWsdl",
       "description": "W2 Globaldata WSDL URL",
       "category": "W2_INTEGRATION"
+    },
+
+    {
+      "id": "w2.globaldata.sandbox.mode",
+      "value": "true",
+      "description": "W2 Globaldata sandbox flag",
+      "category": "W2_INTEGRATION"
     }
 
   ]
