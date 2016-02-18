@@ -55,6 +55,20 @@
       "value": "true",
       "description": "W2 Globaldata sandbox flag",
       "category": "W2_INTEGRATION"
+    },
+
+    {
+      "id": "w2.globaldata.nameQueryMatchThreshold",
+      "value": "80",
+      "description": "W2 Globaldata nameQueryMatchThreshold",
+      "category": "W2_INTEGRATION"
+    },
+
+    {
+      "id": "w2.globaldata.dateOfBirthMatchThreshold",
+      "value": "",
+      "description": "W2 Globaldata dateOfBirthMatchThreshold",
+      "category": "W2_INTEGRATION"
     }
 
   ]
