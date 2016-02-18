@@ -43,7 +43,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
         globalProcessingCardProvider = application.injector().instanceOf(GlobalProcessingCardProvider.class);
         currencyRepository = application.injector().instanceOf(CurrencyRepository.class);
         PropertyLoader propertyLoader = application.injector().instanceOf(PropertyLoader.class);
-        propertyLoader.load(conf.getString("project.path") + "/conf/properties.json", dispatcher);
+        propertyLoader.load("conf/properties.json", dispatcher);
 
 
     }

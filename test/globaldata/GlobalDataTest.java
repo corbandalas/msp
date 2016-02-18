@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.tempuri.IService;
 import org.tempuri.Service;
 import play.Logger;
+import play.api.Play;
 import play.libs.F;
 import provider.GlobalProcessingCardProvider;
 import repository.BaseRepositoryTest;
@@ -22,6 +23,12 @@ import w2globaldata.W2GlobaldataClient;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 
 import static org.junit.Assert.fail;
@@ -34,12 +41,11 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
     private W2GlobaldataClient w2GlobaldataClient;
 
-    @Before
+    //@Before
     public void setup() {
-        Config conf = ConfigFactory.load();
         w2GlobaldataClient = application.injector().instanceOf(W2GlobaldataClient.class);
         PropertyLoader propertyLoader = application.injector().instanceOf(PropertyLoader.class);
-        propertyLoader.load(conf.getString("project.path") + "/conf/properties.json", dispatcher);
+        propertyLoader.load(("conf/properties.json"), dispatcher);
     }
 
 
@@ -80,7 +86,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
     }
 
-    @Test
+    //@Test
     public void standardInternationalSanctionsService() throws Exception {
         try {
             w2GlobaldataClient.standardInternationalSanctionsService("Robert Mugabe", new Date()).get(10000000L);
