@@ -6,8 +6,8 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BaseAPIResponse;
-import dto.customer.CustomerTransactionResponse;
-import dto.customer.TransferOwnCards;
+import dto.customer.CustomerTransferOwnCards;
+import dto.customer.CustomerTransferResponse;
 import exception.WrongAccountException;
 import exception.WrongCurrencyException;
 import exception.WrongPropertyException;
@@ -67,7 +67,7 @@ public class CustomerTransferController extends BaseController {
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "POST",
-            response = TransferOwnCards.class
+            response = CustomerTransferOwnCards.class
     )
     @ApiResponses(value = {
             @ApiResponse(code = 0, message = "OK", response = BaseAPIResponse.class),
@@ -84,9 +84,9 @@ public class CustomerTransferController extends BaseController {
         final Customer customer = (Customer) ctx().args.get("customer");
 
         final JsonNode jsonNode = request().body().asJson();
-        final TransferOwnCards request;
+        final CustomerTransferOwnCards request;
         try {
-            request = Json.fromJson(jsonNode, TransferOwnCards.class);
+            request = Json.fromJson(jsonNode, CustomerTransferOwnCards.class);
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
             return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
@@ -130,12 +130,10 @@ public class CustomerTransferController extends BaseController {
                 return F.Promise.pure(ok(Json.toJson(createResponse("7", "Specified cardTo doesn't belong to customer"))));
             }
 
-            return cardProvider.transferBetweenCards(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(), request.getDescription()).map(providerResponse -> {
-                createTransferOperation(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(), request.getOrderId(), request.getDescription());
-
-                return ok(Json.toJson(createResponse("0", "Transfer was completed successfully")));
-            });
-
+            return cardProvider.transferBetweenCards(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(),
+                    request.getDescription()).flatMap(providerResponse -> createTransferOperation(cardFrom.get(),
+                    cardTo.get(), request.getAmount(), data._2.get(), request.getOrderId(), request.getDescription())
+                    .map(res -> ok(Json.toJson(new CustomerTransferResponse("Transfer was comleted successfully", "0", res._1.getId())))));
         });
 
         return result.recover(throwable -> {
@@ -145,7 +143,7 @@ public class CustomerTransferController extends BaseController {
         });
     }
 
-    private F.Promise createTransferOperation(Card sourceCard, Card destinationCard, Long amount, Currency currency, String orderId, String description) {
+    private F.Promise<F.Tuple<Operation, List<Transaction>>> createTransferOperation(Card sourceCard, Card destinationCard, Long amount, Currency currency, String orderId, String description) {
         final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
                 .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getId())));
         final F.Promise<Optional<Account>> transferAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.transfer"))
@@ -165,7 +163,7 @@ public class CustomerTransferController extends BaseController {
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
                                                 transferAccount.getId(), cardAccount.getId(), destinationCard.getId(), rates._2, rates._1, TransactionType.TRANSFER_FROM)));
 
-                                return F.Promise.sequence(sourceTransactionPromise, destinationTransactionPromise).map(trans -> new F.Tuple(operation, trans));
+                                return F.Promise.sequence(sourceTransactionPromise, destinationTransactionPromise).map(trans -> new F.Tuple<>(operation, trans));
                             }));
         });
     }
@@ -191,28 +189,25 @@ public class CustomerTransferController extends BaseController {
     }
 
 
-
     @With(BaseCustomerApiAction.class)
     public F.Promise<Result> transferToAnotherCard() {
         final Customer customer = (Customer) ctx().args.get("customer");
 
         final JsonNode jsonNode = request().body().asJson();
-        final TransferOwnCards request;
+        final CustomerTransferOwnCards request;
         try {
-            request= Json.fromJson(jsonNode,TransferOwnCards.class);
+            request = Json.fromJson(jsonNode, CustomerTransferOwnCards.class);
         } catch (Exception e) {
-            Logger.error("Wrong request format: ",e);
-            return F.Promise.pure(ok(Json.toJson(createResponse("2","Wrong request format"))));
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
         }
 
-        if(request.getCardFrom().equals(request.getCardTo())) {
+        if (request.getCardFrom().equals(request.getCardTo())) {
             Logger.error("Specified cards is the same");
         }
 
         return null;
     }
-
-
 
 
 }

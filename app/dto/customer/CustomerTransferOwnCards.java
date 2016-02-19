@@ -5,7 +5,7 @@ package dto.customer;
  * @author ra created 19.02.2016.
  * @since 0.1.0
  */
-public class TransferOwnCards {
+public class CustomerTransferOwnCards {
     private Long cardFrom;
     private Long cardTo;
     private String description;
