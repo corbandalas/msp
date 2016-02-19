@@ -61,11 +61,7 @@ public class CustomerCardListController extends BaseController {
         Promise<List<Card>> wrap = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
         Promise<Result> result = wrap.flatMap(res -> Promise.sequence(res.stream().map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), s))).collect(Collectors.toList())).map(z -> ok(Json.toJson(new CustomerCardListResponse("0", "Successful card list retrieval", z)))));
 
-        return result.recover(error -> {
-
-                    return badRequest(Json.toJson(createResponse("6", "General error")));
-
-                }
+        return result.recover(error -> badRequest(Json.toJson(createResponse("6", "General error")))
         );
 
     }

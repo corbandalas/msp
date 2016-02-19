@@ -119,6 +119,9 @@ GET     /api/customer/card/balance/:cardID                              @control
 
 GET     /api-docs/api/customer/transfer                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/transfer")
 POST    /api/customer/transfer/own                                      @controllers.customer.CustomerTransferController.transferOwnCards()
+POST    /api/customer/transfer/other                                    @controllers.customer.CustomerTransferController.transferToAnotherCard()
+
+
 
 GET     /api-docs/api/customer/card/management                          @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/management")
 GET     /api/customer/card/management/changeStatus/:cardID/:reason/:operation   @controllers.customer.CardManagementController.changeStatus(cardID:Long, reason, operation:Int)

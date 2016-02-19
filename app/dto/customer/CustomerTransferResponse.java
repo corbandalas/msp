@@ -14,4 +14,12 @@ public class CustomerTransferResponse extends BaseAPIResponse {
         super(text, code);
         this.operationId=operationId;
     }
+
+    public Long getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(Long operationId) {
+        this.operationId = operationId;
+    }
 }
