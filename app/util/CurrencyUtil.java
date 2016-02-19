@@ -21,10 +21,7 @@ public class CurrencyUtil {
         Currency currencyFrom = currencyFromOptional.orElseThrow(WrongCurrencyException::new);
         Currency currencyTo = currencyToOptional.orElseThrow(WrongCurrencyException::new);
 
-        BigDecimal euroIndexFrom = currencyFrom.getEuroIndex();
-        BigDecimal euroIndexTo = currencyTo.getEuroIndex();
-
-        BigDecimal exchangeRate = euroIndexTo.divide(euroIndexFrom, SCALE, BigDecimal.ROUND_DOWN);
+        BigDecimal exchangeRate = getExchangeRate(currencyFrom, currencyTo);
 
         final double tmp = Math.ceil(exchangeRate.multiply(
                 new BigDecimal(amount)).doubleValue());
@@ -32,5 +29,13 @@ public class CurrencyUtil {
         return new Long(new Double(tmp).intValue());
 
     }
+
+    public static BigDecimal getExchangeRate(Currency currencyFrom, Currency currencyTo) {
+        BigDecimal euroIndexFrom = currencyFrom.getEuroIndex();
+        BigDecimal euroIndexTo = currencyTo.getEuroIndex();
+
+        return euroIndexTo.divide(euroIndexFrom, SCALE, BigDecimal.ROUND_DOWN);
+    }
+
 
 }

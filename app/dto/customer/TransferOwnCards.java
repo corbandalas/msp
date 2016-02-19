@@ -8,6 +8,10 @@ package dto.customer;
 public class TransferOwnCards {
     private Long cardFrom;
     private Long cardTo;
+    private String description;
+    private Long amount;
+    private String currency;
+    private String orderId;
 
     public Long getCardFrom() {
         return cardFrom;
@@ -23,5 +27,37 @@ public class TransferOwnCards {
 
     public void setCardTo(Long cardTo) {
         this.cardTo = cardTo;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 }

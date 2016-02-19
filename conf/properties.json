@@ -69,6 +69,20 @@
       "value": "",
       "description": "W2 Globaldata dateOfBirthMatchThreshold",
       "category": "W2_INTEGRATION"
+    },
+
+    {
+      "id": "com.msp.accounts.card",
+      "value": "42",
+      "description": "MSP card account",
+      "category": "ACCOUNTS"
+    },
+
+    {
+      "id": "com.msp.accounts.transfer",
+      "value": "43",
+      "description": "MSP transfer account",
+      "category": "ACCOUNTS"
     }
 
   ]
