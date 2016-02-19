@@ -1,5 +1,6 @@
 package provider;
 
+import com.google.inject.ImplementedBy;
 import model.Card;
 import model.Currency;
 import model.Customer;
@@ -15,6 +16,8 @@ import java.util.Date;
  * @author corbandalas - created 08.02.2016
  * @since 0.1.0
  */
+
+@ImplementedBy(GlobalProcessingCardProvider.class)
 public interface CardProvider {
 
     F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency);

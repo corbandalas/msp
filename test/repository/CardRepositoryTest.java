@@ -89,6 +89,30 @@ public class CardRepositoryTest extends BaseRepositoryTest {
         }
     }
 
+
+    @Test
+    public void retrieveDefaultCard() throws Exception {
+        try {
+            Customer customer = Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay));
+            assertNotNull(customer);
+            Card card = Await.result(cardRepository.create(new Card(null,"token",customer.getId(), CardType.VIRTUAL, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA", true)), Duration.apply(defaultDelay));
+
+            Optional<Card> defaultCard = Await.result(cardRepository.retrieveDefaultCard(customer.getId()), Duration.apply(defaultDelay));
+            assertNotNull(defaultCard.get());
+            assertEquals(card.getId(), defaultCard.get().getId());
+
+            Card card2 = Await.result(cardRepository.create(new Card(null,"token",customer.getId(), CardType.VIRTUAL, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA", false)), Duration.apply(defaultDelay));
+
+            Optional<Card> defaultCard2 = Await.result(cardRepository.retrieveDefaultCard(customer.getId()), Duration.apply(defaultDelay));
+
+            assertEquals(defaultCard2.get().getId(), defaultCard.get().getId());
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
     @Test
     public void retrieveAll() throws Exception {
         Customer customer = Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay));

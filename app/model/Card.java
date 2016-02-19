@@ -49,6 +49,25 @@ public class Card extends BaseEntity<Long> {
         this.deliveryCountry = deliveryCountry;
     }
 
+    public Card(Long id, String token, String customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry, boolean defaultCard) {
+        this.setId(id);
+        this.token = token;
+        this.customerId = customerId;
+        this.type = type;
+        this.brand = brand;
+        this.cardDefault = cardDefault;
+        this.createDate = createDate;
+        this.alias = alias;
+        this.active = active;
+        this.info = info;
+        this.currencyId = currencyId;
+        this.deliveryAddress1 = deliveryAddress1;
+        this.deliveryAddress2 = deliveryAddress2;
+        this.deliveryAddress3 = deliveryAddress3;
+        this.deliveryCountry = deliveryCountry;
+        this.cardDefault = defaultCard;
+    }
+
     public Boolean getCardDefault() {
         return cardDefault;
     }

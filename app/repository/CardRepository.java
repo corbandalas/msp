@@ -121,6 +121,17 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         return promise.future();
     }
 
+
+    public Future<Optional<Card>> retrieveDefaultCard(String customerID) {
+
+        final Promise<Optional<Card>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card WHERE customer_id=$1 and is_default=true";
+        connectionPool.getConnection().query(query, asList(customerID), result -> promise.success(createEntity(result)), promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<Card> update(Card entity) {
 

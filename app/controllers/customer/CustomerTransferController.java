@@ -39,4 +39,30 @@ public class CustomerTransferController extends BaseController {
 
         return null;
     }
+
+
+
+    @With(BaseCustomerApiAction.class)
+    public F.Promise<Result> transferToAnotherCard() {
+        final Customer customer = (Customer) ctx().args.get("customer");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final TransferOwnCards request;
+        try {
+            request= Json.fromJson(jsonNode,TransferOwnCards.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ",e);
+            return F.Promise.pure(ok(Json.toJson(createResponse("2","Wrong request format"))));
+        }
+
+        if(request.getCardFrom().equals(request.getCardTo())) {
+            Logger.error("Specified cards is the same");
+        }
+
+        return null;
+    }
+
+
+
+
 }

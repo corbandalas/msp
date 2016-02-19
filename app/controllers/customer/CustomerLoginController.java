@@ -20,6 +20,7 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
+import provider.CardProvider;
 import repository.CustomerRepository;
 import util.SecurityUtil;
 
@@ -40,6 +41,9 @@ public class CustomerLoginController extends BaseController {
 
     @Inject
     CacheApi cache;
+
+    @Inject
+    CardProvider cardProvider;
 
 
     @With(BaseMerchantApiAction.class)
