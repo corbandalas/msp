@@ -323,4 +323,20 @@ public class PINControl {
         this.pinStatus = value;
     }
 
+    @Override
+    public String toString() {
+        return "PINControl{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", currentPin='" + currentPin + '\'' +
+                ", newPin='" + newPin + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", pinStatus=" + pinStatus +
+                '}';
+    }
 }

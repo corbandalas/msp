@@ -44,22 +44,22 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
-        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.MASTER_VIRTUAL, false);
+        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.MASTER_VIRTUAL, true);
     }
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency) {
-        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
+        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, true);
     }
 
     @Override
     public F.Promise<CardCreationResponse> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency) {
-        return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, false);
+        return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, true);
     }
 
     @Override
     public F.Promise<CardCreationResponse> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency) {
-        return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
+        return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, true);
     }
 
     @Override
@@ -165,6 +165,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokeCardStatement(res, card, startDate, endDate)).map((res -> new CardTransactionListResponse(res.getActionCode(), res.getTransactions().getTransaction2())));
     }
 
+    @Override
+    public F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN) {
+        return getGPSSettings().flatMap(res -> invokePinControl(res, card, currentPIN, newPIN, confirmNewPIN, "02")).map((res -> new ChangePINResponse(res.getActionCode())));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -195,25 +200,113 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
 
-                virtualCards = service.getServiceSoap().wsCreateCard(wsid, countrySettingsTuple._1.issCode, "10",
-                        null, customer.getTitle(), customer.getLastName(), customer.getFirstName(), customer.getAddress1(),
-                        customer.getAddress2(), customer.getAddress2(), customer.getCity(), customer.getPostcode(), countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(),
-                        customer.getId(), countrySettingsTuple._1.cardDesign, null, dob, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, loadValue, "" + currency.getCode(),
-                        null, null, 0, null, countrySettingsTuple._1.loadSrc,
-                        0, null, 0, type.getValue(),
-                        null, activateNow ? 1 : 0, null, null,
-                        cardName, countrySettingsTuple._1.limitGroup, null, countrySettingsTuple._1.permsGroup,
-                        "request.getProductRef()", null, null, null,
-                        "0", null, null, null,
-                        null, null, null, false,
-                        countrySettingsTuple._1.feeGroup, null, customer.getAddress1(), customer.getAddress2(),
-                        customer.getAddress2(), customer.getCity(), customer.getAddress2(), customer.getPostcode(),
-                        countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), null, "En", "1",
-                        null, null, null, null,
-                        null, null, null, null,
-                        null, null, null, customer.getEmail(), "0",
-                        null, "0", null, createAuthHeader(countrySettingsTuple._1.headerUsername, countrySettingsTuple._1.headerPassword));
+
+//                Product ID: 1822
+//                Scheme: MySafePay
+//                Product Name: MySafePay EUR DE
+//                Product Description: MySafePay EUR DE
+//                Product Type: 01-Mastercard
+//                Card Type: Chip ver Paywave
+//                Prograd ID: SPADEE
+//                Emboss name: Personalised
+//                SubBin Low: 51750961
+//                SubBin High: 51750961
+//                Hanging filer in days: 10
+//                Bank: IDT - 10087
+//                AuthID Response - Full Random
+//                Group Limit: SafePay SDD Velocity EUR SPA-VL-001
+//                Group usage: SafePay Virtual Card Usage
+//                Group AuthFee: SafePay Auth Fee Group EUR
+//                Group Webservice: SafePay Webservice Fee EUR
+//                Card Product: MCRD-Mastercard
+//                Service code: 221
+//                GPS/FEV/Validity 1095 days
+//                Country of issaunce : Germany
+//                Billing currency: EUR
+//                Settling currency: EUR
+
+
+                virtualCards = service.getServiceSoap().wsCreateCard(
+                        wsid, //WSID
+                        countrySettingsTuple._1.issCode, //IssCode
+                        "10", //TxnCode
+                        null, //ClientCode
+                        customer.getTitle(), //Title
+                        customer.getLastName(), //LastName
+                        customer.getFirstName(), //FirstName
+                        customer.getAddress1(), //Addrl1
+                        customer.getAddress2(),//Addrl2
+                        customer.getAddress2(), //Addrl3
+                        customer.getCity(), //City
+                        customer.getPostcode(), //PostCode
+                        countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), //Country
+                        customer.getId(), //Mobile
+                        countrySettingsTuple._1.cardDesign, //CardDesign
+                        null, //ExternalRef
+                        dob, //DOB
+                        DateUtil.format(new Date(), "yyyy-MM-dd"), //LocDate
+                        DateUtil.format(new Date(), "hhmmss"), //LocTime
+                        null, //TerminalID
+                        loadValue, //LoadValue
+                        "" + currency.getCode(), //CurCode
+                        null, //Reason
+                        null, //AccCode
+                        3, //ItemSrc
+                        "6", //LoadFundsType
+                        countrySettingsTuple._1.loadSrc, //LoadSrc
+                        0, //LoadFee
+                        customer.getFullName(), //LoadedBy
+                        0, //CreateImage
+                        type.getValue(), //CreateType
+                        null, //CustAccount
+                        activateNow ? 1 : 0, //ActivateNow
+                        null, //Source_desc
+                        null, //ExpDate
+                        cardName, //CardName
+                        countrySettingsTuple._1.limitGroup, //LimitsGroup
+                        null, //MCCGroup
+                        countrySettingsTuple._1.permsGroup, //PERMSGroup
+                        "1822", //ProductRef
+                        null, //CarrierType
+                        null, //Fulfil1
+                        null, //Fulfil2
+                        "0", //DelvMethod
+                        null, //ThermalLine1
+                        null, //ThermalLine2
+                        null, //EmbossLine4
+                        null, //ImageId
+                        null, //LogoFrontId
+                        null, //LogoBackId
+                        false, //Replacement
+                        countrySettingsTuple._1.feeGroup, //FeeGroup
+                        null, //PrimaryToken
+                        customer.getAddress1(), //Delv_AddrL1
+                        customer.getAddress2(), //Delv_AddrL2
+                        customer.getAddress2(), //Delv_AddrL3
+                        customer.getCity(), //Delv_City
+                        customer.getAddress2(), //Delv_County
+                        customer.getPostcode(), //Delv_PostCode
+                        countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), //Delv_Country
+                        null, //Delv_Code
+                        "En", //Lang
+                        "1", //Sms_Required
+                        null, //SchedFeeGroup
+                        null, //WSFeeGroup
+                        null, //CardManufacturer
+                        null, //CoBrand
+                        null, //PublicToken
+                        null, //ExternalAuth
+                        null, //LinkageGroup
+                        null, //VanityName
+                        null, //PBlock
+                        null, //PINMailer
+                        null, //FxGroup
+                        customer.getEmail(), //Email
+                        "0", //MailOrSMS
+                        null, //AuthCalendarGroup
+                        null, //Quantity
+                        null, //LoadToken
+                        createAuthHeader(countrySettingsTuple._1.headerUsername, countrySettingsTuple._1.headerPassword));
 
 
                 Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + ". Result code: " + virtualCards.getActionCode() + " ." + virtualCards.toString());
@@ -555,6 +648,36 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return cardStatement;
+        });
+    }
+
+    private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, Card card, String oldPin, String newPin, String confirmPin, String func) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WS_PinControl service invocation. WSID #" + wsid);
+
+            PINControl pinControl = null;
+
+            try {
+
+                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, card.getToken(), null, func, oldPin, newPin, confirmPin, "1", "1", null, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString());
+
+                if (!StringUtils.equals("000", pinControl.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return pinControl;
         });
     }
 

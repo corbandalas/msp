@@ -4,3 +4,4 @@ update country set code='826' where id = 'UK';
 update country set code='804' where id = 'UA';
 update country set code='752' where id = 'SE';
 update country set code='840' where id = 'US';
+update country set code='276' where id = 'DE';

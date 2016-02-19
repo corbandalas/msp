@@ -8,7 +8,7 @@ package provider;
  */
 public enum GlobalProcessingCardCreateType {
 
-    VIRTUAL_WITH_AMOUNT(0), PHYSICAL_WITH_AMOUNT(1), VIRTUAL_TO_PLASTIC(2), MASTER_VIRTUAL(3);
+    VIRTUAL_WITH_AMOUNT(1), PHYSICAL_WITH_AMOUNT(2), VIRTUAL_TO_PLASTIC(3), MASTER_VIRTUAL(4);
 
     private int value;
 
