@@ -2,6 +2,8 @@ package controllers.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
@@ -123,7 +125,11 @@ public class CustomerLoginController extends BaseController {
 
             String token = RandomStringUtils.randomAlphanumeric(10);
 
-            cache.set(token,customer.getId());
+            Config conf = ConfigFactory.load();
+
+            String sessionTimeOut = conf.getString("cache.customer.session.timeout");
+
+            cache.set(token,customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
 
             return ok(Json.toJson(new CustomerLoginResponse("0", "Authorization is OK", token, customer.getTemppassword())));
         });
