@@ -129,6 +129,7 @@ public class CustomerLoginController extends BaseController {
 
             String sessionTimeOut = conf.getString("cache.customer.session.timeout");
 
+            //Store token to cache with expiration time out
             cache.set(token,customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
 
             return ok(Json.toJson(new CustomerLoginResponse("0", "Authorization is OK", token, customer.getTemppassword())));
