@@ -44,7 +44,9 @@ public class CountryController extends BaseController {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CountryListResponse.class),
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
             @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -78,7 +80,9 @@ public class CountryController extends BaseController {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CountryListResponse.class),
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
             @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -114,6 +118,8 @@ public class CountryController extends BaseController {
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
             @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "countryID", value = "Country ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -156,7 +162,9 @@ public class CountryController extends BaseController {
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
             @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Country request", required = true, dataType = "model.Country", paramType = "body"),
