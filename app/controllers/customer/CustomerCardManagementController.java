@@ -1,13 +1,18 @@
 package controllers.customer;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BaseAPIResponse;
+import dto.customer.CustomerCardManagementChangePIN;
+import dto.customer.CustomerCardManagementChangeStatus;
 import exception.WrongCardException;
 import model.Card;
 import model.Customer;
+import play.Logger;
+import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -58,16 +63,28 @@ public class CustomerCardManagementController extends BaseController {
     })
     @ApiImplicitParams(
             value = {
-                    @ApiImplicitParam(name = "cardID", value = "Card ID to retrieve", required = true, dataType = "string", paramType = "path"),
-                    @ApiImplicitParam(name = "reason", value = "reason for operation", required = true, dataType = "string", paramType = "path"),
-                    @ApiImplicitParam(name = "operation", value = "Operation number [0-activateCard;1-blockCard;2-reportCardDamaged;3-reportCardLost;4-reportCardStolen;]", required = true, dataType = "integer", paramType = "path"),
+                    @ApiImplicitParam(value = "changeStatus request. Operation number [0-activateCard;1-blockCard;2-reportCardDamaged;3-reportCardLost;4-reportCardStolen;]", required = true, dataType = "dto.customer.CustomerCardManagementChangeStatus", paramType = "body"),
                     @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
-    public Promise<Result> changeStatus(Long cardID, String reason, Integer operation) {
+    public Promise<Result> changeStatus() {
 
         final Customer customer = (Customer) ctx().args.get("customer");
 
+        final JsonNode jsonNode = request().body().asJson();
+        final CustomerCardManagementChangeStatus request;
+        try {
+            request = Json.fromJson(jsonNode, CustomerCardManagementChangeStatus.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getCardID() == null || request.getOperation() == null || request.getReason() == null) {
+            Logger.error("Missing parameters");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
         final Promise<List<Card>> cardListPromise = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
-        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(cardID));
+        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(request.getCardID()));
 
         final Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
             Card card = data._1.orElseThrow(WrongCardException::new);
@@ -75,25 +92,24 @@ public class CustomerCardManagementController extends BaseController {
                 return Promise.pure(createWrongCardResponse());
             }
 
-            switch (operation) {
+            switch (request.getOperation()) {
                 case 0:
-                    return cardProvider.activateCard(card, reason).map(response
+                    return cardProvider.activateCard(card, request.getReason()).map(response
                             -> okResponse());
                 case 1:
-                    return cardProvider.blockCard(card, reason).map(response
+                    return cardProvider.blockCard(card, request.getReason()).map(response
                             -> okResponse());
                 case 2:
-                    return cardProvider.reportCardDamaged(card, reason).map(response
+                    return cardProvider.reportCardDamaged(card, request.getReason()).map(response
                             -> okResponse());
                 case 3:
-                    return cardProvider.reportCardLost(card, reason).map(response
+                    return cardProvider.reportCardLost(card, request.getReason()).map(response
                             -> okResponse());
                 case 4:
-                    return cardProvider.reportCardStolen(card, reason).map(response
+                    return cardProvider.reportCardStolen(card, request.getReason()).map(response
                             -> okResponse());
                 default:
                     return Promise.pure(createWrongRequestFormatResponse());
-
             }
 
         });
@@ -101,7 +117,6 @@ public class CustomerCardManagementController extends BaseController {
         return returnRecover(result);
 
     }
-
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -123,17 +138,28 @@ public class CustomerCardManagementController extends BaseController {
     })
     @ApiImplicitParams(
             value = {
-                    @ApiImplicitParam(name = "cardID", value = "Card ID to retrieve", required = true, dataType = "string", paramType = "path"),
-                    @ApiImplicitParam(name = "currentPIN", value = "current card PIN", required = true, dataType = "string", paramType = "path"),
-                    @ApiImplicitParam(name = "newPIN", value = "new card PIN", required = true, dataType = "string", paramType = "path"),
-                    @ApiImplicitParam(name = "confirmNewPIN", value = "confirm new card PIN", required = true, dataType = "string", paramType = "path"),
+                    @ApiImplicitParam(value = "changePIN request", required = true, dataType = "dto.customer.CustomerCardManagementChangePIN", paramType = "body"),
                     @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
-    public Promise<Result> changePIN(Long cardID, String currentPIN, String newPIN, String confirmNewPIN) {
+    public Promise<Result> changePIN() {
 
         final Customer customer = (Customer) ctx().args.get("customer");
 
+        final JsonNode jsonNode = request().body().asJson();
+        final CustomerCardManagementChangePIN request;
+        try {
+            request = Json.fromJson(jsonNode, CustomerCardManagementChangePIN.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getCardID() == null || request.getConfirmNewPIN() == null || request.getCurrentPIN() == null || request.getNewPIN() == null) {
+            Logger.error("Missing parameters");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
         final Promise<List<Card>> cardListPromise = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
-        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(cardID));
+        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(request.getCardID()));
 
         final Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
             Card card = data._1.orElseThrow(WrongCardException::new);
@@ -141,7 +167,7 @@ public class CustomerCardManagementController extends BaseController {
                 return Promise.pure(createWrongCardResponse());
             }
 
-            return cardProvider.changePIN(card, currentPIN, newPIN, confirmNewPIN).map(response
+            return cardProvider.changePIN(card, request.getCurrentPIN(), request.getNewPIN(), request.getConfirmNewPIN()).map(response
                     -> okResponse());
 
         });
