@@ -78,6 +78,7 @@ public class CustomerTransferController extends BaseController {
     @ApiResponses(value = {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerTransferResponse.class),
             @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
             @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
@@ -160,6 +161,7 @@ public class CustomerTransferController extends BaseController {
 
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerTransferResponse.class),
             @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
             @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
