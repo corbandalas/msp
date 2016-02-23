@@ -16,6 +16,7 @@ import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 import util.SecurityUtil;
 
+import static configs.ReturnCodes.SUCCESS_CODE;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
@@ -35,11 +36,11 @@ public class PropertyControllerTest extends BaseControllerTest {
 
         final Property property = new Property(newPropertyId, newPropertyValue, "test property description", PropertyCategory.GPS_INTEGRATION);
         final JsonNode createResponse = create(property);
-        assertEquals("0", createResponse.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResponse.get("code").asText());
 
         final JsonNode response = retrieveById(newPropertyId);
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), response.get("code").asText());
         assertEquals("test property value", response.get("property").get("value").asText());
     }
 
@@ -51,7 +52,7 @@ public class PropertyControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), response.get("code").asText());
         assertEquals(true, response.get("propertyList").isArray());
     }
 
@@ -59,10 +60,10 @@ public class PropertyControllerTest extends BaseControllerTest {
     public void createAndUpdate() throws Exception {
         final Property property = new Property(newPropertyId, newPropertyValue, "test property description", PropertyCategory.GPS_INTEGRATION);
         final JsonNode createResponse = create(property);
-        assertEquals("0", createResponse.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResponse.get("code").asText());
 
         final JsonNode afterCreateResponse = retrieveById(newPropertyId);
-        assertEquals("0", afterCreateResponse.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), afterCreateResponse.get("code").asText());
         assertEquals(newPropertyValue, afterCreateResponse.get("property").get("value").asText());
 
         final String updateUrl = getAdminApiUrl("/property/update");
@@ -74,10 +75,10 @@ public class PropertyControllerTest extends BaseControllerTest {
                 property.getDescription(), property.getCategory().name(), ORDER_ID, SECRET);
         final JsonNode updateResponse = WS.url(updateUrl).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", updateEnckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(property)).get(TIMEOUT).asJson();
-        assertEquals("0", updateResponse.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), updateResponse.get("code").asText());
 
         final JsonNode afterUpdateResponse = retrieveById(newPropertyId);
-        assertEquals("0", afterUpdateResponse.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), afterUpdateResponse.get("code").asText());
         assertEquals(newValue, afterUpdateResponse.get("property").get("value").asText());
     }
 

@@ -23,6 +23,7 @@ import util.SecurityUtil;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import static configs.ReturnCodes.SUCCESS_CODE;
 import static java.util.Arrays.asList;
 import static junit.framework.TestCase.assertEquals;
 
@@ -45,15 +46,15 @@ public class TransactionControllerTest extends BaseControllerTest {
     public void retrieveById() throws Exception {
         final String orderId = "xxx";
         final JsonNode createOperationResult = createOperation(new Operation(null, OperationType.DEPOSIT, orderId, "test operation", null), testServer.port());
-        assertEquals("0", createOperationResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createOperationResult.get("code").asText());
 
         final long amount = 1000L;
         final JsonNode createResult = create(new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
                 amount, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT));
-        assertEquals("0", createResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResult.get("code").asText());
 
         final JsonNode result = retrieveById(createResult.get("transaction").get("id").asText());
-        assertEquals("0", result.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), result.get("code").asText());
         assertEquals(amount, result.get("transaction").get("amount").asLong());
     }
 
@@ -65,7 +66,7 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final JsonNode result = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
-        assertEquals("0", result.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), result.get("code").asText());
         assertEquals(true, result.get("transactionList").isArray());
     }
 
@@ -73,14 +74,14 @@ public class TransactionControllerTest extends BaseControllerTest {
     public void retrieveByOperationId() throws Exception {
         final String operationOrderId = "xxx";
         final JsonNode createOperationResult = createOperation(new Operation(null, OperationType.DEPOSIT, operationOrderId, "test operation", null), testServer.port());
-        assertEquals("0", createOperationResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createOperationResult.get("code").asText());
 
         final JsonNode createResult1 = create(new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
                 1000L, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT));
-        assertEquals("0", createResult1.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResult1.get("code").asText());
         final JsonNode createResult2 = create(new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
                 100L, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT_FEE));
-        assertEquals("0", createResult2.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResult2.get("code").asText());
 
         final String operationId = createOperationResult.get("operation").get("id").asText();
         final String url = getAdminApiUrl("/transaction/listByOperation/"
@@ -90,7 +91,7 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final JsonNode result = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
-        assertEquals("0", result.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), result.get("code").asText());
         assertEquals(2, result.get("transactionList").size());
     }
 
@@ -106,11 +107,11 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final JsonNode createResult = create(transaction);
 
-        assertEquals("0", createResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResult.get("code").asText());
 
         final Long transactionId = createResult.get("transaction").get("id").asLong();
         final JsonNode afterCreate = retrieveById(transactionId.toString());
-        assertEquals("0", afterCreate.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), afterCreate.get("code").asText());
         assertEquals(amount, afterCreate.get("transaction").get("amount").asLong());
 
         transaction.setId(transactionId);
@@ -127,10 +128,10 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final JsonNode updateResult = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(transaction)).get(TIMEOUT).asJson();
-        assertEquals("0", updateResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), updateResult.get("code").asText());
 
         final JsonNode afterUpdate = retrieveById(transactionId.toString());
-        assertEquals("0", afterUpdate.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), afterUpdate.get("code").asText());
         assertEquals(updatedAmount, afterUpdate.get("transaction").get("amount").asLong());
     }
 

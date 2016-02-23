@@ -6,6 +6,9 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.Authentication;
+import dto.BaseAPIResponse;
+import dto.PropertyListResponse;
+import dto.PropertyResponse;
 import model.Property;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -17,6 +20,8 @@ import repository.PropertyRepository;
 import util.SecurityUtil;
 
 import java.util.List;
+
+import static configs.ReturnCodes.*;
 
 
 /**
@@ -40,15 +45,14 @@ public class PropertyController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Property was created successfully"),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Property request", required = true, dataType = "model.Property", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -71,34 +75,27 @@ public class PropertyController extends BaseController {
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (StringUtils.isBlank(property.getId()) || StringUtils.isBlank(property.getDescription())
                 || StringUtils.isBlank(property.getValue()) || property.getCategory() == null) {
             Logger.error("Missing params");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , property.getId(), property.getValue(), property.getDescription(), property.getCategory().name(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         final Promise<Property> propertyPromise = Promise.wrap(propertyRepository.create(property));
 
-        Promise<Result> result = propertyPromise.map(res -> ok(Json.toJson(createResponse("0", "Property was created successfully"))));
+        Promise<Result> result = propertyPromise.map(res -> ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("6", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -109,15 +106,14 @@ public class PropertyController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Property was updated successfully"),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Property request", required = true, dataType = "model.Property", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -139,34 +135,27 @@ public class PropertyController extends BaseController {
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (StringUtils.isBlank(property.getId()) || StringUtils.isBlank(property.getDescription())
                 || StringUtils.isBlank(property.getValue()) || property.getCategory() == null) {
             Logger.error("Missing params");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , property.getId(), property.getValue(), property.getDescription(), property.getCategory().name(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         final Promise<Property> propertyPromise = Promise.wrap(propertyRepository.update(property));
 
-        Promise<Result> result = propertyPromise.map(res -> ok(Json.toJson(createResponse("0", "Property was updated successfully"))));
+        Promise<Result> result = propertyPromise.map(res -> ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("6", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -176,13 +165,13 @@ public class PropertyController extends BaseController {
             notes = "Obtain list of all application properties stored in DB",
             produces = "application/json",
             httpMethod = "GET",
-            response = dto.PropertyListResponse.class
+            response = PropertyListResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = dto.PropertyListResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = PropertyListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
 
     @ApiImplicitParams(value = {
@@ -196,21 +185,14 @@ public class PropertyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         final Promise<List<Property>> propertyPromise = Promise.wrap(propertyRepository.retrieveAll());
 
-        Promise<Result> result = propertyPromise.map((List<Property> list) -> ok(Json.toJson(createResponse("0", "OK", list))));
+        Promise<Result> result = propertyPromise.map((List<Property> list) -> ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, list))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("6", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -220,13 +202,14 @@ public class PropertyController extends BaseController {
             notes = "Get property by its ID",
             produces = "application/json",
             httpMethod = "GET",
-            response = dto.PropertyListResponse.class
+            response = PropertyResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = dto.PropertyResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = PropertyResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INCORRECT_PROPERTY_CODE, message = INCORRECT_PROPERTY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "propertyID", value = "Property ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -241,28 +224,19 @@ public class PropertyController extends BaseController {
 
         if (StringUtils.isBlank(propertyID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()
                 , propertyID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         Promise<Result> result = Promise.wrap(propertyRepository.retrieveById(propertyID)).map(res -> res.map(prop
-                -> ok(Json.toJson(createResponse("0", "OK", prop)))).orElse(ok(Json.toJson(createResponse("4",
-                "Specified property does not exist")))));
+                -> ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, prop)))).orElse(
+                ok(Json.toJson(createResponse(String.valueOf(INCORRECT_PROPERTY_CODE), INCORRECT_PROPERTY_TEXT)))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
-
-
 }

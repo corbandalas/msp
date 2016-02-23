@@ -6,6 +6,7 @@ import org.junit.Test;
 import play.libs.ws.WS;
 import util.SecurityUtil;
 
+import static configs.ReturnCodes.SUCCESS_CODE;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -26,7 +27,7 @@ public class ExchangeRateHistoryControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), response.get("code").asText());
         assertEquals(true, response.get("exchangeRateHistoryList").isArray());
     }
 

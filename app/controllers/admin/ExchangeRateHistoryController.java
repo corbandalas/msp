@@ -5,6 +5,7 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.Authentication;
+import dto.BaseAPIResponse;
 import dto.ExchangeRateHistoryListResponse;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -14,6 +15,8 @@ import play.mvc.Result;
 import play.mvc.With;
 import repository.ExchangeRateHistoryRepository;
 import util.SecurityUtil;
+
+import static configs.ReturnCodes.*;
 
 /**
  * API exchangeRateHistory controller
@@ -38,9 +41,9 @@ public class ExchangeRateHistoryController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = ExchangeRateHistoryListResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = ExchangeRateHistoryListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "currencyID", value = "Currency ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -51,7 +54,7 @@ public class ExchangeRateHistoryController extends BaseController {
 
         if (StringUtils.isBlank(currencyID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
@@ -59,15 +62,14 @@ public class ExchangeRateHistoryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currencyID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(exchangeRateHistoryRepository.retrieveByCurrencyId(currencyID)).map(exchangeRateHistories -> ok(Json.toJson(new ExchangeRateHistoryListResponse("0", "OK", exchangeRateHistories))));
+        final Promise<Result> result = Promise.wrap(exchangeRateHistoryRepository.retrieveByCurrencyId(currencyID))
+                .map(exchangeRateHistories -> ok(Json.toJson(new ExchangeRateHistoryListResponse(
+                        String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, exchangeRateHistories))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
 }

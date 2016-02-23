@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
+import configs.ReturnCodes;
 import controllers.BaseController;
 import dto.*;
 import model.Transaction;
@@ -15,6 +16,8 @@ import play.mvc.Result;
 import play.mvc.With;
 import repository.TransactionRepository;
 import util.SecurityUtil;
+
+import static configs.ReturnCodes.*;
 
 /**
  * API transaction controller
@@ -36,15 +39,14 @@ public class TransactionController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = BaseAPIResponse.class
+            response = TransactionResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Transaction was created successfully"),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = TransactionResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Transaction request", required = true, dataType = "model.Transaction", paramType = "body"),
@@ -59,11 +61,11 @@ public class TransactionController extends BaseController {
 
         final JsonNode jsonNode = request().body().asJson();
         final Transaction transaction;
-        try{
+        try {
             transaction = Json.fromJson(jsonNode, Transaction.class);
-        }catch (Exception e) {
-            Logger.error("Wrong request format: ",e);
-            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (StringUtils.isBlank(transaction.getCurrencyId()) || transaction.getAmount() == null || transaction.getAmount() <= 0 ||
@@ -71,7 +73,7 @@ public class TransactionController extends BaseController {
                 || transaction.getFromExchangeRate() == null || transaction.getToExchangeRate() == null ||
                 transaction.getOperationId() == null) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
@@ -80,16 +82,13 @@ public class TransactionController extends BaseController {
                 transaction.getToExchangeRate().toString(), transaction.getType().name(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
         final F.Promise<Result> result = F.Promise.wrap(transactionRepository.create(transaction)).map(res ->
-                ok(Json.toJson(new TransactionResponse("transaction created successfully", "0", res))));
+                ok(Json.toJson(new TransactionResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -104,11 +103,10 @@ public class TransactionController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Operation was updated successfully"),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Operation request", required = true, dataType = "model.Operation", paramType = "body"),
@@ -123,11 +121,11 @@ public class TransactionController extends BaseController {
 
         final JsonNode jsonNode = request().body().asJson();
         final Transaction transaction;
-        try{
+        try {
             transaction = Json.fromJson(jsonNode, Transaction.class);
-        }catch (Exception e) {
-            Logger.error("Wrong request format: ",e);
-            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (transaction.getId() == null || StringUtils.isBlank(transaction.getCurrencyId()) || transaction.getAmount() == null || transaction.getAmount() <= 0 ||
@@ -135,7 +133,7 @@ public class TransactionController extends BaseController {
                 || transaction.getFromExchangeRate() == null || transaction.getToExchangeRate() == null ||
                 transaction.getOperationId() == null) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
@@ -144,15 +142,13 @@ public class TransactionController extends BaseController {
                 transaction.getToExchangeRate().toString(), transaction.getType().name(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.update(transaction)).map(account1 -> ok(Json.toJson(createResponse("0", "transaction updated successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.update(transaction)).map(account1 -> ok(
+                Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -162,14 +158,14 @@ public class TransactionController extends BaseController {
             notes = "Get operation by its ID",
             produces = "application/json",
             httpMethod = "GET",
-            response = OperationResponse.class
+            response = TransactionResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = TransactionResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Specified operation does not exist"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = TransactionResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INCORRECT_TRANSACTION_CODE, message = INCORRECT_TRANSACTION_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "transactionID", value = "transaction ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
@@ -181,17 +177,14 @@ public class TransactionController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 transactionID.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
         final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveById(transactionID)).map(transactionOpt
-                -> transactionOpt.map(transaction -> ok(Json.toJson(new TransactionResponse("OK", "0", transaction))))
-                .orElse(ok(Json.toJson(createResponse("4", "Specified operation does not exist")))));
+                -> transactionOpt.map(transaction -> ok(Json.toJson(new TransactionResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), transaction))))
+                .orElse(ok(Json.toJson(createResponse(String.valueOf(INCORRECT_TRANSACTION_CODE), INCORRECT_TRANSACTION_TEXT)))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -205,9 +198,9 @@ public class TransactionController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = TransactionListResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = TransactionListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -218,15 +211,13 @@ public class TransactionController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveAll()).map(transactions -> ok(Json.toJson(new TransactionListResponse("OK", "0", transactions))));
+        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveAll()).map(transactions ->
+                ok(Json.toJson(new TransactionListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), transactions))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -240,9 +231,9 @@ public class TransactionController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = TransactionListResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 1, message = "General error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = TransactionListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "operationID", value = "operation ID to retrieve", required = true, dataType = "Long", paramType = "path"),
@@ -254,14 +245,12 @@ public class TransactionController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 operationID.toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveByOperationId(operationID)).map(transactions -> ok(Json.toJson(new TransactionListResponse("OK", "0", transactions))));
+        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveByOperationId(operationID)).map(transactions ->
+                ok(Json.toJson(new TransactionListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), transactions))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 }

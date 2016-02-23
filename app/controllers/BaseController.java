@@ -86,6 +86,10 @@ public class BaseController extends play.mvc.Controller {
         return new PropertyResponse(text, code, property);
     }
 
+    protected Results.Status createIncorrectAccountResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_ACCOUNT_TEXT, "" + INCORRECT_ACCOUNT_CODE)));
+    }
+
     protected F.Promise<Result> returnRecover(F.Promise<Result> result) {
         return result.recover(throwable -> {
                     Logger.error("Error: ", throwable);

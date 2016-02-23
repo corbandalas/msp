@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import static configs.ReturnCodes.SUCCESS_CODE;
 import static junit.framework.TestCase.assertEquals;
 
 /**
@@ -34,10 +35,10 @@ public class OperationControllerTest extends BaseControllerTest {
     public void retrieveById() throws Exception {
         final String orderId = "xxx";
         final JsonNode createResult = createOperation(new Operation(null, OperationType.DEPOSIT, orderId, "test operation", null), this.testServer.port());
-        assertEquals("0", createResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResult.get("code").asText());
 
         final JsonNode result = retrieveById(createResult.get("operation").get("id").asText());
-        assertEquals("0", result.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), result.get("code").asText());
         assertEquals(orderId, result.get("operation").get("orderId").asText());
     }
 
@@ -48,7 +49,7 @@ public class OperationControllerTest extends BaseControllerTest {
 
         final JsonNode result = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
-        assertEquals("0", result.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), result.get("code").asText());
         assertEquals(true, result.get("operationList").isArray());
     }
 
@@ -68,14 +69,14 @@ public class OperationControllerTest extends BaseControllerTest {
 
         final JsonNode result = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(filter)).get(TIMEOUT).asJson();
-        assertEquals("0", result.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), result.get("code").asText());
         assertEquals(true, result.get("operationList").isArray());
 
         filter.setType(OperationType.DEPOSIT.name());
 
         final JsonNode resultWithType = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(filter)).get(TIMEOUT).asJson();
-        assertEquals("0", resultWithType.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), resultWithType.get("code").asText());
         assertEquals(true, resultWithType.get("operationList").isArray());
     }
 
@@ -85,10 +86,10 @@ public class OperationControllerTest extends BaseControllerTest {
         final Operation operation = new Operation(null, OperationType.DEPOSIT, operationOrderId, "test operation", null);
         final JsonNode createResult = createOperation(operation, this.testServer.port());
 
-        assertEquals("0", createResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), createResult.get("code").asText());
 
         final JsonNode afterCreate = retrieveById(createResult.get("operation").get("id").asText());
-        assertEquals("0", afterCreate.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), afterCreate.get("code").asText());
         assertEquals(operationOrderId, afterCreate.get("operation").get("orderId").asText());
 
         operation.setId(createResult.get("operation").get("id").asLong());
@@ -97,18 +98,16 @@ public class OperationControllerTest extends BaseControllerTest {
         operation.setDescription(updatedDescription);
 
         final String url = getAdminApiUrl("/operation/update");
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, operation.getOrderId(), operation.getDescription(),
-                operation.getType().name(), ORDER_ID, SECRET);
 
         final String updateEnckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, operation.getId().toString(), operation.getOrderId(), operation.getDescription(),
                 operation.getType().name(), ORDER_ID, SECRET);
 
         final JsonNode updateResult = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", updateEnckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(operation)).get(TIMEOUT).asJson();
-        assertEquals("0", updateResult.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), updateResult.get("code").asText());
 
         final JsonNode afterUpdate = retrieveById(operation.getId().toString());
-        assertEquals("0", afterUpdate.get("code").asText());
+        assertEquals(String.valueOf(SUCCESS_CODE), afterUpdate.get("code").asText());
         assertEquals(updatedDescription, afterUpdate.get("operation").get("description").asText());
     }
 

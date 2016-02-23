@@ -45,6 +45,19 @@ public class ReturnCodes {
     public static final byte KYC_RESTRICTION_CODE = 11;
     public static final String KYC_RESTRICTION_TEXT = "Operation permitted due to KYC level";
 
+    public static final byte INCORRECT_ACCOUNT_CODE = 12;
+    public static final String INCORRECT_ACCOUNT_TEXT = "Incorrect account";
+
+    public static final byte INCORRECT_OPERATION_CODE = 13;
+    public static final String INCORRECT_OPERATION_TEXT = "Incorrect operation";
+
+    public static final byte INCORRECT_PROPERTY_CODE = 14;
+    public static final String INCORRECT_PROPERTY_TEXT = "Incorrect property";
+
+    public static final byte INCORRECT_TRANSACTION_CODE = 15;
+    public static final String INCORRECT_TRANSACTION_TEXT = "Incorrect transaction";
+
+
     public static final byte GENERAL_ERROR_CODE = 100;
     public static final String GENERAL_ERROR_TEXT = "General error";
 

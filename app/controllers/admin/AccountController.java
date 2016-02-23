@@ -17,10 +17,11 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.AccountRepository;
-import util.DateUtil;
 import util.SecurityUtil;
 
 import java.util.Date;
+
+import static configs.ReturnCodes.*;
 
 /**
  * API account controller
@@ -42,15 +43,14 @@ public class AccountController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Account was created successfully"),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
@@ -68,29 +68,27 @@ public class AccountController extends BaseController {
             account = Json.fromJson(jsonNode, Account.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
-            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
                 StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret())) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 account.getId().toString(), account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
         if (account.getCreateDate() == null) account.setCreateDate(new Date());
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.create(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(accountRepository.create(account)).map(account1 ->
+                ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -101,15 +99,14 @@ public class AccountController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = dto.BaseAPIResponse.class
+            response = BaseAPIResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Account was updated successfully"),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Account request", required = true, dataType = "model.Account", paramType = "body"),
@@ -125,27 +122,25 @@ public class AccountController extends BaseController {
             account = Json.fromJson(jsonNode, Account.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
-            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (account.getId() == null || account.getActive() == null || StringUtils.isBlank(account.getCurrencyId()) ||
                 StringUtils.isBlank(account.getName()) || StringUtils.isBlank(account.getSecret()) || account.getCreateDate() == null) {
             Logger.error("Missing params");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 account.getName(), account.getCurrencyId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.update(account)).map(account1 -> ok(Json.toJson(createResponse("0", "account created successfully"))));
+        final F.Promise<Result> result = F.Promise.wrap(accountRepository.update(account)).map(account1 ->
+                ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -159,10 +154,10 @@ public class AccountController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = AccountResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Specified account does not exist"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = AccountResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INCORRECT_ACCOUNT_CODE, message = INCORRECT_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "accountID", value = "account ID to retrieve", required = true, dataType = "Integer", paramType = "path"),
@@ -178,12 +173,10 @@ public class AccountController extends BaseController {
         }
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(accountId)).map(accountOpt
-                -> accountOpt.map(account -> ok(Json.toJson(new AccountResponse("0", "OK", account)))).orElse(ok(Json.toJson(createResponse("4", "Specified account does not exist")))));
+                -> accountOpt.map(account -> ok(Json.toJson(new AccountResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, account))))
+                .orElse(createIncorrectAccountResponse()));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -197,9 +190,9 @@ public class AccountController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = AccountListResponse.class),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = AccountListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -210,15 +203,12 @@ public class AccountController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveAll()).map(accounts -> ok(Json
-                .toJson(new AccountListResponse("OK", "0", accounts))));
+                .toJson(new AccountListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), accounts))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 }
