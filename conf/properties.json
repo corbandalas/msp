@@ -38,7 +38,7 @@
 
     {
       "id": "cardprovider.gps.wsdl.api.settings",
-      "value": "SPA:1822:SPA-VL-001 SafePay SDD Velocity EUR:SPA-CU-001 SafePay Virtual Card Usage:SPA-AF-001 SafePay Auth Fee Group EUR:14",
+      "value": "SPA:1822:SPA-VL-001 SafePay SDD Velocity EUR:SPA-CU-001 SafePay Virtual Card Usage:SPA-AF-001 SafePay Auth Fee Group EUR:9",
       "description": "Global Processing Card settings",
       "category": "GPS_INTEGRATION"
     },

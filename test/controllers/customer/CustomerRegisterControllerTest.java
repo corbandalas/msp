@@ -2,11 +2,7 @@ package controllers.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
-import dto.customer.CustomerLogin;
 import dto.customer.CustomerRegister;
-import junit.framework.TestCase;
-import model.Customer;
-import model.enums.KYC;
 import org.junit.After;
 import org.junit.Test;
 import play.libs.Json;
@@ -14,11 +10,9 @@ import play.libs.ws.WS;
 import repository.ConnectionPool;
 import util.SecurityUtil;
 
-import java.util.Date;
-
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static configs.ReturnCodes.*;
 
 /**
  * Test for CustomerRegisterController
@@ -46,7 +40,7 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
         final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerRegister)).get(TIMEOUT).asJson();
 
-        assertEquals("0", registerResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, registerResponse.get("code").asText());
     }
 
 
@@ -67,7 +61,7 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
         final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerRegister)).get(TIMEOUT).asJson();
 
-        assertEquals("5", registerResponse.get("code").asText());
+        assertEquals("" + ALREADY_REGISTERED_CUSTOMER_ACCOUNT_CODE, registerResponse.get("code").asText());
     }
 
     @Test
@@ -80,7 +74,7 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
         final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(new Boolean(true))).get(TIMEOUT).asJson();
 
-        assertEquals("1", registerResponse.get("code").asText());
+        assertEquals("" + WRONG_REQUEST_FORMAT_CODE, registerResponse.get("code").asText());
     }
 
 
@@ -99,7 +93,7 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
         final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerRegister)).get(TIMEOUT).asJson();
 
-        assertEquals("2", registerResponse.get("code").asText());
+        assertEquals("" + WRONG_REQUEST_FORMAT_CODE, registerResponse.get("code").asText());
     }
 
     @Test
@@ -118,7 +112,7 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
         final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerRegister)).get(TIMEOUT).asJson();
 
-        assertEquals("3", registerResponse.get("code").asText());
+        assertEquals("" + WRONG_REQUEST_ENCKEY_CODE, registerResponse.get("code").asText());
     }
 
     @Test
@@ -137,9 +131,8 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
         final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerRegister)).get(TIMEOUT).asJson();
 
-        assertEquals("4", registerResponse.get("code").asText());
+        assertEquals("" + INCORRECT_COUNTRY_CODE, registerResponse.get("code").asText());
     }
-
 
 
     @After

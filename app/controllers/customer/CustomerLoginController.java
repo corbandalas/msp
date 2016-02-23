@@ -22,11 +22,12 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
-import provider.CardProvider;
 import repository.CustomerRepository;
 import util.SecurityUtil;
 
 import java.util.Optional;
+
+import static configs.ReturnCodes.*;
 
 
 /**
@@ -44,10 +45,6 @@ public class CustomerLoginController extends BaseController {
     @Inject
     CacheApi cache;
 
-    @Inject
-    CardProvider cardProvider;
-
-
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "auth",
@@ -60,14 +57,15 @@ public class CustomerLoginController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerLoginResponse.class),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Account not exist"),
-            @ApiResponse(code = 5, message = "Wrong password"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerLoginResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = PASSWORD_MISMATCH_CODE, message = PASSWORD_MISMATCH_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
+
+
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Login request", required = true, dataType = "dto.customer.CustomerLogin", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+hashedPassword+secret)",
@@ -89,18 +87,18 @@ public class CustomerLoginController extends BaseController {
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Missing parameters"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (customerLogin == null || StringUtils.isBlank(customerLogin.getPhone()) || StringUtils.isBlank(customerLogin.getHashedPassword())) {
             Logger.error("Missing params");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong parameters"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), customerLogin.getPhone(), customerLogin.getHashedPassword(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return F.Promise.pure(createWrongEncKeyResponse());
         }
 
         final String password = customerLogin.getHashedPassword();
@@ -114,13 +112,13 @@ public class CustomerLoginController extends BaseController {
             if (!customer.getActive()) {
                 Logger.error("Specified customer does not exist or inactive");
 
-                return badRequest(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
+                return createWrongCustomerAccountResponse();
             }
 
             if (!customer.getPassword().equals(password)) {
                 Logger.error("Password doesn't match");
 
-                return badRequest(Json.toJson(createResponse("5", "Password doesn't match")));
+                return createPasswordMismatchResponse();
             }
 
             String token = RandomStringUtils.randomAlphanumeric(10);
@@ -130,24 +128,13 @@ public class CustomerLoginController extends BaseController {
             String sessionTimeOut = conf.getString("cache.customer.session.timeout");
 
             //Store token to cache with expiration time out
-            cache.set(token,customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
+            cache.set(token, customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
 
-            return ok(Json.toJson(new CustomerLoginResponse("0", "Authorization is OK", token, customer.getTemppassword())));
+            return ok(Json.toJson(new CustomerLoginResponse("" + SUCCESS_CODE, SUCCESS_TEXT, token, customer.getTemppassword())));
         });
 
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-                    if (error instanceof CustomerNotRegisteredException) {
-                        return badRequest(Json.toJson(createResponse("4", "Specified account does not exist or inactive")));
-                    }
-
-
-                    return badRequest(Json.toJson(createResponse("6", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
 

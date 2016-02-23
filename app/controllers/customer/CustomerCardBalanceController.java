@@ -5,7 +5,6 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.customer.CustomerCardBalanceResponse;
-import dto.customer.CustomerCardListResponse;
 import exception.WrongCardException;
 import model.Card;
 import model.Customer;
@@ -20,6 +19,8 @@ import repository.CardRepository;
 
 import java.util.List;
 import java.util.Optional;
+
+import static configs.ReturnCodes.*;
 
 
 /**
@@ -48,17 +49,15 @@ public class CustomerCardBalanceController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerCardBalanceResponse.class),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 4, message = "Specified card does not exist"),
-            @ApiResponse(code = 5, message = "Specified card doesn't belong for authorized customer cards"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerCardBalanceResponse.class),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(
             value = {
                     @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
-
 
     public Promise<Result> cardBalance(Long cardID) {
 
@@ -70,25 +69,18 @@ public class CustomerCardBalanceController extends BaseController {
         final F.Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
             Card card = data._1.orElseThrow(WrongCardException::new);
             if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Specified card doesn't belong for authorized customer cards"))));
+
+                Logger.error("Specified card doesn't belong for authorized customer cards");
+
+                return F.Promise.pure(createWrongCardResponse());
             }
 
             return cardProvider.getVirtualCardBalance(card).map(balanceResponse
-                    -> ok(Json.toJson(new CustomerCardBalanceResponse("OK", "0", balanceResponse.getAvailableBalance(), balanceResponse.getCurrency()))));
+                    -> ok(Json.toJson(new CustomerCardBalanceResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, balanceResponse.getAvailableBalance(), balanceResponse.getCurrency()))));
         });
 
 
-        return result.recover(throwable -> {
-                    Logger.error("Error: ", throwable);
-
-                    if (throwable instanceof WrongCardException) {
-                        return ok(Json.toJson(createResponse("4", "Specified card does not exist")));
-                    }
-
-                    return ok(Json.toJson(createResponse("6", "General error")));
-                }
-
-        );
+        return returnRecover(result);
 
     }
 

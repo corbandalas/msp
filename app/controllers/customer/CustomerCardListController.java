@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
+import dto.customer.CustomerCardBalanceResponse;
 import dto.customer.CustomerCardListResponse;
 import model.Card;
 import model.Customer;
@@ -16,6 +17,8 @@ import repository.CardRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static configs.ReturnCodes.*;
 
 
 /**
@@ -44,9 +47,12 @@ public class CustomerCardListController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerCardListResponse.class),
-            @ApiResponse(code = 1, message = "Missing params"),
-            @ApiResponse(code = 6, message = "General error")
+
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerCardListResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+
     })
     @ApiImplicitParams(
             value = {
@@ -59,10 +65,11 @@ public class CustomerCardListController extends BaseController {
 
 
         Promise<List<Card>> wrap = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
-        Promise<Result> result = wrap.flatMap(res -> Promise.sequence(res.stream().map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), s))).collect(Collectors.toList())).map(z -> ok(Json.toJson(new CustomerCardListResponse("0", "Successful card list retrieval", z)))));
+        Promise<Result> result = wrap.flatMap(res -> Promise.sequence(res.stream().
+                map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), s))).collect(Collectors.toList())).
+                map(z -> ok(Json.toJson(new CustomerCardListResponse("" + SUCCESS_CODE, SUCCESS_TEXT, z)))));
 
-        return result.recover(error -> badRequest(Json.toJson(createResponse("6", "General error")))
-        );
+        return returnRecover(result);
 
     }
 

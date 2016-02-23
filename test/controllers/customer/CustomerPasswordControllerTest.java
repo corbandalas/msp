@@ -19,6 +19,7 @@ import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static configs.ReturnCodes.*;
 
 /**
  * Customer password controller tests
@@ -38,7 +39,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         assertEquals("0", createResponse.get("code").asText());
 
         final JsonNode authorizeResponse = authorizeCustomer(phone, password);
-        assertEquals("0", authorizeResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
 
@@ -49,7 +50,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final JsonNode changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("0",changeResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE,changeResponse.get("code").asText());
     }
 
     @Test
@@ -57,10 +58,10 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
-        assertEquals("0", createResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, createResponse.get("code").asText());
 
         final JsonNode authorizeResponse = authorizeCustomer(phone, password);
-        assertEquals("0", authorizeResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
 
@@ -71,7 +72,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final JsonNode changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("4",changeResponse.get("code").asText());
+        assertEquals("" + PASSWORD_MISMATCH_CODE,changeResponse.get("code").asText());
     }
 
     @Test
@@ -79,10 +80,10 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
-        assertEquals("0", createResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, createResponse.get("code").asText());
 
         final JsonNode authorizeResponse = authorizeCustomer(phone, password);
-        assertEquals("0", authorizeResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
 
@@ -93,7 +94,7 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
         final JsonNode changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("5",changeResponse.get("code").asText());
+        assertEquals("" + PASSWORD_EQUALS_TO_EXISTED_CODE,changeResponse.get("code").asText());
     }
 
     @After

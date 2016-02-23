@@ -194,6 +194,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             VirtualCards virtualCards = null;
 
+            System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
+            System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
+            System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
+            System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
+
             long wsid = System.currentTimeMillis();
             Logger.info("/////// WsCreateCard service invocation. WSID #" + wsid);
 
@@ -251,8 +256,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         "" + currency.getCode(), //CurCode
                         null, //Reason
                         null, //AccCode
-                        3, //ItemSrc
-                        "6", //LoadFundsType
+                        0, //ItemSrc
+                        "5", //LoadFundsType
                         countrySettingsTuple._1.loadSrc, //LoadSrc
                         0, //LoadFee
                         customer.getFullName(), //LoadedBy

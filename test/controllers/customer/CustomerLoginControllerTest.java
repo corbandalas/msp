@@ -18,6 +18,7 @@ import java.util.Date;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static configs.ReturnCodes.*;
 
 /**
  * Test for CustomerLoginController
@@ -37,7 +38,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2", "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA");
         final JsonNode createResult = create(customer);
 
-        TestCase.assertEquals("0", createResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
 
         final String url = getCustomerApiUrl("/login");
 
@@ -51,7 +52,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
 
-        assertEquals("0", loginResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, loginResponse.get("code").asText());
         assertNotNull(loginResponse.get("token").asText());
     }
 
@@ -65,7 +66,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2", "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA");
         final JsonNode createResult = create(customer);
 
-        TestCase.assertEquals("0", createResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
 
         final String url = getCustomerApiUrl("/login");
 
@@ -79,7 +80,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
 
-        assertEquals("5", loginResponse.get("code").asText());
+        assertEquals("" + PASSWORD_MISMATCH_CODE, loginResponse.get("code").asText());
 
 
         customerLogin = new CustomerLogin();
@@ -92,7 +93,7 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         final JsonNode loginResponse2 = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey2)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
 
-        assertEquals("4", loginResponse2.get("code").asText());
+        assertEquals("" + WRONG_CUSTOMER_ACCOUNT_CODE, loginResponse2.get("code").asText());
     }
 
     private JsonNode create(Customer customer) {

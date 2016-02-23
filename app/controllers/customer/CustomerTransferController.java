@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.BaseAPIResponse;
+import dto.customer.CustomerTransactionResponse;
 import dto.customer.CustomerTransferOwnCards;
 import dto.customer.CustomerTransferResponse;
 import dto.customer.TransferToAnotherCard;
@@ -27,6 +27,9 @@ import util.CurrencyUtil;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static configs.ReturnCodes.*;
+
 
 /**
  * API customer transfer controller
@@ -73,13 +76,12 @@ public class CustomerTransferController extends BaseController {
             response = CustomerTransferResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerTransferResponse.class),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 4, message = "Specified cards is the same"),
-            @ApiResponse(code = 5, message = "Specified currency doesn't exist"),
-            @ApiResponse(code = 6, message = "General error"),
-            @ApiResponse(code = 7, message = "Specified card doesn't belong to customer")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerTransferResponse.class),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.CustomerTransferOwnCards", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
@@ -92,24 +94,25 @@ public class CustomerTransferController extends BaseController {
             request = Json.fromJson(jsonNode, CustomerTransferOwnCards.class);
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (request.getCardFrom() == null || request.getCardTo() == null || request.getAmount() == null
                 || StringUtils.isBlank(request.getCurrency()) || StringUtils.isBlank(request.getDescription())
                 || StringUtils.isBlank(request.getOrderId())) {
+
             Logger.error("Missing parameters");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Missing parameters"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (request.getAmount() <= 0) {
-            Logger.error("Wrong request format");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "negative amount"))));
+            Logger.error("Negative amount format");
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (request.getCardFrom().equals(request.getCardTo())) {
             Logger.error("Specified cards is the same");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("4", "Specified cards is the same"))));
+            return F.Promise.pure(createWrongCardResponse());
         }
 
         final F.Promise<List<Card>> cardsPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
@@ -118,32 +121,28 @@ public class CustomerTransferController extends BaseController {
         final F.Promise<Result> result = cardsPromise.zip(currencyPromise).flatMap(data -> {
             if (!data._2.isPresent()) {
                 Logger.error("Specified currency doesn't exist");
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Specified currency doesn't exist"))));
+                return F.Promise.pure(createIncorrectCurrencyResponse());
             }
 
             final Optional<Card> cardFrom = data._1.stream().filter(itm -> itm.getId().equals(request.getCardFrom())).findFirst();
             if (!cardFrom.isPresent()) {
                 Logger.error("Specified cardFrom doesn't belong to customer");
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("7", "Specified cardFrom doesn't belong to customer"))));
+                return F.Promise.pure(createWrongCardResponse());
             }
 
             final Optional<Card> cardTo = data._1.stream().filter(itm -> itm.getId().equals(request.getCardTo())).findFirst();
             if (!cardTo.isPresent()) {
                 Logger.error("Specified cardTo doesn't belong to customer");
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("7", "Specified cardTo doesn't belong to customer"))));
+                return F.Promise.pure(createWrongCardResponse());
             }
 
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(),
                     request.getDescription()).flatMap(providerResponse -> createTransferOperation(cardFrom.get(),
                     cardTo.get(), request.getAmount(), data._2.get(), request.getOrderId(), request.getDescription())
-                    .map(res -> ok(Json.toJson(new CustomerTransferResponse("Transfer was comleted successfully", "0", res._1.getId())))));
+                    .map(res -> ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())))));
         });
 
-        return result.recover(throwable -> {
-            Logger.error("General error: ", throwable);
-
-            return badRequest(Json.toJson(createResponse("6", "General error")));
-        });
+        return returnRecover(result);
     }
 
 
@@ -158,17 +157,14 @@ public class CustomerTransferController extends BaseController {
             response = CustomerTransferResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerTransferResponse.class),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Receiver account is not registered or not active"),
-            @ApiResponse(code = 4, message = "Receiver account doesn't have default card"),
-            @ApiResponse(code = 5, message = "Receiver not allowed to get funds due to KYC level"),
-            @ApiResponse(code = 6, message = "Specified currency doesn't exist"),
-            @ApiResponse(code = 7, message = "Specified card doesn't belong to customer"),
-            @ApiResponse(code = 8, message = "General error"),
 
-
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerTransferResponse.class),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = KYC_RESTRICTION_CODE, message = KYC_RESTRICTION_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.TransferToAnotherCard", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
@@ -181,19 +177,19 @@ public class CustomerTransferController extends BaseController {
             request = Json.fromJson(jsonNode, TransferToAnotherCard.class);
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (request.getCardFrom() == null || request.getAmount() == null
                 || StringUtils.isBlank(request.getCurrency()) || StringUtils.isBlank(request.getDescription())
                 || StringUtils.isBlank(request.getOrderId()) || StringUtils.isBlank(request.getPhone())) {
             Logger.error("Missing parameters");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("1", "Missing parameters"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (request.getAmount() <= 0) {
-            Logger.error("Wrong request format");
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "negative amount"))));
+            Logger.error("Negative amount");
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         final F.Promise<Optional<Customer>> receiverCustomerPromise = F.Promise.wrap(customerRepository.retrieveById(request.getPhone()));
@@ -220,41 +216,24 @@ public class CustomerTransferController extends BaseController {
             final Optional<Card> cardFrom = senderCards.stream().filter(itm -> itm.getId().equals(request.getCardFrom())).findFirst();
             if (!cardFrom.isPresent()) {
                 Logger.error("Specified cardFrom doesn't belong to customer");
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("7", "Specified cardFrom doesn't belong to customer"))));
+                return F.Promise.pure(createWrongCardResponse());
             }
 
             if (!receiverCustomer.getKyc().equals(KYC.FULL_DUE_DILIGENCE)) {
                 Logger.error("Receiver is not allowed to get funds due to KYC restrictions");
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Receiver is not allowed to get funds due to KYC restrictions"))));
+                return F.Promise.pure(createKycLimitResponse());
             }
 
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo, request.getAmount(), currency,
                     request.getDescription()).flatMap(providerResponse -> createTransferOperation(cardFrom.get(),
                     cardTo, request.getAmount(), currency, request.getOrderId(), request.getDescription())
-                    .map(res -> ok(Json.toJson(new CustomerTransferResponse("Transfer was completed successfully", "0", res._1.getId())))));
+                    .map(res -> ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())))));
 
 
         });
 
 
-        return result.recover(throwable -> {
-            Logger.error("General error: ", throwable);
-
-            if (throwable instanceof CustomerNotRegisteredException) {
-                badRequest(Json.toJson(createResponse("3", "Receiver account is not registered or not active")));
-            }
-
-            if (throwable instanceof  WrongCardException) {
-                badRequest(Json.toJson(createResponse("4", "Receiver account doesn't have default card")));
-            }
-
-            if (throwable instanceof WrongCurrencyException) {
-                badRequest(Json.toJson(createResponse("6", "Receiver account doesn't have default card")));
-            }
-
-            return badRequest(Json.toJson(createResponse("8", "General error")));
-        });
-
+        return returnRecover(result);
 
     }
 

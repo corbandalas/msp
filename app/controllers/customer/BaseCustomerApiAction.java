@@ -12,7 +12,10 @@ import play.libs.Json;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.Results;
 import repository.CustomerRepository;
+
+import static configs.ReturnCodes.*;
 
 /**
  * This action validates customer authorization token and saves Customer entity in context for future use.
@@ -32,13 +35,13 @@ public class BaseCustomerApiAction extends Action.Simple {
         final String token = ctx.request().getHeader("token");
         if (StringUtils.isBlank(token)) {
             Logger.error("Missing authorization token header");
-            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Missing authorization token header", "1"))));
+            return F.Promise.pure(createWrongAuthDataResponse());
         }
 
         final String phone = cache.get(token);
         if (StringUtils.isBlank(phone)) {
             Logger.error("Authorization token was not found");
-            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Authorization token was not found", "1"))));
+            return F.Promise.pure(createWrongAuthDataResponse());
         }
 
         final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).flatMap(customerOptional -> {
@@ -47,15 +50,27 @@ public class BaseCustomerApiAction extends Action.Simple {
 
             if (!customer.getActive()) {
                 Logger.error("Customer for specified token is not active");
-                return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Customer for specified token is not active", "1"))));
+                return F.Promise.pure(createWrongCustomerAccountResponse());
             }
             ctx.args.put("customer", customer);
             return delegate.call(ctx);
         });
 
         return result.recover(throwable -> {
-            Logger.error("Error: ",throwable);
-            return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "2")));
+            Logger.error("Error: ", throwable);
+            return createGeneralErrorResponse();
         });
+    }
+
+    private Results.Status createWrongAuthDataResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_AUTHORIZATION_DATA_TEXT, "" + INCORRECT_AUTHORIZATION_DATA_CODE)));
+    }
+
+    private Results.Status createWrongCustomerAccountResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(WRONG_CUSTOMER_ACCOUNT_TEXT, "" + WRONG_CUSTOMER_ACCOUNT_CODE)));
+    }
+
+    private Results.Status createGeneralErrorResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(GENERAL_ERROR_TEXT, "" + GENERAL_ERROR_CODE)));
     }
 }

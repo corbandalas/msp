@@ -5,12 +5,9 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.BaseAPIResponse;
-import dto.customer.CustomerLoginResponse;
 import dto.customer.CustomerTransaction;
 import dto.customer.CustomerTransactionFilter;
 import dto.customer.CustomerTransactionResponse;
-import exception.WrongCardException;
 import model.Card;
 import model.Customer;
 import play.Logger;
@@ -19,7 +16,6 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import provider.CardProvider;
-import provider.dto.CardTransactionListResponse;
 import repository.CardRepository;
 
 import java.text.ParseException;
@@ -28,6 +24,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static configs.ReturnCodes.*;
+
 
 /**
  * Customer transaction api controller
@@ -54,12 +53,11 @@ public class CustomerTransactionController extends BaseController {
             response = CustomerTransactionResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = BaseAPIResponse.class),
-            @ApiResponse(code = 1, message = "Missing parameters"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 4, message = "Specified card does not exist"),
-            @ApiResponse(code = 5, message = "Specified card doesn't belong for authorized customer cards"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerTransactionResponse.class),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.CustomerTransactionFilter", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
@@ -72,12 +70,12 @@ public class CustomerTransactionController extends BaseController {
             transactionFilter = Json.fromJson(jsonNode, CustomerTransactionFilter.class);
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
-            return F.Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (transactionFilter.getCardId() == null) {
             Logger.error("Missing parameter, cardId is not specified");
-            return F.Promise.pure(ok(Json.toJson(createResponse("1", "Missing parameter, cardId is not specified"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         final Date parsedFromDate;
@@ -87,7 +85,7 @@ public class CustomerTransactionController extends BaseController {
             parsedFromDate = simpleDateFormat.parse(transactionFilter.getFromDate());
             parsedToDate = simpleDateFormat.parse(transactionFilter.getToDate());
         } catch (ParseException e) {
-            return F.Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
         final F.Promise<List<Card>> cardListPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
@@ -95,27 +93,20 @@ public class CustomerTransactionController extends BaseController {
 
         final F.Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
             final Card card;
-            if(data._1.isPresent())
-                card=data._1.get();
+            if (data._1.isPresent())
+                card = data._1.get();
             else
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("4", "Specified card does not exist"))));
+                return F.Promise.pure(createWrongCardResponse());
 
             if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
-                return F.Promise.pure(badRequest(Json.toJson(createResponse("5", "Specified card doesn't belong for authorized customer cards"))));
+                return F.Promise.pure(createWrongCardResponse());
             }
 
             return cardProvider.getCardTransactions(card, parsedFromDate, parsedToDate).map(transactionListResponse
-                    -> ok(Json.toJson(new CustomerTransactionResponse("OK", "0", transactionListResponse.getList().stream()
+                    -> ok(Json.toJson(new CustomerTransactionResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, transactionListResponse.getList().stream()
                     .map(CustomerTransaction::new).collect(Collectors.toList())))));
         });
 
-        return result.recover(throwable ->
-
-                {
-                    Logger.error("Error: ", throwable);
-
-                    return ok(Json.toJson(createResponse("6", "General error")));
-                }
-        );
+        return returnRecover(result);
     }
 }

@@ -19,6 +19,7 @@ import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static configs.ReturnCodes.*;
 
 /**
  * API customer transfer controller tests
@@ -34,10 +35,10 @@ public class CustomerTransferControllerTest extends BaseControllerTest {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
                 "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
-        assertEquals("0", createResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, createResponse.get("code").asText());
 
         final JsonNode authorizeResponse = authorizeCustomer(phone, password);
-        assertEquals("0", authorizeResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
 
         final String token = authorizeResponse.get("token").asText();
 
@@ -52,7 +53,7 @@ public class CustomerTransferControllerTest extends BaseControllerTest {
         final JsonNode changeResponse = WS.url(getCustomerApiUrl("/transfer/own")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("7",changeResponse.get("code").asText());
+        assertEquals("" + INCORRECT_CARD_CODE,changeResponse.get("code").asText());
     }
 
     @After

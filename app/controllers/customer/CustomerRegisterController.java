@@ -7,6 +7,7 @@ import configs.Constants;
 import controllers.BaseController;
 import controllers.admin.BaseMerchantApiAction;
 import dto.Authentication;
+import dto.customer.CustomerLoginResponse;
 import dto.customer.CustomerRegister;
 import dto.customer.CustomerRegisterResponse;
 import exception.CustomerAlreadyRegisteredException;
@@ -27,6 +28,8 @@ import sms.SmsGateway;
 import util.SecurityUtil;
 
 import java.util.Date;
+
+import static configs.ReturnCodes.*;
 
 
 /**
@@ -59,13 +62,13 @@ public class CustomerRegisterController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerRegisterResponse.class),
-            @ApiResponse(code = 1, message = "Missing params"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Country not exist or inactive"),
-            @ApiResponse(code = 5, message = "Customer already registered"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerRegisterResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = PASSWORD_MISMATCH_CODE, message = PASSWORD_MISMATCH_TEXT),
+            @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Registration request", required = true, dataType = "dto.customer.CustomerRegister", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -88,18 +91,18 @@ public class CustomerRegisterController extends BaseController {
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (customerRegister == null || StringUtils.isBlank(customerRegister.getPhone()) || StringUtils.isBlank(customerRegister.getCountry())) {
             Logger.error("Missing params");
-            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Missing params"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), customerRegister.getPhone(), customerRegister.getCountry(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(badRequest(Json.toJson(createResponse("3", "Wrong enckey"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         final String country = customerRegister.getCountry();
@@ -139,25 +142,10 @@ public class CustomerRegisterController extends BaseController {
 
             smsGateway.sendSms(phone, "Dear " + res._1.getFullName() + "! Thank you for registration. Your temporary PIN code is " + res._2 + ". Please visit mysafepay.com to complete registration.");
 
-            return ok(Json.toJson(new CustomerRegisterResponse("0", "Registration is OK")));
+            return ok(Json.toJson(new CustomerRegisterResponse("" + SUCCESS_CODE, SUCCESS_TEXT)));
         });
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    if (error instanceof WrongCountryException) {
-                        return badRequest(Json.toJson(createResponse("4", error.getMessage())));
-                    }
-
-                    if (error instanceof CustomerAlreadyRegisteredException) {
-                        return badRequest(Json.toJson(createResponse("5", error.getMessage())));
-                    }
-
-                    return badRequest(Json.toJson(createResponse("6", "General error")));
-
-                }
-        );
+        return returnRecover(result);
 
     }
 
