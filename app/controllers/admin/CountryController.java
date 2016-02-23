@@ -5,10 +5,8 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.Authentication;
-import dto.BaseAPIResponse;
-import dto.CountryListResponse;
-import dto.CountryResponse;
+import dto.*;
+import dto.customer.CustomerTransferResponse;
 import model.Country;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -18,6 +16,8 @@ import play.mvc.Result;
 import play.mvc.With;
 import repository.CountryRepository;
 import util.SecurityUtil;
+
+import static configs.ReturnCodes.*;
 
 /**
  * API country controller
@@ -41,8 +41,10 @@ public class CountryController extends BaseController {
             response = CountryListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CountryListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CountryListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -55,15 +57,12 @@ public class CountryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(countryRepository.retrieveAll()).map(countries -> ok(Json.toJson(new CountryListResponse("0", "OK", countries))));
+        final Promise<Result> result = Promise.wrap(countryRepository.retrieveAll()).map(countries -> ok(Json.toJson(new CountryListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -76,8 +75,10 @@ public class CountryController extends BaseController {
             response = CountryListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CountryListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CountryListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -90,15 +91,12 @@ public class CountryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(countryRepository.retrieveByActive(true)).map(countries -> ok(Json.toJson(new CountryListResponse("0", "OK", countries))));
+        final Promise<Result> result = Promise.wrap(countryRepository.retrieveByActive(true)).map(countries -> ok(Json.toJson(new CountryListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -112,11 +110,10 @@ public class CountryController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CountryResponse.class),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Specified country does not exist"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CountryResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "countryID", value = "Country ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -130,26 +127,18 @@ public class CountryController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 countryID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (StringUtils.isBlank(countryID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         Promise<Result> result = Promise.wrap(countryRepository.retrieveById(countryID)).map(res -> res.map(country
-                -> ok(Json.toJson(new CountryResponse("0", "OK", country)))).orElse(ok(Json.toJson(
-                createResponse("4", "Specified country does not exist")))));
+                -> ok(Json.toJson(new CountryResponse(""+SUCCESS_CODE, SUCCESS_TEXT, country)))).orElse(createIncorrectCountryResponse()));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("6", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -163,9 +152,11 @@ public class CountryController extends BaseController {
             response = BaseAPIResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Country was updated successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Country request", required = true, dataType = "model.Country", paramType = "body"),
@@ -186,27 +177,19 @@ public class CountryController extends BaseController {
             if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                     country.getCode(), authData.getOrderId(), authData.getAccount().getSecret()))) {
                 Logger.error("Provided and calculated enckeys do not match");
-                return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+                return Promise.pure(createWrongEncKeyResponse());
             }
 
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
-
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         final Promise<Country> countryPromise = Promise.wrap(countryRepository.update(country));
 
-        Promise<Result> result = countryPromise.map(res -> ok(Json.toJson(createResponse("0", "Country was updated successfully"))));
+        Promise<Result> result = countryPromise.map(res -> ok(Json.toJson(createResponse(""+SUCCESS_CODE, SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
 }

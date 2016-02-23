@@ -15,7 +15,6 @@ import org.junit.Test;
 import play.Logger;
 import play.libs.Json;
 import play.libs.ws.WS;
-import repository.ConnectionPool;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
@@ -23,7 +22,7 @@ import util.SecurityUtil;
 
 import java.util.Date;
 
-import static java.util.Arrays.asList;
+import static configs.ReturnCodes.SUCCESS_CODE;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -42,15 +41,15 @@ public class CardControllerTest extends BaseControllerTest {
     public void createAndUpdate() throws Exception {
         final Customer customer = new Customer(customer_id, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
         final JsonNode createResultCustomer = createCustomer(customer);
-        TestCase.assertEquals("0", createResultCustomer.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResultCustomer.get("code").asText());
 
         final Card card = new Card(null, "token", customer_id, CardType.VIRTUAL, CardBrand.VISA, true, new Date(), alias, true, "info", "USD", "adress1", "adress2", "adress3", "USA");
         final JsonNode createResult = create(card, this.testServer.port());
 
-        TestCase.assertEquals("0", createResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
 
         final JsonNode afterCreate = retrieveById(createResult.get("card").get("id").asText());
-        TestCase.assertEquals("0", afterCreate.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, afterCreate.get("code").asText());
         TestCase.assertEquals(customer_id, afterCreate.get("card").get("customerId").asText());
 
         newCardId = afterCreate.get("card").get("id").asText();
@@ -66,10 +65,10 @@ public class CardControllerTest extends BaseControllerTest {
 
         final JsonNode updateResult = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", updateEnckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(card)).get(TIMEOUT).asJson();
-        TestCase.assertEquals("0", updateResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, updateResult.get("code").asText());
 
         final JsonNode afterUpdate = retrieveById(newCardId);
-        TestCase.assertEquals("0", afterUpdate.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, afterUpdate.get("code").asText());
         TestCase.assertEquals(updatedAlias, afterUpdate.get("card").get("alias").asText());
     }
 
@@ -103,7 +102,7 @@ public class CardControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("cardList").isArray());
     }
 
@@ -116,7 +115,7 @@ public class CardControllerTest extends BaseControllerTest {
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("cardList").isArray());
     }
 
@@ -129,7 +128,7 @@ public class CardControllerTest extends BaseControllerTest {
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("cardList").isArray());
     }
 
@@ -142,7 +141,7 @@ public class CardControllerTest extends BaseControllerTest {
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("cardList").isArray());
     }
 

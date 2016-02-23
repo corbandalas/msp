@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
+import static configs.ReturnCodes.*;
+
 /**
  * API customer controller
  *
@@ -45,8 +47,11 @@ public class CustomerController extends BaseController {
             response = CustomerListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -59,15 +64,12 @@ public class CustomerController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveAll()).map(customers -> ok(Json.toJson(new CustomerListResponse("0", "OK", customers))));
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveAll()).map(customers -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customers))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -81,9 +83,11 @@ public class CustomerController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "phone", value = "Phone to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -96,27 +100,20 @@ public class CustomerController extends BaseController {
 
         if (StringUtils.isBlank(phone)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 phone, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).map(operationOpt
-                -> operationOpt.map(customer -> ok(Json.toJson(new CustomerResponse("0", "OK", customer))))
-                .orElse(ok(Json.toJson(createResponse("4", "Specified operation does not exist")))));
+                -> operationOpt.map(customer -> ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customer))))
+                .orElse(createWrongCustomerAccountResponse()));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -130,9 +127,11 @@ public class CustomerController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerListResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startDate", value = "startDate to retrieve (yyyy-MM-dd)", required = true, dataType = "string", paramType = "path"),
@@ -145,7 +144,7 @@ public class CustomerController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         if (StringUtils.isBlank(startDate) || StringUtils.isBlank(endDate)) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         Date parsedStartDate;
@@ -155,25 +154,18 @@ public class CustomerController extends BaseController {
             parsedStartDate = simpleDateFormat.parse(startDate);
             parsedEndDate = simpleDateFormat.parse(endDate);
         } catch (ParseException e) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 startDate, endDate, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByRegistrationDate(parsedStartDate, parsedEndDate)).map(countries -> ok(Json.toJson(new CustomerListResponse("0", "OK", countries))));
+        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByRegistrationDate(parsedStartDate, parsedEndDate)).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -187,9 +179,11 @@ public class CustomerController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerListResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "kyc", value = "kyc to retrieve customers", required = true, dataType = "string", paramType = "path"),
@@ -201,25 +195,18 @@ public class CustomerController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         if (StringUtils.isBlank(kyc)) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 kyc, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByKYC(KYC.valueOf(kyc))).map(countries -> ok(Json.toJson(new CustomerListResponse("0", "OK", countries))));
+        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByKYC(KYC.valueOf(kyc))).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -233,9 +220,11 @@ public class CustomerController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CustomerListResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "email", value = "email to retrieve customers", required = true, dataType = "string", paramType = "path"),
@@ -247,25 +236,18 @@ public class CustomerController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         if (StringUtils.isBlank(email)) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 email, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByEmail(email)).map(countries -> ok(Json.toJson(new CustomerListResponse("0", "OK", countries))));
+        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByEmail(email)).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -279,9 +261,11 @@ public class CustomerController extends BaseController {
             response = BaseAPIResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Customer was updated successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Customer request", required = true, dataType = "model.Customer", paramType = "body"),
@@ -302,27 +286,20 @@ public class CustomerController extends BaseController {
             if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                     customer.getId(), authData.getOrderId(), authData.getAccount().getSecret()))) {
                 Logger.error("Provided and calculated enckeys do not match");
-                return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+                return Promise.pure(createWrongEncKeyResponse());
             }
 
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         final Promise<Customer> customerPromise = Promise.wrap(customerRepository.update(customer));
 
-        Promise<Result> result = customerPromise.map(res -> ok(Json.toJson(createResponse("0", "Customer was updated successfully"))));
+        Promise<Result> result = customerPromise.map(res -> ok(Json.toJson(createResponse(""+SUCCESS_CODE, SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -337,11 +314,11 @@ public class CustomerController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Customer was created successfully"),
-            @ApiResponse(code = 1, message = "Missing parameter"),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 6, message = "General error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Customer request", required = true, dataType = "model.Customer", paramType = "body"),
@@ -359,19 +336,19 @@ public class CustomerController extends BaseController {
             customer = Json.fromJson(jsonNode, Customer.class);
         } catch (Exception e) {
             Logger.error("Wrong request format: ",e);
-            return Promise.pure(ok(Json.toJson(createResponse("2", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (StringUtils.isBlank(customer.getId()) || StringUtils.isBlank(customer.getAddress1()) || StringUtils.isBlank(customer.getAddress2())) {
             Logger.error("Missing params");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 customer.getId(), customer.getFirstName(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
@@ -379,12 +356,9 @@ public class CustomerController extends BaseController {
         customer.setTemppassword(true);
 
         final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
-                ok(Json.toJson(new CustomerResponse("0", "Customer created successfully", res))));
+                ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, res))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("6", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
 }

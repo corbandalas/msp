@@ -23,6 +23,8 @@ import util.SecurityUtil;
 
 import java.util.Date;
 
+import static configs.ReturnCodes.*;
+
 /**
  * API card controller
  *
@@ -45,8 +47,11 @@ public class CardController extends BaseController {
             response = CardListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CardListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -59,15 +64,12 @@ public class CardController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveAll()).map(cards -> ok(Json.toJson(new CardListResponse("0", "OK", cards))));
+        final Promise<Result> result = Promise.wrap(cardRepository.retrieveAll()).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -80,8 +82,11 @@ public class CardController extends BaseController {
             response = CardListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CardListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cardBrand", value = "Card brand to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -95,21 +100,18 @@ public class CardController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), cardBrand,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (StringUtils.isBlank(cardBrand)) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         CardBrand cardBrandValue = CardBrand.valueOf(cardBrand);
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCardBrand(cardBrandValue)).map(cards -> ok(Json.toJson(new CardListResponse("0", "OK", cards))));
+        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCardBrand(cardBrandValue)).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -122,8 +124,11 @@ public class CardController extends BaseController {
             response = CardListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CardListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cardType", value = "Card type to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -137,21 +142,18 @@ public class CardController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), cardType,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (StringUtils.isBlank(cardType)) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         CardType cardTypeValue = CardType.valueOf(cardType);
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCardType(cardTypeValue)).map(cards -> ok(Json.toJson(new CardListResponse("0", "OK", cards))));
+        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCardType(cardTypeValue)).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -164,8 +166,11 @@ public class CardController extends BaseController {
             response = CardListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CardListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "customerID", value = "customerID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -179,19 +184,16 @@ public class CardController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), customerID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (StringUtils.isBlank(customerID)) {
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCustomerId(customerID)).map(cards -> ok(Json.toJson(new CardListResponse("0", "OK", cards))));
+        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCustomerId(customerID)).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -205,11 +207,11 @@ public class CardController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CardResponse.class),
-            @ApiResponse(code = 2, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Specified card does not exist"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cardID", value = "Card ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -223,26 +225,18 @@ public class CardController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 cardID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (StringUtils.isBlank(cardID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("2", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         Promise<Result> result = Promise.wrap(cardRepository.retrieveById(cardID)).map(res -> res.map(card
-                -> ok(Json.toJson(new CardResponse("0", "OK", card)))).orElse(ok(Json.toJson(createResponse("4",
-                "Specified card does not exist")))));
+                -> ok(Json.toJson(new CardResponse(""+SUCCESS_CODE, SUCCESS_TEXT, card)))).orElse(createWrongCardResponse()));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -256,9 +250,11 @@ public class CardController extends BaseController {
             response = BaseAPIResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Card was updated successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Card request", required = true, dataType = "model.Card", paramType = "body"),
@@ -279,27 +275,20 @@ public class CardController extends BaseController {
             if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                     card.getId().toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
                 Logger.error("Provided and calculated enckeys do not match");
-                return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+                return Promise.pure(createWrongEncKeyResponse());
             }
 
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         final Promise<Card> cardPromise = Promise.wrap(cardRepository.update(card));
 
-        Promise<Result> result = cardPromise.map(res -> ok(Json.toJson(createResponse("0", "Customer was updated successfully"))));
+        Promise<Result> result = cardPromise.map(res -> ok(Json.toJson(createResponse(""+SUCCESS_CODE, SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -314,9 +303,11 @@ public class CardController extends BaseController {
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Card was created successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Card request", required = true, dataType = "model.Card", paramType = "body"),
@@ -333,25 +324,22 @@ public class CardController extends BaseController {
 
         if (StringUtils.isBlank(card.getAlias()) || StringUtils.isBlank(card.getCurrencyId()) || StringUtils.isBlank(card.getCustomerId()) || card.getType() == null || card.getBrand() == null || card.getActive() == null || card.getCardDefault() == null || StringUtils.isBlank(card.getInfo()) || StringUtils.isBlank(card.getDeliveryAddress1()) || StringUtils.isBlank(card.getDeliveryAddress2()) || StringUtils.isBlank(card.getDeliveryAddress3()) || StringUtils.isBlank(card.getDeliveryCountry())) {
             Logger.error("Missing params");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Missing params"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 card.getCustomerId(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         if (card.getCreateDate() == null) card.setCreateDate(new Date());
 
         final Promise<Result> result = Promise.wrap(cardRepository.create(card)).map(res ->
-                ok(Json.toJson(new CardResponse("0", "Card created successfully", res))));
+                ok(Json.toJson(new CardResponse(""+SUCCESS_CODE, SUCCESS_TEXT, res))));
 
-        return result.recover(error -> {
-            Logger.error("Error: ", error);
-            return ok(Json.toJson(createResponse("2", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
 }

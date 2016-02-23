@@ -5,10 +5,7 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.Authentication;
-import dto.CurrencyExchangeResponse;
-import dto.CurrencyListResponse;
-import dto.CurrencyResponse;
+import dto.*;
 import model.Currency;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -21,6 +18,9 @@ import util.CurrencyUtil;
 import util.SecurityUtil;
 
 import java.util.Optional;
+
+import static configs.ReturnCodes.*;
+import static configs.ReturnCodes.GENERAL_ERROR_TEXT;
 
 /**
  * API currency controller
@@ -44,8 +44,10 @@ public class CurrencyController extends BaseController {
             response = CurrencyListResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CurrencyListResponse.class),
-            @ApiResponse(code = 1, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CurrencyListResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
@@ -58,15 +60,12 @@ public class CurrencyController extends BaseController {
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         final Promise<Result> result = Promise.wrap(currencyRepository.retrieveAll()).map(currencies -> ok(Json.toJson(new CurrencyListResponse("0", "OK", currencies))));
 
-        return result.recover(error -> {
-            Logger.error("Error:", error);
-            return ok(Json.toJson(createResponse("1", error.getMessage())));
-        });
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -79,11 +78,10 @@ public class CurrencyController extends BaseController {
             response = CurrencyResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CurrencyResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 3, message = "Wrong enckey"),
-            @ApiResponse(code = 4, message = "Specified currency does not exist"),
-            @ApiResponse(code = 6, message = "General error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CurrencyResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "currencyID", value = "Currency ID to retrieve", required = true, dataType = "string", paramType = "path"),
@@ -95,28 +93,19 @@ public class CurrencyController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         if (StringUtils.isBlank(currencyID)) {
-
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currencyID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("3", "Provided and calculated enckeys do not match"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         Promise<Result> result = Promise.wrap(currencyRepository.retrieveById(currencyID)).map(res -> res.map(curr
-                -> ok(Json.toJson(new CurrencyResponse("0", "OK", curr)))).orElse(ok(Json.toJson(
-                createResponse("4", "Specified currency does not exist")))));
+                -> ok(Json.toJson(new CurrencyResponse(""+SUCCESS_CODE, SUCCESS_TEXT, curr)))).orElse(createIncorrectCurrencyResponse()));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("6", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
     @With(BaseMerchantApiAction.class)
@@ -130,9 +119,10 @@ public class CurrencyController extends BaseController {
             response = dto.BaseAPIResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "Currency was updated successfully"),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error"),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(value = "Currency request", required = true, dataType = "model.Currency", paramType = "body"),
@@ -153,27 +143,19 @@ public class CurrencyController extends BaseController {
             if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), currency.getId(),
                     authData.getOrderId(), authData.getAccount().getSecret()))) {
                 Logger.error("Provided and calculated enckeys do not match");
-                return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+                return Promise.pure(createWrongEncKeyResponse());
             }
 
         } catch (Exception e) {
             Logger.error("Wrong request format:", e);
-
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         final Promise<Currency> currencyPromise = Promise.wrap(currencyRepository.update(currency));
 
-        Promise<Result> result = currencyPromise.map(res -> ok(Json.toJson(createResponse("0", "Currency was updated successfully"))));
+        Promise<Result> result = currencyPromise.map(res -> ok(Json.toJson(createResponse(""+SUCCESS_CODE, SUCCESS_TEXT))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
 
@@ -187,9 +169,10 @@ public class CurrencyController extends BaseController {
             response = CurrencyExchangeResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 0, message = "OK", response = CurrencyExchangeResponse.class),
-            @ApiResponse(code = 1, message = "Wrong request format"),
-            @ApiResponse(code = 2, message = "DB error")
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CurrencyExchangeResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams({
             @ApiImplicitParam(name = "fromCurrencyID", value = "Original currency", required = true, dataType = "string", paramType = "path"),
@@ -204,29 +187,22 @@ public class CurrencyController extends BaseController {
 
         if (StringUtils.isBlank(fromCurrencyID) || StringUtils.isBlank(toCurrencyID)) {
 
-            return Promise.pure(badRequest(Json.toJson(createResponse("1", "Wrong request format"))));
+            return Promise.pure(createWrongRequestFormatResponse());
         }
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), fromCurrencyID, toCurrencyID, "" + amount,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(ok(Json.toJson(createResponse("1", "Specified account does not exist or inactive"))));
+            return Promise.pure(createWrongEncKeyResponse());
         }
 
         Promise<Optional<Currency>> currencyFromPromise = Promise.wrap(currencyRepository.retrieveById(fromCurrencyID));
         Promise<Optional<Currency>> currencyToPromise = Promise.wrap(currencyRepository.retrieveById(toCurrencyID));
 
         Promise<Result> result = currencyFromPromise.zip(currencyToPromise).map(res -> CurrencyUtil.convert(amount, res._1, res._2)).
-                map(res -> ok(Json.toJson(new CurrencyExchangeResponse("0", "" + (double) amount / 100 + " " + fromCurrencyID + " equals to " + (double) res / 100 + " " + toCurrencyID, fromCurrencyID, toCurrencyID, amount, res))));
+                map(res -> ok(Json.toJson(new CurrencyExchangeResponse(""+SUCCESS_CODE, "" + (double) amount / 100 + " " + fromCurrencyID + " equals to " + (double) res / 100 + " " + toCurrencyID, fromCurrencyID, toCurrencyID, amount, res))));
 
-        return result.recover(error -> {
-
-                    Logger.error("Error:", error);
-
-                    return ok(Json.toJson(createResponse("2", error.getMessage())));
-
-                }
-        );
+        return returnRecover(result);
     }
 
 }

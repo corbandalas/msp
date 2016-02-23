@@ -16,6 +16,7 @@ import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static configs.ReturnCodes.SUCCESS_CODE;
 
 /**
  * Test for CustomerController
@@ -33,10 +34,10 @@ public class CustomerControllerTest extends BaseControllerTest {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
         final JsonNode createResult = createCustomer(customer);
 
-        TestCase.assertEquals("0", createResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
 
         final JsonNode afterCreate = retrieveByPhone(createResult.get("customer").get("id").asText());
-        TestCase.assertEquals("0", afterCreate.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, afterCreate.get("code").asText());
         TestCase.assertEquals(email, afterCreate.get("customer").get("email").asText());
 
         final String updatedEmail = "nihilist.don2@gmail.com";
@@ -49,10 +50,10 @@ public class CustomerControllerTest extends BaseControllerTest {
 
         final JsonNode updateResult = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", updateEnckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(customer)).get(TIMEOUT).asJson();
-        TestCase.assertEquals("0", updateResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, updateResult.get("code").asText());
 
         final JsonNode afterUpdate = retrieveByPhone(customer.getId());
-        TestCase.assertEquals("0", afterUpdate.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, afterUpdate.get("code").asText());
         TestCase.assertEquals(updatedEmail, afterUpdate.get("customer").get("email").asText());
     }
 
@@ -69,7 +70,7 @@ public class CustomerControllerTest extends BaseControllerTest {
     public void retrieveByPhone() throws Exception {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
         final JsonNode createResult = createCustomer(customer);
-        TestCase.assertEquals("0", createResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
 
         String url = getAdminApiUrl("/customer/getByPhone/380953055621");
         final int timeout = 5000;
@@ -78,10 +79,10 @@ public class CustomerControllerTest extends BaseControllerTest {
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
 
         final JsonNode result = retrieveByPhone(response.get("customer").get("id").asText());
-        assertEquals("0", result.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, result.get("code").asText());
         assertEquals("83004", result.get("customer").get("postcode").asText());
     }
 
@@ -89,7 +90,7 @@ public class CustomerControllerTest extends BaseControllerTest {
     public void retrieveByEmail() throws Exception {
         final Customer customer = new Customer(phone, new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA");
         final JsonNode createResult = createCustomer(customer);
-        TestCase.assertEquals("0", createResult.get("code").asText());
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
 
         String url = getAdminApiUrl("/customer/getByEmail/".concat(email));
         final int timeout = 5000;
@@ -98,10 +99,10 @@ public class CustomerControllerTest extends BaseControllerTest {
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
 
         final JsonNode result = retrieveByPhone(response.get("customerList").get(0).get("id").asText());
-        assertEquals("0", result.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, result.get("code").asText());
 
         assertEquals("83004", result.get("customer").get("postcode").asText());
     }
@@ -115,7 +116,7 @@ public class CustomerControllerTest extends BaseControllerTest {
 
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
 
     }
 
@@ -129,7 +130,7 @@ public class CustomerControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("customerList").isArray());
     }
 
@@ -143,7 +144,7 @@ public class CustomerControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("customerList").isArray());
     }
 

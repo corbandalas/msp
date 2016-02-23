@@ -7,6 +7,7 @@ import play.libs.ws.WS;
 import util.SecurityUtil;
 
 import static org.junit.Assert.assertEquals;
+import static configs.ReturnCodes.SUCCESS_CODE;
 
 /**
  * Test for CurrencyController
@@ -27,7 +28,7 @@ public class CurrencyControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals("USD", response.get("currency").get("displayText").asText());
     }
 
@@ -41,7 +42,7 @@ public class CurrencyControllerTest extends BaseControllerTest {
         final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(timeout).asJson();
 
-        assertEquals("0", response.get("code").asText());
+        assertEquals("" + SUCCESS_CODE, response.get("code").asText());
         assertEquals(true, response.get("currencyList").isArray());
     }
 
