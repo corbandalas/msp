@@ -1,6 +1,7 @@
 package controllers.admin;
 
 import com.google.inject.Inject;
+import configs.ReturnCodes;
 import dto.Authentication;
 import dto.BaseAPIResponse;
 import exception.AccountNotFoundException;
@@ -33,32 +34,36 @@ public class BaseMerchantApiAction extends Action.Simple {
         if (!StringUtils.isNumeric(accountId)) {
             Logger.error("accountId header is missing or not numeric");
 
-            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("accountId header is missing", "1"))));
+            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse(ReturnCodes.INCORRECT_AUTHORIZATION_DATA_TEXT,
+                    String.valueOf(ReturnCodes.INCORRECT_AUTHORIZATION_DATA_CODE)))));
         }
 
         final String enckey = ctx.request().getHeader("enckey");
         if (StringUtils.isBlank(enckey)) {
             Logger.error("enckey header is missing");
 
-            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("enckey header is missing", "1"))));
+            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse(ReturnCodes.INCORRECT_AUTHORIZATION_DATA_TEXT,
+                    String.valueOf(ReturnCodes.INCORRECT_AUTHORIZATION_DATA_CODE)))));
         }
 
         final String orderId = ctx.request().getHeader("orderId");
         if (StringUtils.isBlank(orderId)) {
             Logger.error("orderId header is missing");
 
-            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("enckey header is missing", "1"))));
+            return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse(ReturnCodes.INCORRECT_AUTHORIZATION_DATA_TEXT,
+                    String.valueOf(ReturnCodes.INCORRECT_AUTHORIZATION_DATA_CODE)))));
         }
 
         final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveById(Integer.parseInt(accountId))).flatMap(authAccountOptional -> {
 
-            Account authAccount = authAccountOptional.orElseThrow(AccountNotFoundException::new);
-
-            if (!authAccount.getActive()) {
+            if (!authAccountOptional.isPresent() || !authAccountOptional.get().getActive()) {
                 Logger.error("Specified account does not exist or inactive");
 
-                return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse("Specified account does not exist or inactive", "1"))));
+                return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse(ReturnCodes.INACTIVE_ACCOUNT_TEXT,
+                        String.valueOf(ReturnCodes.INACTIVE_ACCOUNT_CODE)))));
             }
+
+            Account authAccount = authAccountOptional.get();
 
             final Authentication authData = new Authentication(authAccount, enckey, orderId);
 
@@ -71,11 +76,7 @@ public class BaseMerchantApiAction extends Action.Simple {
 
             Logger.error("Error: ", throwable);
 
-            if (throwable instanceof AccountNotFoundException) {
-                return ok(Json.toJson(new BaseAPIResponse("Specified account does not exist or inactive", "1")));
-            }
-
-            return ok(Json.toJson(new BaseAPIResponse(throwable.getMessage(), "2")));
+            return ok(Json.toJson(new BaseAPIResponse(ReturnCodes.GENERAL_ERROR_TEXT, String.valueOf(ReturnCodes.GENERAL_ERROR_CODE))));
         });
     }
 }

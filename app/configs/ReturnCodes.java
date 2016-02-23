@@ -57,6 +57,9 @@ public class ReturnCodes {
     public static final byte INCORRECT_TRANSACTION_CODE = 15;
     public static final String INCORRECT_TRANSACTION_TEXT = "Incorrect transaction";
 
+    public static final byte INACTIVE_ACCOUNT_CODE = 16;
+    public static final String INACTIVE_ACCOUNT_TEXT = "Account is not active";
+
 
     public static final byte GENERAL_ERROR_CODE = 100;
     public static final String GENERAL_ERROR_TEXT = "General error";
