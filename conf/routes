@@ -122,8 +122,8 @@ POST    /api/customer/transfer/own                                      @control
 POST    /api/customer/transfer/other                                    @controllers.customer.CustomerTransferController.transferToAnotherCard()
 
 GET     /api-docs/api/customer/card/management                          @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/management")
-GET     /api/customer/card/management/changeStatus                      @controllers.customer.CustomerCardManagementController.changeStatus()
-GET     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
+POST     /api/customer/card/management/changeStatus                      @controllers.customer.CustomerCardManagementController.changeStatus()
+POST     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
 
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)
