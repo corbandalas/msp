@@ -36,7 +36,7 @@ public class CustomerCardListControllerTest extends BaseCustomerControllerTest {
             CustomerCardListResponse customerCardListResponse = Json.fromJson(cardListResponse, CustomerCardListResponse.class);
 
             assertTrue(customerCardListResponse.getList().size() == 2);
-
+            assertTrue(customerCardListResponse.getList().get(0).getCardDetails().getCurrency().equals("EUR"));
 
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
