@@ -41,6 +41,25 @@ public class CustomerCardListResponse extends BaseAPIResponse {
             this.cardDetails = cardDetails;
         }
 
+        public CardWrapper() {
+
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public CardDetailsResponse getCardDetails() {
+            return cardDetails;
+        }
+
+        public void setCardDetails(CardDetailsResponse cardDetails) {
+            this.cardDetails = cardDetails;
+        }
     }
 
 }
