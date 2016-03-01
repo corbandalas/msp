@@ -31,6 +31,9 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
     public static final String PHONE_1 = "4921142172244";
     public static final String PHONE_2 = "4921142172243";
 
+    public static final String PASSWORD_1 = "4921142172244";
+    public static final String PASSWORD_2 = "4921142172243";
+
     public static final String CARD_TOKEN_1 = "795949040";
     public static final String CARD_TOKEN_2 = "795972005";
     public static final String CARD_TOKEN_1_2 = "795975887";
@@ -74,9 +77,9 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
         final CardRepository cardRepository = app.injector().instanceOf(CardRepository.class);
 
-        Await.result(customerRepository.create(createCustomer(PHONE_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff")), Duration.apply(TIMEOUT, "ms"));
+        Await.result(customerRepository.create(createCustomer(PHONE_1, PASSWORD_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff")), Duration.apply(TIMEOUT, "ms"));
 
-        Await.result(customerRepository.create(createCustomer(PHONE_2, "mr_petroff@gmail.com", "Petr", "Petroff")), Duration.apply(TIMEOUT, "ms"));
+        Await.result(customerRepository.create(createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff")), Duration.apply(TIMEOUT, "ms"));
 
         Await.result(cardRepository.create(createCard(PHONE_1, CARD_TOKEN_1, true)), Duration.apply(TIMEOUT, "ms"));
 
@@ -88,9 +91,9 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
     }
 
-    private model.Customer createCustomer(String phone, String email, String firstName, String lastName) {
+    private model.Customer createCustomer(String phone, String password, String email, String firstName, String lastName) {
         return new model.Customer(phone, new Date(), "Mr", firstName, lastName,
-                "adress1", "adress2", "83004", "Berlin", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "DE");
+                "adress1", "adress2", "83004", "Berlin", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "DE");
     }
 
     private Card createCard(String customerPhone, String token, boolean cardDefault) {
