@@ -15,6 +15,10 @@ public class CardDetailsResponse extends BaseCardResponse{
     private String currency;
     private String statCode;
 
+    public CardDetailsResponse() {
+
+    }
+
     public CardDetailsResponse(String pan, String expDate, String cvv, double bal, String currency, String statCode, String actionCode) {
         super(actionCode);
         this.pan = pan;

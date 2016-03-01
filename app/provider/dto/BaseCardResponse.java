@@ -8,6 +8,10 @@ package provider.dto;
  */
 public class BaseCardResponse {
 
+    public BaseCardResponse() {
+
+    }
+
     private String actionCode;
 
     public BaseCardResponse(String actionCode) {
