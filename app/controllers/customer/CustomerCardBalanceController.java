@@ -76,7 +76,7 @@ public class CustomerCardBalanceController extends BaseController {
             }
 
             return cardProvider.getVirtualCardBalance(card).map(balanceResponse
-                    -> ok(Json.toJson(new CustomerCardBalanceResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, balanceResponse.getAvailableBalance(), balanceResponse.getCurrency()))));
+                    -> ok(Json.toJson(new CustomerCardBalanceResponse("" + SUCCESS_CODE, SUCCESS_TEXT, balanceResponse.getAvailableBalance(), balanceResponse.getCurrency()))));
         });
 
 
