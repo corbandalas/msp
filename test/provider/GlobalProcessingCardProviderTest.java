@@ -9,7 +9,6 @@ import model.enums.KYC;
 import module.PropertyLoader;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import play.Logger;
 import provider.dto.*;
@@ -22,7 +21,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 

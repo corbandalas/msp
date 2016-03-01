@@ -26,7 +26,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 19.02.2016.
  * @since 0.1.0
  */
-public class CustomerTransferControllerTest extends BaseControllerTest {
+public class CustomerTransferControllerTest extends BaseCustomerControllerTest {
 
     private String phone = "4524607605";
 
