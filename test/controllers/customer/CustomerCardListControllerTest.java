@@ -37,6 +37,7 @@ public class CustomerCardListControllerTest extends BaseCustomerControllerTest {
 
             assertTrue(customerCardListResponse.getList().size() == 2);
             assertTrue(customerCardListResponse.getList().get(0).getCardDetails().getCurrency().equals("EUR"));
+            assertNotNull(customerCardListResponse.getList().get(1).getId());
 
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
