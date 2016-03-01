@@ -1,17 +1,17 @@
 package controllers.customer;
 
+import akka.actor.ActorSystem;
 import akka.dispatch.Futures;
 import controllers.BaseControllerTest;
 import model.Card;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
+import module.PropertyLoader;
 import org.junit.After;
 import org.junit.Before;
 import play.Logger;
-import repository.CardRepository;
-import repository.ConnectionPool;
-import repository.CustomerRepository;
+import repository.*;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
@@ -27,6 +27,8 @@ import static java.util.Arrays.asList;
  * @since 0.2.0
  */
 public class BaseCustomerControllerTest extends BaseControllerTest {
+
+    public static final long TIMEOUT = 20000;
 
     public static final String PHONE_1 = "4921142172244";
     public static final String PHONE_2 = "4921142172243";
@@ -46,6 +48,9 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
         try {
             insertCustomersAndCards();
+
+            PropertyLoader propertyLoader = app.injector().instanceOf(PropertyLoader.class);
+            propertyLoader.load("conf/properties.json", app.injector().instanceOf(ActorSystem.class).dispatcher());
         } catch (Exception e) {
             Logger.error("Test error", e);
         }
