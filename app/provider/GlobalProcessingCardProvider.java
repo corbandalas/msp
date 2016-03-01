@@ -49,7 +49,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency) {
-        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, true);
+        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
     }
 
     @Override
@@ -74,12 +74,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
+        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getCurCode(), res.getStatCode(), res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getActionCode())));
+        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getCurCode(), res.getStatCode(), res.getActionCode())));
     }
 
     @Override
@@ -175,7 +175,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return getGPSSettings().zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
                 flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow)).
-                map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate()));
+                map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue()));
 
     }
 
@@ -252,8 +252,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         DateUtil.format(new Date(), "yyyy-MM-dd"), //LocDate
                         DateUtil.format(new Date(), "hhmmss"), //LocTime
                         null, //TerminalID
-                        loadValue, //LoadValue
-                        "" + currency.getCode(), //CurCode
+                        loadValue / 100, //LoadValue
+                        "" + currency.getId(), //CurCode
                         null, //Reason
                         null, //AccCode
                         0, //ItemSrc

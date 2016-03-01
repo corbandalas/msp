@@ -12,13 +12,15 @@ public class CardCreationResponse extends BaseCardResponse{
     private String cvv;
     private String pan;
     private String expDate;
+    private double loadValue;
 
-    public CardCreationResponse(String token, String actionCode, String cvv, String pan, String expDate) {
+    public CardCreationResponse(String token, String actionCode, String cvv, String pan, String expDate, double loadValue) {
         super(actionCode);
         this.token = token;
         this.cvv = cvv;
         this.pan = pan;
         this.expDate = expDate;
+        this.loadValue = loadValue;
     }
 
     public String getToken() {
@@ -51,5 +53,13 @@ public class CardCreationResponse extends BaseCardResponse{
 
     public void setExpDate(String expDate) {
         this.expDate = expDate;
+    }
+
+    public double getLoadValue() {
+        return loadValue;
+    }
+
+    public void setLoadValue(double loadValue) {
+        this.loadValue = loadValue;
     }
 }

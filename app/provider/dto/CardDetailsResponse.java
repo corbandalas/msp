@@ -12,13 +12,17 @@ public class CardDetailsResponse extends BaseCardResponse{
     private String expDate;
     private String cvv;
     private double bal;
+    private String currency;
+    private String statCode;
 
-    public CardDetailsResponse(String pan, String expDate, String cvv, double bal, String actionCode) {
+    public CardDetailsResponse(String pan, String expDate, String cvv, double bal, String currency, String statCode, String actionCode) {
         super(actionCode);
         this.pan = pan;
         this.expDate = expDate;
         this.cvv = cvv;
         this.bal = bal;
+        this.currency = currency;
+        this.statCode = statCode;
     }
 
     public String getPan() {
@@ -53,4 +57,19 @@ public class CardDetailsResponse extends BaseCardResponse{
         this.bal = bal;
     }
 
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getStatCode() {
+        return statCode;
+    }
+
+    public void setStatCode(String statCode) {
+        this.statCode = statCode;
+    }
 }
