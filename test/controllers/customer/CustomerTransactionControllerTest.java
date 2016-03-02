@@ -1,26 +1,15 @@
 package controllers.customer;
 
-import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseControllerTest;
 import dto.customer.CustomerCardListResponse;
 import dto.customer.CustomerTransactionFilter;
-import model.Customer;
-import model.enums.KYC;
-import org.junit.After;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
-import repository.ConnectionPool;
-import scala.concurrent.Await;
-import scala.concurrent.Promise;
-import scala.concurrent.duration.Duration;
 
-import java.util.Date;
-
-import static java.util.Arrays.asList;
+import static configs.ReturnCodes.INCORRECT_CARD_CODE;
+import static configs.ReturnCodes.SUCCESS_CODE;
 import static org.junit.Assert.assertEquals;
-import static configs.ReturnCodes.*;
 
 /**
  * API customer transaction test
@@ -64,9 +53,9 @@ public class CustomerTransactionControllerTest extends BaseCustomerControllerTes
         request.setFromDate("2016-02-17");
         request.setToDate("2016-02-18");
 
-        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/transaction/list")).setHeader("token", token)
+        final JsonNode transactionsResponse = WS.url(getCustomerApiUrl("/transaction/list")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("" + INCORRECT_CARD_CODE,changeResponse.get("code").asText());
+        assertEquals("" + INCORRECT_CARD_CODE,transactionsResponse.get("code").asText());
     }
 }
