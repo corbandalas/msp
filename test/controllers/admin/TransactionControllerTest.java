@@ -3,14 +3,11 @@ package controllers.admin;
 import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
-import model.Account;
 import model.Operation;
 import model.Transaction;
 import model.enums.OperationType;
 import model.enums.TransactionType;
 import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -20,11 +17,7 @@ import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 import util.SecurityUtil;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import static configs.ReturnCodes.SUCCESS_CODE;
-import static java.util.Arrays.asList;
 import static junit.framework.TestCase.assertEquals;
 
 /**
@@ -34,13 +27,6 @@ import static junit.framework.TestCase.assertEquals;
  * @since 0.1.0
  */
 public class TransactionControllerTest extends BaseControllerTest {
-
-    @Before
-    public void insertAccount() throws Exception {
-        final Account account = new Account(Integer.parseInt(ACCOUNT_2_ID), "God account", "USD", null, true, SECRET);
-        final JsonNode createResponse = createAccount(account);
-        Assert.assertEquals("0", createResponse.get("code").asText());
-    }
 
     @Test
     public void retrieveById() throws Exception {
@@ -137,7 +123,7 @@ public class TransactionControllerTest extends BaseControllerTest {
 
     private JsonNode retrieveById(String id) {
         final String url = getAdminApiUrl("/transaction/get/" + id);
-        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, id.toString(), ORDER_ID, SECRET);
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, id, ORDER_ID, SECRET);
 
         return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();

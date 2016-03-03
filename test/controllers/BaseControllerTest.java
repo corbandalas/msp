@@ -55,6 +55,7 @@ public class BaseControllerTest extends WithServer {
         connectionPool.setSchemaName(conf.getString("database.test.schema"));
         try {
             insertAccount();
+            insertAccount2();
         } catch (Exception e) {
             fail();
         }
@@ -65,6 +66,16 @@ public class BaseControllerTest extends WithServer {
         final Promise<Object> promise = Futures.promise();
         connectionPool.getConnection().query("INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
                         " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)", asList(ACCOUNT_ID, "USD", "God account",
+                new Timestamp(new Date().getTime()), true, SECRET),
+                promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+    }
+
+    private void insertAccount2() throws Exception {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
+        connectionPool.getConnection().query("INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
+                        " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)", asList(ACCOUNT_2_ID, "USD", "God account",
                 new Timestamp(new Date().getTime()), true, SECRET),
                 promise::success, promise::failure);
         Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));

@@ -3,6 +3,7 @@ package controllers.customer;
 import com.fasterxml.jackson.databind.JsonNode;
 import dto.customer.CustomerCardListResponse;
 import dto.customer.CustomerTransferOwnCards;
+import model.Account;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -41,6 +42,10 @@ public class CustomerTransferControllerTest extends BaseCustomerControllerTest {
 
     @Test
     public void transferOwn() throws Exception {
+        Account account=new Account(Integer.parseInt(ACCOUNT_2_ID), "God account", "USD", null, true, SECRET);
+        final JsonNode createAccountResponse = createAccount(account);
+        assertEquals("0", createAccountResponse.get("code").asText());
+
         final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
         assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
 
