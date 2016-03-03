@@ -20,6 +20,7 @@ import repository.CardRepository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -104,8 +105,9 @@ public class CustomerTransactionController extends BaseController {
             }
 
             return cardProvider.getCardTransactions(card, parsedFromDate, parsedToDate).map(transactionListResponse
-                    -> ok(Json.toJson(new CustomerTransactionResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, transactionListResponse.getList().stream()
-                    .map(CustomerTransaction::new).collect(Collectors.toList())))));
+                    -> ok(Json.toJson(new CustomerTransactionResponse(SUCCESS_TEXT, "" + SUCCESS_CODE,
+                    (transactionListResponse.getList() != null) ? transactionListResponse.getList().stream()
+                            .map(CustomerTransaction::new).collect(Collectors.toList()) : new ArrayList<>()))));
         });
 
         return returnRecover(result);
