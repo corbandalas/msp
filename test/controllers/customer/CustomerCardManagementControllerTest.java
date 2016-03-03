@@ -31,22 +31,22 @@ public class CustomerCardManagementControllerTest extends BaseCustomerController
         changeStatus(0);
     }
 
-    @Test
+    //@Test /*Permanently block card*/
     public void reportDamage() throws Exception {
         changeStatus(2);
     }
 
-    @Test
+    //@Test /*Permanently block card*/
     public void reportLost() throws Exception {
         changeStatus(3);
     }
 
-    @Test
+    //@Test /*Permanently block card*/
     public void reportStolen() throws Exception {
         changeStatus(4);
     }
 
-    @Test
+   // @Test  /*Only plastic*/
     public void changePIN() throws Exception {
         final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
         assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
@@ -114,6 +114,20 @@ public class CustomerCardManagementControllerTest extends BaseCustomerController
             final JsonNode response = WS.url(getCustomerApiUrl("/card/management/changeStatus")).setHeader("token", token).post(Json.toJson(request)).get(TIMEOUT).asJson();
 
             assertEquals("" + SUCCESS_CODE, response.get("code").asText());
+
+            final JsonNode cardListResponse2 = WS.url(getCustomerApiUrl("/card/list")).setHeader("token", token)
+                    .get().get(TIMEOUT).asJson();
+
+            assertEquals("" + SUCCESS_CODE, cardListResponse2.get("code").asText());
+
+            customerCardListResponse = Json.fromJson(cardListResponse2, CustomerCardListResponse.class);
+            cardWrapper = customerCardListResponse.getList().get(0);
+
+            if (operation == 0){
+                assertEquals("00", cardWrapper.getCardDetails().getStatCode());
+            } else if (operation == 1){
+                assertEquals("05", cardWrapper.getCardDetails().getStatCode());
+            }
 
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);

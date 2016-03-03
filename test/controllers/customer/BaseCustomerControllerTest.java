@@ -36,7 +36,7 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
     public static final String PASSWORD_1 = "4921142172244";
     public static final String PASSWORD_2 = "4921142172243";
 
-    public static final String CARD_TOKEN_1 = "795949040";
+    public static final String CARD_TOKEN_1 = "795991141";
     public static final String CARD_TOKEN_2 = "795972005";
     public static final String CARD_TOKEN_1_2 = "795975887";
     public static final String CARD_TOKEN_2_2 = "795979840";
