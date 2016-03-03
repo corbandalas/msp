@@ -535,4 +535,29 @@ public class CardStatement2 {
         this.transactions = value;
     }
 
+    @Override
+    public String toString() {
+        return "CardStatement2{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", startBal=" + startBal +
+                ", endBal=" + endBal +
+                ", txnFilter='" + txnFilter + '\'' +
+                ", startDate='" + startDate + '\'' +
+                ", endDate='" + endDate + '\'' +
+                ", numTxn=" + numTxn +
+                ", itemSrc=" + itemSrc +
+                ", curBill='" + curBill + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", transactions=" + transactions +
+                '}';
+    }
 }

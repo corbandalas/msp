@@ -162,7 +162,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardTransactionListResponse> getCardTransactions(Card card, Date startDate, Date endDate) {
-        return getGPSSettings().flatMap(res -> invokeCardStatement(res, card, startDate, endDate)).map((res -> new CardTransactionListResponse(res.getActionCode(), res.getTransactions().getTransaction2())));
+        return getGPSSettings().flatMap(res -> invokeCardStatement(res, card, startDate, endDate)).map((res -> new CardTransactionListResponse(res.getActionCode(), res.getTransactions() != null? res.getTransactions().getTransaction2(): null)));
     }
 
     @Override
