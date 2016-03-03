@@ -13,12 +13,10 @@ import module.PropertyLoader;
 import org.junit.After;
 import org.junit.Before;
 import play.Logger;
-import play.libs.F;
 import provider.GlobalProcessingCardProvider;
 import provider.dto.CardCreationResponse;
 import repository.*;
 import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 

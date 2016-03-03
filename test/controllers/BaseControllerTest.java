@@ -57,6 +57,7 @@ public class BaseControllerTest extends WithServer {
             insertAccount();
             insertAccount2();
         } catch (Exception e) {
+            e.printStackTrace();
             fail();
         }
     }
