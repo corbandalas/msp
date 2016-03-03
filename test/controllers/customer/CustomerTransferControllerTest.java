@@ -42,10 +42,6 @@ public class CustomerTransferControllerTest extends BaseCustomerControllerTest {
 
     @Test
     public void transferOwn() throws Exception {
-        Account account=new Account(Integer.parseInt(ACCOUNT_2_ID), "God account", "USD", null, true, SECRET);
-        final JsonNode createAccountResponse = createAccount(account);
-        assertEquals("0", createAccountResponse.get("code").asText());
-
         final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
         assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
 
