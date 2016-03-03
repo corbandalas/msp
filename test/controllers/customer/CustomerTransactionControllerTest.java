@@ -56,6 +56,6 @@ public class CustomerTransactionControllerTest extends BaseCustomerControllerTes
         final JsonNode transactionsResponse = WS.url(getCustomerApiUrl("/transaction/list")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
-        assertEquals("" + INCORRECT_CARD_CODE,transactionsResponse.get("code").asText());
+        assertEquals("" + SUCCESS_CODE,transactionsResponse.get("code").asText());
     }
 }
