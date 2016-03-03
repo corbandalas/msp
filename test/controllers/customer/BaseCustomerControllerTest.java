@@ -4,6 +4,8 @@ import akka.actor.ActorSystem;
 import akka.dispatch.Futures;
 import controllers.BaseControllerTest;
 import model.Card;
+import model.Currency;
+import model.Customer;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
@@ -11,12 +13,17 @@ import module.PropertyLoader;
 import org.junit.After;
 import org.junit.Before;
 import play.Logger;
+import play.libs.F;
+import provider.GlobalProcessingCardProvider;
+import provider.dto.CardCreationResponse;
 import repository.*;
 import scala.concurrent.Await;
+import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 
@@ -35,11 +42,6 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
     public static final String PASSWORD_1 = "4921142172244";
     public static final String PASSWORD_2 = "4921142172243";
-
-    public static final String CARD_TOKEN_1 = "795991141";
-    public static final String CARD_TOKEN_2 = "795972005";
-    public static final String CARD_TOKEN_1_2 = "795975887";
-    public static final String CARD_TOKEN_2_2 = "795979840";
 
     @Before
     public void init() {
@@ -82,17 +84,33 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
         final CardRepository cardRepository = app.injector().instanceOf(CardRepository.class);
 
-        Await.result(customerRepository.create(createCustomer(PHONE_1, PASSWORD_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff")), Duration.apply(TIMEOUT, "ms"));
+        final CurrencyRepository currencyRepository = app.injector().instanceOf(CurrencyRepository.class);
 
-        Await.result(customerRepository.create(createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff")), Duration.apply(TIMEOUT, "ms"));
+        final Customer customer1 = createCustomer(PHONE_1, PASSWORD_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff");
 
-        Await.result(cardRepository.create(createCard(PHONE_1, CARD_TOKEN_1, true)), Duration.apply(TIMEOUT, "ms"));
+        final Customer customer2 = createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff");
 
-        Await.result(cardRepository.create(createCard(PHONE_1, CARD_TOKEN_1_2, false)), Duration.apply(TIMEOUT, "ms"));
+        Await.result(customerRepository.create(customer1), Duration.apply(TIMEOUT, "ms"));
 
-        Await.result(cardRepository.create(createCard(PHONE_2, CARD_TOKEN_2, true)), Duration.apply(TIMEOUT, "ms"));
+        Await.result(customerRepository.create(customer2), Duration.apply(TIMEOUT, "ms"));
 
-        Await.result(cardRepository.create(createCard(PHONE_2, CARD_TOKEN_2_2, false)), Duration.apply(TIMEOUT, "ms"));
+        GlobalProcessingCardProvider globalProcessingCardProvider = app.injector().instanceOf(GlobalProcessingCardProvider.class);
+
+
+        Optional<Currency> currency = Await.result(currencyRepository.retrieveById("EUR"), Duration.apply(TIMEOUT, "ms"));
+
+        CardCreationResponse cardCreationResponse1 = globalProcessingCardProvider.issuePrepaidVirtualCard(customer1, "Test card", 1000L, currency.get()).get(TIMEOUT);
+        CardCreationResponse cardCreationResponse2 = globalProcessingCardProvider.issuePrepaidVirtualCard(customer1, "Test card", 1000L, currency.get()).get(TIMEOUT);
+        CardCreationResponse cardCreationResponse3 = globalProcessingCardProvider.issuePrepaidVirtualCard(customer2, "Test card", 1000L, currency.get()).get(TIMEOUT);
+        CardCreationResponse cardCreationResponse4 = globalProcessingCardProvider.issuePrepaidVirtualCard(customer2, "Test card", 1000L, currency.get()).get(TIMEOUT);
+
+        Await.result(cardRepository.create(createCard(PHONE_1, cardCreationResponse1.getToken(), true)), Duration.apply(TIMEOUT, "ms"));
+
+        Await.result(cardRepository.create(createCard(PHONE_1, cardCreationResponse2.getToken(), false)), Duration.apply(TIMEOUT, "ms"));
+
+        Await.result(cardRepository.create(createCard(PHONE_2, cardCreationResponse3.getToken(), true)), Duration.apply(TIMEOUT, "ms"));
+
+        Await.result(cardRepository.create(createCard(PHONE_2, cardCreationResponse4.getToken(), false)), Duration.apply(TIMEOUT, "ms"));
 
     }
 
