@@ -73,6 +73,9 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
                 promise::success, promise::failure);
         Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
 
+        connectionPool.close();
+
+
     }
 
 
