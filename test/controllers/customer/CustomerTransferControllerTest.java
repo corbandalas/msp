@@ -64,12 +64,12 @@ public class CustomerTransferControllerTest extends BaseCustomerControllerTest {
         assertEquals(""+SUCCESS_CODE,transferResponse.get("code").asText());
 
         final CustomerTransferOwnCards request2 = new CustomerTransferOwnCards();
-        request.setAmount(100L);
-        request.setCurrency("USD");
-        request.setCardFrom(customerCardListResponse.getList().get(1).getId());
-        request.setCardTo(customerCardListResponse.getList().get(0).getId());
-        request.setDescription("test transfer");
-        request.setOrderId("xxxx");
+        request2.setAmount(100L);
+        request2.setCurrency("USD");
+        request2.setCardFrom(customerCardListResponse.getList().get(1).getId());
+        request2.setCardTo(customerCardListResponse.getList().get(0).getId());
+        request2.setDescription("test transfer");
+        request2.setOrderId("xxxx");
 
         final JsonNode transferResponse2 = WS.url(getCustomerApiUrl("/transfer/own")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
