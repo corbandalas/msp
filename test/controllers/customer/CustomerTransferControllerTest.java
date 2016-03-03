@@ -62,5 +62,17 @@ public class CustomerTransferControllerTest extends BaseCustomerControllerTest {
         final JsonNode transferResponse = WS.url(getCustomerApiUrl("/transfer/own")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
         assertEquals(""+SUCCESS_CODE,transferResponse.get("code").asText());
+
+        final CustomerTransferOwnCards request2 = new CustomerTransferOwnCards();
+        request.setAmount(100L);
+        request.setCurrency("USD");
+        request.setCardFrom(customerCardListResponse.getList().get(1).getId());
+        request.setCardTo(customerCardListResponse.getList().get(0).getId());
+        request.setDescription("test transfer");
+        request.setOrderId("xxxx");
+
+        final JsonNode transferResponse2 = WS.url(getCustomerApiUrl("/transfer/own")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+        assertEquals(""+SUCCESS_CODE,transferResponse2.get("code").asText());
     }
 }
