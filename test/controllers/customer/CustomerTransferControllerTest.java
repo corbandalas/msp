@@ -3,7 +3,6 @@ package controllers.customer;
 import com.fasterxml.jackson.databind.JsonNode;
 import dto.customer.CustomerCardListResponse;
 import dto.customer.CustomerTransferOwnCards;
-import model.Account;
 import org.junit.Test;
 import play.libs.Json;
 import play.libs.ws.WS;

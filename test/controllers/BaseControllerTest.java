@@ -83,6 +83,20 @@ public class BaseControllerTest extends WithServer {
 
     @After
     public void delete() throws Exception {
+        deleteTransactions();
+        deleteAccounts();
+    }
+
+    private void deleteTransactions() throws Exception {
+        final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
+        final Promise<Object> promise = Futures.promise();
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".transaction", promise::success, promise::failure);
+        Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
+    }
+
+
+    private void deleteAccounts() throws Exception {
+
         final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
         final Promise<Object> promise = Futures.promise();
         connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".account where id=$1 or id=$2", asList(ACCOUNT_ID, ACCOUNT_2_ID),
