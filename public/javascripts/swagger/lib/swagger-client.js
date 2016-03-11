@@ -1835,7 +1835,7 @@ SwaggerClient.prototype.buildFrom1_2Spec = function (response) {
   this.produces = response.produces;
   this.authSchemes = response.authorizations;
   this.info = this.convertInfo(response.info);
-
+  response.apis.sort(function(a,b) { return a.path.localeCompare(b.path) } );
   var isApi = false, i, res;
   for (i = 0; i < response.apis.length; i++) {
     var api = response.apis[i];
