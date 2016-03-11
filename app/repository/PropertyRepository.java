@@ -8,6 +8,7 @@ import model.Property;
 import model.PropertyCategory;
 import model.Transaction;
 import model.enums.TransactionType;
+import play.Logger;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -69,6 +70,8 @@ public class PropertyRepository implements BaseCRUDRepository<Property> {
         final Promise<List<Property>> promise = Futures.promise();
 
         final String query = "select * from " + connectionPool.getSchemaName() + ".property";
+
+        Logger.info("Connection pool: "  + connectionPool.toString());
 
         connectionPool.getConnection().query(query,
                 result -> {
