@@ -29,7 +29,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/account", description = "Operations to manage application accounts stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/account", description = "Allows to manage accounts created for administration use.")
 public class AccountController extends BaseController {
 
     @Inject
@@ -39,7 +39,7 @@ public class AccountController extends BaseController {
     @ApiOperation(
             nickname = "createAccount",
             value = "Create account",
-            notes = "Create account in DB",
+            notes = "Method allows to create accounts in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -97,7 +97,7 @@ public class AccountController extends BaseController {
     @ApiOperation(
             nickname = "updateAccount",
             value = "Update account",
-            notes = "update account in DB",
+            notes = "Method allows to update accounts in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -151,7 +151,7 @@ public class AccountController extends BaseController {
     @ApiOperation(
             nickname = "retrieveById",
             value = "Retrieve account by ID",
-            notes = "Get account by its ID",
+            notes = "Method allows to get account by ID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = AccountResponse.class
@@ -189,7 +189,7 @@ public class AccountController extends BaseController {
     @ApiOperation(
             nickname = "listAllAccounts",
             value = "All accounts list",
-            notes = "Obtain list of all accounts stored in DB",
+            notes = "Method allows to get list of all accounts in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = AccountListResponse.class
