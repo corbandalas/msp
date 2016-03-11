@@ -71,8 +71,6 @@ public class PropertyRepository implements BaseCRUDRepository<Property> {
 
         final String query = "select * from " + connectionPool.getSchemaName() + ".property";
 
-        Logger.info("Connection pool: "  + connectionPool.toString());
-
         connectionPool.getConnection().query(query,
                 result -> {
                     final List<Property> properties = new ArrayList<>();
