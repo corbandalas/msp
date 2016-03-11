@@ -31,7 +31,7 @@ import static configs.ReturnCodes.*;
  * @since 0.1.0
  */
 
-@Api(value = Constants.ADMIN_API_PATH + "/property", description = "Operations to manage application properties stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/property", description = "Allows to manage properties created for administration use.")
 public class PropertyController extends BaseController {
 
     @Inject
@@ -40,8 +40,8 @@ public class PropertyController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "createProperty",
-            value = "Create new property",
-            notes = "Store new application property in DB",
+            value = "Create property",
+            notes = "Method allows to create property in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -103,8 +103,8 @@ public class PropertyController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateProperty",
-            value = "Update existed property",
-            notes = "Update existed application property in DB",
+            value = "Update property",
+            notes = "Method allows to update property in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -166,7 +166,7 @@ public class PropertyController extends BaseController {
     @ApiOperation(
             nickname = "listAllProperty",
             value = "All property list",
-            notes = "Obtain list of all application properties stored in DB",
+            notes = "Method allows to get list of all properties in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = PropertyListResponse.class
@@ -204,8 +204,8 @@ public class PropertyController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve property by ID",
-            notes = "Get property by its ID",
+            value = "Get property by ID",
+            notes = "Method allows to get property by ID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = PropertyResponse.class

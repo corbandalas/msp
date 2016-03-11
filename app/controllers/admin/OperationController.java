@@ -29,7 +29,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/operation", description = "Methods to manage application operation stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/operation", description = "Allows to manage operations created for administration use.")
 public class OperationController extends BaseController {
 
     @Inject
@@ -39,7 +39,7 @@ public class OperationController extends BaseController {
     @ApiOperation(
             nickname = "createOperation",
             value = "Create operation",
-            notes = "Create operation in DB",
+            notes = "Method allows to create operation in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -98,7 +98,7 @@ public class OperationController extends BaseController {
     @ApiOperation(
             nickname = "updateOperation",
             value = "Update operation",
-            notes = "update operation in DB",
+            notes = "Method allows to update operation in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -153,8 +153,8 @@ public class OperationController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve operation by ID",
-            notes = "Get operation by its ID",
+            value = "Get operation by ID",
+            notes = "Method allows to get operation by ID",
             produces = "application/json",
             httpMethod = "GET",
             response = OperationResponse.class
@@ -189,9 +189,9 @@ public class OperationController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "listAllOperations",
-            value = "All operations list",
-            notes = "Obtain list of all operations stored in DB",
+            nickname = "listFilteredOperations",
+            value = "Filtered operations list",
+            notes = "Method allows to get list of filtered operations in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = OperationListResponse.class
@@ -256,9 +256,9 @@ public class OperationController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "listAllOperationsByDate",
-            value = "All accounts list",
-            notes = "Obtain list of all accounts stored in DB",
+            nickname = "listAllOperations",
+            value = "All operations list",
+            notes = "Method allows to get list of all operations in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = OperationListResponse.class

@@ -31,7 +31,7 @@ import static configs.ReturnCodes.*;
  * @author nihilist - created 12.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/card", description = "Operations to manage application cards stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/card", description = "Allows to manage cards created for administration use.")
 public class CardController extends BaseController {
 
     @Inject
@@ -41,7 +41,7 @@ public class CardController extends BaseController {
     @ApiOperation(
             nickname = "listAllCards",
             value = "All cards list",
-            notes = "Obtain list of all cards stored in DB",
+            notes = "Method allows to get list of all cards in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CardListResponse.class
@@ -78,7 +78,7 @@ public class CardController extends BaseController {
     @ApiOperation(
             nickname = "listByCardBrand",
             value = "All cards by card brand",
-            notes = "Obtain list of all cards stored in DB by card brand",
+            notes = "Method allows to get list of all cards by card brand in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CardListResponse.class
@@ -122,7 +122,7 @@ public class CardController extends BaseController {
     @ApiOperation(
             nickname = "listByCardType",
             value = "All cards by card type",
-            notes = "Obtain list of all cards stored in DB by card type",
+            notes = "Method allows to get list of all cards by card type in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CardListResponse.class
@@ -166,7 +166,7 @@ public class CardController extends BaseController {
     @ApiOperation(
             nickname = "listByCustomerID",
             value = "All cards by customerID",
-            notes = "Obtain list of all cards stored in DB by customerID",
+            notes = "Method allows to get list of all by customerID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CardListResponse.class
@@ -207,8 +207,8 @@ public class CardController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve card by ID",
-            notes = "Get card by its ID",
+            value = "Get card by ID",
+            notes = "Method allows to get card by ID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CardResponse.class
@@ -252,8 +252,8 @@ public class CardController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateCard",
-            value = "Update existed card",
-            notes = "Update existed application card in DB",
+            value = "Update card",
+            notes = "Method allows to update card in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -307,7 +307,7 @@ public class CardController extends BaseController {
     @ApiOperation(
             nickname = "createCard",
             value = "Create card",
-            notes = "Create card in DB",
+            notes = "Method allows to create card in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",

@@ -31,7 +31,7 @@ import static configs.ReturnCodes.*;
  * @author nihilist - created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/customer", description = "Operations to manage application customers stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/customer", description = "Allows to manage customers created for administration use.")
 public class CustomerController extends BaseController {
 
     @Inject
@@ -41,7 +41,7 @@ public class CustomerController extends BaseController {
     @ApiOperation(
             nickname = "listAllCustomers",
             value = "All customers list",
-            notes = "Obtain list of all customers stored in DB",
+            notes = "Method allows to get list of all customers in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CustomerListResponse.class
@@ -77,8 +77,8 @@ public class CustomerController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveByPhone",
-            value = "Retrieve customer by phone",
-            notes = "Get customer by its phone",
+            value = "Method allows to get customer by phone in admin system",
+            notes = "Get customer by phone",
             produces = "application/json",
             httpMethod = "GET",
             response = CustomerResponse.class
@@ -123,8 +123,8 @@ public class CustomerController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveByRegistrationDate",
-            value = "Retrieve customers by registration date",
-            notes = "Get customer by registration date",
+            value = "Get customers by registration date",
+            notes = "Method allows to get customer by registration date in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CustomerListResponse.class
@@ -177,8 +177,8 @@ public class CustomerController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveByKYC",
-            value = "Retrieve customers by KYC",
-            notes = "Get customers by KYC",
+            value = "Get customers by KYC",
+            notes = "Method allows to get customers by KYC in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CustomerListResponse.class
@@ -220,8 +220,8 @@ public class CustomerController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveByEmail",
-            value = "Retrieve customers by email",
-            notes = "Get customers by email",
+            value = "Get customers by email",
+            notes = "Method allows to get customers by email in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CustomerListResponse.class
@@ -263,8 +263,8 @@ public class CustomerController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateCustomer",
-            value = "Update existed customer",
-            notes = "Update existed application customer in DB",
+            value = "Update customer",
+            notes = "Method allows to update customer in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -318,7 +318,7 @@ public class CustomerController extends BaseController {
     @ApiOperation(
             nickname = "createCustomer",
             value = "Create customer",
-            notes = "Create customer in DB",
+            notes = "Method allows to create customer in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",

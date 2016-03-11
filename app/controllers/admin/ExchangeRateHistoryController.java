@@ -24,7 +24,7 @@ import static configs.ReturnCodes.*;
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/exchangeRateHistory", description = "Operations to manage exchangeRateHistory stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/exchangeRateHistory", description = "Allows to manage exchange rate history created for administration use.")
 public class ExchangeRateHistoryController extends BaseController {
 
     @Inject
@@ -33,8 +33,8 @@ public class ExchangeRateHistoryController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveByCurrency",
-            value = "Retrieve exchangeRateHistory by currencyID",
-            notes = "Get exchangeRateHistory by currencyID",
+            value = "Get exchangeRateHistory by currencyID",
+            notes = "Method allows to get exchangeRateHistory by currencyID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = ExchangeRateHistoryListResponse.class

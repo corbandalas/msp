@@ -25,7 +25,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 10.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/transaction", description = "Methods to manage application transaction stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/transaction", description = "Allows to manage transactions created for administration use.")
 public class TransactionController extends BaseController {
 
     @Inject
@@ -35,7 +35,7 @@ public class TransactionController extends BaseController {
     @ApiOperation(
             nickname = "createTransaction",
             value = "Create transaction",
-            notes = "Create transaction in DB",
+            notes = "Method allows to create transaction in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -95,9 +95,9 @@ public class TransactionController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
-            nickname = "updateOperation",
-            value = "Update operation",
-            notes = "update operation in DB",
+            nickname = "updateTransaction",
+            value = "Update transaction",
+            notes = "Method allows to update transaction in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -158,8 +158,8 @@ public class TransactionController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve operation by ID",
-            notes = "Get operation by its ID",
+            value = "Get transaction by ID",
+            notes = "Method allows to get transaction by ID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = TransactionResponse.class
@@ -197,7 +197,7 @@ public class TransactionController extends BaseController {
     @ApiOperation(
             nickname = "listAllTransactions",
             value = "All transactions list",
-            notes = "Obtain list of all transactions stored in DB",
+            notes = "Method allows to get list of all transactions in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = TransactionListResponse.class
@@ -232,7 +232,7 @@ public class TransactionController extends BaseController {
     @ApiOperation(
             nickname = "listTransactionsByOperation",
             value = "Transactions list by operation",
-            notes = "Obtain list of operation transactions stored in DB",
+            notes = "Method allows to get list of operation transactions in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = TransactionListResponse.class

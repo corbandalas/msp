@@ -25,7 +25,7 @@ import static configs.ReturnCodes.*;
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/country", description = "Operations to manage application countries stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/country", description = "Allows to manage countries created for administration use.")
 public class CountryController extends BaseController {
 
     @Inject
@@ -35,7 +35,7 @@ public class CountryController extends BaseController {
     @ApiOperation(
             nickname = "listAllCountries",
             value = "All countries list",
-            notes = "Obtain list of all countries stored in DB",
+            notes = "Method allows to get list of all countries in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CountryListResponse.class
@@ -71,7 +71,7 @@ public class CountryController extends BaseController {
     @ApiOperation(
             nickname = "listAllActiveCountries",
             value = "All active countries list",
-            notes = "Obtain list of all active countries stored in DB",
+            notes = "Method allows to get list of all active countries in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CountryListResponse.class
@@ -106,8 +106,8 @@ public class CountryController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve country by ID",
-            notes = "Get country by its ID",
+            value = "Get by ID",
+            notes = "Method allows to get country by ID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CountryResponse.class
@@ -150,8 +150,8 @@ public class CountryController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateCountry",
-            value = "Update existed country",
-            notes = "Update existed application country in DB",
+            value = "Update country",
+            notes = "Method allows to update country in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",

@@ -28,7 +28,7 @@ import static configs.ReturnCodes.GENERAL_ERROR_TEXT;
  * @author nihilist - created 09.02.2016.
  * @since 0.1.0
  */
-@Api(value = Constants.ADMIN_API_PATH + "/currency", description = "Operations to manage application currencies stored in DB")
+@Api(value = Constants.ADMIN_API_PATH + "/currency", description = "Allows to manage currencies created for administration use.")
 public class CurrencyController extends BaseController {
 
     @Inject
@@ -38,7 +38,7 @@ public class CurrencyController extends BaseController {
     @ApiOperation(
             nickname = "listAllCurrency",
             value = "All currency list",
-            notes = "Obtain list of all currencies stored in DB",
+            notes = "Method allows to get list of all currencies in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CurrencyListResponse.class
@@ -73,8 +73,8 @@ public class CurrencyController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveById",
-            value = "Retrieve currency by ID",
-            notes = "Get currency by its ID",
+            value = "Get by ID",
+            notes = "Method allows to get currency by ID in admin system",
             produces = "application/json",
             httpMethod = "GET",
             response = CurrencyResponse.class
@@ -115,8 +115,8 @@ public class CurrencyController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "updateCurrency",
-            value = "Update existed currency",
-            notes = "Update existed application currency in DB",
+            value = "Update currency",
+            notes = "Method allows to update currency in admin system",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -169,7 +169,7 @@ public class CurrencyController extends BaseController {
     @ApiOperation(
             nickname = "currencyConversation",
             value = "Provide amount conversation from one currency to another",
-            notes = "Convert provided amount from one currency to another based on stored currency exchange rates",
+            notes = "Method allows to convert provided amount from one currency to another based on stored currency exchange rates",
             produces = "application/json",
             httpMethod = "GET",
             response = CurrencyExchangeResponse.class
