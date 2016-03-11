@@ -404,7 +404,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "1", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "20", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, card.getCurrencyId(), loadType, gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
