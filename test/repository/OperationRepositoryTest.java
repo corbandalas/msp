@@ -1,7 +1,6 @@
 package repository;
 
 import akka.dispatch.Futures;
-import model.ExchangeRateHistory;
 import model.Operation;
 import model.enums.OperationType;
 import org.junit.After;

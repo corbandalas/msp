@@ -1,7 +1,6 @@
 package repository;
 
 import akka.dispatch.Futures;
-import model.Operation;
 import model.Property;
 import model.PropertyCategory;
 import org.junit.After;

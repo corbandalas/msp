@@ -83,6 +83,28 @@
       "value": "43",
       "description": "MSP transfer account",
       "category": "ACCOUNTS"
+    },
+
+
+    {
+      "id": "com.msp.sms.textanywhere.login",
+      "value": "D16218164",
+      "description": "TextAnyWhere login data",
+      "category": "SMS"
+    },
+
+    {
+      "id": "com.msp.sms.textanywhere.password",
+      "value": "vqyzp7pm",
+      "description": "TextAnyWhere password data",
+      "category": "SMS"
+    },
+
+    {
+      "id": "com.msp.sms.textanywhere.url",
+      "value": "http://www.textapp.net/webservice/httpservice.aspx",
+      "description": "TextAnyWhere URL",
+      "category": "SMS"
     }
 
   ]
