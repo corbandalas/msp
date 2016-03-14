@@ -19,43 +19,43 @@ public class ReturnCodes {
     public static final String WRONG_REQUEST_ENCKEY_TEXT = "Invalid request encryption checksum";
 
     public static final byte WRONG_CUSTOMER_ACCOUNT_CODE = 3;
-    public static final String WRONG_CUSTOMER_ACCOUNT_TEXT = "Wrong customer account";
+    public static final String WRONG_CUSTOMER_ACCOUNT_TEXT = "Сardholder account is invalid or does not exist in the system";
 
     public static final byte ALREADY_REGISTERED_CUSTOMER_ACCOUNT_CODE = 4;
-    public static final String ALREADY_REGISTERED_CUSTOMER_ACCOUNT_TEXT = "Already registered customer account";
+    public static final String ALREADY_REGISTERED_CUSTOMER_ACCOUNT_TEXT = "Cardholder account is already registered in the system";
 
     public static final byte PASSWORD_MISMATCH_CODE = 5;
     public static final String PASSWORD_MISMATCH_TEXT = "Password mismatch";
 
     public static final byte PASSWORD_EQUALS_TO_EXISTED_CODE = 6;
-    public static final String PASSWORD_EQUALS_TO_EXISTED_TEXT = "Specified password equals to existed";
+    public static final String PASSWORD_EQUALS_TO_EXISTED_TEXT = "Specified password matches the existing password";
 
     public static final byte INCORRECT_AUTHORIZATION_DATA_CODE = 7;
-    public static final String INCORRECT_AUTHORIZATION_DATA_TEXT = "Incorrect authorization data";
+    public static final String INCORRECT_AUTHORIZATION_DATA_TEXT = "Authorization data is incorrect";
 
     public static final byte INCORRECT_CARD_CODE = 8;
-    public static final String INCORRECT_CARD_TEXT = "Incorrect card reference";
+    public static final String INCORRECT_CARD_TEXT = "Card reference is invalid";
 
     public static final byte INCORRECT_COUNTRY_CODE = 9;
-    public static final String INCORRECT_COUNTRY_TEXT = "Incorrect country code or country inactive";
+    public static final String INCORRECT_COUNTRY_TEXT = "Country code is incorrect or country is inactive";
 
     public static final byte INCORRECT_CURRENCY_CODE = 10;
-    public static final String INCORRECT_CURRENCY_TEXT = "Incorrect currency code";
+    public static final String INCORRECT_CURRENCY_TEXT = "Сurrency code is incorrect";
 
     public static final byte KYC_RESTRICTION_CODE = 11;
-    public static final String KYC_RESTRICTION_TEXT = "Operation permitted due to KYC level";
+    public static final String KYC_RESTRICTION_TEXT = "Operation is not permitted due to KYC restrictions";
 
     public static final byte INCORRECT_ACCOUNT_CODE = 12;
-    public static final String INCORRECT_ACCOUNT_TEXT = "Incorrect account";
+    public static final String INCORRECT_ACCOUNT_TEXT = "Account is invalid or does not exist";
 
     public static final byte INCORRECT_OPERATION_CODE = 13;
-    public static final String INCORRECT_OPERATION_TEXT = "Incorrect operation";
+    public static final String INCORRECT_OPERATION_TEXT = "Operation is incorrect";
 
     public static final byte INCORRECT_PROPERTY_CODE = 14;
-    public static final String INCORRECT_PROPERTY_TEXT = "Incorrect property";
+    public static final String INCORRECT_PROPERTY_TEXT = "Property is incorrect";
 
     public static final byte INCORRECT_TRANSACTION_CODE = 15;
-    public static final String INCORRECT_TRANSACTION_TEXT = "Incorrect transaction";
+    public static final String INCORRECT_TRANSACTION_TEXT = "Transaction is incorrect";
 
     public static final byte INACTIVE_ACCOUNT_CODE = 16;
     public static final String INACTIVE_ACCOUNT_TEXT = "Account is not active";
