@@ -19,14 +19,14 @@ import static configs.ReturnCodes.*;
  * @author ra created 17.02.2016.
  * @since 0.2.0
  */
-@Api(value = Constants.CUSTOMER_API_PATH + "/profile", description = "Customer profile methods")
+@Api(value = Constants.CUSTOMER_API_PATH + "/profile", description = "Get Cardholder profile methods")
 public class CustomerProfileController extends BaseController {
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
             nickname = "getProfile",
-            value = "Get customer profile",
-            notes = "Allows customer to retrieve his profile",
+            value = "Get cardholder account information",
+            notes = "Method allows to retrieve cardholder account information stored in the profile",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "GET",

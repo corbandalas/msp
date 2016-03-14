@@ -38,7 +38,7 @@ import static configs.ReturnCodes.*;
  * @author corbandalas - created 16.02.2016.
  * @since 0.2.0
  */
-@Api(value = Constants.CUSTOMER_API_PATH + "/register", description = "Customer registration")
+@Api(value = Constants.CUSTOMER_API_PATH + "/register", description = "Cardholder registration")
 public class CustomerRegisterController extends BaseController {
 
     @Inject
@@ -53,8 +53,8 @@ public class CustomerRegisterController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "register",
-            value = "Register customer by phone and country",
-            notes = "Allows merchants to send customer registration data",
+            value = "Register cardholder",
+            notes = "Method allows to register cardholder information in the system",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "POST",

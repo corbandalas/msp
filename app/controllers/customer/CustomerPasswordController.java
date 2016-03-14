@@ -25,7 +25,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 16.02.2016.
  * @since 0.2.0
  */
-@Api(value = Constants.CUSTOMER_API_PATH + "/password", description = "Customer password operations")
+@Api(value = Constants.CUSTOMER_API_PATH + "/password", description = "Password Management")
 public class CustomerPasswordController extends BaseController {
 
     @Inject
@@ -34,8 +34,8 @@ public class CustomerPasswordController extends BaseController {
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
             nickname = "changePassword",
-            value = "Change customer password",
-            notes = "Allows customer to change his password",
+            value = "change cardholder password",
+            notes = "Method allows to change cardholder account password",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "GET",

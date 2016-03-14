@@ -37,7 +37,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 19.02.2016.
  * @since 0.2.0
  */
-@Api(value = Constants.CUSTOMER_API_PATH + "/transfer", description = "Customer transfer methods")
+@Api(value = Constants.CUSTOMER_API_PATH + "/transfer", description = "Card to card transfer methods")
 public class CustomerTransferController extends BaseController {
 
     @Inject
@@ -68,8 +68,8 @@ public class CustomerTransferController extends BaseController {
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
             nickname = "transferOwnCards",
-            value = "customer transfer between own cards",
-            notes = "Allows customer to transfer funds between own cards",
+            value = "Transfer between own cards",
+            notes = "Method allows cardholder to transfer funds between his/her own cards",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "POST",
@@ -150,8 +150,8 @@ public class CustomerTransferController extends BaseController {
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
             nickname = "transferToAnotherCustomer",
-            value = "Transfer funds to another customer by phone number",
-            notes = "Allows customer to transfer funds to another customer default card",
+            value = "Transfer to another registered cardholder default card",
+            notes = "Method allows cardholder to transfer funds to another registered cardholder default card",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "POST",

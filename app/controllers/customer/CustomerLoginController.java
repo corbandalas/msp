@@ -48,8 +48,8 @@ public class CustomerLoginController extends BaseController {
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "auth",
-            value = "Authorize customer by phone and password",
-            notes = "Allows merchants to send customer authorization data",
+            value = "Authorize customer using token",
+            notes = "Method allows to authorize customer using security token mechanism",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "POST",

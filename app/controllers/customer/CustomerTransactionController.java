@@ -35,7 +35,7 @@ import static configs.ReturnCodes.*;
  * @author ra created 17.02.2016.
  * @since 0.2.0
  */
-@Api(value = Constants.CUSTOMER_API_PATH + "/transaction", description = "Customer transactions methods")
+@Api(value = Constants.CUSTOMER_API_PATH + "/transaction", description = "Get card transactions methods")
 public class CustomerTransactionController extends BaseController {
     @Inject
     CardProvider cardProvider;
@@ -46,8 +46,8 @@ public class CustomerTransactionController extends BaseController {
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
             nickname = "listCustomerTransactions",
-            value = "Get customer transactions by card",
-            notes = "Allows customer to retrieve card transactions",
+            value = "Get card transactions",
+            notes = "Method allows to retrieve card transactions for specific card",
             consumes = "application/json",
             produces = "application/json",
             httpMethod = "POST",
