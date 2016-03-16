@@ -1,18 +1,17 @@
 package dto.customer;
 
-import dto.BaseAPIResponse;
 import model.Customer;
 import model.enums.KYC;
 import org.springframework.beans.BeanUtils;
 import util.DateUtil;
 
-/**
- * API customer profile response
- * @author ra created 17.02.2016.
- * @since 0.2.0
- */
-public class CustomerProfileResponse extends BaseAPIResponse implements CustomerProfile {
+import java.text.ParseException;
 
+/**
+ * @author ra created 16.03.2016.
+ * @since 0.1.0
+ */
+public class CustomerProfileRequest implements CustomerProfile {
     private String registrationDate;
     private String title;
     private String firstName;
@@ -26,13 +25,6 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
     private KYC kyc;
     private String country_id;
 
-    public CustomerProfileResponse(String text, String code, Customer customer) {
-        super(text, code);
-        BeanUtils.copyProperties(customer, this);
-        registrationDate = DateUtil.format(customer.getRegistrationDate(), "yyyy-MM-dd");
-        dateBirth = DateUtil.format(customer.getDateBirth(), "yyyy-MM-dd");
-    }
-
     @Override
     public String getRegistrationDate() {
         return registrationDate;
@@ -40,7 +32,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setRegistrationDate(String registrationDate) {
-        this.registrationDate = registrationDate;
+        this.registrationDate=registrationDate;
     }
 
     @Override
@@ -50,7 +42,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setTitle(String title) {
-        this.title = title;
+        this.title=title;
     }
 
     @Override
@@ -60,7 +52,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        this.firstName=firstName;
     }
 
     @Override
@@ -70,7 +62,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.lastName=lastName;
     }
 
     @Override
@@ -80,7 +72,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setAddress1(String address1) {
-        this.address1 = address1;
+        this.address1=address1;
     }
 
     @Override
@@ -90,7 +82,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setAddress2(String address2) {
-        this.address2 = address2;
+        this.address2=address2;
     }
 
     @Override
@@ -100,7 +92,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setPostcode(String postcode) {
-        this.postcode = postcode;
+        this.postcode=postcode;
     }
 
     @Override
@@ -110,7 +102,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setCity(String city) {
-        this.city = city;
+        this.city=city;
     }
 
     @Override
@@ -120,7 +112,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setEmail(String email) {
-        this.email = email;
+        this.email=email;
     }
 
     @Override
@@ -130,7 +122,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setDateBirth(String dateBirth) {
-        this.dateBirth = dateBirth;
+        this.dateBirth=dateBirth;
     }
 
     @Override
@@ -140,7 +132,7 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setKyc(KYC kyc) {
-        this.kyc = kyc;
+        this.kyc=kyc;
     }
 
     @Override
@@ -150,6 +142,12 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
 
     @Override
     public void setCountry_id(String country_id) {
-        this.country_id = country_id;
+        this.country_id=country_id;
+    }
+
+    public void copyToCustomer(Customer customer) throws ParseException {
+        BeanUtils.copyProperties(this,customer);
+        customer.setRegistrationDate(DateUtil.parse(registrationDate,"yyyy-MM-dd"));
+        customer.setDateBirth(DateUtil.parse(dateBirth,"yyyy-MM-dd"));
     }
 }

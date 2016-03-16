@@ -110,6 +110,7 @@ POST    /api/customer/transaction/list                                 @controll
 
 GET     /api-docs/api/customer/profile                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/profile")
 GET     /api/customer/profile/get                                      @controllers.customer.CustomerProfileController.retrieve()
+POST    /api/customer/profile/update                                   @controllers.customer.CustomerProfileController.update()
 
 GET     /api-docs/api/customer/card/list                                @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/list")
 GET     /api/customer/card/list                                         @controllers.customer.CustomerCardListController.cardList()
