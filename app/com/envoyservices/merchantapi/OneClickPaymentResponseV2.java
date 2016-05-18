@@ -140,4 +140,13 @@ public class OneClickPaymentResponseV2
         this.customerReturnValue = value;
     }
 
+    @Override
+    public String toString() {
+        return "OneClickPaymentResponseV2{" +
+                "qrCodeImageUrl='" + qrCodeImageUrl + '\'' +
+                ", referenceDetails=" + referenceDetails +
+                ", forexDetails=" + forexDetails +
+                ", customerReturnValue='" + customerReturnValue + '\'' +
+                '}';
+    }
 }

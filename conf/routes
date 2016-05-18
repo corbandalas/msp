@@ -56,6 +56,10 @@ POST    /api/admin/account/update                                             @c
 GET     /api/admin/account/get/:accountID                                     @controllers.admin.AccountController.retrieveById(accountID:Int)
 GET     /api/admin/account/list                                               @controllers.admin.AccountController.retrieveAll()
 
+# WorldPay API
+GET     /api-docs/api/admin/worldpay                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/worldpay")
+GET    /api/admin/worldpay/getbanks/:country                                           @controllers.admin.WorldPayController.getBankDetails(country:String)
+
 # Operation API
 GET     /api-docs/api/admin/operation                                         @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/operation")
 POST    /api/admin/operation/create                                           @controllers.admin.OperationController.create()

@@ -105,6 +105,27 @@
       "value": "http://www.textapp.net/webservice/httpservice.aspx",
       "description": "TextAnyWhere URL",
       "category": "SMS"
+    },
+
+    {
+      "id": "worldpay.wsdl.url",
+      "value": "http://testapi.envoyservices.com/?wsdl",
+      "description": "WorldPay SOAP WSDL URL",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.wsdl.soap.header.username",
+      "value": "Safepaytest",
+      "description": "WORLDPAY_INTEGRATION header username",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.wsdl.soap.header.password",
+      "value": "Safepaytest123321",
+      "description": "WORLDPAY_INTEGRATION SOAP header password",
+      "category": "WORLDPAY_INTEGRATION"
     }
 
   ]

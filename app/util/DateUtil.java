@@ -1,12 +1,17 @@
 package util;
 
 import org.apache.commons.lang3.StringUtils;
+import play.Logger;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 /**
@@ -104,5 +109,23 @@ public class DateUtil {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime().getTime();
     }
+
+    public static XMLGregorianCalendar toXmlGregorianCalendar(Date date) {
+        GregorianCalendar c = new GregorianCalendar();
+        c.setTime(date);
+
+        XMLGregorianCalendar date2 = null;
+
+        try {
+            date2 = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
+
+            return date2;
+        } catch (DatatypeConfigurationException e) {
+            Logger.error("Error while date conversion", e);
+        }
+
+        return date2;
+    }
+
 
 }

@@ -103,4 +103,13 @@ public class BankDetailsResponseV2 {
         this.bankDetails = value;
     }
 
+
+    @Override
+    public String toString() {
+        return "BankDetailsResponseV2{" +
+                "statusCode=" + statusCode +
+                ", statusMessage='" + statusMessage + '\'' +
+                ", bankDetails=" + bankDetails +
+                '}';
+    }
 }
