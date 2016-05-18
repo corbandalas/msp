@@ -30,8 +30,6 @@ libraryDependencies += filters
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
-seq(flywaySettings: _*)
-
 flywayUrl :=conf.getString("flywayUrl")
 
 flywayUser :=conf.getString("database.username")
