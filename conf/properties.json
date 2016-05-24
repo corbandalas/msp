@@ -85,6 +85,12 @@
       "category": "ACCOUNTS"
     },
 
+    {
+      "id": "com.msp.accounts.deposit",
+      "value": "44",
+      "description": "MSP deposit account",
+      "category": "ACCOUNTS"
+    },
 
     {
       "id": "com.msp.sms.textanywhere.login",

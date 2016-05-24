@@ -5,15 +5,16 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.customer.CustomerTransactionResponse;
 import dto.customer.CustomerTransferOwnCards;
 import dto.customer.CustomerTransferResponse;
 import dto.customer.TransferToAnotherCard;
-import exception.*;
-import model.*;
+import exception.CustomerNotRegisteredException;
+import exception.WrongCardException;
+import exception.WrongCurrencyException;
+import model.Card;
+import model.Currency;
+import model.Customer;
 import model.enums.KYC;
-import model.enums.OperationType;
-import model.enums.TransactionType;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -21,10 +22,11 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import provider.CardProvider;
-import repository.*;
-import util.CurrencyUtil;
+import repository.CardRepository;
+import repository.CurrencyRepository;
+import repository.CustomerRepository;
+import services.OperationService;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,23 +49,13 @@ public class CustomerTransferController extends BaseController {
     CurrencyRepository currencyRepository;
 
     @Inject
-    TransactionRepository transactionRepository;
-
-    @Inject
-    OperationRepository operationRepository;
-
-    @Inject
     CardProvider cardProvider;
-
-    @Inject
-    AccountRepository accountRepository;
-
-    @Inject
-    PropertyRepository propertyRepository;
 
     @Inject
     CustomerRepository customerRepository;
 
+    @Inject
+    OperationService operationService;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -138,7 +130,7 @@ public class CustomerTransferController extends BaseController {
             }
 
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(),
-                    request.getDescription()).flatMap(providerResponse -> createTransferOperation(cardFrom.get(),
+                    request.getDescription()).flatMap(providerResponse -> operationService.createTransferOperation(cardFrom.get(),
                     cardTo.get(), request.getAmount(), data._2.get(), request.getOrderId(), request.getDescription())
                     .map(res -> ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())))));
         });
@@ -227,63 +219,14 @@ public class CustomerTransferController extends BaseController {
             }
 
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo, request.getAmount(), currency,
-                    request.getDescription()).flatMap(providerResponse -> createTransferOperation(cardFrom.get(),
+                    request.getDescription()).flatMap(providerResponse -> operationService.createTransferOperation(cardFrom.get(),
                     cardTo, request.getAmount(), currency, request.getOrderId(), request.getDescription())
                     .map(res -> ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())))));
 
 
         });
 
-
         return returnRecover(result);
 
     }
-
-
-    private F.Promise<F.Tuple<Operation, List<Transaction>>> createTransferOperation(Card sourceCard, Card destinationCard, Long amount, Currency currency, String orderId, String description) {
-        final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
-                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
-        final F.Promise<Optional<Account>> transferAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.transfer"))
-                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
-
-        return cardAccountPromise.zip(transferAccountPromise).flatMap(accounts -> {
-            final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
-            final Account transferAccount = accounts._2.orElseThrow(WrongAccountException::new);
-
-            return getExchangeRates(currency, cardAccount, transferAccount).flatMap(rates ->
-                    F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.TRANSFER, orderId, description, new Date())))
-                            .flatMap(operation -> {
-                                final F.Promise<Transaction> sourceTransactionPromise = F.Promise
-                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                cardAccount.getId(), transferAccount.getId(), sourceCard.getId(), rates._1, rates._2, TransactionType.TRANSFER_FROM)));
-                                final F.Promise<Transaction> destinationTransactionPromise = F.Promise
-                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                transferAccount.getId(), cardAccount.getId(), destinationCard.getId(), rates._2, rates._1, TransactionType.TRANSFER_FROM)));
-
-                                return F.Promise.sequence(sourceTransactionPromise, destinationTransactionPromise).map(trans -> new F.Tuple<>(operation, trans));
-                            }));
-        });
-    }
-
-    private F.Promise<F.Tuple<Double, Double>> getExchangeRates(Currency currency, Account cardAccount, Account transferAccount) {
-        final F.Promise<Double> cardAccountExchangeRatePromise;
-        if (cardAccount.getCurrencyId().equals(currency.getId()))
-            cardAccountExchangeRatePromise = F.Promise.pure(1.0);
-        else {
-            cardAccountExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(cardAccount.getCurrencyId())).map(accCurrency ->
-                    CurrencyUtil.getExchangeRate(currency, accCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
-        }
-
-        final F.Promise<Double> transferAccountExchangeRatePromise;
-        if (transferAccount.getCurrencyId().equals(currency.getId()))
-            transferAccountExchangeRatePromise = F.Promise.pure(1.0);
-        else {
-            transferAccountExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(transferAccount.getCurrencyId())).map(accCurrency ->
-                    CurrencyUtil.getExchangeRate(currency, accCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
-        }
-
-        return cardAccountExchangeRatePromise.zip(transferAccountExchangeRatePromise);
-    }
-
-
 }
