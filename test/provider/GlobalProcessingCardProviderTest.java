@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.Logger;
+import play.libs.F;
 import provider.dto.*;
 import repository.CurrencyRepository;
 import repository.PropertyRepository;
@@ -71,6 +72,42 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
             assertEquals(cardCreationResponse.getLoadValue(), (double) amount / 100, 0.0001);
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
+
+    @Test
+    public void convertVirtualToPlastic() throws Exception {
+
+        Thread.currentThread().sleep(1000);
+
+        try {
+
+            long amount = 1000;
+
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card", amount, getCurrency());
+
+            assertNotNull(cardCreationResponse);
+            assertNotNull(cardCreationResponse.getToken());
+            assertEquals(cardCreationResponse.getLoadValue(), (double) amount / 100, 0.0001);
+
+            Card card = new Card();
+
+            Calendar instance = Calendar.getInstance();
+
+            instance.add(Calendar.DAY_OF_YEAR, 720);
+
+
+            card.setToken(cardCreationResponse.getToken());
+
+            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
+
+            assertNotNull(convertVirtualToPlasticResponse);
+            assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
 
         } catch (Exception e) {
             Logger.error("Error", e);

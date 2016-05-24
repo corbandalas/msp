@@ -1,4 +1,4 @@
-package w2globaldata;
+package services;
 
 import com.google.inject.Inject;
 import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfKeyValueOfstringstring;
@@ -30,13 +30,13 @@ import java.util.GregorianCalendar;
 import java.util.Optional;
 
 /**
- * W2 Global data client
+ * W2 Global data client service
  *
  * @author nihilist - created 16.02.2016
  * @since 0.1.0
  */
 
-public class W2GlobaldataClient {
+public class W2GlobaldataService {
 
     @Inject
     private PropertyRepository propertyRepository;

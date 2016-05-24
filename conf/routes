@@ -56,9 +56,6 @@ POST    /api/admin/account/update                                             @c
 GET     /api/admin/account/get/:accountID                                     @controllers.admin.AccountController.retrieveById(accountID:Int)
 GET     /api/admin/account/list                                               @controllers.admin.AccountController.retrieveAll()
 
-# WorldPay API
-GET     /api-docs/api/admin/worldpay                                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/worldpay")
-GET    /api/admin/worldpay/getbanks/:country                                           @controllers.admin.WorldPayController.getBankDetails(country:String)
 
 # Operation API
 GET     /api-docs/api/admin/operation                                         @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/operation")
@@ -129,6 +126,11 @@ POST    /api/customer/transfer/other                                    @control
 GET     /api-docs/api/customer/card/management                          @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/management")
 POST     /api/customer/card/management/changeStatus                      @controllers.customer.CustomerCardManagementController.changeStatus()
 POST     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
+
+# WorldPay API
+GET     /api-docs/api/customer/worldpay                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/worldpay")
+GET    /api/customer/worldpay/getbanks/:country                         @controllers.customer.CustomerWorldPayCreditDepositController.getBankDetails(country:String)
+POST    /api/customer/worldpay/initCreditCardDeposit                    @controllers.customer.CustomerWorldPayCreditDepositController.initHostedWorldPayPayment()
 
 POST    /api/callbacks/worldpay/deposit                                 @controllers.callback.WorldpayCallbackController.deposit()
 # Map static resources from the /public folder to the /assets URL path

@@ -1,16 +1,24 @@
-package worldpay;
+package services;
 
+import akka.dispatch.Futures;
 import com.envoyservices.merchantapi.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Response;
+import dto.customer.CustomerWorldPayCreditCardDeposit;
 import exception.CardProviderException;
 import exception.WrongPropertyException;
 import model.Currency;
 import model.Customer;
 import model.Property;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
 import repository.PropertyRepository;
+import scala.concurrent.Future;
+import scala.concurrent.Promise;
 import util.DateUtil;
 
 import java.math.BigDecimal;
@@ -19,14 +27,14 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
- * WorldPay gateway client
+ * WorldPay gateway client service
  *
  * @author corbandalas - created 16.05.2016
  * @since 0.2.0
  */
 
 @Singleton
-public class WorldPayPaymentClient {
+public class WorldPayPaymentService {
 
     @Inject
     private PropertyRepository propertyRepository;
@@ -39,11 +47,16 @@ public class WorldPayPaymentClient {
         return getSettings().flatMap(res -> getBankDetails(res, country));
     }
 
+
+    public F.Promise<String> initHostedtWorldPayPayment(final CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
+        return getSettings().flatMap(res -> F.Promise.wrap(initWorldPayHostedPaymentPage(res, customerWorldPayCreditCardDeposit)));
+    }
+
     private F.Promise<OneClickPaymentResponseV2> oneClickPaymentRequestV2(WorldPaySettings settings, String serviceName, String paymentMethod, String transactionDescription, String paymentChannel, long amount, Currency currency, Customer customer, String successURL, String cancelURL, String failureURL) {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(settings.wsdlURL);
+            Service service = getService(settings.url);
 
 
             long wsid = System.currentTimeMillis();
@@ -101,7 +114,7 @@ public class WorldPayPaymentClient {
 
                 Logger.info("/////// OneClickServiceInfoV2 service invocation was ended. WSID #" + wsid + ". Result code: " + oneClickPaymentResponseV2.getStatusCode() + " . Details: " + oneClickPaymentResponseV2.getStatusMessage() + " // " + oneClickPaymentResponseV2.toString());
 
-                if ( 0 != oneClickPaymentResponseV2.getStatusCode()) {
+                if (0 != oneClickPaymentResponseV2.getStatusCode()) {
                     throw new CardProviderException("Bad Response");
                 }
 
@@ -118,7 +131,7 @@ public class WorldPayPaymentClient {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(settings.wsdlURL);
+            Service service = getService(settings.url);
 
 
             long wsid = System.currentTimeMillis();
@@ -134,7 +147,7 @@ public class WorldPayPaymentClient {
 
                 Logger.info("/////// GetBankDetailsV2 service invocation was ended. WSID #" + wsid + ". Result code: " + bankDetailsV2.getStatusCode() + " . Details: " + bankDetailsV2.getStatusMessage() + " // " + bankDetailsV2.toString());
 
-                if ( 0 != bankDetailsV2.getStatusCode()) {
+                if (0 != bankDetailsV2.getStatusCode()) {
                     throw new CardProviderException("Bad Response");
                 }
 
@@ -145,6 +158,49 @@ public class WorldPayPaymentClient {
 
             return bankDetailsV2;
         });
+    }
+
+
+    private Future<String> initWorldPayHostedPaymentPage(final WorldPaySettings settings, CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
+
+        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+
+        final AsyncHttpClient.BoundRequestBuilder builder = asyncHttpClient.preparePost(settings.url);
+
+        final Promise<String> promise = Futures.promise();
+
+        builder.addHeader("Content-Type", "text/xml");
+        builder.setBody(createXML(settings.merchantCode, settings.installationID, customerWorldPayCreditCardDeposit.getAmount(),
+                customerWorldPayCreditCardDeposit.getCurrency(), customerWorldPayCreditCardDeposit.getOrderId(), "Deposit for " + (double) customerWorldPayCreditCardDeposit.getAmount() / 100 + " " + customerWorldPayCreditCardDeposit.getCurrency()));
+
+        builder.execute(new AsyncCompletionHandler<String>() {
+
+            @Override
+            public String onCompleted(Response response) throws Exception {
+
+                String responseBody = response.getResponseBody();
+                Logger.info("///Obtained WorldPay response: " + responseBody);
+
+                String worldPayRedirectionURL = StringUtils.substringBetween(responseBody, ">", "/<");
+
+                worldPayRedirectionURL = worldPayRedirectionURL.concat("&card=" + customerWorldPayCreditCardDeposit.getCardTo() + "&successURL=" + customerWorldPayCreditCardDeposit.getSuccessURL() +
+                        "&failureURL=" + customerWorldPayCreditCardDeposit.getFailURL() + "&cancelURL=" + customerWorldPayCreditCardDeposit.getCancelURL());
+
+                promise.success(worldPayRedirectionURL);
+
+                return worldPayRedirectionURL;
+            }
+
+            @Override
+            public void onThrowable(Throwable t) {
+                Logger.error("/////Error while retrieving response from WorldPay Hosted API", t);
+
+                promise.failure(t);
+            }
+        });
+
+        return promise.future();
+
     }
 
 
@@ -179,25 +235,68 @@ public class WorldPayPaymentClient {
             String url = res._1._1.orElseThrow(WrongPropertyException::new).getValue();
             String userName = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
             String password = res._2.orElseThrow(WrongPropertyException::new).getValue();
-            return new WorldPaySettings(url, userName, password);
+            return new WorldPaySettings(url, userName, password, "", "");
+        });
+    }
+
+    private F.Promise<WorldPaySettings> getHostedSettings() {
+
+        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.url"));
+        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.username"));
+        final F.Promise<Optional<Property>> passwordHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.password"));
+        final F.Promise<Optional<Property>> merchantCodePromise = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.merchantcode"));
+        final F.Promise<Optional<Property>> installationIDPromise = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.installation.id"));
+
+
+        return wsdlPromise.zip(usernameHeaderPromise).zip(passwordHeaderPromise).zip(merchantCodePromise).zip(installationIDPromise).map(res -> {
+
+            String installationID = res._2.orElseThrow(WrongPropertyException::new).getValue();
+            String merchantCode = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String password = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String userName = res._1._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String url = res._1._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+
+            return new WorldPaySettings(url, userName, password, merchantCode, installationID);
         });
     }
 
     private class WorldPaySettings {
 
-        private String wsdlURL;
+        private String url;
         private String headerUsername;
         private String headerPassword;
+        private String merchantCode;
+        private String installationID;
 
-        public WorldPaySettings(String wsdlURL, String headerUsername, String headerPassword) {
-            this.wsdlURL = wsdlURL;
+        public WorldPaySettings(String url, String headerUsername, String headerPassword, String merchantCode, String installationID) {
+            this.url = url;
             this.headerUsername = headerUsername;
             this.headerPassword = headerPassword;
+            this.merchantCode = merchantCode;
+            this.installationID = installationID;
         }
-
 
     }
 
+    private String createXML(String merchantCode, String installationID, long amount, String currency, String orderID, String orderDesciption) {
+        StringBuffer xmlMessage = new StringBuffer();
+
+        xmlMessage.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE paymentService PUBLIC \"-//Worldpay//DTD Worldpay PaymentService v1//EN\" \"http://dtd.worldpay.com/paymentService_v1.dtd\">");
+
+        xmlMessage.append("<paymentService version=\"1.4\" merchantCode=\"" + merchantCode + "\">");
+        xmlMessage.append("<submit>");
+        xmlMessage.append("<order orderCode=\"" + orderID + "\" installationId=\"" + installationID + "\">");
+        xmlMessage.append("<description>" + orderDesciption + "</description>");
+        xmlMessage.append("<amount currencyCode=\"" + currency + "\" value=\"" + amount + "\" exponent=\"2\"/>");
+        xmlMessage.append("<orderContent>" + orderDesciption + "</orderContent>");
+        xmlMessage.append("<paymentMethodMask>");
+        xmlMessage.append("<include code=\"ALL\"/>");
+        xmlMessage.append("</paymentMethodMask>");
+        xmlMessage.append("</order>");
+        xmlMessage.append("</submit>");
+        xmlMessage.append("</paymentService>");
+        return xmlMessage.toString();
+    }
 
 
 }
