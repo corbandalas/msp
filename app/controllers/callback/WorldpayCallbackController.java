@@ -135,9 +135,9 @@ public class WorldpayCallbackController extends BaseController {
 
                     final F.Promise<CardLoadResponse> cardLoadPromise;
                     if (defaultCard.getType().equals(CardType.VIRTUAL)) {
-                        cardLoadPromise = cardProvider.loadVirtualCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
+                        cardLoadPromise = cardProvider.loadVirtualCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
                     } else {
-                        cardLoadPromise = cardProvider.loadPlasticCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
+                        cardLoadPromise = cardProvider.loadPlasticCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
                     }
 
                     return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(defaultCard,
