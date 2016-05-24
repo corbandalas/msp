@@ -1,6 +1,5 @@
 package controllers.callback;
 
-import controllers.BaseControllerTest;
 import controllers.customer.BaseCustomerControllerTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,7 +54,16 @@ public class WorldpayCallbackControllerTest extends BaseCustomerControllerTest {
     }
 
     @Test
-    public void depositToNewCard() {
+    public void depositToNew() {
+
+        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/deposit")
+                .post(String.format(SOAP_REQUEST,PHONE_3_NON_KYC)).get(TIMEOUT);
+
+        Assert.assertTrue(response.getBody().contains("PaymentNotificationResult"));
+    }
+
+    @Test
+    public void depositToExisting() {
 
         final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/deposit")
                 .post(String.format(SOAP_REQUEST,PHONE_1)).get(TIMEOUT);

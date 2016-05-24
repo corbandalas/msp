@@ -37,9 +37,11 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
     public static final String PHONE_1 = "4921142172244";
     public static final String PHONE_2 = "4921142172243";
+    public static final  String PHONE_3_NON_KYC = "4921142172242";
 
     public static final String PASSWORD_1 = "4921142172244";
     public static final String PASSWORD_2 = "4921142172243";
+    public static final String PASSWORD_3_NON_KYC = "4921142172242";
 
     @Before
     public void init() {
@@ -69,7 +71,7 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
         Await.result(promise2.future(), Duration.apply(TIMEOUT, "ms"));
 
         final Promise<Object> promise = Futures.promise();
-        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".customer where id=$1 OR id=$2", asList(PHONE_1, PHONE_2),
+        connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".customer where id=$1 OR id=$2 OR id=$3", asList(PHONE_1, PHONE_2, PHONE_3_NON_KYC),
                 promise::success, promise::failure);
         Await.result(promise.future(), Duration.apply(TIMEOUT, "ms"));
 
@@ -87,13 +89,17 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
         final CurrencyRepository currencyRepository = app.injector().instanceOf(CurrencyRepository.class);
 
-        final Customer customer1 = createCustomer(PHONE_1, PASSWORD_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff");
+        final Customer customer1 = createCustomer(PHONE_1, PASSWORD_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff", KYC.FULL_DUE_DILIGENCE);
 
-        final Customer customer2 = createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff");
+        final Customer customer2 = createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff", KYC.FULL_DUE_DILIGENCE);
+
+        final Customer customer3 = createCustomer(PHONE_2, PASSWORD_2, "vodka@gmail.com", "Nemir", "Nemiroff", KYC.NONE);
 
         Await.result(customerRepository.create(customer1), Duration.apply(TIMEOUT, "ms"));
 
         Await.result(customerRepository.create(customer2), Duration.apply(TIMEOUT, "ms"));
+
+        Await.result(customerRepository.create(customer3), Duration.apply(TIMEOUT, "ms"));
 
         GlobalProcessingCardProvider globalProcessingCardProvider = app.injector().instanceOf(GlobalProcessingCardProvider.class);
 
@@ -115,9 +121,9 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
     }
 
-    private model.Customer createCustomer(String phone, String password, String email, String firstName, String lastName) {
+    private model.Customer createCustomer(String phone, String password, String email, String firstName, String lastName, KYC kyc) {
         return new model.Customer(phone, new Date(), "Mr", firstName, lastName,
-                "adress1", "adress2", "83004", "Berlin", email, new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "DE");
+                "adress1", "adress2", "83004", "Berlin", email, new Date(), true, kyc, password, "DE");
     }
 
     private Card createCard(String customerPhone, String token, boolean cardDefault) {
