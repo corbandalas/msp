@@ -130,5 +130,6 @@ GET     /api-docs/api/customer/card/management                          @pl.mati
 POST     /api/customer/card/management/changeStatus                      @controllers.customer.CustomerCardManagementController.changeStatus()
 POST     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
 
+POST    /api/callbacks/worldpay/deposit                                 @controllers.callback.WorldpayCallbackController.deposit()
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)
