@@ -51,6 +51,13 @@
     },
 
     {
+      "id": "w2.verification.price",
+      "value": "500",
+      "description": "W2 verification proce",
+      "category": "W2_INTEGRATION"
+    },
+
+    {
       "id": "w2.globaldata.sandbox.mode",
       "value": "true",
       "description": "W2 Globaldata sandbox flag",
@@ -131,6 +138,41 @@
       "id": "worldpay.wsdl.soap.header.password",
       "value": "Safepaytest123321",
       "description": "WORLDPAY_INTEGRATION SOAP header password",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.hosted.payment.url",
+      "value": "https://secure-test.worldpay.com/jsp/merchant/xml/paymentService.jsp",
+      "description": "WORLDPAY_INTEGRATION hosted payment URL",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.hosted.payment.username",
+      "value": "Safepaytest",
+      "description": "WORLDPAY_INTEGRATION hosted payment username",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.hosted.payment.password",
+      "value": "Safepaytest123321",
+      "description": "WORLDPAY_INTEGRATION hosted payment URL password",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.hosted.payment.merchantcode",
+      "value": "Safepaytest123321",
+      "description": "WORLDPAY_INTEGRATION hosted payment merchant code",
+      "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.hosted.payment.installation.id",
+      "value": "Safepaytest123321",
+      "description": "WORLDPAY_INTEGRATION hosted payment installation id",
       "category": "WORLDPAY_INTEGRATION"
     }
 

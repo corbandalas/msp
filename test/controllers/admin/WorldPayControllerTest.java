@@ -32,9 +32,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class WorldPayControllerTest extends BaseControllerTest {
 
-    private String newPropertyId = "test.property";
-    private String newPropertyValue = "test property value";
-
     @Before
     public void init() {
 
