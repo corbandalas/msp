@@ -93,7 +93,7 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
         final Customer customer2 = createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff", KYC.FULL_DUE_DILIGENCE);
 
-        final Customer customer3 = createCustomer(PHONE_2, PASSWORD_2, "vodka@gmail.com", "Nemir", "Nemiroff", KYC.NONE);
+        final Customer customer3 = createCustomer(PHONE_3_NON_KYC, PASSWORD_3_NON_KYC, "vodka@gmail.com", "Nemir", "Nemiroff", KYC.NONE);
 
         Await.result(customerRepository.create(customer1), Duration.apply(TIMEOUT, "ms"));
 
