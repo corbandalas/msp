@@ -49,10 +49,11 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
         super.init();
 
         try {
-            insertCustomersAndCards();
 
             PropertyLoader propertyLoader = app.injector().instanceOf(PropertyLoader.class);
             propertyLoader.load("conf/properties.json", app.injector().instanceOf(ActorSystem.class).dispatcher());
+
+            insertCustomersAndCards();
         } catch (Exception e) {
             Logger.error("Test error", e);
         }

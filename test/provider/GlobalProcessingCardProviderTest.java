@@ -547,12 +547,12 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
             assertNotNull(cardDetailsResponse);
             assertEquals("41", cardDetailsResponse.getStatCode());
 
-            globalProcessingCardProvider.reportCardStolen(card, "Fraud case").get(WS_TIMEOUT);
-
-            cardDetailsResponse = globalProcessingCardProvider.getVirtualCardDetails(card).get(WS_TIMEOUT);
-
-            assertNotNull(cardDetailsResponse);
-            assertEquals("43", cardDetailsResponse.getStatCode());
+//            globalProcessingCardProvider.reportCardStolen(card, "Fraud case").get(WS_TIMEOUT);
+//
+//            cardDetailsResponse = globalProcessingCardProvider.getVirtualCardDetails(card).get(WS_TIMEOUT);
+//
+//            assertNotNull(cardDetailsResponse);
+//            assertEquals("43", cardDetailsResponse.getStatCode());
 
 
 //            globalProcessingCardProvider.reportCardDamaged(card, "Fraud case").get(WS_TIMEOUT);

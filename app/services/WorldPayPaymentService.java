@@ -49,7 +49,7 @@ public class WorldPayPaymentService {
 
 
     public F.Promise<String> initHostedtWorldPayPayment(final CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
-        return getSettings().flatMap(res -> F.Promise.wrap(initWorldPayHostedPaymentPage(res, customerWorldPayCreditCardDeposit)));
+        return getHostedSettings().flatMap(res -> F.Promise.wrap(initWorldPayHostedPaymentPage(res, customerWorldPayCreditCardDeposit)));
     }
 
     private F.Promise<OneClickPaymentResponseV2> oneClickPaymentRequestV2(WorldPaySettings settings, String serviceName, String paymentMethod, String transactionDescription, String paymentChannel, long amount, Currency currency, Customer customer, String successURL, String cancelURL, String failureURL) {
