@@ -48,7 +48,7 @@ public class WorldPayPaymentService {
     }
 
 
-    public F.Promise<String> initHostedtWorldPayPayment(final CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
+    public F.Promise<F.Tuple<String, String>> initHostedtWorldPayPayment(final CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
         return getHostedSettings().flatMap(res -> F.Promise.wrap(initWorldPayHostedPaymentPage(res, customerWorldPayCreditCardDeposit)));
     }
 
@@ -161,13 +161,13 @@ public class WorldPayPaymentService {
     }
 
 
-    private Future<String> initWorldPayHostedPaymentPage(final WorldPaySettings settings, CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
+    private Future<F.Tuple<String, String>> initWorldPayHostedPaymentPage(final WorldPaySettings settings, CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
 
         final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
         final AsyncHttpClient.BoundRequestBuilder builder = asyncHttpClient.preparePost(settings.url);
 
-        final Promise<String> promise = Futures.promise();
+        final Promise<F.Tuple<String, String>> promise = Futures.promise();
 
         builder.addHeader("Content-Type", "text/xml");
         builder.setBody(createXML(settings.merchantCode, settings.installationID, customerWorldPayCreditCardDeposit.getAmount(),
@@ -183,10 +183,14 @@ public class WorldPayPaymentService {
 
                 String worldPayRedirectionURL = StringUtils.substringBetween(responseBody, ">", "/<");
 
+                String orderKey = StringUtils.substringAfter(worldPayRedirectionURL, "orderKey=");
+
                 worldPayRedirectionURL = worldPayRedirectionURL.concat("&card=" + customerWorldPayCreditCardDeposit.getCardTo() + "&successURL=" + customerWorldPayCreditCardDeposit.getSuccessURL() +
                         "&failureURL=" + customerWorldPayCreditCardDeposit.getFailURL() + "&cancelURL=" + customerWorldPayCreditCardDeposit.getCancelURL());
 
-                promise.success(worldPayRedirectionURL);
+                F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);
+
+                promise.success(result);
 
                 return worldPayRedirectionURL;
             }

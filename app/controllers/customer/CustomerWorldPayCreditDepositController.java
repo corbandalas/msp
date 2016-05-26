@@ -130,15 +130,21 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
                     return F.Promise.pure(createWrongCardResponse());
                 }
 
-                //Store orderID to cache with expiration time out
-                cache.set("Deposit" + request.getOrderId() + customer.getId(), request, Integer.parseInt(sessionTimeOut) * 60);
+                return worldPayPaymentService.initHostedtWorldPayPayment(request).map(res -> {
 
-                return worldPayPaymentService.initHostedtWorldPayPayment(request).map(res -> ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res))));
+                            //Store orderID to cache with expiration time out
+                            cache.set("Deposit" + res._2, request, Integer.parseInt(sessionTimeOut) * 60);
+
+                            return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1, request.getAmount())));
+
+                        }
+
+                );
 
 
             } else {
 
-                return F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.amount")).zip(F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.currency"))).flatMap(res -> F.Promise.wrap(currencyRepository.retrieveById(res._2.orElseThrow(WrongPropertyException::new))).flatMap(currencyRes-> {
+                return F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.amount")).zip(F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.currency"))).flatMap(res -> F.Promise.wrap(currencyRepository.retrieveById(res._2.orElseThrow(WrongPropertyException::new))).flatMap(currencyRes -> {
 
                     Long convertedAmount = 0L;
 
@@ -150,11 +156,13 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
                     request.setAmount(request.getAmount() + convertedAmount);
 
-
                     //Store orderID to cache with expiration time out
-                    cache.set("Deposit" + request.getOrderId() + customer.getId(), request, Integer.parseInt(sessionTimeOut) * 60);
+                    cache.set("Deposit" + res._2, request, Integer.parseInt(sessionTimeOut) * 60);
 
-                    return worldPayPaymentService.initHostedtWorldPayPayment(request).map(rez -> ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, rez))));
+                    return worldPayPaymentService.initHostedtWorldPayPayment(request).map(rez ->
+                            ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, rez._1, request.getAmount())))
+
+                    );
                 }));
             }
 

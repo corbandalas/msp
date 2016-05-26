@@ -11,10 +11,12 @@ import dto.BaseAPIResponse;
 public class CustomerWorldPayCreditCardResponse extends BaseAPIResponse {
 
     private String url;
+    private long totalAmount;
 
-    public CustomerWorldPayCreditCardResponse(String text, String code, String url) {
+    public CustomerWorldPayCreditCardResponse(String text, String code, String url, long totalAmount) {
         super(text, code);
         this.url = url;
+        this.totalAmount = totalAmount;
     }
 
     public String getUrl() {
@@ -23,5 +25,13 @@ public class CustomerWorldPayCreditCardResponse extends BaseAPIResponse {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(long totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }
