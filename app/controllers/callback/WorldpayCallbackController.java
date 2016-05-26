@@ -13,6 +13,7 @@ import org.w3c.dom.Node;
 import play.Logger;
 import play.libs.F;
 import play.libs.XPath;
+import play.mvc.BodyParser;
 import play.mvc.Result;
 import provider.CardProvider;
 import provider.dto.CardLoadResponse;
@@ -55,15 +56,15 @@ public class WorldpayCallbackController extends BaseController {
      */
     public F.Promise<Result> deposit() {
 
-        final String soapResponse = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-                "xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-                " <soap:Body>\n" +
-                " <PaymentNotificationResponse xmlns=\"http://apilistener.envoyservices.com\">\n" +
-                " <PaymentNotificationResult>%s</PaymentNotificationResult>\n" +
-                " </PaymentNotificationResponse>\n" +
-                " </soap:Body>\n" +
+        final String soapResponse = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+                " xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"" +
+                " xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+                "<soap:Body>" +
+                "<PaymentNotificationResponse xmlns=\"http://apilistener.envoyservices.com\">" +
+                "<PaymentNotificationResult>%s</PaymentNotificationResult>" +
+                "</PaymentNotificationResponse>" +
+                "</soap:Body>" +
                 "</soap:Envelope>";
 
         final Document soapRequest = request().body().asXml();
@@ -72,17 +73,11 @@ public class WorldpayCallbackController extends BaseController {
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        final Node paymentRequest = XPath.selectNode("//paymentNotification/payment", soapRequest);
-        if (paymentRequest == null) {
-            Logger.error("Couldn't find payment object in SOAP body");
-            return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
-        }
-
-        final String phone = XPath.selectText("//itemNumber", paymentRequest);
+        final String phone = soapRequest.getElementsByTagName("itemNumber").item(0).getTextContent();
 
         final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
 
-        final String currencyCode = XPath.selectText("//appliedCurrency", paymentRequest);
+        final String currencyCode = soapRequest.getElementsByTagName("appliedCurrency").item(0).getTextContent();
         if (currencyCode == null) {
             Logger.error("Couldn't find currency code in SOAP request");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
@@ -90,13 +85,13 @@ public class WorldpayCallbackController extends BaseController {
 
         final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(currencyCode));
 
-        final String appliedAmount = XPath.selectText("//appliedAmount", paymentRequest);
+        final String appliedAmount =  soapRequest.getElementsByTagName("appliedAmount").item(0).getTextContent();
         if (appliedAmount == null) {
             Logger.error("Couldn't find amount in SOAP request");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        final Long amount = Long.parseLong(appliedAmount);
+        final Long amount = (long)(Double.parseDouble(appliedAmount)*100);
 
         final F.Promise<Result> result = customerPromise.zip(currencyPromise).flatMap(data -> {
 

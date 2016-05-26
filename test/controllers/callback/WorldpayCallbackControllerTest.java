@@ -14,34 +14,34 @@ import play.libs.ws.WSResponse;
  */
 public class WorldpayCallbackControllerTest extends BaseCustomerControllerTest {
 
-    public static final String SOAP_REQUEST = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-            "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n" +
-            "xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-            " <soap:Body>\n" +
-            " <PaymentNotification xmlns=\"http://apilistener.envoyservices.com\">\n" +
-            " <payment>\n" +
-            " <uniqueReference>uniqueReference</uniqueReference>\n" +
-            " <epacsReference>epacsReference</epacsReference>\n" +
-            " <postingDate>date</postingDate>\n" +
-            " <bankAccountNumber>String</bankAccountNumber>\n" +
-            " <bankName>String</bankName>\n" +
-            " <bankCurrency>String</bankCurrency>\n" +
-            " <bankAmount>Double</bankAmount>\n" +
-            " <appliedCurrency>String</appliedCurrency>\n" +
-            " <appliedAmount>Double</appliedAmount>\n" +
-            " <countryCode>String</countryCode>\n" +
-            " <bankInformation>String</bankInformation>\n" +
-            " <merchantReference>String</merchantReference>\n" +
-            " <envoyMerchantAccountNumber>String</envoyMerchantAccountNumber>\n" +
-            " <envoyBankAccountNumber>String</envoyBankAccountNumber>\n" +
-            " <itemNumber>%s</itemNumber>\n" +
-            " <statementId>String</statementId>\n" +
-            " <transferType>String</transferType>\n" +
-            " <refererType>String</refererType>\n" +
-            " </payment>\n" +
-            " </PaymentNotification>\n" +
-            " </soap:Body>\n" +
+    public static final String SOAP_REQUEST = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+            "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+            " xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"" +
+            " xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+            "<soap:Body>" +
+            "<PaymentNotification xmlns=\"http://apilistener.envoyservices.com\">" +
+            "<payment>" +
+            "<uniqueReference>uniqueReference</uniqueReference>" +
+            "<epacsReference>epacsReference</epacsReference>" +
+            "<postingDate>date</postingDate>" +
+            "<bankAccountNumber>String</bankAccountNumber>" +
+            "<bankName>String</bankName>" +
+            "<bankCurrency>String</bankCurrency>" +
+            "<bankAmount>Double</bankAmount>" +
+            "<appliedCurrency>USD</appliedCurrency>" +
+            "<appliedAmount>100.00</appliedAmount>" +
+            "<countryCode>String</countryCode>" +
+            "<bankInformation>String</bankInformation>" +
+            "<merchantReference>String</merchantReference>" +
+            "<envoyMerchantAccountNumber>String</envoyMerchantAccountNumber>" +
+            "<envoyBankAccountNumber>String</envoyBankAccountNumber>" +
+            "<itemNumber>%s</itemNumber>" +
+            "<statementId>String</statementId>" +
+            "<transferType>String</transferType>" +
+            "<refererType>String</refererType>" +
+            "</payment>" +
+            "</PaymentNotification>" +
+            "</soap:Body>" +
             "</soap:Envelope>";
 
     @Test
