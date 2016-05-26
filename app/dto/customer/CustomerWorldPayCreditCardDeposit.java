@@ -1,11 +1,13 @@
 package dto.customer;
 
+import java.io.Serializable;
+
 /**
  * API customer WorldPay credit card deposit request
  * @author corbandalas created 24.05.2016.
  * @since 0.2.0
  */
-public class CustomerWorldPayCreditCardDeposit {
+public class CustomerWorldPayCreditCardDeposit implements Serializable{
 
     private Long cardTo;
     private Long amount;

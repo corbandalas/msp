@@ -51,9 +51,16 @@
     },
 
     {
-      "id": "w2.verification.price",
+      "id": "w2.verification.price.amount",
       "value": "500",
-      "description": "W2 verification proce",
+      "description": "W2 verification price amount",
+      "category": "W2_INTEGRATION"
+    },
+
+    {
+      "id": "w2.verification.price.currency",
+      "value": "EUR",
+      "description": "W2 verification price currency",
       "category": "W2_INTEGRATION"
     },
 

@@ -2,18 +2,22 @@ package controllers.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BankDetailsListResponse;
 import dto.BaseAPIResponse;
 import dto.customer.*;
+import exception.WrongCurrencyException;
 import exception.WrongPropertyException;
 import model.Card;
 import model.Currency;
 import model.Customer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.cache.CacheApi;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
@@ -22,6 +26,7 @@ import repository.CardRepository;
 import repository.CurrencyRepository;
 import repository.PropertyRepository;
 import services.WorldPayPaymentService;
+import util.CurrencyUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +54,9 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
     @Inject
     WorldPayPaymentService worldPayPaymentService;
+
+    @Inject
+    CacheApi cache;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -110,6 +118,10 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
                 return F.Promise.pure(createIncorrectCurrencyResponse());
             }
 
+            Config conf = ConfigFactory.load();
+
+            String sessionTimeOut = conf.getString("cache.customer.session.timeout");
+
             if (request.getCardTo() != null) {
 
                 final Optional<Card> cardFrom = data._1.stream().filter(itm -> itm.getId().equals(request.getCardTo())).findFirst();
@@ -118,18 +130,32 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
                     return F.Promise.pure(createWrongCardResponse());
                 }
 
+                //Store orderID to cache with expiration time out
+                cache.set("Deposit" + request.getOrderId() + customer.getId(), request, Integer.parseInt(sessionTimeOut) * 60);
+
                 return worldPayPaymentService.initHostedtWorldPayPayment(request).map(res -> ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res))));
 
 
             } else {
 
-                return F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price")).flatMap(res -> {
+                return F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.amount")).zip(F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.currency"))).flatMap(res -> F.Promise.wrap(currencyRepository.retrieveById(res._2.orElseThrow(WrongPropertyException::new))).flatMap(currencyRes-> {
 
-                    request.setAmount(request.getAmount() + Long.parseLong(res.orElseThrow(WrongPropertyException::new).getValue()));
+                    Long convertedAmount = 0L;
+
+                    try {
+                        convertedAmount = CurrencyUtil.convert(Long.parseLong(res._1.get().getValue()), currencyRes, data._2);
+                    } catch (WrongCurrencyException e) {
+                        Logger.error("Error while retrieving data from DB", e);
+                    }
+
+                    request.setAmount(request.getAmount() + convertedAmount);
+
+
+                    //Store orderID to cache with expiration time out
+                    cache.set("Deposit" + request.getOrderId() + customer.getId(), request, Integer.parseInt(sessionTimeOut) * 60);
 
                     return worldPayPaymentService.initHostedtWorldPayPayment(request).map(rez -> ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, rez))));
-
-                });
+                }));
             }
 
         });
@@ -144,7 +170,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
             notes = "Method allows to obtain list of bank account details supported by WorldPay gateway",
             produces = "application/json",
             consumes = "application/json",
-            httpMethod = "POST",
+            httpMethod = "GET",
             response = BankDetailsListResponse.class
     )
 
@@ -157,18 +183,8 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(name = "country", value = "Country", required = true, dataType = "String", paramType = "path"),
-//            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-//            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+country+secret)",
-//                    required = true, dataType = "String", paramType = "header", name = "enckey"),
-//            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
     })
     public F.Promise<Result> getBankDetails(String country) {
-
-//        final Authentication authData = (Authentication) ctx().args.get("authData");
-//        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), country, authData.getAccount().getSecret()))) {
-//            Logger.error("Provided and calculated enckeys do not match");
-//            return F.Promise.pure(createWrongEncKeyResponse());
-//        }
 
         final F.Promise<Result> result = worldPayPaymentService.getBankDetails(country).map(details ->
                 ok(Json.toJson(new BankDetailsListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), details.getBankDetails().getBankDetailsResultV2()))));
