@@ -7,6 +7,8 @@ import com.google.inject.Singleton;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import dto.customer.CustomerWorldPayCreditCardDeposit;
 import exception.CardProviderException;
 import exception.WrongPropertyException;
@@ -185,8 +187,14 @@ public class WorldPayPaymentService {
 
                 String orderKey = StringUtils.substringAfter(worldPayRedirectionURL, "orderKey=");
 
-                worldPayRedirectionURL = worldPayRedirectionURL.concat("&card=" + customerWorldPayCreditCardDeposit.getCardTo() + "&successURL=" + customerWorldPayCreditCardDeposit.getSuccessURL() +
-                        "&failureURL=" + customerWorldPayCreditCardDeposit.getFailURL() + "&cancelURL=" + customerWorldPayCreditCardDeposit.getCancelURL());
+                Config conf = ConfigFactory.load();
+
+                final String webHost = conf.getString("application.web.host");
+
+                final String callbackURL = webHost + "/api/callbacks/worldpay/deposit";
+
+                worldPayRedirectionURL = worldPayRedirectionURL.concat("&successURL=" + callbackURL +
+                        "&failureURL=" + callbackURL + "&cancelURL=" + callbackURL);
 
                 F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);
 
