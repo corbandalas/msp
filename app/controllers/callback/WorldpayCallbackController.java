@@ -95,7 +95,7 @@ public class WorldpayCallbackController extends BaseController {
         final Long amount = (long) (Double.parseDouble(appliedAmount) * 100);
 
 
-        final F.Promise<Result> result = makePayment(phone, amount, currencyCode, true).map(res -> ok(String.format(soapResponse, "SUCCESS")));
+        final F.Promise<Result> result = makePayment(phone, amount, currencyCode, true, null).map(res -> ok(String.format(soapResponse, "SUCCESS")));
 
         return result.recover(throwable -> {
             Logger.error("Error: ", throwable);
@@ -127,7 +127,7 @@ public class WorldpayCallbackController extends BaseController {
             return F.Promise.pure(createRedirect("https://google.com"));
         }
 
-        CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = (CustomerWorldPayCreditCardDeposit) cache.get(orderKey);
+        CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = cache.get(orderKey);
 
         if (customerWorldPayCreditCardDeposit == null) {
             Logger.error("Cache request object is NULL");
@@ -147,7 +147,7 @@ public class WorldpayCallbackController extends BaseController {
         }
 
 
-        final F.Promise<Result> result = makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false).map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
+        final F.Promise<Result> result = makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false, customerWorldPayCreditCardDeposit.getCardTo()).map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
 
 
         return result.recover(throwable -> {
@@ -158,7 +158,7 @@ public class WorldpayCallbackController extends BaseController {
     }
 
 
-    private F.Promise<F.Tuple<Operation, Transaction>> makePayment(String phone, long amount, String currencyCode, boolean isBankDeposit) {
+    private F.Promise<F.Tuple<Operation, Transaction>> makePayment(String phone, long amount, String currencyCode, boolean isBankDeposit, Long cardID) {
 
         final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
 
@@ -191,12 +191,31 @@ public class WorldpayCallbackController extends BaseController {
                                     "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
                             .flatMap(card -> operationService.createDepositOperation(card, amount, currency, "", "Worldpay deposit"));
                 } else {
-                    final Optional<Card> defaultCardOpt = StreamSupport.stream(cards.spliterator(), true).filter(Card::getCardDefault).findFirst();
-                    if (!defaultCardOpt.isPresent()) {
-                        Logger.error("Couldn't find default card for specified phone");
-                        return F.Promise.throwing(new WrongCardException());
+
+                    Card defaultCard = null;
+
+                    if (cardID == null) {
+
+                        final Optional<Card> defaultCardOpt = StreamSupport.stream(cards.spliterator(), true).filter(Card::getCardDefault).findFirst();
+                        if (!defaultCardOpt.isPresent()) {
+                            Logger.error("Couldn't find default card for specified phone");
+                            return F.Promise.throwing(new WrongCardException());
+                        }
+
+                        defaultCard = defaultCardOpt.get();
+
+                    } else {
+
+                        final Optional<Card> defaultCardOpt = cards.stream().filter(itm -> itm.getId().equals(cardID)).findFirst();
+
+                        if (!defaultCardOpt.isPresent()) {
+                            Logger.error("Couldn't find card for specified ID");
+                            return F.Promise.throwing(new WrongCardException());
+                        }
+
+                        defaultCard = defaultCardOpt.get();
                     }
-                    final Card defaultCard = defaultCardOpt.get();
+
 
                     final F.Promise<CardLoadResponse> cardLoadPromise;
                     if (defaultCard.getType().equals(CardType.VIRTUAL)) {
@@ -216,7 +235,9 @@ public class WorldpayCallbackController extends BaseController {
                         }
                     }
 
-                    return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(defaultCard,
+                    final Card finalDefaultCard = defaultCard;
+
+                    return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(finalDefaultCard,
                             amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
                 }
             });
