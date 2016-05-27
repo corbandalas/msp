@@ -16,6 +16,7 @@ public class CustomerWorldPayCreditCardDeposit implements Serializable{
     private String successURL;
     private String cancelURL;
     private String failURL;
+    private String phone;
 
     public Long getCardTo() {
         return cardTo;
@@ -71,5 +72,13 @@ public class CustomerWorldPayCreditCardDeposit implements Serializable{
 
     public void setFailURL(String failURL) {
         this.failURL = failURL;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

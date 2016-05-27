@@ -69,6 +69,10 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(WRONG_REQUEST_FORMAT_TEXT, "" + WRONG_REQUEST_FORMAT_CODE)));
     }
 
+    protected Result createRedirect(String url) {
+        return redirect(url);
+    }
+
     protected Results.Status createWrongEncKeyResponse() {
         return badRequest(Json.toJson(new BaseAPIResponse(WRONG_REQUEST_ENCKEY_TEXT, "" + WRONG_REQUEST_ENCKEY_CODE)));
     }

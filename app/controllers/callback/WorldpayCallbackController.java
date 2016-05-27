@@ -2,18 +2,19 @@ package controllers.callback;
 
 import com.google.inject.Inject;
 import controllers.BaseController;
-import model.Card;
-import model.Currency;
-import model.Customer;
+import dto.customer.CustomerWorldPayCreditCardDeposit;
+import exception.CustomerNotRegisteredException;
+import exception.WrongCardException;
+import exception.WrongCurrencyException;
+import model.*;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import play.Logger;
+import play.cache.CacheApi;
 import play.libs.F;
-import play.libs.XPath;
-import play.mvc.BodyParser;
 import play.mvc.Result;
 import provider.CardProvider;
 import provider.dto.CardLoadResponse;
@@ -49,6 +50,9 @@ public class WorldpayCallbackController extends BaseController {
     @Inject
     OperationService operationService;
 
+    @Inject
+    CacheApi cache;
+
     /**
      * Deposit callback
      *
@@ -68,6 +72,7 @@ public class WorldpayCallbackController extends BaseController {
                 "</soap:Envelope>";
 
         final Document soapRequest = request().body().asXml();
+
         if (soapRequest == null) {
             Logger.error("Couldn't parse SOAP body");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
@@ -75,37 +80,103 @@ public class WorldpayCallbackController extends BaseController {
 
         final String phone = soapRequest.getElementsByTagName("itemNumber").item(0).getTextContent();
 
-        final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
-
         final String currencyCode = soapRequest.getElementsByTagName("appliedCurrency").item(0).getTextContent();
         if (currencyCode == null) {
             Logger.error("Couldn't find currency code in SOAP request");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(currencyCode));
-
-        final String appliedAmount =  soapRequest.getElementsByTagName("appliedAmount").item(0).getTextContent();
+        final String appliedAmount = soapRequest.getElementsByTagName("appliedAmount").item(0).getTextContent();
         if (appliedAmount == null) {
             Logger.error("Couldn't find amount in SOAP request");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        final Long amount = (long)(Double.parseDouble(appliedAmount)*100);
+        final Long amount = (long) (Double.parseDouble(appliedAmount) * 100);
 
-        final F.Promise<Result> result = customerPromise.zip(currencyPromise).flatMap(data -> {
+
+        final F.Promise<Result> result = makePayment(phone, amount, currencyCode, true).map(res -> ok(String.format(soapResponse, "SUCCESS")));
+
+        return result.recover(throwable -> {
+            Logger.error("Error: ", throwable);
+            return ok(String.format(soapResponse, "ERROR"));
+        });
+    }
+
+    /**
+     * WorldPay Credit Card Deposit callback
+     *
+     * @return
+     */
+    public F.Promise<Result> creditCardDeposit() {
+
+
+        String orderKey = request().getQueryString("orderKey");
+        String paymentStatus = request().getQueryString("paymentStatus");
+        String paymentAmount = request().getQueryString("paymentAmount");
+        String paymentCurrency = request().getQueryString("paymentCurrency");
+        String mac = request().getQueryString("mac");
+
+        if (StringUtils.isBlank(orderKey)
+                || StringUtils.isBlank(paymentStatus)
+                || StringUtils.isBlank(paymentAmount)
+                || StringUtils.isBlank(paymentCurrency)
+                || StringUtils.isBlank(mac)) {
+
+            Logger.error("Missing request parameters");
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = (CustomerWorldPayCreditCardDeposit) cache.get(orderKey);
+
+        if (customerWorldPayCreditCardDeposit == null) {
+            Logger.error("Cache request object is NULL");
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        long amount = Long.parseLong(paymentAmount);
+
+        if (amount != customerWorldPayCreditCardDeposit.getAmount()) {
+            Logger.error("Amounts are different!");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+        if (!paymentCurrency.equalsIgnoreCase(customerWorldPayCreditCardDeposit.getCurrency())) {
+            Logger.error("Currencies are different!");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+
+        final F.Promise<Result> result = makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false).map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
+
+
+        return result.recover(throwable -> {
+            Logger.error("Error: ", throwable);
+            return createRedirect(customerWorldPayCreditCardDeposit.getFailURL());
+        });
+
+    }
+
+
+    private F.Promise<F.Tuple<Operation, Transaction>> makePayment(String phone, long amount, String currencyCode, boolean isBankDeposit) {
+
+        final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
+
+        final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(currencyCode));
+
+        return customerPromise.zip(currencyPromise).flatMap(data -> {
 
             if (!data._1.isPresent()) {
                 Logger.error("Couldn't find customer for specified phone");
                 //TODO: need some action here
-                return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
+                return F.Promise.throwing(new CustomerNotRegisteredException());
             }
 
             final Customer customer = data._1.get();
 
             if (!data._2.isPresent()) {
                 Logger.error("Couldn't find currency for specified code");
-                return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
+                return F.Promise.throwing(new WrongCurrencyException());
             }
 
             final Currency currency = data._2.get();
@@ -118,32 +189,39 @@ public class WorldpayCallbackController extends BaseController {
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
                                     "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
-                            .flatMap(card -> operationService.createDepositOperation(card, amount, currency, "", "Worldpay deposit"))
-                            .map(res -> ok(String.format(soapResponse, "SUCCESS")));
+                            .flatMap(card -> operationService.createDepositOperation(card, amount, currency, "", "Worldpay deposit"));
                 } else {
                     final Optional<Card> defaultCardOpt = StreamSupport.stream(cards.spliterator(), true).filter(Card::getCardDefault).findFirst();
                     if (!defaultCardOpt.isPresent()) {
                         Logger.error("Couldn't find default card for specified phone");
-                        return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
+                        return F.Promise.throwing(new WrongCardException());
                     }
                     final Card defaultCard = defaultCardOpt.get();
 
                     final F.Promise<CardLoadResponse> cardLoadPromise;
                     if (defaultCard.getType().equals(CardType.VIRTUAL)) {
-                        cardLoadPromise = cardProvider.loadVirtualCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
+
+                        if (isBankDeposit) {
+                            cardLoadPromise = cardProvider.loadVirtualCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
+                        } else {
+                            cardLoadPromise = cardProvider.loadVirtualCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
+                        }
+
                     } else {
-                        cardLoadPromise = cardProvider.loadPlasticCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
+
+                        if (isBankDeposit) {
+                            cardLoadPromise = cardProvider.loadPlasticCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
+                        } else {
+                            cardLoadPromise = cardProvider.loadPlasticCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
+                        }
                     }
 
                     return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(defaultCard,
-                            amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit")).map(res -> ok(String.format(soapResponse, "SUCCESS")));
+                            amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
                 }
             });
         });
-
-        return result.recover(throwable -> {
-            Logger.error("Error: ", throwable);
-            return ok(String.format(soapResponse, "ERROR"));
-        });
     }
+
+
 }

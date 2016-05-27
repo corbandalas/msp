@@ -122,6 +122,8 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
             String sessionTimeOut = conf.getString("cache.customer.session.timeout");
 
+            request.setPhone(customer.getId());
+
             if (request.getCardTo() != null) {
 
                 final Optional<Card> cardFrom = data._1.stream().filter(itm -> itm.getId().equals(request.getCardTo())).findFirst();
