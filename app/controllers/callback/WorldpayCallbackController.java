@@ -157,14 +157,7 @@ public class WorldpayCallbackController extends BaseController {
             return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
         }
 
-        if (!StringUtils.equalsIgnoreCase(paymentStatus, "AUTHORISED")) {
-            Logger.error("Payment transaction is not authorised by WorldPay");
-            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
-        }
-
-
         final F.Promise<Result> result = makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false, customerWorldPayCreditCardDeposit.getCardTo()).map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
-
 
         return result.recover(throwable -> {
             Logger.error("Error: ", throwable);
