@@ -22,6 +22,7 @@ import repository.PropertyRepository;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import util.DateUtil;
+import util.SecurityUtil;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -172,6 +173,7 @@ public class WorldPayPaymentService {
         final Promise<F.Tuple<String, String>> promise = Futures.promise();
 
         builder.addHeader("Content-Type", "text/xml");
+        builder.addHeader("Authorization", "Basic " + SecurityUtil.encodeString((settings.headerUsername + ":" + settings.headerPassword)));
         builder.setBody(createXML(settings.merchantCode, settings.installationID, customerWorldPayCreditCardDeposit.getAmount(),
                 customerWorldPayCreditCardDeposit.getCurrency(), customerWorldPayCreditCardDeposit.getOrderId(), "Deposit for " + (double) customerWorldPayCreditCardDeposit.getAmount() / 100 + " " + customerWorldPayCreditCardDeposit.getCurrency()));
 
