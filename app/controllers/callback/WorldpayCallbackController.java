@@ -121,6 +121,10 @@ public class WorldpayCallbackController extends BaseController {
 
         cache.remove(mspOrderKey);
 
+        if (customerWorldPayCreditCardDeposit == null) {
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
         String paymentStatus = request().getQueryString("paymentStatus");
 
         if (StringUtils.isBlank(paymentStatus)) {
