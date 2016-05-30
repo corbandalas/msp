@@ -120,7 +120,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
             Config conf = ConfigFactory.load();
 
-            String sessionTimeOut = conf.getString("cache.customer.session.timeout");
+            String sessionTimeOut = conf.getString("cache.worldpay.session.timeout");
 
             request.setPhone(customer.getId());
 
@@ -135,9 +135,9 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
                 return worldPayPaymentService.initHostedtWorldPayPayment(request).map(res -> {
 
                             //Store orderID to cache with expiration time out
-                            cache.set("Deposit" + res._2, request, Integer.parseInt(sessionTimeOut) * 60);
+                            cache.set(res._2, request, Integer.parseInt(sessionTimeOut) * 60);
 
-                            return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1, request.getAmount())));
+                            return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1, request.getAmount(), res._2)));
 
                         }
 
@@ -158,11 +158,13 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
                     request.setAmount(request.getAmount() + convertedAmount);
 
-                    //Store orderID to cache with expiration time out
-                    cache.set("Deposit" + res._2, request, Integer.parseInt(sessionTimeOut) * 60);
 
-                    return worldPayPaymentService.initHostedtWorldPayPayment(request).map(rez ->
-                            ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, rez._1, request.getAmount())))
+                    return worldPayPaymentService.initHostedtWorldPayPayment(request).map(rez -> {
+                                //Store orderID to cache with expiration time out
+                                cache.set(rez._2, request, Integer.parseInt(sessionTimeOut) * 60);
+
+                                return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, rez._1, request.getAmount(), rez._2)));
+                            }
 
                     );
                 }));

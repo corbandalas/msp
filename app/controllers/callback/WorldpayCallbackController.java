@@ -110,28 +110,39 @@ public class WorldpayCallbackController extends BaseController {
      */
     public F.Promise<Result> creditCardDeposit() {
 
+        String mspOrderKey = request().getQueryString("ordk");
+
+        if (StringUtils.isBlank(mspOrderKey)) {
+            Logger.error("Internal order ID is empty!");
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = cache.get(mspOrderKey);
+
+        cache.remove(mspOrderKey);
+
+        String paymentStatus = request().getQueryString("paymentStatus");
+
+        if (StringUtils.isBlank(paymentStatus)) {
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getCancelURL()));
+        } else if (!StringUtils.equalsIgnoreCase(paymentStatus, "AUTHORISED")) {
+            Logger.error("Payment transaction is not authorised by WorldPay");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
 
         String orderKey = request().getQueryString("orderKey");
-        String paymentStatus = request().getQueryString("paymentStatus");
         String paymentAmount = request().getQueryString("paymentAmount");
         String paymentCurrency = request().getQueryString("paymentCurrency");
         String mac = request().getQueryString("mac");
 
         if (StringUtils.isBlank(orderKey)
-                || StringUtils.isBlank(paymentStatus)
                 || StringUtils.isBlank(paymentAmount)
                 || StringUtils.isBlank(paymentCurrency)
                 || StringUtils.isBlank(mac)) {
 
             Logger.error("Missing request parameters");
-            return F.Promise.pure(createRedirect("https://google.com"));
-        }
-
-        CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = cache.get(orderKey);
-
-        if (customerWorldPayCreditCardDeposit == null) {
-            Logger.error("Cache request object is NULL");
-            return F.Promise.pure(createRedirect("https://google.com"));
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
         }
 
         long amount = Long.parseLong(paymentAmount);
@@ -143,6 +154,11 @@ public class WorldpayCallbackController extends BaseController {
 
         if (!paymentCurrency.equalsIgnoreCase(customerWorldPayCreditCardDeposit.getCurrency())) {
             Logger.error("Currencies are different!");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+        if (!StringUtils.equalsIgnoreCase(paymentStatus, "AUTHORISED")) {
+            Logger.error("Payment transaction is not authorised by WorldPay");
             return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
         }
 
