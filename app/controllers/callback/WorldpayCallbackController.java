@@ -21,7 +21,9 @@ import provider.dto.CardLoadResponse;
 import repository.CardRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
+import repository.PropertyRepository;
 import services.OperationService;
+import util.SecurityUtil;
 
 import java.util.Date;
 import java.util.Optional;
@@ -52,6 +54,9 @@ public class WorldpayCallbackController extends BaseController {
 
     @Inject
     CacheApi cache;
+
+    @Inject
+    private PropertyRepository propertyRepository;
 
     /**
      * Deposit callback
@@ -161,7 +166,21 @@ public class WorldpayCallbackController extends BaseController {
             return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
         }
 
-        final F.Promise<Result> result = makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false, customerWorldPayCreditCardDeposit.getCardTo()).map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
+        F.Promise<Result> result = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.secret")).flatMap(rez -> {
+
+            String secret = rez.get().getValue();
+
+            String generatedMAC = SecurityUtil.generateKeyFromArrayMD5(orderKey, paymentAmount, paymentCurrency, paymentStatus, secret);
+
+            if (!StringUtils.equalsIgnoreCase(generatedMAC, mac)) {
+                Logger.error("MAC is not correct!");
+                return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+            }
+
+            return makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false, customerWorldPayCreditCardDeposit.getCardTo()).map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
+
+        });
+
 
         return result.recover(throwable -> {
             Logger.error("Error: ", throwable);

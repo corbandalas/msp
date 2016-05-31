@@ -181,6 +181,13 @@
       "value": "Safepaytest123321",
       "description": "WORLDPAY_INTEGRATION hosted payment installation id",
       "category": "WORLDPAY_INTEGRATION"
+    },
+
+    {
+      "id": "worldpay.hosted.payment.secret",
+      "value": "Safepaytest123321",
+      "description": "WORLDPAY_INTEGRATION hosted payment secret value",
+      "category": "WORLDPAY_INTEGRATION"
     }
 
   ]
