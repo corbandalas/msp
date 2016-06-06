@@ -70,6 +70,10 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_PHONE_NUMBER_TEXT, "" + INCORRECT_PHONE_NUMBER_CODE)));
     }
 
+    protected Results.Status createPasswordExceededResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(PASSWORD_ATTEMPTS_EXCEEDED_TEXT, "" + PASSWORD_ATTEMPTS_EXCEEDED_CODE)));
+    }
+
     protected Result createRedirect(String url) {
         return redirect(url);
     }

@@ -96,6 +96,59 @@ public class CustomerLoginControllerTest extends BaseControllerTest {
         assertEquals("" + WRONG_CUSTOMER_ACCOUNT_CODE, loginResponse2.get("code").asText());
     }
 
+
+    @Test
+    public void wrongLoginAttempts() throws Exception {
+
+        String password = "101dog101";
+        String password2 = "101dog10";
+
+        final Customer customer = new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2", "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA");
+        final JsonNode createResult = create(customer);
+
+        TestCase.assertEquals("" + SUCCESS_CODE, createResult.get("code").asText());
+
+        final String url = getCustomerApiUrl("/login");
+
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, phone, password2, SECRET);
+
+        CustomerLogin customerLogin = new CustomerLogin();
+
+        customerLogin.setPhone(phone);
+        customerLogin.setHashedPassword(password2);
+
+        JsonNode loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("" + PASSWORD_MISMATCH_CODE, loginResponse.get("code").asText());
+
+
+        loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("" + PASSWORD_MISMATCH_CODE, loginResponse.get("code").asText());
+
+
+        loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("" + PASSWORD_MISMATCH_CODE, loginResponse.get("code").asText());
+
+
+        loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("" + PASSWORD_MISMATCH_CODE, loginResponse.get("code").asText());
+
+
+        loginResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerLogin)).get(TIMEOUT).asJson();
+
+        assertEquals("" + PASSWORD_ATTEMPTS_EXCEEDED_CODE, loginResponse.get("code").asText());
+
+
+    }
+
     private JsonNode create(Customer customer) {
         final String url = getAdminApiUrl("/customer/create");
 

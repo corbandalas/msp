@@ -62,6 +62,7 @@ public class CustomerLoginController extends BaseController {
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
             @ApiResponse(code = PASSWORD_MISMATCH_CODE, message = PASSWORD_MISMATCH_TEXT),
+            @ApiResponse(code = PASSWORD_ATTEMPTS_EXCEEDED_CODE, message = PASSWORD_ATTEMPTS_EXCEEDED_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
 
@@ -109,6 +110,12 @@ public class CustomerLoginController extends BaseController {
 
             Customer customer = customerOptional.orElseThrow(CustomerNotRegisteredException::new);
 
+            if (checkLoginAttempt(customer)) {
+                Logger.error("Customer has exceeded number of wrong login attempts per day");
+
+                return createPasswordExceededResponse();
+            }
+
             if (!customer.getActive()) {
                 Logger.error("Specified customer does not exist or inactive");
 
@@ -117,6 +124,8 @@ public class CustomerLoginController extends BaseController {
 
             if (!customer.getPassword().equals(password)) {
                 Logger.error("Password doesn't match");
+
+                increaseWrongLoginAttempt(customer);
 
                 return createPasswordMismatchResponse();
             }
@@ -130,11 +139,45 @@ public class CustomerLoginController extends BaseController {
             //Store token to cache with expiration time out
             cache.set(token, customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
 
+            putLoginAttempt(customer, 0);
+
             return ok(Json.toJson(new CustomerLoginResponse("" + SUCCESS_CODE, SUCCESS_TEXT, token, customer.getTemppassword())));
         });
 
 
         return returnRecover(result);
+    }
+
+    private void increaseWrongLoginAttempt(Customer customer) {
+
+        int count = getWrongLoginAttempt(customer);
+
+        putLoginAttempt(customer, ++count);
+    }
+
+    private void putLoginAttempt(Customer customer, Integer count) {
+        //Store login attepmpts to cache with expiration time out
+        cache.set("login#attempt#" + customer.getId(), count, 60 * 24 * 60);
+    }
+
+    private boolean checkLoginAttempt(Customer customer) {
+
+        int count = getWrongLoginAttempt(customer);
+
+        return (++count >= 5);
+    }
+
+    private Integer getWrongLoginAttempt(Customer customer) {
+        Object objeAttempt = cache.get("login#attempt#" + customer.getId());
+
+        int count = 0;
+
+        if (objeAttempt != null) {
+            count = (Integer) objeAttempt;
+        }
+
+        return count;
+
     }
 
 

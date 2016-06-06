@@ -63,6 +63,9 @@ public class ReturnCodes {
     public static final byte INCORRECT_PHONE_NUMBER_CODE = 17;
     public static final String INCORRECT_PHONE_NUMBER_TEXT = "Phone number is not valid";
 
+    public static final byte PASSWORD_ATTEMPTS_EXCEEDED_CODE = 18;
+    public static final String PASSWORD_ATTEMPTS_EXCEEDED_TEXT = "Password attempts number exceeded";
+
 
     public static final byte GENERAL_ERROR_CODE = 100;
     public static final String GENERAL_ERROR_TEXT = "General error";
