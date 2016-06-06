@@ -38,7 +38,7 @@ import static configs.ReturnCodes.*;
  * API customer WorldPay Credit card deposit controller
  *
  * @author corbandalas created 24.05.2016.
- * @since 0.2.0
+ * @since 0.3.0
  */
 @Api(value = Constants.CUSTOMER_API_PATH + "/worldpay", description = "WorldPay deposit payment methods")
 public class CustomerWorldPayCreditDepositController extends BaseController {

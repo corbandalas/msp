@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * Operation serviice
  * @author ra created 24.05.2016.
- * @since 0.2.0
+ * @since 0.3.0
  */
 public class OperationService {
 

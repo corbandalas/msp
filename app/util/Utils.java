@@ -1,11 +1,15 @@
 package util;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import exception.MspException;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
+import play.Logger;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -223,6 +227,31 @@ public final class Utils {
         Reflections reflections = new Reflections(builder);
 
         return reflections.getMethodsAnnotatedWith(annotation);
+    }
+
+    /**
+     * Allows to validate mobile phone number
+     *
+     * @param phone
+     * @param countryCode
+     * @return
+     * @since 0.3.0
+     */
+    public static Boolean isValidPhoneNumber(String phone, String countryCode) {
+        boolean validNumber = false;
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        try {
+            Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(phone, countryCode);
+            validNumber = phoneUtil.isValidNumber(phoneNumber);
+        } catch (NumberParseException e) {
+            Logger.error("Phone number validation error", e);
+        }
+
+        if (!phone.matches("^\\d+$")) {
+            validNumber = false;
+        }
+
+        return validNumber;
     }
 
 

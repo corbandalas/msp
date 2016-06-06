@@ -12,6 +12,7 @@ import dto.customer.CustomerRegister;
 import dto.customer.CustomerRegisterResponse;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
+import exception.WrongPhoneNumberException;
 import model.Customer;
 import model.enums.KYC;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,6 +27,7 @@ import repository.CountryRepository;
 import repository.CustomerRepository;
 import sms.SmsGateway;
 import util.SecurityUtil;
+import util.Utils;
 
 import java.util.Date;
 
@@ -68,6 +70,7 @@ public class CustomerRegisterController extends BaseController {
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
             @ApiResponse(code = PASSWORD_MISMATCH_CODE, message = PASSWORD_MISMATCH_TEXT),
             @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT),
+            @ApiResponse(code = INCORRECT_PHONE_NUMBER_CODE, message = INCORRECT_PHONE_NUMBER_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Registration request", required = true, dataType = "dto.customer.CustomerRegister", paramType = "body"),
@@ -126,6 +129,11 @@ public class CustomerRegisterController extends BaseController {
 
             final String password = RandomStringUtils.randomNumeric(4);
             final Customer customer = new Customer();
+
+            if (!Utils.isValidPhoneNumber(phone, country)) {
+               throw new WrongPhoneNumberException();
+            }
+
 
             customer.setActive(true);
             customer.setCountry_id(country);

@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
  * Controller holds  Worldpay callback SOAP methods.
  *
  * @author ra created 23.05.2016.
- * @since 0.2.0
+ * @since 0.3.0
  */
 public class WorldpayCallbackController extends BaseController {
 

@@ -33,7 +33,7 @@ import java.util.Optional;
  * WorldPay gateway client service
  *
  * @author corbandalas - created 16.05.2016
- * @since 0.2.0
+ * @since 0.3.0
  */
 
 @Singleton

@@ -3,10 +3,7 @@ package controllers;
 import dto.BaseAPIResponse;
 import dto.PropertyListResponse;
 import dto.PropertyResponse;
-import exception.CustomerAlreadyRegisteredException;
-import exception.CustomerNotRegisteredException;
-import exception.WrongCardException;
-import exception.WrongCountryException;
+import exception.*;
 import model.Property;
 import play.Logger;
 import play.libs.F;
@@ -69,6 +66,10 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(WRONG_REQUEST_FORMAT_TEXT, "" + WRONG_REQUEST_FORMAT_CODE)));
     }
 
+    protected Results.Status createWrongPhoneNumberResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_PHONE_NUMBER_TEXT, "" + INCORRECT_PHONE_NUMBER_CODE)));
+    }
+
     protected Result createRedirect(String url) {
         return redirect(url);
     }
@@ -112,6 +113,10 @@ public class BaseController extends play.mvc.Controller {
 
                     if (throwable instanceof CustomerNotRegisteredException) {
                         return createWrongCustomerAccountResponse();
+                    }
+
+                    if (throwable instanceof WrongPhoneNumberException) {
+                        return createWrongPhoneNumberResponse();
                     }
 
                     return createGeneralErrorResponse();

@@ -135,6 +135,28 @@ public class CustomerRegisterControllerTest extends BaseControllerTest {
     }
 
 
+    @Test
+    public void wrongPhone() throws Exception {
+
+
+        final String url = getCustomerApiUrl("/register");
+
+        final String mobile = "4524607605";
+
+        final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, ORDER_ID, mobile, "UA", SECRET);
+
+        CustomerRegister customerRegister = new CustomerRegister();
+
+        customerRegister.setPhone(mobile);
+        customerRegister.setCountry("UA");
+
+        final JsonNode registerResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
+                .setHeader("orderId", ORDER_ID).post(Json.toJson(customerRegister)).get(TIMEOUT).asJson();
+
+        assertEquals("" + INCORRECT_PHONE_NUMBER_CODE, registerResponse.get("code").asText());
+    }
+
+
     @After
     public void clean() {
         final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);
