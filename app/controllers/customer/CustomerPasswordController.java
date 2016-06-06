@@ -11,6 +11,7 @@ import dto.customer.CustomerLoginResponse;
 import model.Customer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.cache.CacheApi;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
@@ -27,6 +28,9 @@ import static configs.ReturnCodes.*;
  */
 @Api(value = Constants.CUSTOMER_API_PATH + "/password", description = "Password Management")
 public class CustomerPasswordController extends BaseController {
+
+    @Inject
+    CacheApi cache;
 
     @Inject
     CustomerRepository customerRepository;
@@ -47,6 +51,7 @@ public class CustomerPasswordController extends BaseController {
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
             @ApiResponse(code = PASSWORD_MISMATCH_CODE, message = PASSWORD_MISMATCH_TEXT),
             @ApiResponse(code = PASSWORD_EQUALS_TO_EXISTED_CODE, message = PASSWORD_EQUALS_TO_EXISTED_TEXT),
+            @ApiResponse(code = PASSWORD_ATTEMPTS_EXCEEDED_CODE, message = PASSWORD_ATTEMPTS_EXCEEDED_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Change pin request", required = true, dataType = "dto.customer.CustomerChangePassword", paramType = "body"),
@@ -66,6 +71,12 @@ public class CustomerPasswordController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
+        if (checkLoginAttempt(customer)) {
+            Logger.error("Customer has exceeded number of wrong change pin attempts per day");
+
+            return F.Promise.pure(createPasswordExceededResponse());
+        }
+
         if (StringUtils.isBlank(request.getHashedPassword()) || StringUtils.isBlank(request.getOldHashedPassword())) {
             Logger.error("Missing parameters");
 
@@ -73,6 +84,9 @@ public class CustomerPasswordController extends BaseController {
         }
 
         if (!customer.getPassword().equals(request.getOldHashedPassword())) {
+
+            increaseWrongLoginAttempt(customer);
+
             Logger.error("Specified old password does not match with existing");
 
             return F.Promise.pure(createPasswordMismatchResponse());
@@ -86,10 +100,43 @@ public class CustomerPasswordController extends BaseController {
 
         customer.setPassword(request.getHashedPassword());
         customer.setTemppassword(false);
+        putLoginAttempt(customer, 0);
 
         final F.Promise<Result> result = F.Promise.wrap(customerRepository.update(customer)).map(updCustomer ->
                 ok(Json.toJson(new BaseAPIResponse(SUCCESS_TEXT, "" + SUCCESS_CODE))));
 
         return returnRecover(result);
+    }
+
+    private void increaseWrongLoginAttempt(Customer customer) {
+
+        int count = getWrongLoginAttempt(customer);
+
+        putLoginAttempt(customer, ++count);
+    }
+
+    private void putLoginAttempt(Customer customer, Integer count) {
+        //Store login attepmpts to cache with expiration time out
+        cache.set("setpin#attempt#" + customer.getId(), count, 60 * 24 * 60);
+    }
+
+    private boolean checkLoginAttempt(Customer customer) {
+
+        int count = getWrongLoginAttempt(customer);
+
+        return (++count >= 5);
+    }
+
+    private Integer getWrongLoginAttempt(Customer customer) {
+        Object objeAttempt = cache.get("setpin#attempt#" + customer.getId());
+
+        int count = 0;
+
+        if (objeAttempt != null) {
+            count = (Integer) objeAttempt;
+        }
+
+        return count;
+
     }
 }

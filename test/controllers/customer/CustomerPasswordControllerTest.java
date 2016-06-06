@@ -4,6 +4,7 @@ import akka.dispatch.Futures;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import dto.customer.CustomerChangePassword;
+import junit.framework.TestCase;
 import model.Customer;
 import model.enums.KYC;
 import org.junit.After;
@@ -14,6 +15,7 @@ import repository.ConnectionPool;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
+import util.SecurityUtil;
 
 import java.util.Date;
 
@@ -96,6 +98,45 @@ public class CustomerPasswordControllerTest extends BaseControllerTest {
 
         assertEquals("" + PASSWORD_EQUALS_TO_EXISTED_CODE,changeResponse.get("code").asText());
     }
+
+
+    @Test
+    public void wrongAttempts() throws Exception {
+
+        final String password = "hashedpass";
+        final String password2 = "hashedpass_wrong";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
+        assertEquals("" + SUCCESS_CODE, createResponse.get("code").asText());
+
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        final CustomerChangePassword request = new CustomerChangePassword();
+        request.setOldHashedPassword(password2);
+        request.setHashedPassword("setpassword");
+
+        JsonNode changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        changeResponse = WS.url(getCustomerApiUrl("/password/change")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals("" + PASSWORD_ATTEMPTS_EXCEEDED_CODE, changeResponse.get("code").asText());
+
+    }
+
 
     @After
     public void clean() throws Exception {
