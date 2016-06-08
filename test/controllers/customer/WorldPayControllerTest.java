@@ -52,7 +52,7 @@ public class WorldPayControllerTest extends BaseCustomerControllerTest  {
 
         final String url = getCustomerApiUrl("/worldpay/getbanks/" + country);
 
-        WSResponse wsResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("token", token).get().get(TIMEOUT);
+        WSResponse wsResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("token", token).get().get(TIMEOUT * 3);
 
         String body = wsResponse.getBody();
 

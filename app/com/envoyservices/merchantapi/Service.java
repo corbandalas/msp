@@ -3,6 +3,10 @@ package com.envoyservices.merchantapi;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.*;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
@@ -26,6 +30,7 @@ public class Service
     private final static QName SERVICE_QNAME = new QName("http://merchantapi.envoyservices.com", "Service");
 
     static {
+        disableSslVerification();
         URL url = null;
         WebServiceException e = null;
         try {
@@ -88,6 +93,42 @@ public class Service
             throw SERVICE_EXCEPTION;
         }
         return SERVICE_WSDL_LOCATION;
+    }
+
+    private static void disableSslVerification() {
+        try
+        {
+            // Create a trust manager that does not validate certificate chains
+            TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
+            }
+            };
+
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+            // Create all-trusting host name verifier
+            HostnameVerifier allHostsValid = new HostnameVerifier() {
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            };
+
+            // Install the all-trusting host verifier
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
     }
 
 }

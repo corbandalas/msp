@@ -129,21 +129,21 @@
 
     {
       "id": "worldpay.wsdl.url",
-      "value": "http://testapi.envoyservices.com/?wsdl",
+      "value": "https://testapi.envoyservices.com/?wsdl",
       "description": "WorldPay SOAP WSDL URL",
       "category": "WORLDPAY_INTEGRATION"
     },
 
     {
       "id": "worldpay.wsdl.soap.header.username",
-      "value": "Safepaytest",
+      "value": "os@mysafepay.com",
       "description": "WORLDPAY_INTEGRATION header username",
       "category": "WORLDPAY_INTEGRATION"
     },
 
     {
       "id": "worldpay.wsdl.soap.header.password",
-      "value": "Safepaytest123321",
+      "value": "xr9Sq8Cf_",
       "description": "WORLDPAY_INTEGRATION SOAP header password",
       "category": "WORLDPAY_INTEGRATION"
     },
@@ -157,21 +157,21 @@
 
     {
       "id": "worldpay.hosted.payment.username",
-      "value": "Safepaytest",
+      "value": "os@mysafepay.com",
       "description": "WORLDPAY_INTEGRATION hosted payment username",
       "category": "WORLDPAY_INTEGRATION"
     },
 
     {
       "id": "worldpay.hosted.payment.password",
-      "value": "Safepaytest123321",
+      "value": "xr9Sq8Cf_",
       "description": "WORLDPAY_INTEGRATION hosted payment URL password",
       "category": "WORLDPAY_INTEGRATION"
     },
 
     {
       "id": "worldpay.hosted.payment.merchantcode",
-      "value": "Safepaytest123321",
+      "value": "MSP",
       "description": "WORLDPAY_INTEGRATION hosted payment merchant code",
       "category": "WORLDPAY_INTEGRATION"
     },

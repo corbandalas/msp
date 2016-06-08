@@ -194,10 +194,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             VirtualCards virtualCards = null;
 
-            System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
-            System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
-            System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
-            System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
+//            System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
+//            System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
+//            System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
+//            System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
 
             long wsid = System.currentTimeMillis();
             Logger.info("/////// WsCreateCard service invocation. WSID #" + wsid);
