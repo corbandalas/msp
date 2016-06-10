@@ -1,19 +1,20 @@
 package services;
 
 import com.google.inject.Inject;
-import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfKeyValueOfstringstring;
+import com.microsoft.schemas._2003._10.Serialization.Arrays.ArrayOfKeyValueOfstringstringKeyValueOfstringstring;
 import exception.W2GlobaldataException;
 import exception.W2GlobaldataValidationException;
 import exception.WrongPropertyException;
+import model.Country;
 import model.Property;
 import org.apache.commons.lang3.StringUtils;
-import org.datacontract.schemas._2004._07.databaselibrary.DocumentTypeEnum;
-import org.datacontract.schemas._2004._07.databaselibrary.IsoCountriesEnum;
-import org.datacontract.schemas._2004._07.neuromancerlibrary.*;
-import org.datacontract.schemas._2004._07.neuromancerlibrary_datacontracts.DocumentUploadRequest;
-import org.datacontract.schemas._2004._07.neuromancerlibrary_datacontracts.DocumentUploadResponse;
+import org.datacontract.schemas._2004._07.DatabaseLibrary_Enums.DocumentTypeEnum;
+import org.datacontract.schemas._2004._07.DatabaseLibrary_Enums.IsoCountriesEnum;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts.*;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts_DocumentUpload.DocumentUploadRequest;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts_DocumentUpload.DocumentUploadResponse;
 import org.tempuri.IService;
-import org.tempuri.Service;
+import org.tempuri.ServiceLocator;
 import play.Logger;
 import play.libs.F;
 import repository.PropertyRepository;
@@ -48,34 +49,41 @@ public class W2GlobaldataService {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateOfBirth);
-        calendar.get(Calendar.YEAR);
-        calendar.get(Calendar.MONTH);
-        calendar.get(Calendar.DAY_OF_MONTH);
 
-        queryData.setDayOfBirth(new JAXBElement<>(new QName("d4p1"), Integer.class, calendar.get(Calendar.DAY_OF_MONTH)));
-        queryData.setMonthOfBirth(new JAXBElement<>(new QName("d4p1"), Integer.class, calendar.get(Calendar.MONTH)));
-        queryData.setYearOfBirth(new JAXBElement<>(new QName("d4p1"), Integer.class, calendar.get(Calendar.YEAR)));
+        queryData.setDayOfBirth(calendar.get(Calendar.DAY_OF_MONTH));
+        queryData.setMonthOfBirth(calendar.get(Calendar.MONTH) + 1);
+        queryData.setYearOfBirth(calendar.get(Calendar.YEAR));
         return queryData;
     }
 
 
-    private QueryData createQueryData(W2GlobaldataSettings w2GlobaldataSettings, String nameQuery, Date dateOfBirth) throws W2GlobaldataValidationException {
-
-        if (nameQuery == null || StringUtils.isBlank(nameQuery))
-            throw new W2GlobaldataValidationException("SIS/SPF Validation exception");
+    private QueryData createQueryData(W2GlobaldataSettings w2GlobaldataSettings, String city, String country, Date dateOfBirth, String forename, String nationalId, String postcode, String region, String street, String surename, String houseNameNumber) throws W2GlobaldataValidationException {
 
         QueryData queryData = new QueryData();
-        queryData.setNameQuery(new JAXBElement<>(new QName("d4p1"), String.class, nameQuery));
-        queryData.setNameQueryMatchThreshold(new JAXBElement<>(new QName("d4p1"), Integer.class, w2GlobaldataSettings.nameQueryMatchThreshold));
-        queryData.setDateOfBirthMatchThreshold(new JAXBElement<>(new QName("d4p1"), Integer.class, w2GlobaldataSettings.dateOfBirthMatchThreshold));
+        queryData.setCity(city);
+        queryData.setCountry(IsoCountriesEnum.fromString(country));
+        queryData.setForename(forename);
+        queryData.setNationalId(nationalId);
+        queryData.setPostcode(postcode);
+        queryData.setRegion(region);
+        queryData.setStreet(street);
+        queryData.setSurname(surename);
+        queryData.setHouseNameNumber(houseNameNumber);
 
-        fillDateOfBirth(queryData, dateOfBirth);
+       /* queryData.setNameQueryMatchThreshold(w2GlobaldataSettings.nameQueryMatchThreshold);
+        queryData.setDateOfBirthMatchThreshold(w2GlobaldataSettings.dateOfBirthMatchThreshold);*/
+
+        queryData = fillDateOfBirth(queryData, dateOfBirth);
 
         return queryData;
     }
 
+    public F.Promise<ServiceResponse> scandyService(String city, String country, Date dateOfBirth, String forename, String nationalId, String postcode, String street, String surename, String houseNameNumber, String testdatanumber) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, city, country, dateOfBirth, forename, nationalId, postcode, null, street, surename, houseNameNumber), "TEST_SCANDI", testdatanumber));
+    }
 
-    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Date dateOfBirth) {
+
+/*    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Date dateOfBirth) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, dateOfBirth)));
     }
 
@@ -90,18 +98,18 @@ public class W2GlobaldataService {
 
 
         QueryData queryData = new QueryData();
-        queryData.setForename(new JAXBElement<>(new QName("d4p1"), String.class, forename));
+        queryData.setForename(forename);
         //queryData.setMiddleNames(new JAXBElement<>(new QName("d4p1"), String.class, middleNames));
-        queryData.setSurname(new JAXBElement<>(new QName("d4p1"), String.class, surname));
+        queryData.setSurname(surname);
         fillDateOfBirth(queryData, dateOfBirth);
-        queryData.setHouseNameNumber(new JAXBElement<>(new QName("d4p1"), String.class, houseNameNumber));
-        queryData.setStreet(new JAXBElement<>(new QName("d4p1"), String.class, street));
+        queryData.setHouseNameNumber(houseNameNumber);
+        queryData.setStreet(street);
         // queryData.setRegion(new JAXBElement<>(new QName("d4p1"), String.class, region));
         //queryData.setCounty(new JAXBElement<>(new QName("d4p1"), String.class, county));
         if (country != null)
-            queryData.setCountry(IsoCountriesEnum.valueOf(country));
-        queryData.setCity(new JAXBElement<>(new QName("d4p1"), String.class, city));
-        queryData.setPostcode(new JAXBElement<>(new QName("d4p1"), String.class, postcode));
+            queryData.setCountry(IsoCountriesEnum.fromValue(country));
+        queryData.setCity(city);
+        queryData.setPostcode(postcode);
 
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData));
     }
@@ -113,12 +121,12 @@ public class W2GlobaldataService {
 
 
         QueryData queryData = new QueryData();
-        queryData.setHouseNameNumber(new JAXBElement<>(new QName("d4p1"), String.class, houseNameNumber));
-        queryData.setPostcode(new JAXBElement<>(new QName("d4p1"), String.class, postcode));
-        queryData.setStreet(new JAXBElement<>(new QName("d4p1"), String.class, street));
+        queryData.setHouseNameNumber(houseNameNumber);
+        queryData.setPostcode(postcode);
+        queryData.setStreet(street);
         //queryData.setCounty(new JAXBElement<>(new QName("d4p1"), String.class, county));
-        queryData.setCity(new JAXBElement<>(new QName("d4p1"), String.class, city));
-        queryData.setCountry(IsoCountriesEnum.valueOf(country));
+        queryData.setCity(city);
+        queryData.setCountry(IsoCountriesEnum.fromString(country));
 
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData));
     }
@@ -130,21 +138,21 @@ public class W2GlobaldataService {
 
 
         QueryData queryData = new QueryData();
-        queryData.setForename(new JAXBElement<>(new QName("d4p1"), String.class, forename));
-        queryData.setSurname(new JAXBElement<>(new QName("d4p1"), String.class, surname));
-        queryData.setHouseNameNumber(new JAXBElement<>(new QName("d4p1"), String.class, houseNameNumber));
-        queryData.setPostcode(new JAXBElement<>(new QName("d4p1"), String.class, postcode));
+        queryData.setForename(forename);
+        queryData.setSurname(surname);
+        queryData.setHouseNameNumber(houseNameNumber);
+        queryData.setPostcode(postcode);
         fillDateOfBirth(queryData, dateOfBirth);
-        queryData.setCountry(IsoCountriesEnum.valueOf(country));
+        queryData.setCountry(IsoCountriesEnum.fromString(country));
         // queryData.setGender(new JAXBElement<>(new QName("d4p1"), String.class, gender));
         //queryData.setPhoneNumber(new JAXBElement<>(new QName("d4p1"), String.class, phoneNumber));
-        queryData.setMobileNumber(new JAXBElement<>(new QName("d4p1"), String.class, mobileNumber));
+        queryData.setMobileNumber(mobileNumber);
         //queryData.setFlat(new JAXBElement<>(new QName("d4p1"), String.class, flat));
-        queryData.setCity(new JAXBElement<>(new QName("d4p1"), String.class, city));
+        queryData.setCity(city);
         // queryData.setCounty(new JAXBElement<>(new QName("d4p1"), String.class, county));
 
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, queryData));
-    }
+    }*/
 
     public F.Promise<DocumentUploadResponse> uploadDocument(String documentData, String documentReference, String documentType, Date documentExpiry) throws W2GlobaldataValidationException {
 
@@ -154,37 +162,51 @@ public class W2GlobaldataService {
         return getW2GlobaldataSettings().flatMap(res -> invokeUploadDocument(res, documentData, documentReference, documentType, documentExpiry));
     }
 
-    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData) {
+    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName, String testdatanumber) {
         return F.Promise.promise(() -> {
             try {
 
-                final Service service = new Service(new URL(w2GlobaldataSettings.wsdlURL));
-                final IService servicePort = service.getPort(IService.class);
+                ServiceLocator serviceLocator = new ServiceLocator();
+
+                IService basicHttpsBinding_iService = serviceLocator.getBasicHttpsBinding_IService(new URL(w2GlobaldataSettings.wsdlURL));
 
                 ServiceRequest serviceRequest = new ServiceRequest();
 
-                final BundleData bundleData = new BundleData();
-                serviceRequest.setBundleData(new JAXBElement<>(new QName("d4p1"), BundleData.class, bundleData));
+                final BundleData bundleData = new BundleData(bundleName);
+                serviceRequest.setBundleData(bundleData);
 
-                final ArrayOfKeyValueOfstringstring queryOptions = new ArrayOfKeyValueOfstringstring();
-                final ArrayOfKeyValueOfstringstring.KeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstring.KeyValueOfstringstring();
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] queryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[2];
 
-                if (w2GlobaldataSettings.sandbox) {
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption2 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+
+                queryOption.setKey("RedirectUrl");
+                queryOption.setValue("http://google.com");
+
+         /*       if (w2GlobaldataSettings.sandbox) {
                     queryOption.setKey("Sandbox");
                     queryOption.setValue("true");
-                }
+                }*/
 
-                queryOptions.getKeyValueOfstringstring().add(queryOption);
-                serviceRequest.setQueryOptions(new JAXBElement<>(new QName("d4p1"), ArrayOfKeyValueOfstringstring.class, queryOptions));
+                queryOption2.setKey("testdatanumber");
+                queryOption2.setValue(testdatanumber);
 
-                serviceRequest.setQueryData(new JAXBElement<>(new QName("d4p1"), QueryData.class, queryData));
+
+                queryOptions[0] = queryOption;
+                queryOptions[1] = queryOption2;
+
+                serviceRequest.setQueryOptions(queryOptions);
+
+                serviceRequest.setQueryData(queryData);
 
                 ServiceAuthorisation serviceAuthorisation = new ServiceAuthorisation();
-                serviceAuthorisation.setAPIKey(new JAXBElement<>(new QName("d4p1"), String.class, "123456"));
+                serviceAuthorisation.setAPIKey(w2GlobaldataSettings.apiKey);
 
-                serviceRequest.setServiceAuthorisation(new JAXBElement<>(new QName("d4p1"), ServiceAuthorisation.class, serviceAuthorisation));
+                serviceRequest.setServiceAuthorisation(serviceAuthorisation);
 
-                final ServiceResponse serviceResponse = servicePort.kycCheck(serviceRequest);
+                final ServiceResponse serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
 
                 return serviceResponse;
 
@@ -199,43 +221,47 @@ public class W2GlobaldataService {
         return F.Promise.promise(() -> {
             try {
 
-                final Service service = new Service(new URL(w2GlobaldataSettings.wsdlURL));
-                final IService servicePort = service.getPort(IService.class);
+
+                ServiceLocator serviceLocator = new ServiceLocator();
+
+                IService basicHttpsBinding_iService = serviceLocator.getBasicHttpsBinding_IService(new URL(w2GlobaldataSettings.wsdlURL));
 
                 DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest();
 
-                documentUploadRequest.setDocumentData(new JAXBElement<>(new QName("d4p1"), String.class, SecurityUtil.encodeString(documentData)));
+                documentUploadRequest.setDocumentData(documentData);
 
                 if (documentExpiry != null) {
-                    GregorianCalendar c = new GregorianCalendar();
-                    c.setTime(documentExpiry);
-                    XMLGregorianCalendar date2 = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
-                    documentUploadRequest.setDocumentExpiry(new JAXBElement<>(new QName("d4p1"), XMLGregorianCalendar.class, date2));
+                    GregorianCalendar calendar = new GregorianCalendar();
+                    calendar.setTime(documentExpiry);
+                    documentUploadRequest.setDocumentExpiry(calendar);
                 }
 
                 if (StringUtils.isNoneBlank(documentReference)) {
-                    documentUploadRequest.setDocumentReference(new JAXBElement<>(new QName("d4p1"), String.class, documentReference));
+                    documentUploadRequest.setDocumentReference(documentReference);
                 }
 
-                documentUploadRequest.setDocumentType(DocumentTypeEnum.valueOf(documentType));
+                documentUploadRequest.setDocumentType(DocumentTypeEnum.fromString(documentType));
 
-                final ArrayOfKeyValueOfstringstring queryOptions = new ArrayOfKeyValueOfstringstring();
-                final ArrayOfKeyValueOfstringstring.KeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstring.KeyValueOfstringstring();
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] queryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[1];
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
 
                 if (w2GlobaldataSettings.sandbox) {
                     queryOption.setKey("Sandbox");
                     queryOption.setValue("true");
                 }
 
-                queryOptions.getKeyValueOfstringstring().add(queryOption);
-                documentUploadRequest.setQueryOptions(new JAXBElement<>(new QName("d4p1"), ArrayOfKeyValueOfstringstring.class, queryOptions));
+                queryOptions[0] = queryOption;
+
+                documentUploadRequest.setQueryOptions(queryOptions);
 
                 ServiceAuthorisation serviceAuthorisation = new ServiceAuthorisation();
-                serviceAuthorisation.setAPIKey(new JAXBElement<>(new QName("d5p1"), String.class, "123456"));
+                serviceAuthorisation.setAPIKey("123456");
 
-                documentUploadRequest.setServiceAuthorisation(new JAXBElement<>(new QName("d4p1"), ServiceAuthorisation.class, serviceAuthorisation));
+                documentUploadRequest.setServiceAuthorisation(serviceAuthorisation);
 
-                final DocumentUploadResponse documentUploadResponse = servicePort.uploadDocument(documentUploadRequest);
+                final DocumentUploadResponse documentUploadResponse = basicHttpsBinding_iService.uploadDocument(documentUploadRequest);
 
                 return documentUploadResponse;
 
@@ -252,19 +278,21 @@ public class W2GlobaldataService {
         final F.Promise<Optional<Property>> sandboxPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.sandbox.mode"));
         final F.Promise<Optional<Property>> nameQueryMatchThresholdPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.nameQueryMatchThreshold"));
         final F.Promise<Optional<Property>> dateOfBirthMatchThresholdPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.dateOfBirthMatchThreshold"));
+        final F.Promise<Optional<Property>> apiKeyPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.api.key"));
 
-        return wsdlPromise.zip(sandboxPromise).zip(nameQueryMatchThresholdPromise).zip(dateOfBirthMatchThresholdPromise).map(res -> {
+        return wsdlPromise.zip(sandboxPromise).zip(nameQueryMatchThresholdPromise).zip(dateOfBirthMatchThresholdPromise).zip(apiKeyPromise).map(res -> {
 
-            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
-            Boolean sandbox = Boolean.parseBoolean(res._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
-            Integer nameQueryMatchThreshold = Integer.parseInt(res._1._2.orElseThrow(WrongPropertyException::new).getValue());
-            String dateOfBirthMatchThresholdString = res._2.orElseThrow(WrongPropertyException::new).getValue();
+            String url = res._1._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+            Boolean sandbox = Boolean.parseBoolean(res._1._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
+            Integer nameQueryMatchThreshold = Integer.parseInt(res._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
+            String dateOfBirthMatchThresholdString = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
             Integer dateOfBirthMatchThreshold = null;
             if (!StringUtils.isBlank(dateOfBirthMatchThresholdString)) {
                 dateOfBirthMatchThreshold = Integer.parseInt(dateOfBirthMatchThresholdString);
             }
+            String apiKeyString = res._2.orElseThrow(WrongPropertyException::new).getValue();
 
-            return new W2GlobaldataSettings(url, sandbox, nameQueryMatchThreshold, dateOfBirthMatchThreshold);
+            return new W2GlobaldataSettings(url, sandbox, nameQueryMatchThreshold, dateOfBirthMatchThreshold, apiKeyString);
 
         });
     }
@@ -274,12 +302,14 @@ public class W2GlobaldataService {
         private Boolean sandbox;
         private Integer nameQueryMatchThreshold;
         private Integer dateOfBirthMatchThreshold;
+        private String apiKey;
 
-        public W2GlobaldataSettings(String wsdlURL, Boolean sandbox, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold) {
+        public W2GlobaldataSettings(String wsdlURL, Boolean sandbox, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, String apiKey) {
             this.wsdlURL = wsdlURL;
             this.sandbox = sandbox;
             this.nameQueryMatchThreshold = nameQueryMatchThreshold;
             this.dateOfBirthMatchThreshold = dateOfBirthMatchThreshold;
+            this.apiKey = apiKey;
         }
     }
 

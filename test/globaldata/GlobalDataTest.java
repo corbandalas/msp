@@ -1,18 +1,17 @@
 package globaldata;
 
-import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfKeyValueOfstringstring;
 import module.PropertyLoader;
-import org.datacontract.schemas._2004._07.neuromancerlibrary.*;
-import org.tempuri.IService;
-import org.tempuri.Service;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts.ServiceResponse;
+import org.junit.Before;
+import org.junit.Test;
 import play.Logger;
 import repository.BaseRepositoryTest;
 import services.W2GlobaldataService;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -23,7 +22,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
     private W2GlobaldataService w2GlobaldataService;
 
-    //@Before
+    @Before
     public void setup() {
         w2GlobaldataService = application.injector().instanceOf(W2GlobaldataService.class);
         PropertyLoader propertyLoader = application.injector().instanceOf(PropertyLoader.class);
@@ -31,7 +30,44 @@ public class GlobalDataTest extends BaseRepositoryTest {
     }
 
 
-    //    @Test
+    @Test
+    public void scandiSuccess() throws Exception {
+        try {
+            Thread.currentThread().sleep(1000);
+
+            String dt = "1952-06-04";  // Start date
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar c = Calendar.getInstance();
+            c.setTime(sdf.parse(dt));
+
+            ServiceResponse serviceResponse = w2GlobaldataService.scandyService("BILLDAL", "SWE", c.getTime(), "SIRI", "23434645634", "42715", "Eriksbo Västergärde 47", "PETERSSON", "23", "1").get(10000000L);
+
+        } catch (Exception e) {
+            Logger.error("Error eKYC_UKService", e);
+            fail();
+        }
+    }
+
+    @Test
+    public void scandiFail() throws Exception {
+        try {
+            Thread.currentThread().sleep(1000);
+
+            String dt = "1980-12-07";  // Start date
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar c = Calendar.getInstance();
+            c.setTime(sdf.parse(dt));
+
+            ServiceResponse serviceResponse = w2GlobaldataService.scandyService("FAGERSTA", "SWE", c.getTime(), "ERIK ANDERS", "198012072388", "73791", "LINGONSTIGEN 4", "ARVIDSSON", "23", "2").get(10000000L);
+
+        } catch (Exception e) {
+            Logger.error("Error eKYC_UKService", e);
+            fail();
+        }
+    }
+
+
+/*    //    @Test
     public void kycCheck() throws Exception {
         final Service service = new Service();
         final IService servicePort = service.getPort(IService.class);
@@ -127,6 +163,6 @@ public class GlobalDataTest extends BaseRepositoryTest {
             Logger.error("Error uploadDocument", e);
             fail();
         }
-    }
+    }*/
 
 }
