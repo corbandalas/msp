@@ -178,12 +178,15 @@ public class OperationServiceTest extends BaseRepositoryTest {
     @Test
     public void getDepositSumByCard() throws Exception {
 
+        final Double result1 = operationService.getDepositSumByCard(card1).get(TIMEOUT);
+        assertEquals(Double.valueOf(0),result1);
+
         assertNotNull(operationService.createDepositOperation(card1, 100L, usd, "1111", "deposit1").get(TIMEOUT));
         assertNotNull(operationService.createDepositOperation(card1, 200L, usd, "2222", "deposit2").get(TIMEOUT));
         assertNotNull(operationService.createDepositOperation(card2, 300L, usd, "3333", "deposit3").get(TIMEOUT));
 
-        final Double result = operationService.getDepositSumByCard(card1).get(TIMEOUT);
+        final Double result2 = operationService.getDepositSumByCard(card1).get(TIMEOUT);
 
-        assertEquals(Double.valueOf(300), result);
+        assertEquals(Double.valueOf(300), result2);
     }
 }

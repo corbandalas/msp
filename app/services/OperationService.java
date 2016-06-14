@@ -86,7 +86,7 @@ public class OperationService {
     }
 
     public F.Promise<Double> getDepositSumByCard(Card card) {
-        return F.Promise.wrap(transactionRepository.retrieveSumByToCardId(card.getId()));
+        return F.Promise.wrap(transactionRepository.retrieveSumByToCardId(card.getId())).map(sum -> (sum != null) ? sum : Double.valueOf(0));
     }
 
     private F.Promise<F.Tuple<F.Tuple<Double, Double>, F.Tuple<Double, Double>>> getExchangeRates(Currency currency, Account fromAccount, Account toAccount,
