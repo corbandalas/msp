@@ -172,6 +172,18 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
+    public Future<Double> retrieveSumByToCardId(Long toCardId) {
+
+        final Promise<Double> promise = Futures.promise();
+
+        String query = "SELECT sum(amount*to_card_exchange_rate) FROM " + connectionPool.getSchemaName() + ".transaction where to_card_id=$1";
+        connectionPool.getConnection().query(query, asList(toCardId), result -> {
+            promise.success(result.row(0).getDouble(0));
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     public Transaction createEntity(Row row) {
         return new Transaction(row.getLong("id"), row.getLong("operation_id"), row.getLong("amount"), row.getString("currency_id"),
                 row.getInt("from_account_id"), row.getInt("to_account_id"), row.getLong("from_card_id"), row.getLong("to_card_id"),

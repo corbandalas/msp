@@ -56,7 +56,7 @@ public class OperationService {
                                                 cardAccount.getId(), transferAccount.getId(), sourceCard.getId(), null, rates._1._1, rates._1._2, rates._2._1, null, TransactionType.TRANSFER_FROM)));
                                 final F.Promise<Transaction> destinationTransactionPromise = F.Promise
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                transferAccount.getId(), cardAccount.getId(), null, destinationCard.getId(), rates._1._2, rates._1._1, null, rates._2._2, TransactionType.TRANSFER_FROM)));
+                                                transferAccount.getId(), cardAccount.getId(), null, destinationCard.getId(), rates._1._2, rates._1._1, null, rates._2._2, TransactionType.TRANSFER_TO)));
 
                                 return F.Promise.sequence(sourceTransactionPromise, destinationTransactionPromise).map(trans -> new F.Tuple<>(operation, trans));
                             }));
@@ -73,12 +73,12 @@ public class OperationService {
             final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
             final Account depositAccount = accounts._2.orElseThrow(WrongAccountException::new);
 
-            return getExchangeRates(currency, cardAccount, depositAccount, null, card).flatMap(rates ->
+            return getExchangeRates(currency, depositAccount, cardAccount, null, card).flatMap(rates ->
                     F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.DEPOSIT, orderId, description, new Date())))
                             .flatMap(operation -> {
                                 final F.Promise<Transaction> transactionPromise = F.Promise
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                cardAccount.getId(), depositAccount.getId(), null, card.getId(), rates._1._1, rates._1._2, null, rates._2._2, TransactionType.TRANSFER_FROM)));
+                                                depositAccount.getId(), cardAccount.getId(), null, card.getId(), rates._1._1, rates._1._2, null, rates._2._2, TransactionType.DEPOSIT)));
 
                                 return transactionPromise.map(trans -> new F.Tuple<>(operation, trans));
                             }));
@@ -86,8 +86,7 @@ public class OperationService {
     }
 
     public F.Promise<Double> getDepositSumByCard(Card card) {
-        return F.Promise.wrap(transactionRepository.retrieveByToCardId(card.getId())).map(transactions -> transactions.stream()
-                .mapToDouble(itm -> itm.getAmount() * itm.getToCardExchangeRate()).sum());
+        return F.Promise.wrap(transactionRepository.retrieveSumByToCardId(card.getId()));
     }
 
     private F.Promise<F.Tuple<F.Tuple<Double, Double>, F.Tuple<Double, Double>>> getExchangeRates(Currency currency, Account fromAccount, Account toAccount,
