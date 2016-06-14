@@ -122,7 +122,7 @@ public class OperationService {
             if (toCard.getCurrencyId().equals(currency.getId()))
                 toCardExchangeRatePromise = F.Promise.pure(1.0);
             else
-                toCardExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(fromCard.getCurrencyId())).map(cardCurrency ->
+                toCardExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(toCard.getCurrencyId())).map(cardCurrency ->
                         CurrencyUtil.getExchangeRate(currency, cardCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
         else
             toCardExchangeRatePromise = F.Promise.pure(null);
