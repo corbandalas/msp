@@ -56,7 +56,7 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation.getId());
 
         final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 100L, "USD", fromAccountId,
-                toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
+                toAccountId, null, null, 1.0, 1.0, null, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
         assertNotNull(transaction.getId());
 
         final Optional<Transaction> transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
@@ -78,7 +78,7 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation.getId());
 
         final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 200L, "USD", fromAccountId,
-                toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
+                toAccountId, null, null, 1.0, 1.0, null, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
         assertNotNull(transaction.getId());
 
         Long amount = 2000L;
@@ -103,7 +103,7 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation.getId());
 
         final Transaction transaction = Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 300L, "USD", fromAccountId,
-                toAccountId, null, 1.0, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
+                toAccountId, null, null, 1.0, 1.0, null, 1.0, TransactionType.DEPOSIT)), Duration.apply(defaultDelay));
         assertNotNull(transaction.getId());
 
         final Optional<Transaction> transactionById = Await.result(transactionRepository.retrieveById(transaction.getId()), Duration.apply(defaultDelay));
@@ -125,9 +125,9 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation.getId());
 
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 400L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null, null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation.getId(), 400L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
 
         final List<Transaction> transactions = Await.result(transactionRepository.retrieveAll(), Duration.apply(defaultDelay));
 
@@ -153,13 +153,13 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation2.getId());
 
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation1.getId(), 400L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null , null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation1.getId(), 400L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation2.getId(), 500L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null, null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation2.getId(), 500L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
 
         final List<Transaction> transactions = Await.result(transactionRepository.retrieveByFromAccountId(account1), Duration.apply(defaultDelay));
 
@@ -185,13 +185,13 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation2.getId());
 
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation1.getId(), 600L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null, null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation1.getId(), 600L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation2.getId(), 700L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null, null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation2.getId(), 700L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
 
         final List<Transaction> transactions = Await.result(transactionRepository.retrieveByToAccountId(account2), Duration.apply(defaultDelay));
 
@@ -217,13 +217,13 @@ public class TransactionRepositoryTest extends BaseRepositoryTest {
         assertNotNull(operation2.getId());
 
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation1.getId(), 700L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null, null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation1.getId(), 700L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation2.getId(), 800L, "USD", account1,
-                account2, null, 1.0, 1.0, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
+                account2, null, null, 1.0, 1.0, 1.0, null, TransactionType.TRANSFER_FROM)), Duration.apply(defaultDelay)));
         assertNotNull(Await.result(transactionRepository.create(new Transaction(null, operation2.getId(), 800L, "USD", account2,
-                account1, null, 1.0, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
+                account1, null, null, 1.0, 1.0, null, 1.0, TransactionType.TRANSFER_TO)), Duration.apply(defaultDelay)));
 
         final List<Transaction> transactions = Await.result(transactionRepository.retrieveByOperationId(operation1.getId()), Duration.apply(defaultDelay));
 

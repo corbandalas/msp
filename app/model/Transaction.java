@@ -16,21 +16,29 @@ public class Transaction extends BaseEntity<Long> {
     private String currencyId;
     private Integer fromAccountId;
     private Integer toAccountId;
-    private Long cardId;
-    private Double fromExchangeRate;
-    private Double toExchangeRate;
+    private Long fromCardId;
+    private Long toCardId;
+    private Double fromAccountExchangeRate;
+    private Double toAccountExchangeRate;
+    private Double fromCardExchangeRate;
+    private Double toCardExchangeRate;
     private TransactionType type;
 
-    public Transaction(Long id, Long operationId, Long amount, String currencyId, Integer fromAccountId, Integer toAccountId, Long cardId, Double fromExchangeRate, Double toExchangeRate, TransactionType type) {
+    public Transaction(Long id, Long operationId, Long amount, String currencyId, Integer fromAccountId, Integer toAccountId,
+                       Long fromCardId, Long toCardId, Double fromAccountExchangeRate, Double toAccountExchangeRate,
+                       Double fromCardExchangeRate, Double toCardExchangeRate, TransactionType type) {
         this.setId(id);
         this.operationId = operationId;
         this.amount = amount;
         this.currencyId = currencyId;
         this.fromAccountId = fromAccountId;
         this.toAccountId = toAccountId;
-        this.cardId = cardId;
-        this.fromExchangeRate = fromExchangeRate;
-        this.toExchangeRate = toExchangeRate;
+        this.fromCardId=fromCardId;
+        this.toCardId = toCardId;
+        this.fromAccountExchangeRate = fromAccountExchangeRate;
+        this.toAccountExchangeRate = toAccountExchangeRate;
+        this.fromCardExchangeRate=fromCardExchangeRate;
+        this.toCardExchangeRate=toCardExchangeRate;
         this.type = type;
     }
 
@@ -77,28 +85,52 @@ public class Transaction extends BaseEntity<Long> {
         this.toAccountId = toAccountId;
     }
 
-    public Long getCardId() {
-        return cardId;
+    public Long getFromCardId() {
+        return fromCardId;
     }
 
-    public void setCardId(Long cardId) {
-        this.cardId = cardId;
+    public void setFromCardId(Long fromCardId) {
+        this.fromCardId = fromCardId;
     }
 
-    public Double getFromExchangeRate() {
-        return fromExchangeRate;
+    public Long getToCardId() {
+        return toCardId;
     }
 
-    public void setFromExchangeRate(Double fromExchangeRate) {
-        this.fromExchangeRate = fromExchangeRate;
+    public void setToCardId(Long toCardId) {
+        this.toCardId = toCardId;
     }
 
-    public Double getToExchangeRate() {
-        return toExchangeRate;
+    public Double getFromAccountExchangeRate() {
+        return fromAccountExchangeRate;
     }
 
-    public void setToExchangeRate(Double toExchangeRate) {
-        this.toExchangeRate = toExchangeRate;
+    public void setFromAccountExchangeRate(Double fromAccountExchangeRate) {
+        this.fromAccountExchangeRate = fromAccountExchangeRate;
+    }
+
+    public Double getToAccountExchangeRate() {
+        return toAccountExchangeRate;
+    }
+
+    public void setToAccountExchangeRate(Double toAccountExchangeRate) {
+        this.toAccountExchangeRate = toAccountExchangeRate;
+    }
+
+    public Double getFromCardExchangeRate() {
+        return fromCardExchangeRate;
+    }
+
+    public void setFromCardExchangeRate(Double fromCardExchangeRate) {
+        this.fromCardExchangeRate = fromCardExchangeRate;
+    }
+
+    public Double getToCardExchangeRate() {
+        return toCardExchangeRate;
+    }
+
+    public void setToCardExchangeRate(Double toCardExchangeRate) {
+        this.toCardExchangeRate = toCardExchangeRate;
     }
 
     public TransactionType getType() {
@@ -117,9 +149,9 @@ public class Transaction extends BaseEntity<Long> {
                 ", currencyId=" + currencyId +
                 ", fromAccountId=" + fromAccountId +
                 ", toAccountId=" + toAccountId +
-                ", cardId=" + cardId +
-                ", fromExchangeRate=" + fromExchangeRate +
-                ", toExchangeRate=" + toExchangeRate +
+                ", toCardId=" + toCardId +
+                ", fromAccountExchangeRate=" + fromAccountExchangeRate +
+                ", toAccountExchangeRate=" + toAccountExchangeRate +
                 ", type=" + type +
                 '}';
     }

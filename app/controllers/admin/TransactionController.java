@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
-import configs.ReturnCodes;
 import controllers.BaseController;
 import dto.*;
 import model.Transaction;
@@ -72,7 +71,7 @@ public class TransactionController extends BaseController {
 
         if (StringUtils.isBlank(transaction.getCurrencyId()) || transaction.getAmount() == null || transaction.getAmount() <= 0 ||
                 transaction.getType() == null || transaction.getFromAccountId() == null || transaction.getToAccountId() == null
-                || transaction.getFromExchangeRate() == null || transaction.getToExchangeRate() == null ||
+                || transaction.getFromAccountExchangeRate() == null || transaction.getToAccountExchangeRate() == null ||
                 transaction.getOperationId() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
@@ -80,8 +79,8 @@ public class TransactionController extends BaseController {
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 transaction.getCurrencyId(), transaction.getAmount().toString(), transaction.getFromAccountId().toString(),
-                transaction.getToAccountId().toString(), transaction.getFromExchangeRate().toString(),
-                transaction.getToExchangeRate().toString(), transaction.getType().name(), authData.getOrderId(),
+                transaction.getToAccountId().toString(), transaction.getFromAccountExchangeRate().toString(),
+                transaction.getToAccountExchangeRate().toString(), transaction.getType().name(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
@@ -134,7 +133,7 @@ public class TransactionController extends BaseController {
 
         if (transaction.getId() == null || StringUtils.isBlank(transaction.getCurrencyId()) || transaction.getAmount() == null || transaction.getAmount() <= 0 ||
                 transaction.getType() == null || transaction.getFromAccountId() == null || transaction.getToAccountId() == null
-                || transaction.getFromExchangeRate() == null || transaction.getToExchangeRate() == null ||
+                || transaction.getFromAccountExchangeRate() == null || transaction.getToAccountExchangeRate() == null ||
                 transaction.getOperationId() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
@@ -142,8 +141,8 @@ public class TransactionController extends BaseController {
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 transaction.getId().toString(), transaction.getCurrencyId(), transaction.getAmount().toString(), transaction.getFromAccountId().toString(),
-                transaction.getToAccountId().toString(), transaction.getFromExchangeRate().toString(),
-                transaction.getToExchangeRate().toString(), transaction.getType().name(), authData.getOrderId(),
+                transaction.getToAccountId().toString(), transaction.getFromAccountExchangeRate().toString(),
+                transaction.getToAccountExchangeRate().toString(), transaction.getType().name(), authData.getOrderId(),
                 authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());

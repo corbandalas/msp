@@ -36,7 +36,7 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final long amount = 1000L;
         final JsonNode createResult = create(new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
-                amount, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT));
+                amount, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, null, 1.0, 1.0, null, 1.0, TransactionType.DEPOSIT));
         assertEquals(String.valueOf(SUCCESS_CODE), createResult.get("code").asText());
 
         final JsonNode result = retrieveById(createResult.get("transaction").get("id").asText());
@@ -63,10 +63,10 @@ public class TransactionControllerTest extends BaseControllerTest {
         assertEquals(String.valueOf(SUCCESS_CODE), createOperationResult.get("code").asText());
 
         final JsonNode createResult1 = create(new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
-                1000L, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT));
+                1000L, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, null, 1.0, 1.0, null, 1.0, TransactionType.DEPOSIT));
         assertEquals(String.valueOf(SUCCESS_CODE), createResult1.get("code").asText());
         final JsonNode createResult2 = create(new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
-                100L, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT_FEE));
+                100L, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, null, 1.0, 1.0, null, null, TransactionType.DEPOSIT_FEE));
         assertEquals(String.valueOf(SUCCESS_CODE), createResult2.get("code").asText());
 
         final String operationId = createOperationResult.get("operation").get("id").asText();
@@ -89,7 +89,7 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final long amount = 1000L;
         final Transaction transaction = new Transaction(null, createOperationResult.get("operation").get("id").asLong(),
-                amount, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, 1.0, 1.0, TransactionType.DEPOSIT);
+                amount, "USD", Integer.valueOf(ACCOUNT_ID), Integer.valueOf(ACCOUNT_2_ID), null, null, 1.0, 1.0, null, 1.0, TransactionType.DEPOSIT);
 
         final JsonNode createResult = create(transaction);
 
@@ -109,8 +109,8 @@ public class TransactionControllerTest extends BaseControllerTest {
 
         final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, transaction.getId().toString(), transaction.getCurrencyId(),
                 transaction.getAmount().toString(), transaction.getFromAccountId().toString(),
-                transaction.getToAccountId().toString(), transaction.getFromExchangeRate().toString(),
-                transaction.getToExchangeRate().toString(), transaction.getType().name(), ORDER_ID, SECRET);
+                transaction.getToAccountId().toString(), transaction.getFromAccountExchangeRate().toString(),
+                transaction.getToAccountExchangeRate().toString(), transaction.getType().name(), ORDER_ID, SECRET);
 
         final JsonNode updateResult = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(transaction)).get(TIMEOUT).asJson();
@@ -133,8 +133,8 @@ public class TransactionControllerTest extends BaseControllerTest {
         final String url = getAdminApiUrl("/transaction/create");
         final String enckey = SecurityUtil.generateKeyFromArray(ACCOUNT_ID, transaction.getCurrencyId(),
                 transaction.getAmount().toString(), transaction.getFromAccountId().toString(),
-                transaction.getToAccountId().toString(), transaction.getFromExchangeRate().toString(),
-                transaction.getToExchangeRate().toString(), transaction.getType().name(), ORDER_ID, SECRET);
+                transaction.getToAccountId().toString(), transaction.getFromAccountExchangeRate().toString(),
+                transaction.getToAccountExchangeRate().toString(), transaction.getType().name(), ORDER_ID, SECRET);
 
         return WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
                 .setHeader("orderId", ORDER_ID).post(Json.toJson(transaction)).get(TIMEOUT).asJson();

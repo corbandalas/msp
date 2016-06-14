@@ -17,6 +17,7 @@ import java.util.Optional;
 
 /**
  * Operation serviice
+ *
  * @author ra created 24.05.2016.
  * @since 0.3.0
  */
@@ -47,15 +48,15 @@ public class OperationService {
             final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
             final Account transferAccount = accounts._2.orElseThrow(WrongAccountException::new);
 
-            return getExchangeRates(currency, cardAccount, transferAccount).flatMap(rates ->
+            return getExchangeRates(currency, cardAccount, transferAccount, sourceCard, destinationCard).flatMap(rates ->
                     F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.TRANSFER, orderId, description, new Date())))
                             .flatMap(operation -> {
                                 final F.Promise<Transaction> sourceTransactionPromise = F.Promise
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                cardAccount.getId(), transferAccount.getId(), sourceCard.getId(), rates._1, rates._2, TransactionType.TRANSFER_FROM)));
+                                                cardAccount.getId(), transferAccount.getId(), sourceCard.getId(), null, rates._1._1, rates._1._2, rates._2._1, null, TransactionType.TRANSFER_FROM)));
                                 final F.Promise<Transaction> destinationTransactionPromise = F.Promise
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                transferAccount.getId(), cardAccount.getId(), destinationCard.getId(), rates._2, rates._1, TransactionType.TRANSFER_FROM)));
+                                                transferAccount.getId(), cardAccount.getId(), null, destinationCard.getId(), rates._1._2, rates._1._1, null, rates._2._2, TransactionType.TRANSFER_FROM)));
 
                                 return F.Promise.sequence(sourceTransactionPromise, destinationTransactionPromise).map(trans -> new F.Tuple<>(operation, trans));
                             }));
@@ -72,35 +73,61 @@ public class OperationService {
             final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
             final Account depositAccount = accounts._2.orElseThrow(WrongAccountException::new);
 
-            return getExchangeRates(currency, cardAccount, depositAccount).flatMap(rates ->
+            return getExchangeRates(currency, cardAccount, depositAccount, null, card).flatMap(rates ->
                     F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.DEPOSIT, orderId, description, new Date())))
                             .flatMap(operation -> {
                                 final F.Promise<Transaction> transactionPromise = F.Promise
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
-                                                cardAccount.getId(), depositAccount.getId(), card.getId(), rates._1, rates._2, TransactionType.TRANSFER_FROM)));
+                                                cardAccount.getId(), depositAccount.getId(), null, card.getId(), rates._1._1, rates._1._2, null, rates._2._2, TransactionType.TRANSFER_FROM)));
 
                                 return transactionPromise.map(trans -> new F.Tuple<>(operation, trans));
                             }));
         });
     }
 
-    private F.Promise<F.Tuple<Double, Double>> getExchangeRates(Currency currency, Account fromAccount, Account toAccount) {
-        final F.Promise<Double> cardAccountExchangeRatePromise;
+    public F.Promise<Double> getDepositSumByCard(Card card) {
+        return F.Promise.wrap(transactionRepository.retrieveByToCardId(card.getId())).map(transactions -> transactions.stream()
+                .mapToDouble(itm -> itm.getAmount() * itm.getToCardExchangeRate()).sum());
+    }
+
+    private F.Promise<F.Tuple<F.Tuple<Double, Double>, F.Tuple<Double, Double>>> getExchangeRates(Currency currency, Account fromAccount, Account toAccount,
+                                                                                                  Card fromCard, Card toCard) {
+        final F.Promise<Double> fromAccountExchangeRatePromise;
         if (fromAccount.getCurrencyId().equals(currency.getId()))
-            cardAccountExchangeRatePromise = F.Promise.pure(1.0);
+            fromAccountExchangeRatePromise = F.Promise.pure(1.0);
         else {
-            cardAccountExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(fromAccount.getCurrencyId())).map(accCurrency ->
+            fromAccountExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(fromAccount.getCurrencyId())).map(accCurrency ->
                     CurrencyUtil.getExchangeRate(currency, accCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
         }
 
-        final F.Promise<Double> transferAccountExchangeRatePromise;
+        final F.Promise<Double> toAccountExchangeRatePromise;
         if (toAccount.getCurrencyId().equals(currency.getId()))
-            transferAccountExchangeRatePromise = F.Promise.pure(1.0);
+            toAccountExchangeRatePromise = F.Promise.pure(1.0);
         else {
-            transferAccountExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(toAccount.getCurrencyId())).map(accCurrency ->
+            toAccountExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(toAccount.getCurrencyId())).map(accCurrency ->
                     CurrencyUtil.getExchangeRate(currency, accCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
         }
 
-        return cardAccountExchangeRatePromise.zip(transferAccountExchangeRatePromise);
+        final F.Promise<Double> fromCardExchangeRatePromise;
+        if (fromCard != null)
+            if (fromCard.getCurrencyId().equals(currency.getId()))
+                fromCardExchangeRatePromise = F.Promise.pure(1.0);
+            else
+                fromCardExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(fromCard.getCurrencyId())).map(cardCurrency ->
+                        CurrencyUtil.getExchangeRate(currency, cardCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
+        else
+            fromCardExchangeRatePromise = F.Promise.pure(null);
+
+        final F.Promise<Double> toCardExchangeRatePromise;
+        if (toCard != null)
+            if (toCard.getCurrencyId().equals(currency.getId()))
+                toCardExchangeRatePromise = F.Promise.pure(1.0);
+            else
+                toCardExchangeRatePromise = F.Promise.wrap(currencyRepository.retrieveById(fromCard.getCurrencyId())).map(cardCurrency ->
+                        CurrencyUtil.getExchangeRate(currency, cardCurrency.orElseThrow(WrongCurrencyException::new)).doubleValue());
+        else
+            toCardExchangeRatePromise = F.Promise.pure(null);
+
+        return fromAccountExchangeRatePromise.zip(toAccountExchangeRatePromise).zip(fromCardExchangeRatePromise.zip(toCardExchangeRatePromise));
     }
 }
