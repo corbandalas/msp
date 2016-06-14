@@ -144,34 +144,6 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
-    public Future<List<Transaction>> retrieveByFromCardId(Integer fromCardId) {
-
-        final Promise<List<Transaction>> promise = Futures.promise();
-
-        String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction where from_card_id=$1";
-        connectionPool.getConnection().query(query, asList(fromCardId), result -> {
-            final ArrayList<Transaction> transactions = new ArrayList<>();
-            result.forEach(row -> transactions.add(createEntity(row)));
-            promise.success(transactions);
-        }, promise::failure);
-
-        return promise.future();
-    }
-
-    public Future<List<Transaction>> retrieveByToCardId(Long toCardId) {
-
-        final Promise<List<Transaction>> promise = Futures.promise();
-
-        String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction where to_card_id=$1";
-        connectionPool.getConnection().query(query, asList(toCardId), result -> {
-            final ArrayList<Transaction> transactions = new ArrayList<>();
-            result.forEach(row -> transactions.add(createEntity(row)));
-            promise.success(transactions);
-        }, promise::failure);
-
-        return promise.future();
-    }
-
     public Future<Double> retrieveSumByToCardId(Long toCardId) {
 
         final Promise<Double> promise = Futures.promise();
