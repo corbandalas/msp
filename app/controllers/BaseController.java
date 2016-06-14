@@ -45,6 +45,14 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_CARD_TEXT, "" + INCORRECT_CARD_CODE)));
     }
 
+    protected Results.Status createWrongKYCResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_KYC_TEXT, "" + INCORRECT_KYC_CODE)));
+    }
+
+    protected Results.Status createLimitsExceededResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(LIMITS_EXCEEDED_TEXT, "" + LIMITS_EXCEEDED_CODE)));
+    }
+
     protected Results.Status createGeneralErrorResponse() {
         return badRequest(Json.toJson(new BaseAPIResponse(GENERAL_ERROR_TEXT, "" + GENERAL_ERROR_CODE)));
     }

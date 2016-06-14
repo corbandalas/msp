@@ -130,7 +130,7 @@ POST     /api/customer/card/management/changePIN                         @contro
 # WorldPay API
 GET     /api-docs/api/customer/worldpay                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/worldpay")
 GET    /api/customer/worldpay/getbanks/:country                         @controllers.customer.CustomerWorldPayCreditDepositController.getBankDetails(country:String)
-POST    /api/customer/worldpay/initCreditCardDeposit                    @controllers.customer.CustomerWorldPayCreditDepositController.initHostedWorldPayPayment()
+POST    /api/customer/worldpay/initCreditCardDeposit                    @controllers.customer.CustomerWorldPayCreditDepositController.initCreditCardDeposit()
 
 POST    /api/callbacks/worldpay/deposit                                 @controllers.callback.WorldpayCallbackController.deposit()
 POST    /api/callbacks/worldpay/cardDeposit                             @controllers.callback.WorldpayCallbackController.creditCardDeposit()

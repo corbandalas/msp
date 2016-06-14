@@ -1,31 +1,22 @@
 package service;
 
 import com.envoyservices.merchantapi.BankDetailsResponseV2;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import model.Card;
-import model.Currency;
-import model.Customer;
-import model.enums.KYC;
+import dto.customer.CustomerWorldPayCreditCardDeposit;
 import module.PropertyLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.Logger;
-import provider.BaseCardProviderTest;
+import play.libs.F;
 import provider.GlobalProcessingCardProvider;
-import provider.dto.*;
 import repository.BaseRepositoryTest;
 import repository.CurrencyRepository;
 import repository.PropertyRepository;
-import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
 import services.WorldPayPaymentService;
 
-import java.util.Calendar;
-import java.util.Date;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-import static org.junit.Assert.*;
 
 /**
  * WorldPay payment service test
@@ -79,6 +70,39 @@ public class WorldPayPaymentServiceTest extends BaseRepositoryTest {
     }
 
 
+    @Test
+    public void testInitHostedPage() throws Exception {
+
+        Thread.currentThread().sleep(1000);
+
+        try {
+
+
+            CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = new CustomerWorldPayCreditCardDeposit();
+
+            customerWorldPayCreditCardDeposit.setAmount(1000L);
+            customerWorldPayCreditCardDeposit.setCurrency("GBP");
+            customerWorldPayCreditCardDeposit.setCancelURL("https://google.com");
+            customerWorldPayCreditCardDeposit.setCardTo(null);
+            customerWorldPayCreditCardDeposit.setFailURL("https://google.com");
+            customerWorldPayCreditCardDeposit.setOrderId("" + System.currentTimeMillis());
+            customerWorldPayCreditCardDeposit.setPhone("380632426303");
+            customerWorldPayCreditCardDeposit.setSuccessURL("https://google.com");
+
+
+            F.Tuple<String, String> stringStringTuple = worldPayPaymentService.initHostedtWorldPayPayment(customerWorldPayCreditCardDeposit).get(WS_TIMEOUT);
+
+            assertNotNull(stringStringTuple);
+            assertNotNull(stringStringTuple._1);
+            assertNotNull(stringStringTuple._2);
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
+
     @After
     public void clean() {
         connectionPool.getConnection().query("delete from " + connectionPool.getSchemaName() + ".property;", resultSet -> {
@@ -86,4 +110,7 @@ public class WorldPayPaymentServiceTest extends BaseRepositoryTest {
             throwable.printStackTrace();
         });
     }
+
+
+
 }

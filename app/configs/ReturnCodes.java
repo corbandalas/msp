@@ -66,6 +66,12 @@ public class ReturnCodes {
     public static final byte PASSWORD_ATTEMPTS_EXCEEDED_CODE = 18;
     public static final String PASSWORD_ATTEMPTS_EXCEEDED_TEXT = "Password attempts number exceeded";
 
+    public static final byte INCORRECT_KYC_CODE = 19;
+    public static final String INCORRECT_KYC_TEXT = "KYC level is incorrect";
+
+    public static final byte LIMITS_EXCEEDED_CODE = 20;
+    public static final String LIMITS_EXCEEDED_TEXT = "Limits exceeded";
+
 
     public static final byte GENERAL_ERROR_CODE = 100;
     public static final String GENERAL_ERROR_TEXT = "General error";

@@ -4,9 +4,7 @@ import akka.dispatch.Futures;
 import com.envoyservices.merchantapi.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
+import com.ning.http.client.*;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import dto.customer.CustomerWorldPayCreditCardDeposit;
@@ -22,7 +20,6 @@ import repository.PropertyRepository;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import util.DateUtil;
-import util.SecurityUtil;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -173,16 +170,27 @@ public class WorldPayPaymentService {
 
         final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
-        final AsyncHttpClient.BoundRequestBuilder builder = asyncHttpClient.preparePost(settings.url);
+        RequestBuilder builder = new RequestBuilder("GET");
 
+        Realm realm = new Realm.RealmBuilder()
+                .setPrincipal(settings.headerUsername)
+                .setPassword(settings.headerPassword)
+                .setUsePreemptiveAuth(true)
+                .setScheme(Realm.AuthScheme.BASIC)
+                .build();
+
+
+        builder.setUrl(settings.url)
+                .setBody(createXML(settings.merchantCode, settings.installationID, customerWorldPayCreditCardDeposit.getAmount(),
+                        customerWorldPayCreditCardDeposit.getCurrency(), customerWorldPayCreditCardDeposit.getOrderId(), "Deposit for " + (double) customerWorldPayCreditCardDeposit.getAmount() / 100 + " " + customerWorldPayCreditCardDeposit.getCurrency()));
+
+
+        builder.setRealm(realm);
+
+        Request request = builder.build();
         final Promise<F.Tuple<String, String>> promise = Futures.promise();
 
-        builder.addHeader("Content-Type", "text/xml");
-        builder.addHeader("Authorization", "Basic " + SecurityUtil.encodeString((settings.headerUsername + ":" + settings.headerPassword)));
-        builder.setBody(createXML(settings.merchantCode, settings.installationID, customerWorldPayCreditCardDeposit.getAmount(),
-                customerWorldPayCreditCardDeposit.getCurrency(), customerWorldPayCreditCardDeposit.getOrderId(), "Deposit for " + (double) customerWorldPayCreditCardDeposit.getAmount() / 100 + " " + customerWorldPayCreditCardDeposit.getCurrency()));
-
-        builder.execute(new AsyncCompletionHandler<String>() {
+        asyncHttpClient.executeRequest(request, new AsyncCompletionHandler<String>() {
 
             @Override
             public String onCompleted(Response response) throws Exception {
@@ -190,9 +198,9 @@ public class WorldPayPaymentService {
                 String responseBody = response.getResponseBody();
                 Logger.info("///Obtained WorldPay response: " + responseBody);
 
-                String worldPayRedirectionURL = StringUtils.substringBetween(responseBody, ">", "/<");
+                String worldPayRedirectionURL = "https://" + StringUtils.substringBetween(responseBody, "https://", "</reference>");
 
-                String orderKey = StringUtils.substringAfter(worldPayRedirectionURL, "orderKey=");
+                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "Ticket");
 
                 Config conf = ConfigFactory.load();
 

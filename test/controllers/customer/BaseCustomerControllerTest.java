@@ -92,7 +92,7 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
         final Customer customer1 = createCustomer(PHONE_1, PASSWORD_1, "mr_ivanoff@gmail.com", "Ivan", "Ivanoff", KYC.FULL_DUE_DILIGENCE);
 
-        final Customer customer2 = createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff", KYC.FULL_DUE_DILIGENCE);
+        final Customer customer2 = createCustomer(PHONE_2, PASSWORD_2, "mr_petroff@gmail.com", "Petr", "Petroff", KYC.SIMPLIFIED_DUE_DILIGENCE);
 
         final Customer customer3 = createCustomer(PHONE_3_NON_KYC, PASSWORD_3_NON_KYC, "vodka@gmail.com", "Nemir", "Nemiroff", KYC.NONE);
 

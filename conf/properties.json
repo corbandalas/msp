@@ -164,7 +164,7 @@
 
     {
       "id": "worldpay.hosted.payment.username",
-      "value": "os@mysafepay.com",
+      "value": "Q19G8EVZ7DNFVAVOEV52",
       "description": "WORLDPAY_INTEGRATION hosted payment username",
       "category": "WORLDPAY_INTEGRATION"
     },
@@ -178,14 +178,14 @@
 
     {
       "id": "worldpay.hosted.payment.merchantcode",
-      "value": "MSP",
+      "value": "6012",
       "description": "WORLDPAY_INTEGRATION hosted payment merchant code",
       "category": "WORLDPAY_INTEGRATION"
     },
 
     {
       "id": "worldpay.hosted.payment.installation.id",
-      "value": "Safepaytest123321",
+      "value": "1120170",
       "description": "WORLDPAY_INTEGRATION hosted payment installation id",
       "category": "WORLDPAY_INTEGRATION"
     },
@@ -195,8 +195,35 @@
       "value": "Safepaytest123321",
       "description": "WORLDPAY_INTEGRATION hosted payment secret value",
       "category": "WORLDPAY_INTEGRATION"
-    }
+    },
 
+    {
+      "id": "limits.worldpay.deposit.card.kyc.NONE",
+      "value": "0",
+      "description": "Limits for credit card deposit per card for NONE KYC level (in USD)",
+      "category": "LIMITS"
+    },
+
+    {
+      "id": "limits.worldpay.deposit.card.kyc.SIMPLIFIED_DUE_DILIGENCE",
+      "value": "5000",
+      "description": "Limits for credit card deposit per card for SIMPLIFIED_DUE_DILIGENCE KYC level",
+      "category": "LIMITS"
+    },
+
+    {
+      "id": "limits.worldpay.deposit.card.kyc.FULL_DUE_DILIGENCE",
+      "value": "10000",
+      "description": "Limits for credit card deposit per card for FULL_DUE_DILIGENCE KYC level",
+      "category": "LIMITS"
+    },
+
+    {
+      "id": "limits.worldpay.deposit.card.currency",
+      "value": "EUR",
+      "description": "Currency for limits for credit card deposit per card",
+      "category": "LIMITS"
+    }
   ]
 
 }
