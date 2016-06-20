@@ -167,6 +167,28 @@ public class CardRepositoryTest extends BaseRepositoryTest {
         assertEquals(2,result.size());
     }
 
+    @Test
+    public void countCardsByCardType() throws Exception {
+        Customer customer = Await.result(customerRepository.create(new Customer("380953055621", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay));
+        assertNotNull(customer);
+
+        Customer customer2 = Await.result(customerRepository.create(new Customer("380953055622", new Date(), "Mr", "Vladimir", "Kuznetsov", "adress1", "adress2", "83004", "Donetsk", "nihilist.don@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "USA")), Duration.apply(defaultDelay));
+        assertNotNull(customer);
+
+        Await.result(cardRepository.create(new Card(null,"token2",customer.getId(), CardType.VIRTUAL, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply(defaultDelay));
+        Await.result(cardRepository.create(new Card(null,"token3",customer.getId(), CardType.PLASTIC, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply(defaultDelay));
+        Await.result(cardRepository.create(new Card(null,"token3",customer.getId(), CardType.PLASTIC, CardBrand.VISA, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply(defaultDelay));
+        Await.result(cardRepository.create(new Card(null,"token4",customer2.getId(), CardType.PLASTIC, CardBrand.MASTERCARD, true, new Date(),"alias", true, "info", "USD", "adress1", "adress2", "adress3", "USA")), Duration.apply(defaultDelay));
+
+        long result = Await.result(cardRepository.countCardsByType(customer.getId(), CardType.PLASTIC), Duration.apply(defaultDelay));
+        assertEquals(2, result);
+        result = Await.result(cardRepository.countCardsByType(customer.getId(), CardType.VIRTUAL), Duration.apply(defaultDelay));
+        assertEquals(1, result);
+        result = Await.result(cardRepository.countCardsByType(customer2.getId(), CardType.PLASTIC), Duration.apply(defaultDelay));
+        assertEquals(1, result);
+
+    }
+
     @After
     public void clean() {
         final Promise<Card> promise = Futures.promise();

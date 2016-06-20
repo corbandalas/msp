@@ -121,6 +121,18 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         return promise.future();
     }
 
+    public Future<Long> countCardsByType(String customerID, CardType cardType) {
+
+        final Promise<Long> promise = Futures.promise();
+
+        final String query = "SELECT count(*) FROM " + connectionPool.getSchemaName() + ".card where customer_id=$1 AND cardtype=$2";
+        connectionPool.getConnection().query(query, asList(customerID, cardType.name()), result -> {
+            promise.success(result.row(0).getLong(0));
+        }, promise::failure);
+
+        return promise.future();
+    }
+
 
     public Future<Optional<Card>> retrieveDefaultCard(String customerID) {
 

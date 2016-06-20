@@ -8,11 +8,13 @@ import com.ning.http.client.*;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import dto.customer.CustomerWorldPayCreditCardDeposit;
+import dto.customer.CustomerWorldPayCreditCardPurchase;
 import exception.CardProviderException;
 import exception.WrongPropertyException;
 import model.Currency;
 import model.Customer;
 import model.Property;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -39,92 +41,17 @@ public class WorldPayPaymentService {
     @Inject
     private PropertyRepository propertyRepository;
 
-    public F.Promise<OneClickPaymentResponseV2> oneClickPaymentRequest(String serviceName, String paymentMethod, String transactionDescription, String paymentChannel, long amount, Currency currency, Customer customer, String successURL, String cancelURL, String failureURL) {
-        return getSettings().flatMap(res -> oneClickPaymentRequestV2(res, serviceName, paymentMethod, transactionDescription, paymentChannel, amount, currency, customer, successURL, cancelURL, failureURL));
-    }
-
     public F.Promise<BankDetailsResponseV2> getBankDetails(String country) {
         return getSettings().flatMap(res -> getBankDetails(res, country));
     }
 
 
-    public F.Promise<F.Tuple<String, String>> initHostedtWorldPayPayment(final CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
-        return getHostedSettings().flatMap(res -> F.Promise.wrap(initWorldPayHostedPaymentPage(res, customerWorldPayCreditCardDeposit)));
+    public F.Promise<F.Tuple<String, String>> initDepositHostedtWorldPayPayment(final CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
+        return getHostedSettings().flatMap(res -> F.Promise.wrap(initDepositWorldPayHostedPaymentPage(res, customerWorldPayCreditCardDeposit)));
     }
 
-    private F.Promise<OneClickPaymentResponseV2> oneClickPaymentRequestV2(WorldPaySettings settings, String serviceName, String paymentMethod, String transactionDescription, String paymentChannel, long amount, Currency currency, Customer customer, String successURL, String cancelURL, String failureURL) {
-
-        return F.Promise.promise(() -> {
-
-            Service service = getService(settings.url);
-
-
-            long wsid = System.currentTimeMillis();
-            Logger.info("/////// OneClickServiceInfoV2 service invocation. WSID #" + wsid);
-
-            OneClickPaymentResponseV2 oneClickPaymentResponseV2 = null;
-
-            try {
-
-                OneClickServiceInfoV2 oneClickServiceInfoV2 = new OneClickServiceInfoV2();
-
-                oneClickServiceInfoV2.setServiceName(serviceName);
-                oneClickServiceInfoV2.setTransactionCategoryCode(serviceName);
-                oneClickServiceInfoV2.setTransactionLongDescription(transactionDescription);
-                oneClickServiceInfoV2.setLanguageCode("en");
-                oneClickServiceInfoV2.setTransactionShortDescription(transactionDescription);
-                ArrayOfOneClickServiceData arrayOfOneClickServiceData = new ArrayOfOneClickServiceData();
-                oneClickServiceInfoV2.setServiceData(arrayOfOneClickServiceData);
-
-                PaymentData paymentData = new PaymentData();
-
-                paymentData.setCustomerRef("customerRef"); //TODO:
-
-                paymentData.setCountry("uk"); //TODO:
-                paymentData.setAmount(new BigDecimal(amount)); //TODO:
-                paymentData.setCurrency(currency.getId());
-                paymentData.setPaymentMethod(paymentMethod);
-
-                CustomerDataV2 customerDataV2 = new CustomerDataV2();
-
-                customerDataV2.setAddress1(customer.getAddress1());
-                customerDataV2.setAddress2(customer.getAddress2());
-                customerDataV2.setCity(customer.getCity());
-                customerDataV2.setCountry(customer.getCountry_id());
-                customerDataV2.setCustomerId(customer.getId());
-                customerDataV2.setDateOfBirth(DateUtil.toXmlGregorianCalendar(customer.getDateBirth()));
-                customerDataV2.setEmail(customer.getEmail());
-                customerDataV2.setFirstName(customer.getFirstName());
-                customerDataV2.setLastName(customer.getLastName());
-                customerDataV2.setMobile(customer.getId());
-                customerDataV2.setPostcode(customer.getPostcode());
-                customerDataV2.setTitle(customer.getTitle());
-
-                CustomerAccountDetails customerAccountDetails = new CustomerAccountDetails();
-
-                customerAccountDetails.setPaymentChannel(paymentChannel);
-
-                RedirectionUrls redirectionUrls = new RedirectionUrls();
-                redirectionUrls.setSuccessUrl(successURL);
-                redirectionUrls.setErrorUrl(failureURL);
-                redirectionUrls.setCancelUrl(cancelURL);
-
-
-                oneClickPaymentResponseV2 = service.getServiceSoap().oneClickPaymentRequestV2(createAuthHeader(settings.headerUsername, settings.headerPassword), oneClickServiceInfoV2, paymentData, customerDataV2, customerAccountDetails, redirectionUrls, "", null);
-
-                Logger.info("/////// OneClickServiceInfoV2 service invocation was ended. WSID #" + wsid + ". Result code: " + oneClickPaymentResponseV2.getStatusCode() + " . Details: " + oneClickPaymentResponseV2.getStatusMessage() + " // " + oneClickPaymentResponseV2.toString());
-
-                if (0 != oneClickPaymentResponseV2.getStatusCode()) {
-                    throw new CardProviderException("Bad Response");
-                }
-
-            } catch (Exception e) {
-                Logger.error("WorldPay connection error: ", e);
-                throw new CardProviderException("WorldPay error");
-            }
-
-            return oneClickPaymentResponseV2;
-        });
+    public F.Promise<F.Tuple<String, String>> initPurchaseHostedtWorldPayPayment(final CustomerWorldPayCreditCardPurchase customerWorldPayCreditCardPurchase, long totalAmount) {
+        return getHostedSettings().flatMap(res -> F.Promise.wrap(initPurchaseWorldPayHostedPaymentPage(res, totalAmount, customerWorldPayCreditCardPurchase)));
     }
 
     private F.Promise<BankDetailsResponseV2> getBankDetails(WorldPaySettings settings, String country) {
@@ -166,31 +93,13 @@ public class WorldPayPaymentService {
     }
 
 
-    private Future<F.Tuple<String, String>> initWorldPayHostedPaymentPage(final WorldPaySettings settings, CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
+    private Future<F.Tuple<String, String>> initDepositWorldPayHostedPaymentPage(final WorldPaySettings settings, CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit) {
 
         final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
-        RequestBuilder builder = new RequestBuilder("GET");
-
-        Realm realm = new Realm.RealmBuilder()
-                .setPrincipal(settings.headerUsername)
-                .setPassword(settings.headerPassword)
-                .setUsePreemptiveAuth(true)
-                .setScheme(Realm.AuthScheme.BASIC)
-                .build();
-
-
-        builder.setUrl(settings.url)
-                .setBody(createXML(settings.merchantCode, settings.installationID, customerWorldPayCreditCardDeposit.getAmount(),
-                        customerWorldPayCreditCardDeposit.getCurrency(), customerWorldPayCreditCardDeposit.getOrderId(), "Deposit for " + (double) customerWorldPayCreditCardDeposit.getAmount() / 100 + " " + customerWorldPayCreditCardDeposit.getCurrency()));
-
-
-        builder.setRealm(realm);
-
-        Request request = builder.build();
         final Promise<F.Tuple<String, String>> promise = Futures.promise();
 
-        asyncHttpClient.executeRequest(request, new AsyncCompletionHandler<String>() {
+        asyncHttpClient.executeRequest(prepareRequest(settings, customerWorldPayCreditCardDeposit.getAmount(), customerWorldPayCreditCardDeposit.getCurrency(), customerWorldPayCreditCardDeposit.getOrderId(), "Credit card deposit"), new AsyncCompletionHandler<String>() {
 
             @Override
             public String onCompleted(Response response) throws Exception {
@@ -198,15 +107,66 @@ public class WorldPayPaymentService {
                 String responseBody = response.getResponseBody();
                 Logger.info("///Obtained WorldPay response: " + responseBody);
 
+                responseBody = StringEscapeUtils.unescapeHtml4(responseBody);
                 String worldPayRedirectionURL = "https://" + StringUtils.substringBetween(responseBody, "https://", "</reference>");
 
-                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "Ticket");
+
+                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
 
                 Config conf = ConfigFactory.load();
 
                 final String webHost = conf.getString("application.web.host");
 
                 final String callbackURL = webHost + "/api/callbacks/worldpay/cardDeposit";
+
+                worldPayRedirectionURL = worldPayRedirectionURL.concat("&successURL=" + callbackURL +
+                        "&failureURL=" + callbackURL + "&cancelURL=" + callbackURL + "&ordk=" + orderKey);
+
+
+                F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);
+
+                promise.success(result);
+
+                return worldPayRedirectionURL;
+            }
+
+            @Override
+            public void onThrowable(Throwable t) {
+                Logger.error("/////Error while retrieving response from WorldPay Hosted API", t);
+
+                promise.failure(t);
+            }
+        });
+
+        return promise.future();
+
+    }
+
+
+    private Future<F.Tuple<String, String>> initPurchaseWorldPayHostedPaymentPage(final WorldPaySettings settings, long totalAmount, CustomerWorldPayCreditCardPurchase customerWorldPayCreditCardPurchase) {
+
+        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+
+        final Promise<F.Tuple<String, String>> promise = Futures.promise();
+
+        asyncHttpClient.executeRequest(prepareRequest(settings, totalAmount, customerWorldPayCreditCardPurchase.getCurrency(), customerWorldPayCreditCardPurchase.getOrderId(), "Credit card deposit"), new AsyncCompletionHandler<String>() {
+
+            @Override
+            public String onCompleted(Response response) throws Exception {
+
+                String responseBody = response.getResponseBody();
+                Logger.info("///Obtained WorldPay response: " + responseBody);
+                responseBody = StringEscapeUtils.unescapeHtml4(responseBody);
+
+                String worldPayRedirectionURL = "https://" + StringUtils.substringBetween(responseBody, "https://", "</reference>");
+
+                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
+
+                Config conf = ConfigFactory.load();
+
+                final String webHost = conf.getString("application.web.host");
+
+                final String callbackURL = webHost + "/api/callbacks/worldpay/cardPurchase";
 
                 worldPayRedirectionURL = worldPayRedirectionURL.concat("&successURL=" + callbackURL +
                         "&failureURL=" + callbackURL + "&cancelURL=" + callbackURL + "&ordk=" + orderKey);
@@ -326,5 +286,28 @@ public class WorldPayPaymentService {
         return xmlMessage.toString();
     }
 
+
+    private Request prepareRequest(final WorldPaySettings settings, long amount, String currency, String orderID, String orderDesciption) {
+
+        RequestBuilder builder = new RequestBuilder("GET");
+
+        Realm realm = new Realm.RealmBuilder()
+                .setPrincipal(settings.headerUsername)
+                .setPassword(settings.headerPassword)
+                .setUsePreemptiveAuth(true)
+                .setScheme(Realm.AuthScheme.BASIC)
+                .build();
+
+
+        builder.setUrl(settings.url)
+                .setBody(createXML(settings.merchantCode, settings.installationID, amount,
+                        currency, orderID, "Payment for " + (double) amount / 100 + " " + currency));
+
+
+        builder.setRealm(realm);
+
+        return builder.build();
+
+    }
 
 }

@@ -2,6 +2,7 @@ package service;
 
 import com.envoyservices.merchantapi.BankDetailsResponseV2;
 import dto.customer.CustomerWorldPayCreditCardDeposit;
+import dto.customer.CustomerWorldPayCreditCardPurchase;
 import module.PropertyLoader;
 import org.junit.After;
 import org.junit.Before;
@@ -71,7 +72,7 @@ public class WorldPayPaymentServiceTest extends BaseRepositoryTest {
 
 
     @Test
-    public void testInitHostedPage() throws Exception {
+    public void testDepositInitHostedPage() throws Exception {
 
         Thread.currentThread().sleep(1000);
 
@@ -90,7 +91,39 @@ public class WorldPayPaymentServiceTest extends BaseRepositoryTest {
             customerWorldPayCreditCardDeposit.setSuccessURL("https://google.com");
 
 
-            F.Tuple<String, String> stringStringTuple = worldPayPaymentService.initHostedtWorldPayPayment(customerWorldPayCreditCardDeposit).get(WS_TIMEOUT);
+            F.Tuple<String, String> stringStringTuple = worldPayPaymentService.initDepositHostedtWorldPayPayment(customerWorldPayCreditCardDeposit).get(WS_TIMEOUT);
+
+            assertNotNull(stringStringTuple);
+            assertNotNull(stringStringTuple._1);
+            assertNotNull(stringStringTuple._2);
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
+
+    @Test
+    public void testPurchaseInitHostedPage() throws Exception {
+
+        Thread.currentThread().sleep(1000);
+
+        try {
+
+
+            CustomerWorldPayCreditCardPurchase customerWorldPayCreditCardDeposit = new CustomerWorldPayCreditCardPurchase();
+
+            customerWorldPayCreditCardDeposit.setAmount(1000L);
+            customerWorldPayCreditCardDeposit.setCurrency("GBP");
+            customerWorldPayCreditCardDeposit.setCancelURL("https://google.com");
+            customerWorldPayCreditCardDeposit.setFailURL("https://google.com");
+            customerWorldPayCreditCardDeposit.setOrderId("" + System.currentTimeMillis());
+            customerWorldPayCreditCardDeposit.setPhone("380632426303");
+            customerWorldPayCreditCardDeposit.setSuccessURL("https://google.com");
+
+
+            F.Tuple<String, String> stringStringTuple = worldPayPaymentService.initPurchaseHostedtWorldPayPayment(customerWorldPayCreditCardDeposit, 1000L).get(WS_TIMEOUT);
 
             assertNotNull(stringStringTuple);
             assertNotNull(stringStringTuple._1);

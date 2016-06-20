@@ -10,12 +10,12 @@ import controllers.BaseController;
 import dto.BankDetailsListResponse;
 import dto.BaseAPIResponse;
 import dto.customer.*;
-import exception.WrongCurrencyException;
 import exception.WrongPropertyException;
 import model.Card;
 import model.Currency;
 import model.Customer;
 import model.Property;
+import model.enums.CardType;
 import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -66,7 +66,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
-            nickname = "initHostedWorldPayPayment",
+            nickname = "initCreditCardDeposit",
             value = "Initiate WorldPay credit card deposit method",
             notes = "Allows to initiate redirection to WorldPay hosted payment page",
             consumes = "application/json",
@@ -120,16 +120,11 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
         final F.Promise<List<Card>> cardsPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
         final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(request.getCurrency()));
 
-        final F.Promise<Optional<Property>> limitPropertyPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.kyc." + customer.getKyc().name()));
+        final F.Promise<Result> result = cardsPromise.zip(currencyPromise).flatMap(data -> {
 
+            final Optional<Currency> currency = data._2;
 
-        final F.Promise<Result> result = cardsPromise.zip(currencyPromise).zip(limitPropertyPromise).flatMap(data -> {
-
-            final Property amountLimitProperty = data._2.orElseThrow(WrongPropertyException::new);
-
-            final Optional<Currency> currency = data._1._2;
-
-            final List<Card> cards = data._1._1;
+            final List<Card> cards = data._1;
 
             if (!currency.isPresent()) {
                 Logger.error("Specified currency doesn't exist");
@@ -142,63 +137,163 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
             request.setPhone(customer.getId());
 
-            if (request.getCardTo() != null) {
 
-                final Optional<Card> cardTo = cards.stream().filter(itm -> itm.getId().equals(request.getCardTo())).findFirst();
-                if (!cardTo.isPresent()) {
-                    Logger.error("Specified cardTo doesn't belong to customer");
-                    return F.Promise.pure(createWrongCardResponse());
-                }
+            final Optional<Card> cardTo = cards.stream().filter(itm -> itm.getId().equals(request.getCardTo())).findFirst();
 
-                if (customer.getKyc().equals(KYC.NONE)) {
-                    Logger.error("Incorrect KYC level");
-                    return F.Promise.pure(createWrongKYCResponse());
-                }
+            if (!cardTo.isPresent()) {
+                Logger.error("Specified cardTo doesn't belong to customer");
+                return F.Promise.pure(createWrongCardResponse());
+            }
+
+            if (customer.getKyc().equals(KYC.NONE)) {
+                Logger.error("Incorrect KYC level");
+                return F.Promise.pure(createWrongKYCResponse());
+            }
 
 
-                return checkDeposit(cardTo.get(), request.getAmount(), currency, Long.parseLong(amountLimitProperty.getValue())).flatMap(
-                        checkLimit -> {
-                            if (checkLimit) {
-                                return worldPayPaymentService.initHostedtWorldPayPayment(request).map(res -> {
+            return checkDeposit(customer, cardTo.get(), request.getAmount(), currency).flatMap(
+                    checkLimit -> {
+                        if (checkLimit) {
+                            return worldPayPaymentService.initDepositHostedtWorldPayPayment(request).map(res -> {
 
-                                    //Store orderID to cache with expiration time out
-                                    cache.set(res._2, request, Integer.parseInt(sessionTimeOut) * 60);
+                                //Store orderID to cache with expiration time out
+                                cache.set(res._2, request, Integer.parseInt(sessionTimeOut) * 60);
 
-                                    return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1, request.getAmount(), res._2)));
+                                return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1, res._2)));
 
-                                });
-                            } else {
-                                return F.Promise.pure(createLimitsExceededResponse());
-                            }
+                            });
+                        } else {
+                            return F.Promise.pure(createLimitsExceededResponse());
                         }
-
-                );
-
-            } else {
-
-                return F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.amount")).zip(F.Promise.wrap(propertyRepository.retrieveById("w2.verification.price.currency"))).flatMap(res -> F.Promise.wrap(currencyRepository.retrieveById(res._2.orElseThrow(WrongPropertyException::new))).flatMap(currencyRes -> {
-
-                    Long convertedAmount = 0L;
-
-                    try {
-                        convertedAmount = CurrencyUtil.convert(Long.parseLong(res._1.get().getValue()), currencyRes, data._1._2);
-                    } catch (WrongCurrencyException e) {
-                        Logger.error("Error while retrieving data from DB", e);
                     }
 
-                    request.setAmount(request.getAmount() + convertedAmount);
+            );
 
 
-                    return worldPayPaymentService.initHostedtWorldPayPayment(request).map(rez -> {
-                                //Store orderID to cache with expiration time out
-                                cache.set(rez._2, request, Integer.parseInt(sessionTimeOut) * 60);
+        });
 
-                                return ok(Json.toJson(new CustomerWorldPayCreditCardResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, rez._1, request.getAmount(), rez._2)));
-                            }
+        return returnRecover(result);
+    }
 
-                    );
-                }));
+
+    @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "initCreditCardPurchase",
+            value = "Initiate WorldPay credit purchase method",
+            notes = "Allows to initiate redirection to WorldPay hosted payment page",
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "POST",
+            response = CustomerWorldPayCreditCardPurchaseResponse.class
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerWorldPayCreditCardPurchaseResponse.class),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = INCORRECT_KYC_CODE, message = INCORRECT_KYC_TEXT),
+            @ApiResponse(code = LIMITS_EXCEEDED_CODE, message = LIMITS_EXCEEDED_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+    })
+    @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.CustomerWorldPayCreditCardPurchase", paramType = "body"),
+            @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
+    public F.Promise<Result> initCreditCardPurchase() {
+        final Customer customer = (Customer) ctx().args.get("customer");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CustomerWorldPayCreditCardPurchase request;
+        try {
+            request = Json.fromJson(jsonNode, CustomerWorldPayCreditCardPurchase.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getCardType() == null
+                || StringUtils.isBlank(request.getCurrency())
+                || StringUtils.isBlank(request.getOrderId())
+                || StringUtils.isBlank(request.getSuccessURL())
+                || StringUtils.isBlank(request.getFailURL())
+                || StringUtils.isBlank(request.getCancelURL())
+                || StringUtils.isBlank(request.getCardType())
+                ) {
+
+            Logger.error("Missing parameters");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getAmount() <= 0) {
+            request.setAmount(0L);
+        }
+
+
+        CardType cardType;
+
+        try {
+            cardType = CardType.valueOf(request.getCardType());
+
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (customer.getKyc().equals(KYC.NONE)) {
+            Logger.error("Incorrect KYC level");
+            return F.Promise.pure(createWrongKYCResponse());
+        }
+
+        final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(request.getCurrency()));
+        final F.Promise<Optional<Property>> priceAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card." + cardType.name()));
+        final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+
+        final CardType finalCardType = cardType;
+        final F.Promise<Result> result = priceAmountPromise.zip(priceCurrencyPromise).zip(currencyPromise).flatMap(data -> {
+
+            long priceAmount = Long.parseLong(data._1._1.get().getValue());
+
+            Optional<Currency> priceCurrency = data._1._2;
+
+            final Optional<Currency> currency = data._2;
+
+            if (!currency.isPresent()) {
+                Logger.error("Specified currency doesn't exist");
+                return F.Promise.pure(createIncorrectCurrencyResponse());
             }
+
+            Config conf = ConfigFactory.load();
+
+            String sessionTimeOut = conf.getString("cache.worldpay.session.timeout");
+
+            request.setPhone(customer.getId());
+
+            if (customer.getKyc().equals(KYC.NONE)) {
+                Logger.error("Incorrect KYC level");
+                return F.Promise.pure(createWrongKYCResponse());
+            }
+
+            final long totalAmount = CurrencyUtil.convert(priceAmount, priceCurrency, currency) + request.getAmount();
+
+            return checkCardNumberAndDepositSum(customer, finalCardType, request.getAmount(), currency).flatMap(
+                    checkLimit -> {
+                        if (checkLimit) {
+                            return worldPayPaymentService.initPurchaseHostedtWorldPayPayment(request, totalAmount).map(res -> {
+
+                                //Store orderID to cache with expiration time out
+                                cache.set(res._2, request, Integer.parseInt(sessionTimeOut) * 60);
+
+                                return ok(Json.toJson(new CustomerWorldPayCreditCardPurchaseResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1, totalAmount, res._2)));
+
+                            });
+                        } else {
+                            return F.Promise.pure(createLimitsExceededResponse());
+                        }
+                    }
+
+            );
+
 
         });
 
@@ -233,25 +328,94 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
         return returnRecover(result);
     }
 
-    private F.Promise<Boolean> checkDeposit(Card card, long amount, Optional<Currency> currency, long limitAmount) {
+    private F.Promise<Boolean> checkDeposit(Customer customer, Card card, long amount, Optional<Currency> currency) {
 
 
-        F.Promise<Optional<Currency>> limitCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
-        F.Promise<Double> depositSumPromise = operationService.getDepositSumByCard(card);
-        F.Promise<Optional<Currency>> cardCurrencyPromise = F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()));
+        final F.Promise<Optional<Currency>> limitCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+        final F.Promise<Double> depositSumPromise = operationService.getDepositSumByCard(card);
+        final F.Promise<Optional<Currency>> cardCurrencyPromise = F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()));
+        final F.Promise<Optional<Property>> limitAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.kyc." + customer.getKyc().name()));
 
-        return depositSumPromise.zip(cardCurrencyPromise).zip(limitCurrencyPromise).map(res -> {
 
-            final Double depositSum = res._1._1;
-            final Optional<Currency> limitCurrency = res._2;
-            final long convertedDepositAmount = CurrencyUtil.convert(amount, currency, res._1._2);
-            final long convertedLimitAmount = CurrencyUtil.convert(limitAmount, limitCurrency, res._1._2);
+        return depositSumPromise.zip(cardCurrencyPromise).zip(limitCurrencyPromise).zip(limitAmountPromise).map(res -> {
+
+            final Double depositSum = res._1._1._1;
+            final Optional<Currency> limitCurrency = res._1._1._2;
+            final Optional<Currency> cardCurrency = res._1._2;
+
+            final Property property = res._2.orElseThrow(WrongPropertyException::new);
+
+            final long convertedDepositAmount = CurrencyUtil.convert(amount, currency, cardCurrency);
+            final long convertedLimitAmount = CurrencyUtil.convert(Long.parseLong(property.getValue()), limitCurrency, cardCurrency);
 
             return depositSum.longValue() + convertedDepositAmount < convertedLimitAmount;
 
         });
+    }
 
+    private F.Promise<Boolean> checkDepositToNew(Customer customer, long amount, Optional<Currency> currency) {
+
+
+        final F.Promise<Optional<Currency>> limitCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+        final F.Promise<Optional<Property>> limitAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.kyc." + customer.getKyc().name()));
+
+
+        return limitCurrencyPromise.zip(limitAmountPromise).map(res -> {
+
+            final Optional<Currency> limitCurrency = res._1;
+
+            final Property property = res._2.orElseThrow(WrongPropertyException::new);
+
+            final long convertedDepositAmount = CurrencyUtil.convert(amount, currency, limitCurrency);
+            final long convertedLimitAmount = Long.parseLong(property.getValue());
+
+            return convertedDepositAmount < convertedLimitAmount;
+
+        });
+    }
+
+
+
+    private F.Promise<Boolean> checkCardNumberAndDepositSum(Customer customer, CardType cardType, long amount, Optional<Currency> currency) {
+        return checkDepositToNew(customer, amount, currency).zip(checkCardPurchaseNumber(customer, cardType)).map(rez -> rez._1 && rez._2);
+    }
+
+
+    private F.Promise<Boolean> checkCardPurchaseNumber(Customer customer, CardType cardType) {
+
+
+        final F.Promise<Long> virtualCardNumberPromise = F.Promise.wrap(cardRepository.countCardsByType(customer.getId(), CardType.VIRTUAL));
+        final F.Promise<Long> plasticCardNumberPromise = F.Promise.wrap(cardRepository.countCardsByType(customer.getId(), CardType.PLASTIC));
+
+        F.Promise<Optional<Property>> cardLimitNumberPromise = null;
+
+        if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
+            cardLimitNumberPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.msp.card.SIMPLIFIED_DUE_DILIGENCE"));
+        } else {
+            cardLimitNumberPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.msp.card.FULL_DUE_DILIGENCE." + cardType.name()));
+        }
+
+        return virtualCardNumberPromise.zip(plasticCardNumberPromise).zip(cardLimitNumberPromise).map(res -> {
+
+            long virtualCardNumber = res._1._1;
+            long plasticCardNumber = res._1._2;
+
+            long cardLimit = Long.parseLong(res._2.get().getValue());
+
+            if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
+                return virtualCardNumber + 1 <= cardLimit && plasticCardNumber + 1 <= cardLimit;
+            } else {
+                if (cardType.equals(CardType.VIRTUAL)) {
+                    return virtualCardNumber + 1 <= cardLimit;
+                } else if (cardType.equals(CardType.PLASTIC)) {
+                    return plasticCardNumber + 1 <= cardLimit;
+                }
+            }
+
+            return false;
+        });
 
     }
+
 
 }

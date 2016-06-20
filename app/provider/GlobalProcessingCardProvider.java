@@ -132,7 +132,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<PhoneActivateResponse> activateCardByPhone(Card card) {
-        return getGPSSettings().flatMap(res -> invokePlasticCardActivation(res, card)).map((rez -> new PhoneActivateResponse(rez.getActionCode(), rez.isIsLive(), rez.getPinBlock(), "" + rez.getPINStatus())));
+        return getGPSSettings().flatMap(res -> invokePhonePlasticCardActivation(res, card)).map((rez -> new PhoneActivateResponse(rez.getActionCode(), rez.isIsLive(), rez.getPinBlock(), "" + rez.getPINStatus())));
+    }
+
+    @Override
+    public F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card) {
+        return getGPSSettings().flatMap(res -> invokePlasticCardActivation(res, card)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
     }
 
     @Override
@@ -168,6 +173,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     @Override
     public F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN) {
         return getGPSSettings().flatMap(res -> invokePinControl(res, card, currentPIN, newPIN, confirmNewPIN, "02")).map((res -> new ChangePINResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<ChangePINResponse> obtainPIN(Card card) {
+        return getGPSSettings().flatMap(res -> invokePinControl(res, card, null, null, null, "01")).map((res -> new ChangePINResponse(res.getActionCode())));
     }
 
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
@@ -558,7 +568,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-    private F.Promise<PhoneActivate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card) {
+    private F.Promise<PhoneActivate> invokePhonePlasticCardActivation(GPSSettings gpsSettings, Card card) {
 
         return F.Promise.promise(() -> {
 
@@ -589,6 +599,40 @@ public class GlobalProcessingCardProvider implements CardProvider {
             return phoneActivate;
         });
     }
+
+
+    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Activate service invocation. WSID #" + wsid);
+
+            Activate wsActivate = null;
+
+
+            try {
+                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, null, null, null, null, null, null, null, "0", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), "Plastic card activation", 0, 0, null, 0, "2", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
+
+                if (!StringUtils.equals("000", wsActivate.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return wsActivate;
+        });
+    }
+
 
 
     private F.Promise<StatusChange> invokeStatusChange(GPSSettings gpsSettings, Card card, String statCode, String reason) {

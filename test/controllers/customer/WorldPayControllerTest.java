@@ -4,6 +4,8 @@ import akka.actor.ActorSystem;
 import com.fasterxml.jackson.databind.JsonNode;
 import dto.customer.CustomerCardListResponse;
 import dto.customer.CustomerWorldPayCreditCardDeposit;
+import dto.customer.CustomerWorldPayCreditCardPurchase;
+import model.enums.CardType;
 import module.PropertyLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -191,5 +193,87 @@ public class WorldPayControllerTest extends BaseCustomerControllerTest  {
         assertEquals(String.valueOf(INCORRECT_CURRENCY_CODE), response2.get("code").asText());
 
     }
+
+
+    @Test
+    public void testInitCorrectCreditCardPurchase() throws Exception {
+
+        final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        final CustomerWorldPayCreditCardPurchase request = new CustomerWorldPayCreditCardPurchase();
+        request.setAmount(100L);
+        request.setCurrency("USD");
+        request.setCardType(CardType.PLASTIC.name());
+        request.setOrderId("" + System.currentTimeMillis());
+        request.setSuccessURL("http://google.com");
+        request.setFailURL("http://google.com");
+        request.setCancelURL("http://google.com");
+
+        final JsonNode response = WS.url(getCustomerApiUrl("/worldpay/" +
+                "initCreditCardPurchase")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals(String.valueOf(SUCCESS_CODE), response.get("code").asText());
+
+        assertTrue(StringUtils.isNoneBlank(response.get("url").asText()));
+        assertTrue(StringUtils.isNoneBlank(response.get("totalAmount").asText()));
+    }
+
+
+    @Test
+    public void testInitLimitExceededCreditCardPurchase() throws Exception {
+
+        final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        final CustomerWorldPayCreditCardPurchase request = new CustomerWorldPayCreditCardPurchase();
+        request.setAmount(10000000L);
+        request.setCurrency("USD");
+        request.setCardType(CardType.PLASTIC.name());
+        request.setOrderId("" + System.currentTimeMillis());
+        request.setSuccessURL("http://google.com");
+        request.setFailURL("http://google.com");
+        request.setCancelURL("http://google.com");
+
+        final JsonNode response = WS.url(getCustomerApiUrl("/worldpay/" +
+                "initCreditCardPurchase")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals(String.valueOf(LIMITS_EXCEEDED_CODE), response.get("code").asText());
+
+    }
+
+
+    @Test
+    public void testInitWrongCardTypeCreditCardPurchase() throws Exception {
+
+        final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        final CustomerWorldPayCreditCardPurchase request = new CustomerWorldPayCreditCardPurchase();
+        request.setAmount(1000L);
+        request.setCurrency("USD");
+        request.setCardType("PHYSICAL");
+        request.setOrderId("" + System.currentTimeMillis());
+        request.setSuccessURL("http://google.com");
+        request.setFailURL("http://google.com");
+        request.setCancelURL("http://google.com");
+
+        final JsonNode response = WS.url(getCustomerApiUrl("/worldpay/" +
+                "initCreditCardPurchase")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals(String.valueOf(WRONG_REQUEST_FORMAT_CODE), response.get("code").asText());
+
+    }
+
+
 
 }

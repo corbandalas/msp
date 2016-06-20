@@ -223,7 +223,60 @@
       "value": "EUR",
       "description": "Currency for limits for credit card deposit per card",
       "category": "LIMITS"
+    },
+
+    {
+      "id": "limits.worldpay.deposit.card.kyc.FULL_DUE_DILIGENCE",
+      "value": "10000",
+      "description": "Limits for credit card deposit per card for FULL_DUE_DILIGENCE KYC level",
+      "category": "LIMITS"
+    },
+
+    {
+      "id": "limits.msp.card.SIMPLIFIED_DUE_DILIGENCE",
+      "value": "1",
+      "description": "Total Number of  cards allowed per one SIMPLIFIED_DUE_DILIGENCE account",
+      "category": "LIMITS"
+    },
+
+
+    {
+      "id": "limits.msp.card.FULL_DUE_DILIGENCE.VIRTUAL",
+      "value": "3",
+      "description": "Number of virtual cards allowed per one FULL_DUE_DILIGENCE account",
+      "category": "LIMITS"
+    },
+
+    {
+      "id": "limits.msp.card.FULL_DUE_DILIGENCE.PLASTIC",
+      "value": "1",
+      "description": "Number of plastic cards allowed per one FULL_DUE_DILIGENCE account",
+      "category": "LIMITS"
+    },
+
+    {
+      "id": "price.msp.card.PLASTIC",
+      "value": "100",
+      "description": "Plastic card price",
+      "category": "PRICE"
+    },
+
+    {
+      "id": "price.msp.card.VIRTUAL",
+      "value": "100",
+      "description": "VIRTUAL card price",
+      "category": "PRICE"
+    },
+
+    {
+      "id": "price.msp.card.currency",
+      "value": "EUR",
+      "description": "Card price currency",
+      "category": "PRICE"
     }
+
+
+
   ]
 
 }

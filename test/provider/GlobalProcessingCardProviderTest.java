@@ -117,6 +117,48 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
 
     @Test
+    public void convertVirtualToPlasticAndActivate() throws Exception {
+
+        Thread.currentThread().sleep(1000);
+
+        try {
+
+            long amount = 1000;
+
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card2", amount, getCurrency());
+
+            assertNotNull(cardCreationResponse);
+            assertNotNull(cardCreationResponse.getToken());
+            assertEquals(cardCreationResponse.getLoadValue(), (double) amount / 100, 0.0001);
+
+            Card card = new Card();
+
+            Calendar instance = Calendar.getInstance();
+
+            instance.add(Calendar.DAY_OF_YEAR, 720);
+
+
+            card.setToken(cardCreationResponse.getToken());
+
+            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
+
+            assertNotNull(convertVirtualToPlasticResponse);
+            assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
+
+
+            PlasticCardActivateResponse plasticCardActivateResponse = globalProcessingCardProvider.activatePlasticCard(card).get(WS_TIMEOUT);
+
+            assertNotNull(plasticCardActivateResponse);
+            assertEquals(plasticCardActivateResponse.getActionCode(), "000");
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
+
+    @Test
     public void issueEmptyVirtualCard() throws Exception {
 
         Thread.currentThread().sleep(1000);
@@ -561,6 +603,28 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 //
 //            assertNotNull(cardDetailsResponse);
 //            assertEquals("83", cardDetailsResponse.getStatCode());
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
+    @Test
+    public void obtainPIN() throws Exception {
+
+        Thread.currentThread().sleep(1000);
+
+        try {
+
+            Card card = new Card();
+            card.setToken("800882124");
+
+
+            ChangePINResponse changePINResponse = globalProcessingCardProvider.obtainPIN(card).get(WS_TIMEOUT);
+
+            assertNotNull(changePINResponse);
+
 
         } catch (Exception e) {
             Logger.error("Error", e);

@@ -295,4 +295,19 @@ public class Activate {
         this.isLive = value;
     }
 
+    @Override
+    public String toString() {
+        return "Activate{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", isLive=" + isLive +
+                '}';
+    }
 }
