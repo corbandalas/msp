@@ -203,8 +203,10 @@ public class WorldPayControllerTest extends BaseCustomerControllerTest  {
 
         final String token = authorizeResponse.get("token").asText();
 
+        final long amount = 100L;
+
         final CustomerWorldPayCreditCardPurchase request = new CustomerWorldPayCreditCardPurchase();
-        request.setAmount(100L);
+        request.setAmount(amount);
         request.setCurrency("USD");
         request.setCardType(CardType.PLASTIC.name());
         request.setOrderId("" + System.currentTimeMillis());
@@ -218,8 +220,12 @@ public class WorldPayControllerTest extends BaseCustomerControllerTest  {
 
         assertEquals(String.valueOf(SUCCESS_CODE), response.get("code").asText());
 
+        String totalAmount = response.get("totalAmount").asText();
+
         assertTrue(StringUtils.isNoneBlank(response.get("url").asText()));
-        assertTrue(StringUtils.isNoneBlank(response.get("totalAmount").asText()));
+        assertTrue(StringUtils.isNoneBlank(totalAmount));
+
+        assertTrue(Long.parseLong(totalAmount) > amount);
     }
 
 

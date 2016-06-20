@@ -280,6 +280,19 @@ public class WorldPayPaymentService {
         xmlMessage.append("<paymentMethodMask>");
         xmlMessage.append("<include code=\"ALL\"/>");
         xmlMessage.append("</paymentMethodMask>");
+        xmlMessage.append("<shopper>");
+//        xmlMessage.append("<shopperEmailAddress>" + "me@corbandalas.com" + "</shopperEmailAddress>");
+//        xmlMessage.append("</shopper>");
+//        xmlMessage.append("<shippingAddress>\n" +
+//                "<address>\n" +
+//                "<firstName>John</firstName> <lastName>Shopper</lastName> <address1>Shopperstreet</address1> <address2>Shopperaddress2</address2> <address3>Shopperaddress3</address3> <postalCode>1234</postalCode> <city>Shoppercity</city> <state>Shopperregion</state> <countryCode>NL</countryCode> <telephoneNumber>0123456789</telephoneNumber>\n" +
+//                "</address>\n" +
+//                "</shippingAddress> <billingAddress>\n" +
+//                "<address>\n" +
+//                "<firstName>John</firstName> <lastName>Shopper</lastName> <address1>Shopperstreet</address1> <address2>Shopperaddress2</address2> <address3>Shopperaddress3</address3> <postalCode>1234</postalCode> <city>Shoppercity</city> <state>Shopperregion</state> <countryCode>NL</countryCode> <telephoneNumber>0123456789</telephoneNumber>\n" +
+//                "</address>\n" +
+//                "</billingAddress>");
+
         xmlMessage.append("</order>");
         xmlMessage.append("</submit>");
         xmlMessage.append("</paymentService>");
