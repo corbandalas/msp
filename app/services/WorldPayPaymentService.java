@@ -26,6 +26,7 @@ import util.DateUtil;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Optional;
 
 /**
@@ -168,8 +169,10 @@ public class WorldPayPaymentService {
 
                 final String callbackURL = webHost + "/api/callbacks/worldpay/cardPurchase";
 
-                worldPayRedirectionURL = worldPayRedirectionURL.concat("&successURL=" + callbackURL +
-                        "&failureURL=" + callbackURL + "&cancelURL=" + callbackURL + "&ordk=" + orderKey);
+                final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8") +
+                        "&failureURL=" + URLEncoder.encode(callbackURL  + "?ordk=" + orderKey, "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8");
+
+                worldPayRedirectionURL = worldPayRedirectionURL.concat(additionalParams);
 
 
                 F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);
@@ -280,7 +283,7 @@ public class WorldPayPaymentService {
         xmlMessage.append("<paymentMethodMask>");
         xmlMessage.append("<include code=\"ALL\"/>");
         xmlMessage.append("</paymentMethodMask>");
-        xmlMessage.append("<shopper>");
+//        xmlMessage.append("<shopper>");
 //        xmlMessage.append("<shopperEmailAddress>" + "me@corbandalas.com" + "</shopperEmailAddress>");
 //        xmlMessage.append("</shopper>");
 //        xmlMessage.append("<shippingAddress>\n" +
