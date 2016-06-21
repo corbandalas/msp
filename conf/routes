@@ -135,7 +135,8 @@ POST    /api/customer/worldpay/initCreditCardPurchase                   @control
 
 
 
-POST    /api/callbacks/worldpay/deposit                                 @controllers.callback.WorldpayCallbackController.deposit()
+POST    /api/callbacks/worldpay/bankDeposit                                 @controllers.callback.WorldpayCallbackController.bankDeposit()
 POST    /api/callbacks/worldpay/cardDeposit                             @controllers.callback.WorldpayCallbackController.creditCardDeposit()
+POST    /api/callbacks/worldpay/cardPurchase                             @controllers.callback.WorldpayCallbackController.creditCardPurchase()
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                                        controllers.Assets.at(path="/public", file)

@@ -167,11 +167,10 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 0;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card", amount, getCurrency());
+            CardCreationResponse cardCreationResponse = getEmptyVirtualCard(createCustomer(), "My card", getCurrency());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
-            assertEquals(cardCreationResponse.getLoadValue(), (double) amount / 100, 0.0001);
 
         } catch (Exception e) {
             Logger.error("Error", e);
@@ -187,9 +186,9 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
         try {
 
-            long amount = 1000;
+            long amount = 0;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card", amount, getCurrency());
+            CardCreationResponse cardCreationResponse = getEmptyVirtualCard(createCustomer(), "My card", getCurrency());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -638,6 +637,10 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
     private CardCreationResponse getPrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency) {
         return globalProcessingCardProvider.issuePrepaidVirtualCard(customer, cardName, amount, currency).get(WS_TIMEOUT);
+    }
+
+    private CardCreationResponse getEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
+        return globalProcessingCardProvider.issueEmptyVirtualCard(customer, cardName, currency).get(WS_TIMEOUT);
     }
 
     private CardCreationResponse getPrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency) {

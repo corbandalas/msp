@@ -120,8 +120,10 @@ public class WorldPayPaymentService {
 
                 final String callbackURL = webHost + "/api/callbacks/worldpay/cardDeposit";
 
-                worldPayRedirectionURL = worldPayRedirectionURL.concat("&successURL=" + callbackURL +
-                        "&failureURL=" + callbackURL + "&cancelURL=" + callbackURL + "&ordk=" + orderKey);
+                final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8") +
+                        "&failureURL=" + URLEncoder.encode(callbackURL  + "?ordk=" + orderKey, "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8");
+
+                worldPayRedirectionURL = worldPayRedirectionURL.concat(additionalParams);
 
 
                 F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);

@@ -47,7 +47,7 @@ public class WorldpayCallbackControllerTest extends BaseCustomerControllerTest {
     @Test
     public void depositWrongPhone() {
 
-        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/deposit")
+        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/bankDeposit")
                 .setHeader("Content-Type","application/xml").post(String.format(SOAP_REQUEST,"380501234567")).get(TIMEOUT);
 
         Assert.assertTrue(response.getBody().contains("PaymentNotificationResult"));
@@ -56,7 +56,7 @@ public class WorldpayCallbackControllerTest extends BaseCustomerControllerTest {
     @Test
     public void depositToNew() {
 
-        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/deposit")
+        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/bankDeposit")
                 .setHeader("Content-Type","application/xml").post(String.format(SOAP_REQUEST,PHONE_3_NON_KYC)).get(TIMEOUT);
 
         Assert.assertTrue(response.getBody().contains("PaymentNotificationResult"));
@@ -65,7 +65,7 @@ public class WorldpayCallbackControllerTest extends BaseCustomerControllerTest {
     @Test
     public void depositToExisting() {
 
-        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/deposit")
+        final WSResponse response = WS.url("http://localhost:" + testServer.port() + "/api/callbacks/worldpay/bankDeposit")
                 .setHeader("Content-Type","application/xml").post(String.format(SOAP_REQUEST,PHONE_1)).get(TIMEOUT);
 
         Assert.assertTrue(response.getBody().contains("PaymentNotificationResult"));
