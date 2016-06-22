@@ -211,6 +211,7 @@ public class WorldpayCallbackController extends BaseController {
         cache.remove(mspOrderKey);
 
         if (customerWorldPayCreditCardPurchase == null) {
+            Logger.error("Cached order object is null");
             return F.Promise.pure(createRedirect("https://google.com"));
         }
 
