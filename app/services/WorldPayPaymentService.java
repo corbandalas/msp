@@ -108,9 +108,13 @@ public class WorldPayPaymentService {
                 String responseBody = response.getResponseBody();
                 Logger.info("///Obtained WorldPay response: " + responseBody);
 
-                responseBody = StringEscapeUtils.unescapeHtml4(responseBody);
-                String worldPayRedirectionURL = "https://" + StringUtils.substringBetween(responseBody, "https://", "</reference>");
+                String url = StringUtils.substringBetween(responseBody, "https://", "</reference>");
 
+                if (!StringUtils.isNotBlank(url)) {
+                    throw new Exception();
+                }
+
+                String worldPayRedirectionURL = "https://" + url;
 
                 String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
 
@@ -161,7 +165,13 @@ public class WorldPayPaymentService {
                 Logger.info("///Obtained WorldPay response: " + responseBody);
                 responseBody = StringEscapeUtils.unescapeHtml4(responseBody);
 
-                String worldPayRedirectionURL = "https://" + StringUtils.substringBetween(responseBody, "https://", "</reference>");
+                String url = StringUtils.substringBetween(responseBody, "https://", "</reference>");
+
+                if (!StringUtils.isNotBlank(url)) {
+                    throw new Exception();
+                }
+
+                String worldPayRedirectionURL = "https://" + url;
 
                 String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
 
