@@ -201,6 +201,8 @@ public class WorldpayCallbackController extends BaseController {
 
         String mspOrderKey = request().getQueryString("ordk");
 
+        Logger.info("Order id: " +mspOrderKey);
+
         if (StringUtils.isBlank(mspOrderKey)) {
             Logger.error("Internal order ID is empty!");
             return F.Promise.pure(createRedirect("https://google.com"));

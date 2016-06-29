@@ -281,6 +281,8 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
                         if (checkLimit) {
                             return worldPayPaymentService.initPurchaseHostedtWorldPayPayment(request, totalAmount).map(res -> {
 
+                                Logger.info("Put request object to cache with id: " + res._2);
+
                                 //Store orderID to cache with expiration time out
                                 cache.set(res._2, request, Integer.parseInt(sessionTimeOut) * 60);
 
