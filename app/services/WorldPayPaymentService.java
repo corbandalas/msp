@@ -116,7 +116,7 @@ public class WorldPayPaymentService {
 
                 String worldPayRedirectionURL = "https://" + url;
 
-                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
+//                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
 
                 Config conf = ConfigFactory.load();
 
@@ -124,13 +124,13 @@ public class WorldPayPaymentService {
 
                 final String callbackURL = webHost + "/api/callbacks/worldpay/cardDeposit";
 
-                final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8") +
-                        "&failureURL=" + URLEncoder.encode(callbackURL  + "?ordk=" + orderKey, "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8");
+                final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + customerWorldPayCreditCardDeposit.getOrderId(), "UTF-8") +
+                        "&failureURL=" + URLEncoder.encode(callbackURL  + "?ordk=" + customerWorldPayCreditCardDeposit.getOrderId(), "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + customerWorldPayCreditCardDeposit.getOrderId(), "UTF-8");
 
                 worldPayRedirectionURL = worldPayRedirectionURL.concat(additionalParams);
 
 
-                F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);
+                F.Tuple result = new F.Tuple(worldPayRedirectionURL, customerWorldPayCreditCardDeposit.getOrderId());
 
                 promise.success(result);
 
@@ -173,7 +173,7 @@ public class WorldPayPaymentService {
 
                 String worldPayRedirectionURL = "https://" + url;
 
-                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
+//                String orderKey = StringUtils.substringBetween(worldPayRedirectionURL, "OrderKey=", "&Ticket");
 
                 Config conf = ConfigFactory.load();
 
@@ -181,13 +181,14 @@ public class WorldPayPaymentService {
 
                 final String callbackURL = webHost + "/api/callbacks/worldpay/cardPurchase";
 
-                final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8") +
-                        "&failureURL=" + URLEncoder.encode(callbackURL  + "?ordk=" + orderKey, "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderKey, "UTF-8");
+                final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + customerWorldPayCreditCardPurchase.getOrderId(), "UTF-8") +
+                        "&failureURL=" + URLEncoder.encode(callbackURL  + "?ordk=" + customerWorldPayCreditCardPurchase.getOrderId(), "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + customerWorldPayCreditCardPurchase.getOrderId(), "UTF-8");
+
 
                 worldPayRedirectionURL = worldPayRedirectionURL.concat(additionalParams);
 
 
-                F.Tuple result = new F.Tuple(worldPayRedirectionURL, orderKey);
+                F.Tuple result = new F.Tuple(worldPayRedirectionURL, customerWorldPayCreditCardPurchase.getOrderId());
 
                 promise.success(result);
 
