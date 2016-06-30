@@ -68,11 +68,15 @@ public class W2GlobaldataService {
         queryData.setSurname(surname);
         queryData.setHouseNameNumber(houseNameNumber);
         queryData.setPostcode(postcode);
+        if (StringUtils.isNotBlank(flat))
         queryData.setFlat(flat);
+        if (StringUtils.isNotBlank(street))
         queryData.setStreet(street);
         if (StringUtils.isNotBlank(country))
             queryData.setCountry(IsoCountriesEnum.fromString(country));
+        if (StringUtils.isNotBlank(city))
         queryData.setCity(city);
+        if (StringUtils.isNotBlank(phoneNumber))
         queryData.setPhoneNumber(phoneNumber);
 
        /* queryData.setNameQueryMatchThreshold(w2GlobaldataSettings.nameQueryMatchThreshold);

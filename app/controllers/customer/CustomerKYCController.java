@@ -40,7 +40,7 @@ public class CustomerKYCController extends BaseController {
     @Inject
     W2GlobaldataService w2GlobaldataService;
 
-    //    @With(BaseCustomerApiAction.class)
+    @With(BaseCustomerApiAction.class)
     @ApiOperation(
             nickname = "kyc/checkUK",
             value = "Check kyc for UK",

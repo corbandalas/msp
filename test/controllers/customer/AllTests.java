@@ -19,7 +19,8 @@ import org.junit.runners.Suite.SuiteClasses;
                 CustomerProfileControllerTest.class,
                 CustomerRegisterControllerTest.class,
                 CustomerTransactionControllerTest.class,
-                CustomerTransferControllerTest.class
+                CustomerTransferControllerTest.class,
+                CustomerKycControllerTest.class
         }
 )
 public class AllTests extends TestSuite {
