@@ -24,6 +24,7 @@ import repository.CurrencyRepository;
 import repository.CustomerRepository;
 import repository.PropertyRepository;
 import services.OperationService;
+import util.CurrencyUtil;
 import util.SecurityUtil;
 
 import java.util.Calendar;
@@ -201,7 +202,7 @@ public class WorldpayCallbackController extends BaseController {
 
         String mspOrderKey = request().getQueryString("ordk");
 
-        Logger.info("Order id: " +mspOrderKey);
+        Logger.info("Order id: " + mspOrderKey);
 
         if (StringUtils.isBlank(mspOrderKey)) {
             Logger.error("Internal order ID is empty!");
@@ -241,21 +242,34 @@ public class WorldpayCallbackController extends BaseController {
             return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
         }
 
-        long amount = Long.parseLong(paymentAmount);
+        long totalPaymentAmount = Long.parseLong(paymentAmount);
 
-        if (amount != customerWorldPayCreditCardPurchase.getAmount()) {
-            Logger.error("Amounts are different!");
-            return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
-        }
 
         if (!paymentCurrency.equalsIgnoreCase(customerWorldPayCreditCardPurchase.getCurrency())) {
             Logger.error("Currencies are different!");
             return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
         }
 
-        F.Promise<Result> result = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.secret")).flatMap(rez -> {
+        final F.Promise<Optional<Property>> priceAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card." + customerWorldPayCreditCardPurchase.getCardType()));
+        final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+        final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(customerWorldPayCreditCardPurchase.getCurrency()));
 
-            String secret = rez.get().getValue();
+        F.Promise<Result> result = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.secret")).zip(priceAmountPromise).zip(priceCurrencyPromise).zip(currencyPromise).flatMap(rez -> {
+
+            final Optional<Currency> requestCurrency = rez._2;
+
+            final Optional<Currency> priceCurrency = rez._1._2;
+
+            final long priceAmount = Long.parseLong(rez._1._1._2.get().getValue());
+
+            final long totalCalculatedAmount = CurrencyUtil.convert(priceAmount, priceCurrency, requestCurrency) + customerWorldPayCreditCardPurchase.getAmount();
+
+            if (totalPaymentAmount != totalCalculatedAmount) {
+                Logger.error("Amounts are different!");
+                return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
+            }
+
+            String secret = rez._1._1._1.get().getValue();
 
             String generatedMAC = SecurityUtil.generateKeyFromArrayMD5(orderKey, paymentAmount, paymentCurrency, paymentStatus, secret);
 
@@ -264,7 +278,7 @@ public class WorldpayCallbackController extends BaseController {
                 return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
             }
 
-            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), amount, paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL()));
+            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL()));
 
         });
 
