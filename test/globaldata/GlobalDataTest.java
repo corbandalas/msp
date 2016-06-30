@@ -31,6 +31,37 @@ public class GlobalDataTest extends BaseRepositoryTest {
 
 
     @Test
+    public void testSDD() throws Exception {
+        try {
+            Thread.currentThread().sleep(1000);
+
+            String dt = "1944-12-31";  // Start date
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar c = Calendar.getInstance();
+            c.setTime(sdf.parse(dt));
+
+            ServiceResponse serviceResponse = w2GlobaldataService.kycCheckUK("Billy Jones", "Billy", null, "Jones", c.getTime(), "68", "RH13 3HE", null, null, null, null, null, "KYC_UK_SafePay_FDD").get(10000000L);
+
+        } catch (Exception e) {
+            Logger.error("Error eKYC_UKService", e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testSDDSIS() throws Exception {
+        try {
+            Thread.currentThread().sleep(1000);
+
+            ServiceResponse serviceResponse = w2GlobaldataService.kycCheckUK("Robert Mugabe", "Robert", null, "Mugabe", null, null, null, null, null, null, null, null, "KYC_UK_SafePay_FDD").get(10000000L);
+
+        } catch (Exception e) {
+            Logger.error("Error eKYC_UKService", e);
+            fail();
+        }
+    }
+
+/*    @Test
     public void scandiSuccess() throws Exception {
         try {
             Thread.currentThread().sleep(1000);
@@ -64,7 +95,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
             Logger.error("Error eKYC_UKService", e);
             fail();
         }
-    }
+    }*/
 
 
 /*    //    @Test

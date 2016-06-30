@@ -45,14 +45,14 @@
 
     {
       "id": "w2.globaldata.wsdl.url",
-      "value": "https://apiv3-uat.w2globaldata.com/Service.svc?singleWsdl",
+      "value": "https://apiv3.w2globaldata.com/Service.svc?singleWsdl",
       "description": "W2 Globaldata WSDL URL",
       "category": "W2_INTEGRATION"
     },
 
     {
       "id": "w2.globaldata.api.key",
-      "value": "ff4834a5-4b87-4e2f-b488-5dc8ad9739ec",
+      "value": "ebc1214b-0ab3-4577-b9cb-de856b85a12b",
       "description": "W2 Globaldata Api key",
       "category": "W2_INTEGRATION"
     },

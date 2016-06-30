@@ -1,6 +1,7 @@
 package services;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.microsoft.schemas._2003._10.Serialization.Arrays.ArrayOfKeyValueOfstringstringKeyValueOfstringstring;
 import exception.W2GlobaldataException;
 import exception.W2GlobaldataValidationException;
@@ -37,6 +38,7 @@ import java.util.Optional;
  * @since 0.1.0
  */
 
+@Singleton
 public class W2GlobaldataService {
 
     @Inject
@@ -57,18 +59,21 @@ public class W2GlobaldataService {
     }
 
 
-    private QueryData createQueryData(W2GlobaldataSettings w2GlobaldataSettings, String city, String country, Date dateOfBirth, String forename, String nationalId, String postcode, String region, String street, String surename, String houseNameNumber) throws W2GlobaldataValidationException {
+    private QueryData createQueryData(W2GlobaldataSettings w2GlobaldataSettings, String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber) throws W2GlobaldataValidationException {
 
         QueryData queryData = new QueryData();
-        queryData.setCity(city);
-        queryData.setCountry(IsoCountriesEnum.fromString(country));
+        queryData.setNameQuery(nameQuery);
         queryData.setForename(forename);
-        queryData.setNationalId(nationalId);
-        queryData.setPostcode(postcode);
-        queryData.setRegion(region);
-        queryData.setStreet(street);
-        queryData.setSurname(surename);
+        queryData.setMiddleNames(middleNames);
+        queryData.setSurname(surname);
         queryData.setHouseNameNumber(houseNameNumber);
+        queryData.setPostcode(postcode);
+        queryData.setFlat(flat);
+        queryData.setStreet(street);
+        if (StringUtils.isNotBlank(country))
+            queryData.setCountry(IsoCountriesEnum.fromString(country));
+        queryData.setCity(city);
+        queryData.setPhoneNumber(phoneNumber);
 
        /* queryData.setNameQueryMatchThreshold(w2GlobaldataSettings.nameQueryMatchThreshold);
         queryData.setDateOfBirthMatchThreshold(w2GlobaldataSettings.dateOfBirthMatchThreshold);*/
@@ -78,8 +83,12 @@ public class W2GlobaldataService {
         return queryData;
     }
 
-    public F.Promise<ServiceResponse> scandyService(String city, String country, Date dateOfBirth, String forename, String nationalId, String postcode, String street, String surename, String houseNameNumber, String testdatanumber) {
+/*    public F.Promise<ServiceResponse> scandyService(String city, String country, Date dateOfBirth, String forename, String nationalId, String postcode, String street, String surename, String houseNameNumber, String testdatanumber) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, city, country, dateOfBirth, forename, nationalId, postcode, null, street, surename, houseNameNumber), "TEST_SCANDI", testdatanumber));
+    }*/
+
+    public F.Promise<ServiceResponse> kycCheckUK(String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber, String bundleName) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, forename, middleNames, surname, dateOfBirth, houseNameNumber, postcode, flat, street, country, city, phoneNumber), bundleName));
     }
 
 
@@ -162,12 +171,11 @@ public class W2GlobaldataService {
         return getW2GlobaldataSettings().flatMap(res -> invokeUploadDocument(res, documentData, documentReference, documentType, documentExpiry));
     }
 
-    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName, String testdatanumber) {
+    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName) {
         return F.Promise.promise(() -> {
             try {
 
                 ServiceLocator serviceLocator = new ServiceLocator();
-
                 IService basicHttpsBinding_iService = serviceLocator.getBasicHttpsBinding_IService(new URL(w2GlobaldataSettings.wsdlURL));
 
                 ServiceRequest serviceRequest = new ServiceRequest();
@@ -185,14 +193,14 @@ public class W2GlobaldataService {
                 queryOption.setKey("RedirectUrl");
                 queryOption.setValue("http://google.com");
 
-         /*       if (w2GlobaldataSettings.sandbox) {
-                    queryOption.setKey("Sandbox");
-                    queryOption.setValue("true");
-                }*/
+                if (w2GlobaldataSettings.sandbox) {
+                    queryOption2.setKey("Sandbox");
+                    queryOption2.setValue("true");
+                }
 
-                queryOption2.setKey("testdatanumber");
+   /*             queryOption2.setKey("testdatanumber");
                 queryOption2.setValue(testdatanumber);
-
+*/
 
                 queryOptions[0] = queryOption;
                 queryOptions[1] = queryOption2;

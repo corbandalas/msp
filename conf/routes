@@ -127,6 +127,9 @@ GET     /api-docs/api/customer/card/management                          @pl.mati
 POST     /api/customer/card/management/changeStatus                      @controllers.customer.CustomerCardManagementController.changeStatus()
 POST     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
 
+GET     /api-docs/api/customer/kyc                                      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/kyc")
+POST     /api/customer/kyc/checkUK                                      @controllers.customer.CustomerKYCController.kycCheckUK()
+
 # WorldPay API
 GET     /api-docs/api/customer/worldpay                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/worldpay")
 GET    /api/customer/worldpay/getbanks/:country                         @controllers.customer.CustomerWorldPayCreditDepositController.getBankDetails(country:String)
