@@ -11,6 +11,8 @@ import dto.customer.CustomerKYCCheck;
 import dto.customer.CustomerKYCCheckResponse;
 import dto.customer.KYCServiceResult;
 import model.Card;
+import model.Customer;
+import model.enums.KYC;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts.ServiceResponse;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTransactionInformation;
 import play.Logger;
@@ -19,6 +21,7 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
+import repository.CustomerRepository;
 import services.W2GlobaldataService;
 
 import java.util.ArrayList;
@@ -39,6 +42,9 @@ public class CustomerKYCController extends BaseController {
 
     @Inject
     W2GlobaldataService w2GlobaldataService;
+
+    @Inject
+    CustomerRepository customerRepository;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -62,6 +68,8 @@ public class CustomerKYCController extends BaseController {
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
     public Promise<Result> kycCheckUK() {
 
+        final Customer customer = (Customer) ctx().args.get("customer");
+
         String bundleName = "KYC_UK_SafePay_SDD";
 
         final JsonNode jsonNode = request().body().asJson();
@@ -79,17 +87,27 @@ public class CustomerKYCController extends BaseController {
             bundleName = "KYC_UK_SafePay_FDD";
         }
 
-        final F.Promise<Result> result = w2GlobaldataService.kycCheckUK(request.getNameQuery(), request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).map(details ->
+        final Promise<Result> result = w2GlobaldataService.kycCheckUK(request.getNameQuery(), request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).flatMap(details ->
         {
 
-        List<KYCServiceResult> kycServiceResults = new ArrayList<KYCServiceResult>();
+            List<KYCServiceResult> kycServiceResults = new ArrayList<KYCServiceResult>();
 
-            for (ServiceTransactionInformation serviceTransactionInformation : details.getProcessRequestResult().getTransactionInformation().getServiceTransactions()){
+            for (ServiceTransactionInformation serviceTransactionInformation : details.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
                 kycServiceResults.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
             }
 
+            if (details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
+                if (request.getKycType().equalsIgnoreCase("FDD")) {
+                    customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+                } else {
+                    customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                }
+            }
+
+            return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details)).zip(Promise.pure(kycServiceResults));
+        }).map(res -> {
             return ok(Json.toJson(
-                    new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), kycServiceResults)));
+                    new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2)));
         });
         return returnRecover(result);
 

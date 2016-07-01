@@ -58,7 +58,7 @@ public class CustomerKycControllerTest extends BaseControllerTest {
     public void checkSuccessKYC_UK_SDD() throws Exception {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
-                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
         assertEquals("0", createResponse.get("code").asText());
 
         final JsonNode authorizeResponse = authorizeCustomer(phone, password);
@@ -86,13 +86,19 @@ public class CustomerKycControllerTest extends BaseControllerTest {
 
         assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
         assertEquals("Pass", changeResponse.get("result").asText());
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.SIMPLIFIED_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
     }
 
     @Test
     public void checkFailKYC_UK_SDD() throws Exception {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
-                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, password, "USA"));
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
         assertEquals("0", createResponse.get("code").asText());
 
         final JsonNode authorizeResponse = authorizeCustomer(phone, password);
@@ -120,6 +126,13 @@ public class CustomerKycControllerTest extends BaseControllerTest {
 
         assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
         assertEquals("Fail", changeResponse.get("result").asText());
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.NONE.toString(), profileResponse.get("kyc").asText());
+
     }
 
 
