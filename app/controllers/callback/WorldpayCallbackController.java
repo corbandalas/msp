@@ -278,7 +278,7 @@ public class WorldpayCallbackController extends BaseController {
                 return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
             }
 
-            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL()));
+            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res.getToken()));
 
         });
 
@@ -441,7 +441,7 @@ public class WorldpayCallbackController extends BaseController {
 
                     instance.add(Calendar.DAY_OF_YEAR, 720);
 
-                    cardPromise = cardProvider.issueEmptyPlasticCard(customer, "Plastic card", currency).flatMap(cardCreationResponse ->
+                    cardPromise = cardProvider.issueEmptyVirtualCard(customer, "Plastic card", currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.PLASTIC, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
                                     customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
