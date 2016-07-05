@@ -7,6 +7,7 @@ import dto.customer.CustomerWorldPayCreditCardPurchase;
 import exception.CustomerNotRegisteredException;
 import exception.WrongCardException;
 import exception.WrongCurrencyException;
+import exception.WrongKYCException;
 import model.*;
 import model.enums.CardBrand;
 import model.enums.CardType;
@@ -314,64 +315,68 @@ public class WorldpayCallbackController extends BaseController {
 
             final Currency currency = data._2.get();
 
+            if (customer.getKyc().equals(KYC.NONE)) {
+                Logger.error("Specified customer is NONE KYC");
+                return F.Promise.throwing(new WrongKYCException());
+            }
+
             return F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId())).flatMap(cards -> {
-                if (customer.getKyc() == KYC.NONE) {
+                final Card card;
 
-                    return cardProvider.issuePrepaidVirtualCard(customer, "new card", amount, currency).flatMap(cardCreationResponse ->
-                            F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
-                                    CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
-                            .flatMap(card -> operationService.createDepositOperation(card, amount, currency, "", "Worldpay deposit"));
-                } else {
-
-                    Card defaultCard = null;
-
-                    if (cardID == null) {
+                if (cardID == null) {
+                    if (cards.size() > 0) {
+                        if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
+                            Logger.error("Specified SIMPLIFIED_DUE_DILIGENCE customeralready has card");
+                            return F.Promise.throwing(new WrongKYCException());
+                        }
 
                         final Optional<Card> defaultCardOpt = StreamSupport.stream(cards.spliterator(), true).filter(Card::getCardDefault).findFirst();
+
                         if (!defaultCardOpt.isPresent()) {
                             Logger.error("Couldn't find default card for specified phone");
                             return F.Promise.throwing(new WrongCardException());
                         }
 
-                        defaultCard = defaultCardOpt.get();
-
+                        card=defaultCardOpt.get();
                     } else {
+                        return cardProvider.issuePrepaidVirtualCard(customer, "new card", amount, currency).flatMap(cardCreationResponse ->
+                                F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
+                                        CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
+                                        "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
+                                .flatMap(crd -> operationService.createDepositOperation(crd, amount, currency, "", "Worldpay deposit"));
+                    }
+                } else {
+                    final Optional<Card> cardOpt = cards.stream().filter(itm -> itm.getId().equals(cardID)).findFirst();
 
-                        final Optional<Card> defaultCardOpt = cards.stream().filter(itm -> itm.getId().equals(cardID)).findFirst();
-
-                        if (!defaultCardOpt.isPresent()) {
-                            Logger.error("Couldn't find card for specified ID");
-                            return F.Promise.throwing(new WrongCardException());
-                        }
-
-                        defaultCard = defaultCardOpt.get();
+                    if (!cardOpt.isPresent()) {
+                        Logger.error("Couldn't find card for specified ID");
+                        return F.Promise.throwing(new WrongCardException());
                     }
 
-
-                    final F.Promise<CardLoadResponse> cardLoadPromise;
-                    if (defaultCard.getType().equals(CardType.VIRTUAL)) {
-
-                        if (isBankDeposit) {
-                            cardLoadPromise = cardProvider.loadVirtualCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
-                        } else {
-                            cardLoadPromise = cardProvider.loadVirtualCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
-                        }
-
-                    } else {
-
-                        if (isBankDeposit) {
-                            cardLoadPromise = cardProvider.loadPlasticCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
-                        } else {
-                            cardLoadPromise = cardProvider.loadPlasticCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
-                        }
-                    }
-
-                    final Card finalDefaultCard = defaultCard;
-
-                    return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(finalDefaultCard,
-                            amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
+                    card = cardOpt.get();
                 }
+
+
+                final F.Promise<CardLoadResponse> cardLoadPromise;
+                if (card.getType().equals(CardType.VIRTUAL)) {
+
+                    if (isBankDeposit) {
+                        cardLoadPromise = cardProvider.loadVirtualCardFromBank(card, amount, currency, "Worldpay deposit");
+                    } else {
+                        cardLoadPromise = cardProvider.loadVirtualCardFromCard(card, amount, currency, "Worldpay deposit");
+                    }
+
+                } else {
+
+                    if (isBankDeposit) {
+                        cardLoadPromise = cardProvider.loadPlasticCardFromBank(card, amount, currency, "Worldpay deposit");
+                    } else {
+                        cardLoadPromise = cardProvider.loadPlasticCardFromCard(card, amount, currency, "Worldpay deposit");
+                    }
+                }
+
+                return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(card,
+                        amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
             });
         });
     }
