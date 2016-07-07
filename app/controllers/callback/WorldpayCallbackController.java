@@ -82,7 +82,7 @@ public class WorldpayCallbackController extends BaseController {
 
         final Document soapRequest = request().body().asXml();
 
-        Logger.info("Soap request xml: \n{}",request().body().asText());
+        Logger.info("Soap request xml: \n{}",soapRequest.getTextContent());
 
         if (soapRequest == null) {
             Logger.error("Couldn't parse SOAP body");
@@ -328,7 +328,7 @@ public class WorldpayCallbackController extends BaseController {
                 if (cardID == null) {
                     if (cards.size() > 0) {
                         if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
-                            Logger.error("Specified SIMPLIFIED_DUE_DILIGENCE customeralready has card");
+                            Logger.error("Specified SIMPLIFIED_DUE_DILIGENCE customer already has card");
                             return F.Promise.throwing(new WrongKYCException());
                         }
 
