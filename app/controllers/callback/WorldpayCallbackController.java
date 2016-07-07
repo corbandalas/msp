@@ -87,7 +87,7 @@ public class WorldpayCallbackController extends BaseController {
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        final String phone = soapRequest.getElementsByTagName("itemNumber").item(0).getTextContent();
+        final String phone = soapRequest.getElementsByTagName("bankInformation").item(0).getTextContent();
 
         final String currencyCode = soapRequest.getElementsByTagName("appliedCurrency").item(0).getTextContent();
         if (currencyCode == null) {
