@@ -82,6 +82,8 @@ public class WorldpayCallbackController extends BaseController {
 
         final Document soapRequest = request().body().asXml();
 
+        Logger.info("Soap request xml: \n{}",request().body().asText());
+
         if (soapRequest == null) {
             Logger.error("Couldn't parse SOAP body");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
