@@ -19,6 +19,7 @@ import play.cache.CacheApi;
 import play.libs.F;
 import play.mvc.Result;
 import provider.CardProvider;
+import provider.dto.CardCreationResponse;
 import provider.dto.CardLoadResponse;
 import repository.CardRepository;
 import repository.CurrencyRepository;
@@ -27,6 +28,7 @@ import repository.PropertyRepository;
 import services.OperationService;
 import util.CurrencyUtil;
 import util.SecurityUtil;
+import util.Utils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -281,7 +283,7 @@ public class WorldpayCallbackController extends BaseController {
                 return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
             }
 
-            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res.getToken()));
+            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res._1.getToken() + "&crdpan=" + Utils.maskCardNumber(res._2.getPan()) + "&crdexp=" + res._2.getExpDate()));
 
         });
 
@@ -384,7 +386,7 @@ public class WorldpayCallbackController extends BaseController {
     }
 
 
-    private F.Promise<Card> cardPurchase(String phone, long amount, String currencyCode, CardType cardType) {
+    private F.Promise<F.Tuple<Card, CardCreationResponse>> cardPurchase(String phone, long amount, String currencyCode, CardType cardType) {
 
         final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
 
@@ -407,7 +409,7 @@ public class WorldpayCallbackController extends BaseController {
 
             final Currency currency = data._2.get();
 
-            F.Promise<Card> cardPromise = null;
+            F.Promise<F.Tuple<Card, CardCreationResponse>> cardPromise = null;
 
             if (amount > 0) {
 
@@ -416,7 +418,7 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issuePrepaidVirtualCard(customer, "Virtual card", amount, currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
                 } else {
 
@@ -427,10 +429,10 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issuePrepaidVirtualCard(customer, "Plastic card", amount, currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.PLASTIC, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
                     cardPromise.map(card -> {
-                        cardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime());
+                        cardProvider.convertVirtualToPlastic(card._1, new Date(), false, instance.getTime());
                         return card;
                     });
 
@@ -441,7 +443,7 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issueEmptyVirtualCard(customer, "Virtual card", currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
                 } else {
 
                     Calendar instance = Calendar.getInstance();
@@ -451,12 +453,15 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issueEmptyVirtualCard(customer, "Plastic card", currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.PLASTIC, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
-                    cardPromise.flatMap(card -> cardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()));
+                    cardPromise.flatMap(card -> cardProvider.convertVirtualToPlastic(card._1, new Date(), false, instance.getTime()));
 
                 }
             }
+
+
+            cardPromise.flatMap(card-> cardProvider.regenerateCardDetails(card._1));
 
             return cardPromise;
 

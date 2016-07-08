@@ -42,6 +42,7 @@ public class CardRegenerate {
     protected String publicToken;
     @XmlElement(name = "ActionCode")
     protected String actionCode;
+
     @XmlElement(name = "CVV")
     protected String cvv;
     @XmlElement(name = "PAN")
@@ -141,6 +142,16 @@ public class CardRegenerate {
      */
     public void setPAN(String value) {
         this.pan = value;
+    }
+
+    @Override
+    public String toString() {
+        return "CardRegenerate{" +
+                "publicToken='" + publicToken + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", cvv='" + cvv + '\'' +
+                ", pan='" + pan + '\'' +
+                '}';
     }
 
 }

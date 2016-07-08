@@ -135,6 +135,43 @@ public class WorldPayPaymentServiceTest extends BaseRepositoryTest {
         }
     }
 
+//    @Test
+//    public void testWrongOrderPurchaseInitHostedPage() throws Exception {
+//
+//        Thread.currentThread().sleep(1000);
+//
+//        try {
+//
+//
+//            CustomerWorldPayCreditCardPurchase customerWorldPayCreditCardDeposit = new CustomerWorldPayCreditCardPurchase();
+//
+//            customerWorldPayCreditCardDeposit.setAmount(1000L);
+//            customerWorldPayCreditCardDeposit.setCurrency("GBP");
+//            customerWorldPayCreditCardDeposit.setCancelURL("https://google.com");
+//            customerWorldPayCreditCardDeposit.setFailURL("https://google.com");
+//            customerWorldPayCreditCardDeposit.setOrderId("" + 123);
+//            customerWorldPayCreditCardDeposit.setPhone("380632426303");
+//            customerWorldPayCreditCardDeposit.setSuccessURL("https://google.com");
+//
+//
+//            F.Tuple<String, String> stringStringTuple = worldPayPaymentService.initPurchaseHostedtWorldPayPayment(customerWorldPayCreditCardDeposit, 1000L).get(WS_TIMEOUT);
+//
+//            assertNotNull(stringStringTuple);
+//            assertNotNull(stringStringTuple._1);
+//            assertNotNull(stringStringTuple._2);
+//
+//
+//            stringStringTuple = worldPayPaymentService.initPurchaseHostedtWorldPayPayment(customerWorldPayCreditCardDeposit, 1000L).get(WS_TIMEOUT);
+//
+//            assertNotNull(stringStringTuple);
+//            assertNotNull(stringStringTuple._1);
+//            assertNotNull(stringStringTuple._2);
+//
+//        } catch (Exception e) {
+//            Logger.error("Error", e);
+//            fail();
+//        }
+//    }
 
     @After
     public void clean() {

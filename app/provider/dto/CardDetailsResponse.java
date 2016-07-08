@@ -14,13 +14,16 @@ public class CardDetailsResponse extends BaseCardResponse{
     private double bal;
     private String currency;
     private String statCode;
+    private String token;
 
     public CardDetailsResponse() {
 
     }
 
-    public CardDetailsResponse(String pan, String expDate, String cvv, double bal, String currency, String statCode, String actionCode) {
+    public CardDetailsResponse(String token, String pan, String expDate, String cvv, double bal, String currency, String statCode, String actionCode) {
         super(actionCode);
+
+        this.token = token;
         this.pan = pan;
         this.expDate = expDate;
         this.cvv = cvv;
@@ -75,5 +78,13 @@ public class CardDetailsResponse extends BaseCardResponse{
 
     public void setStatCode(String statCode) {
         this.statCode = statCode;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

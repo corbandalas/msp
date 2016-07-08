@@ -4,6 +4,7 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import exception.MspException;
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -252,6 +253,51 @@ public final class Utils {
         }
 
         return validNumber;
+    }
+
+    /**
+     * Return masked card number with specified mask
+     *
+     * @param cardNumber
+     * @param mask
+     * @return masked credit card number
+     */
+    public static String maskCardNumber(String cardNumber, String mask) {
+
+        if (!StringUtils.isNumeric(cardNumber)) {
+            return cardNumber;
+        }
+
+        // format the number
+        int index = 0;
+        StringBuilder maskedNumber = new StringBuilder();
+        for (int i = 0; i < mask.length(); i++) {
+            char c = mask.charAt(i);
+            if (c == '#') {
+                maskedNumber.append(cardNumber.charAt(index));
+                index++;
+            } else if (c == 'x') {
+                maskedNumber.append(c);
+                index++;
+            } else {
+                maskedNumber.append(c);
+            }
+        }
+
+        // return the masked number
+        return maskedNumber.toString();
+    }
+
+
+    /**
+     * Return masked card number with predefined default mask
+     *
+     * @param cardNumber
+     * @return
+     */
+    public static String maskCardNumber(String cardNumber) {
+
+        return maskCardNumber(cardNumber, "##xxxxxxxxxxxx##");
     }
 
 

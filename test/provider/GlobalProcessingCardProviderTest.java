@@ -131,6 +131,8 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
             assertNotNull(cardCreationResponse.getToken());
             assertEquals(cardCreationResponse.getLoadValue(), (double) amount / 100, 0.0001);
 
+            String cvv = cardCreationResponse.getCvv();
+
             Card card = new Card();
 
             Calendar instance = Calendar.getInstance();
@@ -146,7 +148,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
             assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
 
 
-            PlasticCardActivateResponse plasticCardActivateResponse = globalProcessingCardProvider.activatePlasticCard(card).get(WS_TIMEOUT);
+            PlasticCardActivateResponse plasticCardActivateResponse = globalProcessingCardProvider.activatePlasticCard(card, cardCreationResponse.getPan(), cvv).get(WS_TIMEOUT);
 
             assertNotNull(plasticCardActivateResponse);
             assertEquals(plasticCardActivateResponse.getActionCode(), "000");
@@ -297,6 +299,40 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
             } catch (Exception e) {
 
             }
+
+
+        } catch (Exception e) {
+            Logger.error("Error", e);
+            fail();
+        }
+    }
+
+    @Test
+    public void testRegenerateCardDetails() throws Exception {
+
+        Thread.currentThread().sleep(1000);
+
+        try {
+
+            long amount = 1000;
+
+            Currency currency = getCurrency();
+
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card", amount, currency);
+
+            assertNotNull(cardCreationResponse);
+            assertNotNull(cardCreationResponse.getToken());
+            assertEquals(cardCreationResponse.getLoadValue(), (double) amount / 100, 0.0001);
+
+            Card card = new Card();
+
+            card.setToken(cardCreationResponse.getToken());
+
+
+            CardDetailsResponse cardDetailsResponse = globalProcessingCardProvider.regenerateCardDetails(card).get(WS_TIMEOUT);
+
+            assertNotNull(cardDetailsResponse);
+            assertNotNull(cardDetailsResponse.getPan());
 
 
         } catch (Exception e) {

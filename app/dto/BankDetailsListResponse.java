@@ -15,16 +15,20 @@ public class BankDetailsListResponse extends BaseAPIResponse {
 
     private List<BankDetailsResultV2> bankDetailsResultV2;
 
+    public BankDetailsListResponse() {
+        super("", "");
+    }
+
     public BankDetailsListResponse(String text, String code, List<BankDetailsResultV2> bankDetailsResultV2) {
         super(text, code);
         this.bankDetailsResultV2 = bankDetailsResultV2;
     }
 
-    public List<BankDetailsResultV2> getTransactionList() {
+    public List<BankDetailsResultV2> getBankDetailsResultV2() {
         return bankDetailsResultV2;
     }
 
-    public void setTransactionList(List<BankDetailsResultV2> transactionList) {
-        this.bankDetailsResultV2 = transactionList;
+    public void setBankDetailsResultV2(List<BankDetailsResultV2> bankDetailsResultV2) {
+        this.bankDetailsResultV2 = bankDetailsResultV2;
     }
 }
