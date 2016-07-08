@@ -297,7 +297,7 @@ public final class Utils {
      */
     public static String maskCardNumber(String cardNumber) {
 
-        return maskCardNumber(cardNumber, "##xxxxxxxxxxxx##");
+        return maskCardNumber(cardNumber, "#####xxxxxx#####");
     }
 
 
