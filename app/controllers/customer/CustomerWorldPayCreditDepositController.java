@@ -322,6 +322,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(name = "country", value = "Country", required = true, dataType = "String", paramType = "path"),
+            @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")
     })
     public F.Promise<Result> getBankDetails(String country) {
 
