@@ -347,7 +347,10 @@ public class WorldpayCallbackController extends BaseController {
                                 F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                         CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
                                         "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
-                                .flatMap(crd -> operationService.createDepositOperation(crd, amount, currency, "", "Worldpay deposit"));
+                                .flatMap(crd -> {
+                                    cardProvider.regenerateCardDetails(crd);
+                                    return operationService.createDepositOperation(crd, amount, currency, "", "Worldpay deposit");
+                                });
                     }
                 } else {
                     final Optional<Card> cardOpt = cards.stream().filter(itm -> itm.getId().equals(cardID)).findFirst();
