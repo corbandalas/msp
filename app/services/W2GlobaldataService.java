@@ -62,22 +62,25 @@ public class W2GlobaldataService {
     private QueryData createQueryData(W2GlobaldataSettings w2GlobaldataSettings, String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber) throws W2GlobaldataValidationException {
 
         QueryData queryData = new QueryData();
-        queryData.setNameQuery(nameQuery);
+        if (StringUtils.isNotBlank(nameQuery))
+            queryData.setNameQuery(nameQuery);
         queryData.setForename(forename);
         queryData.setMiddleNames(middleNames);
         queryData.setSurname(surname);
-        queryData.setHouseNameNumber(houseNameNumber);
-        queryData.setPostcode(postcode);
+        if (StringUtils.isNotBlank(houseNameNumber))
+            queryData.setHouseNameNumber(houseNameNumber);
+        if (StringUtils.isNotBlank(postcode))
+            queryData.setPostcode(postcode);
         if (StringUtils.isNotBlank(flat))
-        queryData.setFlat(flat);
+            queryData.setFlat(flat);
         if (StringUtils.isNotBlank(street))
-        queryData.setStreet(street);
+            queryData.setStreet(street);
         if (StringUtils.isNotBlank(country))
             queryData.setCountry(IsoCountriesEnum.fromString(country));
         if (StringUtils.isNotBlank(city))
-        queryData.setCity(city);
+            queryData.setCity(city);
         if (StringUtils.isNotBlank(phoneNumber))
-        queryData.setPhoneNumber(phoneNumber);
+            queryData.setPhoneNumber(phoneNumber);
 
        /* queryData.setNameQueryMatchThreshold(w2GlobaldataSettings.nameQueryMatchThreshold);
         queryData.setDateOfBirthMatchThreshold(w2GlobaldataSettings.dateOfBirthMatchThreshold);*/
@@ -87,15 +90,17 @@ public class W2GlobaldataService {
         return queryData;
     }
 
-/*    public F.Promise<ServiceResponse> scandyService(String city, String country, Date dateOfBirth, String forename, String nationalId, String postcode, String street, String surename, String houseNameNumber, String testdatanumber) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, city, country, dateOfBirth, forename, nationalId, postcode, null, street, surename, houseNameNumber), "TEST_SCANDI", testdatanumber));
-    }*/
-
-    public F.Promise<ServiceResponse> kycCheckUK(String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber, String bundleName) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, forename, middleNames, surname, dateOfBirth, houseNameNumber, postcode, flat, street, country, city, phoneNumber), bundleName));
+    public F.Promise<ServiceResponse> scandyService(String forename, String surename, Date dateOfBirth, String houseNameNumber, String postcode, String street, String country, String city, String testdatanumber) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, null, surename, dateOfBirth, houseNameNumber, postcode, null, street, country, city, null), "TEST_SCANDI", testdatanumber));
     }
 
+    public F.Promise<ServiceResponse> kycCheckUK(String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber, String bundleName) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, middleNames, surname, dateOfBirth, houseNameNumber, postcode, flat, street, country, city, phoneNumber), bundleName, null));
+    }
 
+    public F.Promise<ServiceResponse> kycCheckCommon(String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, forename, middleNames, surname, dateOfBirth, null, null, null, null, null, null, null), "SafePay_CommonChecks", null));
+    }
 /*    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Date dateOfBirth) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, dateOfBirth)));
     }
@@ -175,7 +180,7 @@ public class W2GlobaldataService {
         return getW2GlobaldataSettings().flatMap(res -> invokeUploadDocument(res, documentData, documentReference, documentType, documentExpiry));
     }
 
-    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName) {
+    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName, String testdatanumber) {
         return F.Promise.promise(() -> {
             try {
 
@@ -202,9 +207,10 @@ public class W2GlobaldataService {
                     queryOption2.setValue("true");
                 }
 
-   /*             queryOption2.setKey("testdatanumber");
-                queryOption2.setValue(testdatanumber);
-*/
+                if (StringUtils.isNotBlank(testdatanumber)) {
+                    queryOption2.setKey("testdatanumber");
+                    queryOption2.setValue(testdatanumber);
+                }
 
                 queryOptions[0] = queryOption;
                 queryOptions[1] = queryOption2;

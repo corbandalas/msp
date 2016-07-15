@@ -6,10 +6,7 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BankDetailsListResponse;
-import dto.customer.CustomerCardListResponse;
-import dto.customer.CustomerKYCCheck;
-import dto.customer.CustomerKYCCheckResponse;
-import dto.customer.KYCServiceResult;
+import dto.customer.*;
 import model.Card;
 import model.Customer;
 import model.enums.KYC;
@@ -70,11 +67,9 @@ public class CustomerKYCController extends BaseController {
 
         final Customer customer = (Customer) ctx().args.get("customer");
 
-        String bundleName = "KYC_UK_SafePay_SDD";
-
         final JsonNode jsonNode = request().body().asJson();
         final CustomerKYCCheck request;
-
+        final String bundleName;
         try {
             request = Json.fromJson(jsonNode, CustomerKYCCheck.class);
 
@@ -85,10 +80,53 @@ public class CustomerKYCController extends BaseController {
         }
         if (request.getKycType().equalsIgnoreCase("FDD")) {
             bundleName = "KYC_UK_SafePay_FDD";
+        } else {
+            bundleName = "KYC_UK_SafePay_SDD";
         }
 
-        final Promise<Result> result = w2GlobaldataService.kycCheckUK(request.getNameQuery(), request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).flatMap(details ->
+        final Promise<Result> result = w2GlobaldataService.kycCheckCommon(request.getNameQuery(), request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth()).flatMap(details -> {
+            if (details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
+                return w2GlobaldataService.kycCheckUK(request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).flatMap(
+                        details2 -> {
+
+                            List<KYCServiceResult> kycServiceResults2 = new ArrayList<KYCServiceResult>();
+
+                            for (ServiceTransactionInformation serviceTransactionInformation : details2.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
+                                kycServiceResults2.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
+                            }
+
+                            if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
+                                if (request.getKycType().equalsIgnoreCase("FDD")) {
+                                    customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+                                } else {
+                                    customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                                }
+                            }
+
+                            return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
+
+                        }).map(res -> {
+                    return ok(Json.toJson(
+                            new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2)));
+                });
+            } else {
+
+                List<KYCServiceResult> kycServiceResults = new ArrayList<KYCServiceResult>();
+
+                for (ServiceTransactionInformation serviceTransactionInformation : details.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
+                    kycServiceResults.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
+                }
+
+                return F.Promise.pure(ok(Json.toJson(
+                        new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), kycServiceResults))));
+            }
+
+        });
+        return returnRecover(result);
+/*
+        final Promise<Result> result = w2GlobaldataService.kycCheckUK(request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).flatMap(details ->
         {
+
 
             List<KYCServiceResult> kycServiceResults = new ArrayList<KYCServiceResult>();
 
@@ -109,7 +147,7 @@ public class CustomerKYCController extends BaseController {
             return ok(Json.toJson(
                     new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2)));
         });
-        return returnRecover(result);
+        return returnRecover(result);*/
 
     }
 
