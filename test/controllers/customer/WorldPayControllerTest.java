@@ -2,6 +2,7 @@ package controllers.customer;
 
 import akka.actor.ActorSystem;
 import com.fasterxml.jackson.databind.JsonNode;
+import dto.BankDetailsListResponse;
 import dto.customer.CustomerCardListResponse;
 import dto.customer.CustomerWorldPayCreditCardDeposit;
 import dto.customer.CustomerWorldPayCreditCardPurchase;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import play.Logger;
 import play.libs.Json;
 import play.libs.ws.WS;
+import play.libs.ws.WSResponse;
 
 import static configs.ReturnCodes.*;
 import static org.junit.Assert.assertEquals;
@@ -40,28 +42,27 @@ public class WorldPayControllerTest extends BaseCustomerControllerTest  {
         }
     }
 //
-//    @Test
-//    public void getBanks() throws Exception {
-//
-//        final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
-//        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
-//
-//        final String token = authorizeResponse.get("token").asText();
-//
-//        final String country = "uk";
-//
-//        final String url = getCustomerApiUrl("/worldpay/getbanks/" + country);
-//
-//        WSResponse wsResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("token", token).get().get(TIMEOUT * 3);
-//
-//        String body = wsResponse.getBody();
-//
-////        final JsonNode response = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("enckey", enckey)
-////                .setHeader("orderId", ORDER_ID).get().get(TIMEOUT).asJson();
-//
-////        assertEquals(String.valueOf(SUCCESS_CODE), response.get("code").asText());
-////        assertEquals(true, response.get("propertyList").isArray());
-//    }
+    @Test
+    public void getBanks() throws Exception {
+
+        final JsonNode authorizeResponse = authorizeCustomer(PHONE_1, PASSWORD_1);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        final String country = "uk";
+
+        final String url = getCustomerApiUrl("/worldpay/getbanks/" + country);
+
+        WSResponse wsResponse = WS.url(url).setHeader("accountId", ACCOUNT_ID).setHeader("token", token).get().get(TIMEOUT * 3);
+
+        JsonNode jsonNode = wsResponse.asJson();
+
+        final BankDetailsListResponse bankDetailsListResponse = Json.fromJson(jsonNode, BankDetailsListResponse.class);
+
+        assertEquals(String.valueOf(SUCCESS_CODE), bankDetailsListResponse.getCode());
+        assertEquals(true, jsonNode.get("bankDetailsResultV2").isArray());
+    }
 
 
     @Test

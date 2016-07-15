@@ -74,12 +74,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getCurCode(), res.getStatCode(), res.getActionCode())));
+        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getPublicToken(), res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getCurCode(), res.getStatCode(), res.getActionCode())));
     }
 
     @Override
     public F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getCurCode(), res.getStatCode(), res.getActionCode())));
+        return getGPSSettings().flatMap(res -> invokeCardDetails(res, card)).map((res -> new CardDetailsResponse(res.getPublicToken(), res.getMaskedPAN(), res.getExpDate(), null, res.getAvlBal(), res.getCurCode(), res.getStatCode(), res.getActionCode())));
     }
 
     @Override
@@ -136,8 +136,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card) {
-        return getGPSSettings().flatMap(res -> invokePlasticCardActivation(res, card)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
+    public F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv) {
+        return getGPSSettings().flatMap(res -> invokePlasticCardActivation(res, card, cardNumber, cvv)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
     }
 
     @Override
@@ -180,6 +180,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokePinControl(res, card, null, null, null, "01")).map((res -> new ChangePINResponse(res.getActionCode())));
     }
 
+    @Override
+    public F.Promise<CardDetailsResponse> regenerateCardDetails(Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardRegenerate(res, card)).map((res -> new CardDetailsResponse(res.getPublicToken(), res.getPAN(), null, res.getCVV(), 0.0, null, null, res.getActionCode())));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -204,10 +209,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             VirtualCards virtualCards = null;
 
-//            System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
-//            System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
-//            System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
-//            System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
+            System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
+            System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
+            System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
+            System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
 
             long wsid = System.currentTimeMillis();
             Logger.info("/////// WsCreateCard service invocation. WSID #" + wsid);
@@ -601,7 +606,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card) {
+    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card, String cardNumber, String cvv) {
 
         return F.Promise.promise(() -> {
 
@@ -613,9 +618,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             Activate wsActivate = null;
 
+            System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
+            System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
+            System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
+            System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
+
 
             try {
-                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, null, null, null, null, null, null, null, "0", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, null, null, null, null, null, null, null, "2", cardNumber, null, card.getToken(), null, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), "Plastic card activation", 0, 0, null, 0, "2", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
@@ -727,6 +737,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return pinControl;
+        });
+    }
+
+    private F.Promise<CardRegenerate> invokeCardRegenerate(GPSSettings gpsSettings, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// WS_Regenerate service invocation. WSID #" + wsid);
+
+            CardRegenerate cardRegenerate = null;
+
+            try {
+
+                cardRegenerate = service.getServiceSoap().wsRegenerateCardDetail(card.getToken(), 0, 1, 1, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + cardRegenerate.getActionCode() + " ." + cardRegenerate.toString());
+
+                if (!StringUtils.equals("000", cardRegenerate.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return cardRegenerate;
         });
     }
 

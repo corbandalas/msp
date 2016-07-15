@@ -45,6 +45,7 @@ public interface CardProvider {
     F.Promise<CardStatusChangeResponseResponse> reportCardDamaged(Card card, String reason);
     F.Promise<CardTransactionListResponse> getCardTransactions(Card card, Date startDate, Date endDate);
     F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN);
-    F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card);
+    F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv);
     F.Promise<ChangePINResponse> obtainPIN(Card card);
+    F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
 }

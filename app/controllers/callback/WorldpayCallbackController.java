@@ -7,6 +7,7 @@ import dto.customer.CustomerWorldPayCreditCardPurchase;
 import exception.CustomerNotRegisteredException;
 import exception.WrongCardException;
 import exception.WrongCurrencyException;
+import exception.WrongKYCException;
 import model.*;
 import model.enums.CardBrand;
 import model.enums.CardType;
@@ -18,6 +19,7 @@ import play.cache.CacheApi;
 import play.libs.F;
 import play.mvc.Result;
 import provider.CardProvider;
+import provider.dto.CardCreationResponse;
 import provider.dto.CardLoadResponse;
 import repository.CardRepository;
 import repository.CurrencyRepository;
@@ -26,6 +28,7 @@ import repository.PropertyRepository;
 import services.OperationService;
 import util.CurrencyUtil;
 import util.SecurityUtil;
+import util.Utils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -81,12 +84,14 @@ public class WorldpayCallbackController extends BaseController {
 
         final Document soapRequest = request().body().asXml();
 
+        Logger.info("Soap request xml: \n{}",request().body().toString());
+
         if (soapRequest == null) {
             Logger.error("Couldn't parse SOAP body");
             return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        final String phone = soapRequest.getElementsByTagName("itemNumber").item(0).getTextContent();
+        final String phone = soapRequest.getElementsByTagName("bankInformation").item(0).getTextContent();
 
         final String currencyCode = soapRequest.getElementsByTagName("appliedCurrency").item(0).getTextContent();
         if (currencyCode == null) {
@@ -278,7 +283,7 @@ public class WorldpayCallbackController extends BaseController {
                 return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
             }
 
-            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL()));
+            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType())).map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res._1.getToken() + "&crdpan=" + Utils.maskCardNumber(res._2.getPan()) + "&crdexp=" + res._2.getExpDate()));
 
         });
 
@@ -314,70 +319,77 @@ public class WorldpayCallbackController extends BaseController {
 
             final Currency currency = data._2.get();
 
+            if (customer.getKyc().equals(KYC.NONE)) {
+                Logger.error("Specified customer is NONE KYC");
+                return F.Promise.throwing(new WrongKYCException());
+            }
+
             return F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId())).flatMap(cards -> {
-                if (customer.getKyc() == KYC.NONE) {
+                final Card card;
 
-                    return cardProvider.issuePrepaidVirtualCard(customer, "new card", amount, currency).flatMap(cardCreationResponse ->
-                            F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
-                                    CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
-                            .flatMap(card -> operationService.createDepositOperation(card, amount, currency, "", "Worldpay deposit"));
-                } else {
-
-                    Card defaultCard = null;
-
-                    if (cardID == null) {
+                if (cardID == null) {
+                    if (cards.size() > 0) {
+                        if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
+                            Logger.error("Specified SIMPLIFIED_DUE_DILIGENCE customer already has card");
+                            return F.Promise.throwing(new WrongKYCException());
+                        }
 
                         final Optional<Card> defaultCardOpt = StreamSupport.stream(cards.spliterator(), true).filter(Card::getCardDefault).findFirst();
+
                         if (!defaultCardOpt.isPresent()) {
                             Logger.error("Couldn't find default card for specified phone");
                             return F.Promise.throwing(new WrongCardException());
                         }
 
-                        defaultCard = defaultCardOpt.get();
-
+                        card=defaultCardOpt.get();
                     } else {
+                        return cardProvider.issuePrepaidVirtualCard(customer, "new card", amount, currency).flatMap(cardCreationResponse ->
+                                F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
+                                        CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
+                                        "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
+                                .flatMap(crd -> {
+                                    cardProvider.regenerateCardDetails(crd);
+                                    return operationService.createDepositOperation(crd, amount, currency, "", "Worldpay deposit");
+                                });
+                    }
+                } else {
+                    final Optional<Card> cardOpt = cards.stream().filter(itm -> itm.getId().equals(cardID)).findFirst();
 
-                        final Optional<Card> defaultCardOpt = cards.stream().filter(itm -> itm.getId().equals(cardID)).findFirst();
-
-                        if (!defaultCardOpt.isPresent()) {
-                            Logger.error("Couldn't find card for specified ID");
-                            return F.Promise.throwing(new WrongCardException());
-                        }
-
-                        defaultCard = defaultCardOpt.get();
+                    if (!cardOpt.isPresent()) {
+                        Logger.error("Couldn't find card for specified ID");
+                        return F.Promise.throwing(new WrongCardException());
                     }
 
-
-                    final F.Promise<CardLoadResponse> cardLoadPromise;
-                    if (defaultCard.getType().equals(CardType.VIRTUAL)) {
-
-                        if (isBankDeposit) {
-                            cardLoadPromise = cardProvider.loadVirtualCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
-                        } else {
-                            cardLoadPromise = cardProvider.loadVirtualCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
-                        }
-
-                    } else {
-
-                        if (isBankDeposit) {
-                            cardLoadPromise = cardProvider.loadPlasticCardFromBank(defaultCard, amount, currency, "Worldpay deposit");
-                        } else {
-                            cardLoadPromise = cardProvider.loadPlasticCardFromCard(defaultCard, amount, currency, "Worldpay deposit");
-                        }
-                    }
-
-                    final Card finalDefaultCard = defaultCard;
-
-                    return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(finalDefaultCard,
-                            amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
+                    card = cardOpt.get();
                 }
+
+
+                final F.Promise<CardLoadResponse> cardLoadPromise;
+                if (card.getType().equals(CardType.VIRTUAL)) {
+
+                    if (isBankDeposit) {
+                        cardLoadPromise = cardProvider.loadVirtualCardFromBank(card, amount, currency, "Worldpay deposit");
+                    } else {
+                        cardLoadPromise = cardProvider.loadVirtualCardFromCard(card, amount, currency, "Worldpay deposit");
+                    }
+
+                } else {
+
+                    if (isBankDeposit) {
+                        cardLoadPromise = cardProvider.loadPlasticCardFromBank(card, amount, currency, "Worldpay deposit");
+                    } else {
+                        cardLoadPromise = cardProvider.loadPlasticCardFromCard(card, amount, currency, "Worldpay deposit");
+                    }
+                }
+
+                return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(card,
+                        amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
             });
         });
     }
 
 
-    private F.Promise<Card> cardPurchase(String phone, long amount, String currencyCode, CardType cardType) {
+    private F.Promise<F.Tuple<Card, CardCreationResponse>> cardPurchase(String phone, long amount, String currencyCode, CardType cardType) {
 
         final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
 
@@ -400,7 +412,7 @@ public class WorldpayCallbackController extends BaseController {
 
             final Currency currency = data._2.get();
 
-            F.Promise<Card> cardPromise = null;
+            F.Promise<F.Tuple<Card, CardCreationResponse>> cardPromise = null;
 
             if (amount > 0) {
 
@@ -409,7 +421,7 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issuePrepaidVirtualCard(customer, "Virtual card", amount, currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
                 } else {
 
@@ -420,10 +432,10 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issuePrepaidVirtualCard(customer, "Plastic card", amount, currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.PLASTIC, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
                     cardPromise.map(card -> {
-                        cardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime());
+                        cardProvider.convertVirtualToPlastic(card._1, new Date(), false, instance.getTime());
                         return card;
                     });
 
@@ -434,22 +446,25 @@ public class WorldpayCallbackController extends BaseController {
                     cardPromise = cardProvider.issueEmptyVirtualCard(customer, "Virtual card", currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
                 } else {
 
                     Calendar instance = Calendar.getInstance();
 
                     instance.add(Calendar.DAY_OF_YEAR, 720);
 
-                    cardPromise = cardProvider.issueEmptyPlasticCard(customer, "Plastic card", currency).flatMap(cardCreationResponse ->
+                    cardPromise = cardProvider.issueEmptyVirtualCard(customer, "Plastic card", currency).flatMap(cardCreationResponse ->
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.PLASTIC, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
-                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))));
+                                    customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
-                    cardPromise.flatMap(card -> cardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()));
+                    cardPromise.flatMap(card -> cardProvider.convertVirtualToPlastic(card._1, new Date(), false, instance.getTime()));
 
                 }
             }
+
+
+            cardPromise.flatMap(card-> cardProvider.regenerateCardDetails(card._1));
 
             return cardPromise;
 

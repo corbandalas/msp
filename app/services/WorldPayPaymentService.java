@@ -307,7 +307,7 @@ public class WorldPayPaymentService {
 
         final String webHost = conf.getString("application.web.host");
 
-        final String callbackURL = webHost + "/api/callbacks/worldpay/cardPurchase";
+        final String callbackURL = webHost + callback;
 
         final String additionalParams = "&successURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderID, "UTF-8") +
                 "&failureURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderID, "UTF-8") + "&cancelURL=" + URLEncoder.encode(callbackURL + "?ordk=" + orderID, "UTF-8");
