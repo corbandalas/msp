@@ -64,7 +64,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
         }
     }
 
-    /*@Test
+    @Test
     public void scandiSuccess() throws Exception {
         try {
             Thread.currentThread().sleep(1000);
@@ -98,6 +98,6 @@ public class GlobalDataTest extends BaseRepositoryTest {
             Logger.error("Error eKYC_UKService", e);
             fail();
         }
-    }*/
+    }
 
 }
