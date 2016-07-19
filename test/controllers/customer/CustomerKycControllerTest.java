@@ -136,6 +136,28 @@ public class CustomerKycControllerTest extends BaseControllerTest {
     }
 
 
+    @Test
+    public void getKYC() throws Exception {
+        final String password = "hashedpass";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
+        assertEquals("0", createResponse.get("code").asText());
+
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/kyc/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.NONE.toString(), profileResponse.get("kyc").asText());
+
+    }
+
+
     @After
     public void clean() throws Exception {
         final ConnectionPool connectionPool = app.injector().instanceOf(ConnectionPool.class);

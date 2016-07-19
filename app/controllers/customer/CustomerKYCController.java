@@ -5,12 +5,12 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.BankDetailsListResponse;
-import dto.customer.*;
-import model.Card;
+import dto.customer.CustomerKYCCheck;
+import dto.customer.CustomerKYCCheckResponse;
+import dto.customer.CustomerKYCResponse;
+import dto.customer.KYCServiceResult;
 import model.Customer;
 import model.enums.KYC;
-import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts.ServiceResponse;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTransactionInformation;
 import play.Logger;
 import play.libs.F;
@@ -23,7 +23,6 @@ import services.W2GlobaldataService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static configs.ReturnCodes.*;
 
@@ -148,6 +147,35 @@ public class CustomerKYCController extends BaseController {
                     new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2)));
         });
         return returnRecover(result);*/
+
+    }
+
+
+    @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "kyc/status",
+            value = "Obtain customer KYC level",
+            notes = "Allow to obtain current KYC level",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CustomerKYCResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerKYCCheckResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
+    public Promise<Result> getKYC() {
+
+        final Customer customer = (Customer) ctx().args.get("customer");
+
+        return Promise.pure(ok(Json.toJson(
+                new CustomerKYCResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), customer.getKyc().name()))));
 
     }
 

@@ -7,10 +7,10 @@ import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTr
 import java.util.List;
 
 /**
- * Request object for change pin
+ * Customer KYC verification response
  *
  * @author kv created 30.06.2016.
- * @since 0.2.0
+ * @since 0.3.0
  */
 public class CustomerKYCCheckResponse extends BaseAPIResponse {
 
