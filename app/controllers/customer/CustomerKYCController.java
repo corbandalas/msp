@@ -13,6 +13,7 @@ import model.Customer;
 import model.enums.KYC;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTransactionInformation;
 import play.Logger;
+import play.cache.CacheApi;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
@@ -38,6 +39,9 @@ public class CustomerKYCController extends BaseController {
 
     @Inject
     W2GlobaldataService w2GlobaldataService;
+
+    @Inject
+    CacheApi cache;
 
     @Inject
     CustomerRepository customerRepository;
@@ -115,7 +119,7 @@ public class CustomerKYCController extends BaseController {
 
                     Boolean skipScandiBankId = null;
 
-                    if (request.getKycType().equalsIgnoreCase("FDD")) {
+                    if (request.getKycType().equalsIgnoreCase("SDD")) {
                         skipScandiBankId = true;
                     }
 
@@ -129,10 +133,10 @@ public class CustomerKYCController extends BaseController {
                                 }
 
                                 if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
-                                    if (request.getKycType().equalsIgnoreCase("FDD")) {
-                                        customer.setKyc(KYC.FULL_DUE_DILIGENCE);
-                                    } else {
+                                    if (request.getKycType().equalsIgnoreCase("SDD")) {
                                         customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                                    } else {
+                                        cache.set(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId(), 24 * 60 * 60);
                                     }
                                 }
 

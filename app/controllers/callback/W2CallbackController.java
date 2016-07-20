@@ -3,6 +3,8 @@ package controllers.callback;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import controllers.BaseController;
+import model.Customer;
+import model.enums.KYC;
 import play.Logger;
 import play.cache.CacheApi;
 import play.libs.F;
@@ -14,6 +16,8 @@ import repository.CustomerRepository;
 import repository.PropertyRepository;
 import services.OperationService;
 import util.SecurityUtil;
+
+import java.util.Optional;
 
 /**
  * Controller holds  Worldpay callback SOAP methods.
@@ -51,6 +55,26 @@ public class W2CallbackController extends BaseController {
             if (SecurityUtil.encodeString("Bancore:" + apiKey).equalsIgnoreCase(auth)) {
 
                 String interpretResult = request.get("ServiceResults").get("W2DataEkycScandi025").get("InterpretResult").asText();
+
+
+                if (interpretResult.equalsIgnoreCase("PASS")) {
+                    String customerId = cache.get(request.get("CallReference").asText());
+
+                    F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(customerId));
+
+                    customerPromise.flatMap(data -> {
+
+                        Customer customer = data.get();
+                        customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+
+                        return F.Promise.wrap(customerRepository.update(customer));
+
+                    });
+
+
+                    cache.remove(request.get("CallReference").asText());
+
+                }
 
                 return F.Promise.pure(ok("OK"));
             } else {
