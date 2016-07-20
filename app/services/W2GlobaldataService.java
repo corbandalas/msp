@@ -3,6 +3,7 @@ package services;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.microsoft.schemas._2003._10.Serialization.Arrays.ArrayOfKeyValueOfstringstringKeyValueOfstringstring;
+import dto.customer.KYCServiceResult;
 import exception.W2GlobaldataException;
 import exception.W2GlobaldataValidationException;
 import exception.WrongPropertyException;
@@ -14,6 +15,7 @@ import org.datacontract.schemas._2004._07.DatabaseLibrary_Enums.IsoCountriesEnum
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts.*;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts_DocumentUpload.DocumentUploadRequest;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts_DocumentUpload.DocumentUploadResponse;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTransactionInformation;
 import org.tempuri.IService;
 import org.tempuri.ServiceLocator;
 import play.Logger;
@@ -90,16 +92,16 @@ public class W2GlobaldataService {
         return queryData;
     }
 
-    public F.Promise<ServiceResponse> scandyService(String forename, String surename, Date dateOfBirth, String houseNameNumber, String postcode, String street, String country, String city, String testdatanumber) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, null, surename, dateOfBirth, houseNameNumber, postcode, null, street, country, city, null), "TEST_SCANDI", testdatanumber));
+    public F.Promise<ServiceResponse> scandyService(String forename, String surename, Date dateOfBirth, String houseNameNumber, String postcode, String street, String country, String city, String testdatanumber, Boolean skipScandiBankId) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, null, surename, dateOfBirth, houseNameNumber, postcode, null, street, country, city, null), "TEST_SCANDI", testdatanumber, skipScandiBankId));
     }
 
     public F.Promise<ServiceResponse> kycCheckUK(String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber, String bundleName) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, middleNames, surname, dateOfBirth, houseNameNumber, postcode, flat, street, country, city, phoneNumber), bundleName, null));
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, middleNames, surname, dateOfBirth, houseNameNumber, postcode, flat, street, country, city, phoneNumber), bundleName, null, null));
     }
 
     public F.Promise<ServiceResponse> kycCheckCommon(String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, forename, middleNames, surname, dateOfBirth, null, null, null, null, null, null, null), "SafePay_CommonChecks", null));
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, forename, middleNames, surname, dateOfBirth, null, null, null, null, null, null, null), "SafePay_CommonChecks", null, null));
     }
 /*    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Date dateOfBirth) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, dateOfBirth)));
@@ -180,7 +182,7 @@ public class W2GlobaldataService {
         return getW2GlobaldataSettings().flatMap(res -> invokeUploadDocument(res, documentData, documentReference, documentType, documentExpiry));
     }
 
-    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName, String testdatanumber) {
+    private F.Promise<ServiceResponse> invokeKycCheck(W2GlobaldataSettings w2GlobaldataSettings, QueryData queryData, String bundleName, String testdatanumber, Boolean skipScandiBankId) {
         return F.Promise.promise(() -> {
             try {
 
@@ -198,6 +200,8 @@ public class W2GlobaldataService {
 
                 final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption2 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
 
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption3 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
 
                 queryOption.setKey("RedirectUrl");
                 queryOption.setValue("http://google.com");
@@ -212,12 +216,19 @@ public class W2GlobaldataService {
                     queryOption2.setValue(testdatanumber);
                 }
 
+                if (skipScandiBankId != null) {
+                    queryOption3.setKey("SkipScandiBankId");
+                    queryOption3.setValue("true");
+                }
+
                 queryOptions[0] = queryOption;
                 queryOptions[1] = queryOption2;
 
                 serviceRequest.setQueryOptions(queryOptions);
 
                 serviceRequest.setQueryData(queryData);
+
+                Logger.info("invokeKycCheck request: " + queryData.toString());
 
                 ServiceAuthorisation serviceAuthorisation = new ServiceAuthorisation();
                 serviceAuthorisation.setAPIKey(w2GlobaldataSettings.apiKey);
@@ -226,6 +237,9 @@ public class W2GlobaldataService {
 
                 final ServiceResponse serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
 
+
+                Logger.info("invokeKycCheck response: " + serviceResponseToString(serviceResponse));
+
                 return serviceResponse;
 
             } catch (Exception ex) {
@@ -233,6 +247,24 @@ public class W2GlobaldataService {
                 throw new W2GlobaldataException("W2 global data  kycCheck error");
             }
         });
+    }
+
+
+    private String serviceResponseToString(ServiceResponse serviceResponse) {
+        String result = "InterpretResult: ".concat(serviceResponse.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue()).concat(", serviceCallReference: ").concat(serviceResponse.getProcessRequestResult().getTransactionInformation().getServiceCallReference());
+
+        result = result.concat(", ServiceTransactions: { ");
+
+        for (ServiceTransactionInformation serviceTransactionInformation : serviceResponse.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
+            result = result.concat("{ serviceName: ").concat(serviceTransactionInformation.getService().getValue()).concat(", serviceInterpretResult: ").concat(serviceTransactionInformation.getServiceInterpretResult().getValue()).concat(", serviceTransactionResult: ").concat(serviceTransactionInformation.getServiceTransactionResult().getValue()).concat(", serviceTransactionResultMessage: ").concat(serviceTransactionInformation.getServiceTransactionResultMessage()).concat(", validationResult: ").concat(serviceTransactionInformation.getValidationResult().getValue()).concat(" }, ");
+        }
+
+        result = result.concat(" }");
+
+
+        return result;
+
+
     }
 
     private F.Promise<DocumentUploadResponse> invokeUploadDocument(W2GlobaldataSettings w2GlobaldataSettings, String documentData, String documentReference, String documentType, Date documentExpiry) {

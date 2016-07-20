@@ -80,8 +80,9 @@ public class CustomerKycControllerTest extends BaseControllerTest {
         request.setDateOfBirth(c.getTime());
         request.setPostcode("BS8 1HN");
         request.setKycType("SDD");
+        request.setCountry("GBR");
 
-        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/checkUK")).setHeader("token", token)
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/check")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
         assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
@@ -120,8 +121,9 @@ public class CustomerKycControllerTest extends BaseControllerTest {
         request.setDateOfBirth(c.getTime());
         request.setPostcode("RH13 3HE");
         request.setKycType("SDD");
+        request.setCountry("GBR");
 
-        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/checkUK")).setHeader("token", token)
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/check")).setHeader("token", token)
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
         assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());

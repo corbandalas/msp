@@ -23,6 +23,15 @@ public class CustomerKYCCheck {
     private String city;
     private String phoneNumber;
     private String kycType;
+    private String scandyTestdatanumber;
+
+    public String getScandyTestdatanumber() {
+        return scandyTestdatanumber;
+    }
+
+    public void setScandyTestdatanumber(String scandyTestdatanumber) {
+        this.scandyTestdatanumber = scandyTestdatanumber;
+    }
 
     public String getNameQuery() {
         return nameQuery;

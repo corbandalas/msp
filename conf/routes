@@ -128,7 +128,8 @@ POST     /api/customer/card/management/changeStatus                      @contro
 POST     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
 
 GET     /api-docs/api/customer/kyc                                      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/kyc")
-POST     /api/customer/kyc/checkUK                                      @controllers.customer.CustomerKYCController.kycCheckUK()
+POST     /api/customer/kyc/check                                       @controllers.customer.CustomerKYCController.kycCheck()
+POST     /api/callbacks/w2globaldata/kycCallback                        @controllers.callback.W2CallbackController.kycCallback()
 GET     /api/customer/kyc/get                                         @controllers.customer.CustomerKYCController.getKYC()
 
 # WorldPay API

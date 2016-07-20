@@ -62,7 +62,7 @@ public class CustomerKYCController extends BaseController {
 
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Check KYC request", required = true, dataType = "dto.customer.CustomerKYCCheck", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
-    public Promise<Result> kycCheckUK() {
+    public Promise<Result> kycCheck() {
 
         final Customer customer = (Customer) ctx().args.get("customer");
 
@@ -85,29 +85,68 @@ public class CustomerKYCController extends BaseController {
 
         final Promise<Result> result = w2GlobaldataService.kycCheckCommon(request.getNameQuery(), request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth()).flatMap(details -> {
             if (details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
-                return w2GlobaldataService.kycCheckUK(request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).flatMap(
-                        details2 -> {
 
-                            List<KYCServiceResult> kycServiceResults2 = new ArrayList<KYCServiceResult>();
 
-                            for (ServiceTransactionInformation serviceTransactionInformation : details2.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
-                                kycServiceResults2.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
-                            }
+                if (request.getCountry().equalsIgnoreCase("GBR")) {
+                    return w2GlobaldataService.kycCheckUK(request.getForename(), request.getMiddleNames(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getFlat(), request.getStreet(), request.getCountry(), request.getCity(), request.getPhoneNumber(), bundleName).flatMap(
+                            details2 -> {
 
-                            if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
-                                if (request.getKycType().equalsIgnoreCase("FDD")) {
-                                    customer.setKyc(KYC.FULL_DUE_DILIGENCE);
-                                } else {
-                                    customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                                List<KYCServiceResult> kycServiceResults2 = new ArrayList<KYCServiceResult>();
+
+                                for (ServiceTransactionInformation serviceTransactionInformation : details2.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
+                                    kycServiceResults2.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
                                 }
-                            }
 
-                            return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
+                                if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
+                                    if (request.getKycType().equalsIgnoreCase("FDD")) {
+                                        customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+                                    } else {
+                                        customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                                    }
+                                }
 
-                        }).map(res -> {
-                    return ok(Json.toJson(
-                            new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2)));
-                });
+                                return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
+
+                            }).map(res -> {
+                        return ok(Json.toJson(
+                                new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2, null, res._1._2.getProcessRequestResult().getTransactionInformation().getServiceCallReference())));
+                    });
+                } else if (request.getCountry().equalsIgnoreCase("SWE") || request.getCountry().equalsIgnoreCase("DNK") || request.getCountry().equalsIgnoreCase("NOR")) {
+
+                    Boolean skipScandiBankId = null;
+
+                    if (request.getKycType().equalsIgnoreCase("FDD")) {
+                        skipScandiBankId = true;
+                    }
+
+                    return w2GlobaldataService.scandyService(request.getForename(), request.getSurname(), request.getDateOfBirth(), request.getHouseNameNumber(), request.getPostcode(), request.getStreet(), request.getCountry(), request.getCity(), request.getScandyTestdatanumber(), skipScandiBankId).flatMap(
+                            details2 -> {
+
+                                List<KYCServiceResult> kycServiceResults2 = new ArrayList<KYCServiceResult>();
+
+                                for (ServiceTransactionInformation serviceTransactionInformation : details2.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
+                                    kycServiceResults2.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
+                                }
+
+                                if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
+                                    if (request.getKycType().equalsIgnoreCase("FDD")) {
+                                        customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+                                    } else {
+                                        customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                                    }
+                                }
+
+                                return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
+
+                            }).map(res -> {
+                        return ok(Json.toJson(
+                                new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2, res._1._2.getProcessRequestResult().getServiceResult().getW2DataEkycScandi025Result().getBankIdFormUrl(), res._1._2.getProcessRequestResult().getTransactionInformation().getServiceCallReference())));
+                    });
+                } else {
+                    //TODO: FIX
+                    return null;
+                }
+
             } else {
 
                 List<KYCServiceResult> kycServiceResults = new ArrayList<KYCServiceResult>();
@@ -117,7 +156,7 @@ public class CustomerKYCController extends BaseController {
                 }
 
                 return F.Promise.pure(ok(Json.toJson(
-                        new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), kycServiceResults))));
+                        new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), details.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), kycServiceResults, null, details.getProcessRequestResult().getTransactionInformation().getServiceCallReference()))));
             }
 
         });

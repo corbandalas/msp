@@ -31,6 +31,24 @@ public class GlobalDataTest extends BaseRepositoryTest {
         propertyLoader.load(("conf/properties.json"), dispatcher);
     }
 
+
+    @Test
+    public void testSafePay_CommonChecks() throws Exception {
+        try {
+            Thread.currentThread().sleep(1000);
+            String dt = "1966-10-09";  // Start date
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar c = Calendar.getInstance();
+            c.setTime(sdf.parse(dt));
+            ServiceResponse serviceResponse = w2GlobaldataService.kycCheckCommon("David Cameron","David", null, "Cameron", c.getTime()).get(10000000L);
+            Assert.assertEquals(serviceResponse.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), "Pass");
+        } catch (Exception e) {
+            Logger.error("Error testUKSuccess", e);
+            fail();
+        }
+    }
+
+
     @Test
     public void testUKSuccessSDD() throws Exception {
         try {
@@ -74,8 +92,8 @@ public class GlobalDataTest extends BaseRepositoryTest {
             Calendar c = Calendar.getInstance();
             c.setTime(sdf.parse(dt));
 
-            ServiceResponse serviceResponse = w2GlobaldataService.scandyService("SIRI", "PETERSSON", c.getTime(), "47", "42715", "Eriksbo Västergärde", "SWE", "BILLDAL", "1").get(10000000L);
-
+            ServiceResponse serviceResponse = w2GlobaldataService.scandyService("SIRI", "PETERSSON", c.getTime(), "47", "42715", "Eriksbo Västergärde", "SWE", "BILLDAL", "1", null).get(10000000L);
+            Logger.info("Success");
         } catch (Exception e) {
             Logger.error("Error eKYC_UKService", e);
             fail();
@@ -92,7 +110,7 @@ public class GlobalDataTest extends BaseRepositoryTest {
             Calendar c = Calendar.getInstance();
             c.setTime(sdf.parse(dt));
 
-            ServiceResponse serviceResponse = w2GlobaldataService.scandyService("SIRI", "PETERSSON", c.getTime(), "47", "42715", "Eriksbo Västergärde", "SWE", "BILLDAL", "2").get(10000000L);
+            ServiceResponse serviceResponse = w2GlobaldataService.scandyService("SIRI", "PETERSSON", c.getTime(), "47", "42715", "Eriksbo Västergärde", "SWE", "BILLDAL", "2", null).get(10000000L);
 
         } catch (Exception e) {
             Logger.error("Error eKYC_UKService", e);
