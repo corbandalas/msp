@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import controllers.BaseController;
 import model.Customer;
 import model.enums.KYC;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.cache.CacheApi;
 import play.libs.F;
@@ -58,7 +59,14 @@ public class W2CallbackController extends BaseController {
 
 
                 if (interpretResult.equalsIgnoreCase("PASS")) {
-                    String customerId = cache.get(request.get("CallReference").asText());
+
+                    String callReference = request.get("CallReference").asText();
+
+                    if (StringUtils.startsWith(callReference, "WSCR")) {
+                        callReference = StringUtils.replace(callReference, "WSCR", "");
+                    }
+
+                    String customerId = cache.get(callReference);
 
                     F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(customerId));
 
@@ -72,7 +80,7 @@ public class W2CallbackController extends BaseController {
                     });
 
 
-                    cache.remove(request.get("CallReference").asText());
+                    cache.remove(callReference);
 
                 }
 

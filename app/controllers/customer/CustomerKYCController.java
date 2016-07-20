@@ -61,7 +61,8 @@ public class CustomerKYCController extends BaseController {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerKYCCheckResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
+            @ApiResponse(code = INCORRECT_COUNTRY_CODE, message = INCORRECT_COUNTRY_TEXT)
     })
 
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Check KYC request", required = true, dataType = "dto.customer.CustomerKYCCheck", paramType = "body"),
@@ -153,8 +154,7 @@ public class CustomerKYCController extends BaseController {
                                 new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2, url, res._1._2.getProcessRequestResult().getTransactionInformation().getServiceCallReference())));
                     });
                 } else {
-                    //TODO: FIX
-                    return null;
+                    return F.Promise.pure(createIncorrectCountryResponse());
                 }
 
             } else {
