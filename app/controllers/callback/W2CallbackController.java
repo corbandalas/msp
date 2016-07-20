@@ -55,9 +55,11 @@ public class W2CallbackController extends BaseController {
 
             Logger.info("W2CallbackController auth = " + auth);
 
-            Logger.info("W2CallbackController our auth = " + SecurityUtil.encodeString("Safepay:" + apiKey));
+            String ourAuth = "Basic ".concat(SecurityUtil.encodeString("Safepay:" + apiKey));
 
-            if (SecurityUtil.encodeString("Safepay:" + apiKey).equalsIgnoreCase(auth)) {
+            Logger.info("W2CallbackController our auth = ".concat(ourAuth));
+
+            if (ourAuth.equalsIgnoreCase(auth)) {
 
                 String interpretResult = request.get("ServiceResults").get("W2DataEkycScandi025").get("InterpretResult").asText();
 
@@ -97,6 +99,8 @@ public class W2CallbackController extends BaseController {
 
                 return F.Promise.pure(ok("OK"));
             } else {
+                Logger.info("W2CallbackController fail authorisation");
+
                 return F.Promise.pure(ok("ERROR"));
             }
 
