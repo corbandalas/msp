@@ -201,7 +201,7 @@ public class W2GlobaldataService {
 
                 final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
 
-                /*final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption1 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();*/
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption1 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
 
                 final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption2 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
 
@@ -214,12 +214,12 @@ public class W2GlobaldataService {
                 queryOption.setValue("http://google.com");
                 queryOptions[0] = queryOption;
 
-       /*         if (w2GlobaldataSettings.sandbox) {
+                if (!bundleName.equalsIgnoreCase("TEST_SCANDI") && w2GlobaldataSettings.sandbox) {
                     size++;
                     queryOption1.setKey("Sandbox");
                     queryOption1.setValue("true");
                     queryOptions[1] = queryOption1;
-                }*/
+                }
 
                 if (StringUtils.isNotBlank(testdatanumber)) {
                     size++;
