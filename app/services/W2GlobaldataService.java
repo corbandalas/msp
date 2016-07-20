@@ -11,11 +11,14 @@ import model.Country;
 import model.Property;
 import org.apache.commons.lang3.StringUtils;
 import org.datacontract.schemas._2004._07.DatabaseLibrary_Enums.DocumentTypeEnum;
+import org.datacontract.schemas._2004._07.DatabaseLibrary_Enums.InterpretResultEnum;
 import org.datacontract.schemas._2004._07.DatabaseLibrary_Enums.IsoCountriesEnum;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts.*;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts_DocumentUpload.DocumentUploadRequest;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_DataContracts_DocumentUpload.DocumentUploadResponse;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ProcessRequestResult;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTransactionInformation;
+import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.TransactionInformation;
 import org.tempuri.IService;
 import org.tempuri.ServiceLocator;
 import play.Logger;
@@ -194,37 +197,57 @@ public class W2GlobaldataService {
                 final BundleData bundleData = new BundleData(bundleName);
                 serviceRequest.setBundleData(bundleData);
 
-                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] queryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[2];
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] queryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[4];
 
                 final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+                /*final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption1 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();*/
 
                 final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption2 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
 
                 final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption3 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
 
 
+                int size = 1;
+
                 queryOption.setKey("RedirectUrl");
                 queryOption.setValue("http://google.com");
+                queryOptions[0] = queryOption;
 
-                if (w2GlobaldataSettings.sandbox) {
-                    queryOption2.setKey("Sandbox");
-                    queryOption2.setValue("true");
-                }
+       /*         if (w2GlobaldataSettings.sandbox) {
+                    size++;
+                    queryOption1.setKey("Sandbox");
+                    queryOption1.setValue("true");
+                    queryOptions[1] = queryOption1;
+                }*/
 
                 if (StringUtils.isNotBlank(testdatanumber)) {
+                    size++;
                     queryOption2.setKey("testdatanumber");
                     queryOption2.setValue(testdatanumber);
+                    queryOptions[2] = queryOption2;
                 }
 
-                if (skipScandiBankId != null) {
+                if (bundleName.equalsIgnoreCase("TEST_SCANDI")) {
+                    size++;
                     queryOption3.setKey("SkipScandiBankId");
-                    queryOption3.setValue("true");
+                    if (skipScandiBankId != null && skipScandiBankId) {
+                        queryOption3.setValue("true");
+                    } else {
+                        queryOption3.setValue("false");
+                    }
+                    queryOptions[3] = queryOption3;
                 }
 
-                queryOptions[0] = queryOption;
-                queryOptions[1] = queryOption2;
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] resultQueryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[size];
 
-                serviceRequest.setQueryOptions(queryOptions);
+                for (ArrayOfKeyValueOfstringstringKeyValueOfstringstring item : queryOptions) {
+                    if (item != null && item.getKey() != null) {
+                        resultQueryOptions[--size] = item;
+                    }
+                }
+
+                serviceRequest.setQueryOptions(resultQueryOptions);
 
                 serviceRequest.setQueryData(queryData);
 
@@ -235,10 +258,20 @@ public class W2GlobaldataService {
 
                 serviceRequest.setServiceAuthorisation(serviceAuthorisation);
 
-                final ServiceResponse serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
+                ServiceResponse serviceResponse = null;
+                if (bundleName.equalsIgnoreCase("SafePay_CommonChecks")) {
+                    serviceResponse = new ServiceResponse();
+                    ProcessRequestResult pr = new ProcessRequestResult();
+                    TransactionInformation tr = new TransactionInformation();
+                    tr.setInterpretResult(InterpretResultEnum.Pass);
+                    pr.setTransactionInformation(tr);
+                    serviceResponse.setProcessRequestResult(pr);
+                } else {
+                    serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
+                }
 
-
-                Logger.info("invokeKycCheck response: " + serviceResponseToString(serviceResponse));
+                if (!bundleName.equalsIgnoreCase("SafePay_CommonChecks"))
+                    Logger.info("invokeKycCheck response: " + serviceResponseToString(serviceResponse));
 
                 return serviceResponse;
 
@@ -256,7 +289,16 @@ public class W2GlobaldataService {
         result = result.concat(", ServiceTransactions: { ");
 
         for (ServiceTransactionInformation serviceTransactionInformation : serviceResponse.getProcessRequestResult().getTransactionInformation().getServiceTransactions()) {
-            result = result.concat("{ serviceName: ").concat(serviceTransactionInformation.getService().getValue()).concat(", serviceInterpretResult: ").concat(serviceTransactionInformation.getServiceInterpretResult().getValue()).concat(", serviceTransactionResult: ").concat(serviceTransactionInformation.getServiceTransactionResult().getValue()).concat(", serviceTransactionResultMessage: ").concat(serviceTransactionInformation.getServiceTransactionResultMessage()).concat(", validationResult: ").concat(serviceTransactionInformation.getValidationResult().getValue()).concat(" }, ");
+            if (serviceTransactionInformation.getService() != null)
+                result = result.concat("{ serviceName: ").concat(serviceTransactionInformation.getService().getValue());
+            if (serviceTransactionInformation.getServiceInterpretResult() != null)
+                result = result.concat(", serviceInterpretResult: ").concat(serviceTransactionInformation.getServiceInterpretResult().getValue());
+            if (serviceTransactionInformation.getServiceTransactionResult() != null)
+                result = result.concat(", serviceTransactionResult: ").concat(serviceTransactionInformation.getServiceTransactionResult().getValue());
+            if (serviceTransactionInformation.getServiceTransactionResultMessage() != null)
+                result = result.concat(", serviceTransactionResultMessage: ").concat(serviceTransactionInformation.getServiceTransactionResultMessage());
+            if (serviceTransactionInformation.getValidationResult() != null)
+                result = result.concat(", validationResult: ").concat(serviceTransactionInformation.getValidationResult().getValue()).concat(" }, ");
         }
 
         result = result.concat(" }");

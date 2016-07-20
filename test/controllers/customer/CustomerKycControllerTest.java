@@ -137,6 +137,94 @@ public class CustomerKycControllerTest extends BaseControllerTest {
 
     }
 
+    @Test
+    public void checkSuccessKYC_SCANDI_SDD() throws Exception {
+        final String password = "hashedpass";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
+        assertEquals("0", createResponse.get("code").asText());
+
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        String dt = "1952-06-04";  // Start date
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar c = Calendar.getInstance();
+        c.setTime(sdf.parse(dt));
+
+
+        final CustomerKYCCheck request = new CustomerKYCCheck();
+        request.setForename("SIRI");
+        request.setSurname("PETERSSON");
+        request.setHouseNameNumber("47");
+        request.setDateOfBirth(c.getTime());
+        request.setPostcode("42715");
+        request.setKycType("SDD");
+        request.setCountry("SWE");
+        request.setCity("BILLDAL");
+        request.setStreet("Eriksbo Västergärde");
+        request.setScandyTestdatanumber("1");
+
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/check")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
+        assertEquals("Pass", changeResponse.get("result").asText());
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.SIMPLIFIED_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
+
+    }
+
+
+    @Test
+    public void checkSuccessKYC_SCANDI_FDD() throws Exception {
+        final String password = "hashedpass";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
+        assertEquals("0", createResponse.get("code").asText());
+
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        String dt = "1952-06-04";  // Start date
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar c = Calendar.getInstance();
+        c.setTime(sdf.parse(dt));
+
+
+        final CustomerKYCCheck request = new CustomerKYCCheck();
+        request.setForename("SIRI");
+        request.setSurname("PETERSSON");
+        request.setHouseNameNumber("47");
+        request.setDateOfBirth(c.getTime());
+        request.setPostcode("42715");
+        request.setKycType("FDD");
+        request.setCountry("SWE");
+        request.setCity("BILLDAL");
+        request.setStreet("Eriksbo Västergärde");
+        request.setScandyTestdatanumber("1");
+
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/check")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
+        assertEquals("Pass", changeResponse.get("result").asText());
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.SIMPLIFIED_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
+
+    }
 
     @Test
     public void getKYC() throws Exception {

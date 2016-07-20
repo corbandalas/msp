@@ -135,16 +135,22 @@ public class CustomerKYCController extends BaseController {
                                 if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
                                     if (request.getKycType().equalsIgnoreCase("SDD")) {
                                         customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
-                                    } else {
-                                        cache.set(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId(), 24 * 60 * 60);
                                     }
                                 }
+
+                                cache.set(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId(), 24 * 60 * 60);
 
                                 return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
 
                             }).map(res -> {
+
+                        String url = null;
+
+                        if (res._1._2.getProcessRequestResult().getServiceResult().getW2DataEkycScandi025Result() != null)
+                            url = res._1._2.getProcessRequestResult().getServiceResult().getW2DataEkycScandi025Result().getBankIdFormUrl();
+
                         return ok(Json.toJson(
-                                new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2, res._1._2.getProcessRequestResult().getServiceResult().getW2DataEkycScandi025Result().getBankIdFormUrl(), res._1._2.getProcessRequestResult().getTransactionInformation().getServiceCallReference())));
+                                new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2, url, res._1._2.getProcessRequestResult().getTransactionInformation().getServiceCallReference())));
                     });
                 } else {
                     //TODO: FIX
