@@ -58,7 +58,7 @@ public class W2CallbackController extends BaseController {
                 String interpretResult = request.get("ServiceResults").get("W2DataEkycScandi025").get("InterpretResult").asText();
 
 
-                if (interpretResult.equalsIgnoreCase("PASS")) {
+                if (interpretResult.equalsIgnoreCase("Pass")) {
 
                     String callReference = request.get("CallReference").asText();
 
@@ -66,13 +66,20 @@ public class W2CallbackController extends BaseController {
                         callReference = StringUtils.replace(callReference, "WSCR", "");
                     }
 
+                    Logger.info("W2CallbackController callReference = " + callReference);
+
                     String customerId = cache.get(callReference);
+
+                    Logger.info("W2CallbackController customerId = " + customerId);
 
                     F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(customerId));
 
                     customerPromise.flatMap(data -> {
 
                         Customer customer = data.get();
+
+                        Logger.info("W2CallbackController setting customer FDD KYC");
+
                         customer.setKyc(KYC.FULL_DUE_DILIGENCE);
 
                         return F.Promise.wrap(customerRepository.update(customer));
