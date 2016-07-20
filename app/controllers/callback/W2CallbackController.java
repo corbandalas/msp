@@ -53,7 +53,11 @@ public class W2CallbackController extends BaseController {
         F.Promise<Result> result = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.api.key")).flatMap(rez -> {
             String apiKey = rez.get().getValue();
 
-            if (SecurityUtil.encodeString("Bancore:" + apiKey).equalsIgnoreCase(auth)) {
+            Logger.info("W2CallbackController auth = " + auth);
+
+            Logger.info("W2CallbackController our auth = " + SecurityUtil.encodeString("Safepay:" + apiKey));
+
+            if (SecurityUtil.encodeString("Safepay:" + apiKey).equalsIgnoreCase(auth)) {
 
                 String interpretResult = request.get("ServiceResults").get("W2DataEkycScandi025").get("InterpretResult").asText();
 
