@@ -148,7 +148,10 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
             assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
 
 
-            PlasticCardActivateResponse plasticCardActivateResponse = globalProcessingCardProvider.activatePlasticCard(card, cardCreationResponse.getPan(), cvv).get(WS_TIMEOUT);
+            card.setToken("804693480");
+
+
+            PlasticCardActivateResponse plasticCardActivateResponse = globalProcessingCardProvider.activatePlasticCard(card, "5175096185671258", "179").get(WS_TIMEOUT);
 
             assertNotNull(plasticCardActivateResponse);
             assertEquals(plasticCardActivateResponse.getActionCode(), "000");

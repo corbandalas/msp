@@ -8,6 +8,7 @@ import controllers.BaseController;
 import dto.BaseAPIResponse;
 import dto.customer.CustomerCardManagementChangePIN;
 import dto.customer.CustomerCardManagementChangeStatus;
+import dto.customer.PlasticCardActivation;
 import exception.WrongCardException;
 import model.Card;
 import model.Customer;
@@ -168,6 +169,64 @@ public class CustomerCardManagementController extends BaseController {
             }
 
             return cardProvider.changePIN(card, request.getCurrentPIN(), request.getNewPIN(), request.getConfirmNewPIN()).map(response
+                    -> okResponse());
+
+        });
+
+        return returnRecover(result);
+
+    }
+
+    @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "activatePlastic",
+            value = "Plastic card activation",
+            notes = "Activate plastic card by PAN and CVV code",
+            produces = "application/json",
+            httpMethod = "POST",
+            response = BaseAPIResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+    })
+    @ApiImplicitParams(
+            value = {
+                    @ApiImplicitParam(value = "plasticActivation request", required = true, dataType = "dto.customer.PlasticCardActivation", paramType = "body"),
+                    @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
+    public Promise<Result> plasticCardActivation() {
+
+        final Customer customer = (Customer) ctx().args.get("customer");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final PlasticCardActivation request;
+        try {
+            request = Json.fromJson(jsonNode, PlasticCardActivation.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getCardID() == null || request.getPan() == null || request.getCvv() == null) {
+            Logger.error("Missing parameters");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        final Promise<List<Card>> cardListPromise = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
+        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(request.getCardID()));
+
+        final Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
+            Card card = data._1.orElseThrow(WrongCardException::new);
+            if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
+                return Promise.pure(createWrongCardResponse());
+            }
+
+            return cardProvider.activatePlasticCard(card, request.getPan(), request.getCvv()).map(response
                     -> okResponse());
 
         });
