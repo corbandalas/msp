@@ -211,7 +211,7 @@ public class W2GlobaldataService {
                 int size = 1;
 
                 queryOption.setKey("RedirectUrl");
-                queryOption.setValue("http://google.com");
+                queryOption.setValue(w2GlobaldataSettings.redirectUrl);
                 queryOptions[0] = queryOption;
 
                 if (!bundleName.equalsIgnoreCase("TEST_SCANDI") && w2GlobaldataSettings.sandbox) {
@@ -371,20 +371,22 @@ public class W2GlobaldataService {
         final F.Promise<Optional<Property>> nameQueryMatchThresholdPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.nameQueryMatchThreshold"));
         final F.Promise<Optional<Property>> dateOfBirthMatchThresholdPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.dateOfBirthMatchThreshold"));
         final F.Promise<Optional<Property>> apiKeyPromise = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.api.key"));
+        final F.Promise<Optional<Property>> redirectUrl = F.Promise.wrap(propertyRepository.retrieveById("w2.globaldata.redirect.url"));
 
-        return wsdlPromise.zip(sandboxPromise).zip(nameQueryMatchThresholdPromise).zip(dateOfBirthMatchThresholdPromise).zip(apiKeyPromise).map(res -> {
+        return wsdlPromise.zip(sandboxPromise).zip(nameQueryMatchThresholdPromise).zip(dateOfBirthMatchThresholdPromise).zip(apiKeyPromise).zip(redirectUrl).map(res -> {
 
-            String url = res._1._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
-            Boolean sandbox = Boolean.parseBoolean(res._1._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
-            Integer nameQueryMatchThreshold = Integer.parseInt(res._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
-            String dateOfBirthMatchThresholdString = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String url = res._1._1._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+            Boolean sandbox = Boolean.parseBoolean(res._1._1._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
+            Integer nameQueryMatchThreshold = Integer.parseInt(res._1._1._1._2.orElseThrow(WrongPropertyException::new).getValue());
+            String dateOfBirthMatchThresholdString = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
             Integer dateOfBirthMatchThreshold = null;
             if (!StringUtils.isBlank(dateOfBirthMatchThresholdString)) {
                 dateOfBirthMatchThreshold = Integer.parseInt(dateOfBirthMatchThresholdString);
             }
-            String apiKeyString = res._2.orElseThrow(WrongPropertyException::new).getValue();
+            String apiKeyString = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String redirectUrlString = res._2.orElseThrow(WrongPropertyException::new).getValue();
 
-            return new W2GlobaldataSettings(url, sandbox, nameQueryMatchThreshold, dateOfBirthMatchThreshold, apiKeyString);
+            return new W2GlobaldataSettings(url, sandbox, nameQueryMatchThreshold, dateOfBirthMatchThreshold, apiKeyString, redirectUrlString);
 
         });
     }
@@ -395,13 +397,15 @@ public class W2GlobaldataService {
         private Integer nameQueryMatchThreshold;
         private Integer dateOfBirthMatchThreshold;
         private String apiKey;
+        private String redirectUrl;
 
-        public W2GlobaldataSettings(String wsdlURL, Boolean sandbox, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, String apiKey) {
+        public W2GlobaldataSettings(String wsdlURL, Boolean sandbox, Integer nameQueryMatchThreshold, Integer dateOfBirthMatchThreshold, String apiKey, String redirectUrl) {
             this.wsdlURL = wsdlURL;
             this.sandbox = sandbox;
             this.nameQueryMatchThreshold = nameQueryMatchThreshold;
             this.dateOfBirthMatchThreshold = dateOfBirthMatchThreshold;
             this.apiKey = apiKey;
+            this.redirectUrl = redirectUrl;
         }
     }
 

@@ -58,6 +58,13 @@
     },
 
     {
+      "id": "w2.globaldata.redirect.url",
+      "value": "http://google.com",
+      "description": "W2 Globaldata redirect url for scandy",
+      "category": "W2_INTEGRATION"
+    },
+
+    {
       "id": "w2.verification.price.amount",
       "value": "500",
       "description": "W2 verification price amount",
