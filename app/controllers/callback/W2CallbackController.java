@@ -76,7 +76,7 @@ public class W2CallbackController extends BaseController {
 
                     String cacheValue = cache.get(callReference);
 
-                    String[] cacheResult = cacheValue.split("|");
+                    String[] cacheResult = cacheValue.split("\\|");
 
                     String customerId = cacheResult[0];
                     String kycType = cacheResult[1];
