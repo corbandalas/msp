@@ -27,6 +27,7 @@ import java.util.Date;
 import static configs.ReturnCodes.*;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Customer password controller tests
@@ -66,19 +67,19 @@ public class CustomerKycControllerTest extends BaseControllerTest {
 
         final String token = authorizeResponse.get("token").asText();
 
-        String dt = "1966-10-09";  // Start date
+        String dt = "1992-05-09";  // Start date
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar c = Calendar.getInstance();
         c.setTime(sdf.parse(dt));
 
 
         final CustomerKYCCheck request = new CustomerKYCCheck();
-        request.setNameQuery("David Cameron");
+        request.setNameQuery("David Robson");
         request.setForename("David");
-        request.setSurname("Cameron");
-        request.setHouseNameNumber("5");
+        request.setSurname("Robson");
+        request.setHouseNameNumber("42");
         request.setDateOfBirth(c.getTime());
-        request.setPostcode("BS8 1HN");
+        request.setPostcode("HU12 9FL");
         request.setKycType("SDD");
         request.setCountry("GBR");
 
@@ -93,6 +94,47 @@ public class CustomerKycControllerTest extends BaseControllerTest {
 
         assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
         assertEquals(KYC.SIMPLIFIED_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
+    }
+
+    @Test
+    public void checkSuccessKYC_UK_FDD() throws Exception {
+        final String password = "hashedpass";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
+        assertEquals("0", createResponse.get("code").asText());
+
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        String dt = "1992-05-09";  // Start date
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar c = Calendar.getInstance();
+        c.setTime(sdf.parse(dt));
+
+
+        final CustomerKYCCheck request = new CustomerKYCCheck();
+        request.setNameQuery("David Robson");
+        request.setForename("David");
+        request.setSurname("Robson");
+        request.setHouseNameNumber("42");
+        request.setDateOfBirth(c.getTime());
+        request.setPostcode("HU12 9FL");
+        request.setKycType("FDD");
+        request.setCountry("GBR");
+
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/check")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
+        assertEquals("Pass", changeResponse.get("result").asText());
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.FULL_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
     }
 
     @Test
@@ -138,6 +180,49 @@ public class CustomerKycControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void checkFailKYC_UK_FDD() throws Exception {
+        final String password = "hashedpass";
+        final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
+                "83004", "Donetsk", "sao@bao.com", new Date(), true, KYC.NONE, password, "USA"));
+        assertEquals("0", createResponse.get("code").asText());
+
+        final JsonNode authorizeResponse = authorizeCustomer(phone, password);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+        String dt = "1944-12-31";  // Start date
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar c = Calendar.getInstance();
+        c.setTime(sdf.parse(dt));
+
+
+        final CustomerKYCCheck request = new CustomerKYCCheck();
+        request.setNameQuery("Billy Jones");
+        request.setForename("Billy");
+        request.setSurname("Jones");
+        request.setHouseNameNumber("68");
+        request.setDateOfBirth(c.getTime());
+        request.setPostcode("RH13 3HE");
+        request.setKycType("FDD");
+        request.setCountry("GBR");
+
+        final JsonNode changeResponse = WS.url(getCustomerApiUrl("/kyc/check")).setHeader("token", token)
+                .post(Json.toJson(request)).get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
+        assertEquals("Fail", changeResponse.get("result").asText());
+
+        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
+        assertEquals(KYC.NONE.toString(), profileResponse.get("kyc").asText());
+
+    }
+
+
+    @Test
     public void checkSuccessKYC_SCANDI_SDD() throws Exception {
         final String password = "hashedpass";
         final JsonNode createResponse = createCustomer(new Customer(phone, new Date(), "Mr", "Ivan", "Petrenko", "adress1", "adress2",
@@ -153,7 +238,6 @@ public class CustomerKycControllerTest extends BaseControllerTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar c = Calendar.getInstance();
         c.setTime(sdf.parse(dt));
-
 
         final CustomerKYCCheck request = new CustomerKYCCheck();
         request.setForename("SIRI");
@@ -171,13 +255,6 @@ public class CustomerKycControllerTest extends BaseControllerTest {
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
         assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
-        assertEquals("Pass", changeResponse.get("result").asText());
-
-        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
-                .get().get(TIMEOUT).asJson();
-
-        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
-        assertEquals(KYC.SIMPLIFIED_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
 
     }
 
@@ -216,13 +293,7 @@ public class CustomerKycControllerTest extends BaseControllerTest {
                 .post(Json.toJson(request)).get(TIMEOUT).asJson();
 
         assertEquals("" + SUCCESS_CODE, changeResponse.get("code").asText());
-        assertEquals("Pass", changeResponse.get("result").asText());
-
-        final JsonNode profileResponse = WS.url(getCustomerApiUrl("/profile/get")).setHeader("token", token)
-                .get().get(TIMEOUT).asJson();
-
-        assertEquals("" + SUCCESS_CODE, profileResponse.get("code").asText());
-        assertEquals(KYC.SIMPLIFIED_DUE_DILIGENCE.toString(), profileResponse.get("kyc").asText());
+        assertNotNull(changeResponse.get("redirectUrl"));
 
     }
 
