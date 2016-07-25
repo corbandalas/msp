@@ -74,7 +74,12 @@ public class W2CallbackController extends BaseController {
 
                     Logger.info("W2CallbackController callReference = " + callReference);
 
-                    String customerId = cache.get(callReference);
+                    String cacheValue = cache.get(callReference);
+
+                    String[] cacheResult = cacheValue.split("|");
+
+                    String customerId = cacheResult[0];
+                    String kycType = cacheResult[1];
 
                     Logger.info("W2CallbackController customerId = " + customerId);
 
@@ -84,17 +89,23 @@ public class W2CallbackController extends BaseController {
 
                         Customer customer = data.get();
 
-                        Logger.info("W2CallbackController setting customer FDD KYC");
+                        if (kycType.equalsIgnoreCase("FDD")) {
+                            Logger.info("W2CallbackController setting customer FDD KYC");
+                            customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+                        } else {
+                            Logger.info("W2CallbackController setting customer SDD KYC");
+                            customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+                        }
 
-                        customer.setKyc(KYC.FULL_DUE_DILIGENCE);
 
                         return F.Promise.wrap(customerRepository.update(customer));
 
                     });
 
-
                     cache.remove(callReference);
 
+                } else {
+                    Logger.info("W2CallbackController InterpretResult != Pass, skip");
                 }
 
                 return F.Promise.pure(ok("OK"));

@@ -133,13 +133,13 @@ public class CustomerKYCController extends BaseController {
                                     kycServiceResults2.add(new KYCServiceResult(serviceTransactionInformation.getService().getValue(), serviceTransactionInformation.getServiceInterpretResult().getValue(), serviceTransactionInformation.getServiceTransactionResultMessage()));
                                 }
 
-                                if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
+/*                                if (details2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue().equalsIgnoreCase("Pass")) {
                                     if (request.getKycType().equalsIgnoreCase("SDD")) {
                                         customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
                                     }
-                                }
+                                }*/
 
-                                cache.set(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId(), 24 * 60 * 60);
+                                cache.set(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId().concat("|").concat(request.getKycType()), 24 * 60 * 60);
 
                                 return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
 
