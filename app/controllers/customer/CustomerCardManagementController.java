@@ -6,6 +6,7 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BaseAPIResponse;
+import dto.customer.CustomerCardManagementChangeAlias;
 import dto.customer.CustomerCardManagementChangePIN;
 import dto.customer.CustomerCardManagementChangeStatus;
 import dto.customer.PlasticCardActivation;
@@ -234,6 +235,68 @@ public class CustomerCardManagementController extends BaseController {
         return returnRecover(result);
 
     }
+
+    @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "changeAlias",
+            value = "Change card name",
+            notes = "Change specified customer's card name",
+            produces = "application/json",
+            httpMethod = "POST",
+            response = BaseAPIResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+    })
+    @ApiImplicitParams(
+            value = {
+                    @ApiImplicitParam(value = "changeAlias request", required = true, dataType = "dto.customer.CustomerCardManagementChangeAlias", paramType = "body"),
+                    @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
+    public Promise<Result> changeAlias() {
+
+        final Customer customer = (Customer) ctx().args.get("customer");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CustomerCardManagementChangeAlias request;
+        try {
+            request = Json.fromJson(jsonNode, CustomerCardManagementChangeAlias.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getCardID() == null || request.getAlias() == null) {
+            Logger.error("Missing parameters");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        final Promise<List<Card>> cardListPromise = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
+        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(request.getCardID()));
+
+        final Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
+            Card card = data._1.orElseThrow(WrongCardException::new);
+            if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
+                return Promise.pure(createWrongCardResponse());
+            }
+
+
+            card.setAlias(request.getAlias());
+
+            return F.Promise.wrap(cardRepository.update(card)).map(response
+                    -> okResponse());
+
+        });
+
+        return returnRecover(result);
+
+    }
+
 
     private Status okResponse() {
         return ok(Json.toJson(new BaseAPIResponse(SUCCESS_TEXT, "" + SUCCESS_CODE)));

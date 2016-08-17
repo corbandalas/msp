@@ -66,7 +66,7 @@ public class CustomerCardListController extends BaseController {
 
         Promise<List<Card>> wrap = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
         Promise<Result> result = wrap.flatMap(res -> Promise.sequence(res.stream().
-                map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), s))).collect(Collectors.toList())).
+                map(t -> cardProvider.getVirtualCardDetails(t).map(s -> new CustomerCardListResponse.CardWrapper(t.getId(), t.getAlias(), s))).collect(Collectors.toList())).
                 map(z -> ok(Json.toJson(new CustomerCardListResponse("" + SUCCESS_CODE, SUCCESS_TEXT, z)))));
 
         return returnRecover(result);

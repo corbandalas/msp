@@ -127,6 +127,8 @@ GET     /api-docs/api/customer/card/management                          @pl.mati
 POST     /api/customer/card/management/changeStatus                      @controllers.customer.CustomerCardManagementController.changeStatus()
 POST     /api/customer/card/management/changePIN                         @controllers.customer.CustomerCardManagementController.changePIN()
 POST     /api/customer/card/activation                                   @controllers.customer.CustomerCardManagementController.plasticCardActivation()
+POST     /api/customer/card/changeAlias                                   @controllers.customer.CustomerCardManagementController.changeAlias()
+
 
 GET     /api-docs/api/customer/kyc                                      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/kyc")
 POST     /api/customer/kyc/check                                       @controllers.customer.CustomerKYCController.kycCheck()

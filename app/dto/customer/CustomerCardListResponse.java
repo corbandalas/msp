@@ -34,11 +34,13 @@ public class CustomerCardListResponse extends BaseAPIResponse {
 
     public static class CardWrapper {
         private long id;
+        private String alias;
         private CardDetailsResponse cardDetails;
 
-        public CardWrapper(long id, CardDetailsResponse cardDetails) {
+        public CardWrapper(long id, String alias, CardDetailsResponse cardDetails) {
             this.id = id;
             this.cardDetails = cardDetails;
+            this.alias = alias;
         }
 
         public CardWrapper() {
@@ -59,6 +61,14 @@ public class CustomerCardListResponse extends BaseAPIResponse {
 
         public void setCardDetails(CardDetailsResponse cardDetails) {
             this.cardDetails = cardDetails;
+        }
+
+        public String getAlias() {
+            return alias;
+        }
+
+        public void setAlias(String alias) {
+            this.alias = alias;
         }
     }
 
