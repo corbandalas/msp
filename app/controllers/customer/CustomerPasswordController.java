@@ -83,7 +83,7 @@ public class CustomerPasswordController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (!customer.getPassword().equals(request.getOldHashedPassword())) {
+        if (!customer.getPassword().equalsIgnoreCase(request.getOldHashedPassword())) {
 
             increaseWrongLoginAttempt(customer);
 
@@ -92,7 +92,7 @@ public class CustomerPasswordController extends BaseController {
             return F.Promise.pure(createPasswordMismatchResponse());
         }
 
-        if (customer.getPassword().equals(request.getHashedPassword())) {
+        if (customer.getPassword().equalsIgnoreCase(request.getHashedPassword())) {
             Logger.error("Specified password equals to existing");
 
             return F.Promise.pure(createPasswordEqualsToExistedResponse());

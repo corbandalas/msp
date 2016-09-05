@@ -122,7 +122,7 @@ public class CustomerLoginController extends BaseController {
                 return createWrongCustomerAccountResponse();
             }
 
-            if (!customer.getPassword().equals(password)) {
+            if (!customer.getPassword().equalsIgnoreCase(password)) {
                 Logger.error("Password doesn't match");
 
                 increaseWrongLoginAttempt(customer);
