@@ -35,16 +35,26 @@ public class CustomerCardListResponse extends BaseAPIResponse {
     public static class CardWrapper {
         private long id;
         private String alias;
+        private String type;
         private CardDetailsResponse cardDetails;
 
-        public CardWrapper(long id, String alias, CardDetailsResponse cardDetails) {
+        public CardWrapper(long id, String alias, CardDetailsResponse cardDetails, String type) {
             this.id = id;
             this.cardDetails = cardDetails;
             this.alias = alias;
+            this.type = type;
         }
 
         public CardWrapper() {
 
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
 
         public long getId() {
