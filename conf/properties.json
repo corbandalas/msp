@@ -17,29 +17,29 @@
 
     {
       "id": "cardprovider.gps.wsdl.url",
-      "value": "https://ws-test.globalprocessing.ae:10000/hyperion_its/Service.asmx?wsdl",
+      "value": "https://localhost:13682/service.asmx?wsdl",
       "description": "Global Processing WSDL URL",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.username",
-      "value": "Safepaytest",
+      "value": "SafePayApS",
       "description": "Global Processing SOAP header username",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.password",
-      "value": "Safepaytest123321",
+      "value": "0<q-1m;94l8|W,p",
       "description": "Global Processing SOAP header password",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.api.settings",
-      "value": "SPA:1822:SPA-VL-001 SafePay SDD Velocity EUR:SPA-CU-001 SafePay Virtual Card Usage:SPA-AF-001 SafePay Auth Fee Group EUR:9",
-      "description": "Global Processing Card settings",
+      "value": "SPA:1822|1981|1982:SPA-VL-002 SafePay FDD Limit EUR|SPA-VL-001 SafePay SDD Limit EUR|SPA-VL-004 SafePay FDD Limit DKK|SPA-VL-003 SafePay SDD Limit DKK|SPA-VL-006 SafePay FDD Limit GBP|SPA-VL-005 SafePay SDD Limit GBP:SPA-CU-002|SPA-CU-003:SPA-AF-001|SPA-AF-002|SPA-AF-003:9:76100G",
+      "description": "Global Processing Card settings //  issCode,  cardDesign,  limitGroup, permGroup, feeGroup, loadSrc, productRef",
       "category": "GPS_INTEGRATION"
     },
 

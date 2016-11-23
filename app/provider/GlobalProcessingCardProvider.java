@@ -9,6 +9,7 @@ import model.*;
 import model.Card;
 import model.Currency;
 import model.Customer;
+import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -27,7 +28,7 @@ import java.util.*;
  * Global Processing(GPS) CardProvider implementation
  *
  * @author corbandalas - created 08.02.2016
- * @since 0.1.0
+ * @since 0.2.0
  */
 
 @CardProviderVendor(value = "gps")
@@ -125,8 +126,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Card card, Date convertDate, boolean applyFee, Date expDate) {
-        return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate)).map((rez -> new ConvertVirtualToPlasticResponse(rez.getActionCode())));
+    public F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Customer customer, Card card, Date convertDate, boolean applyFee, Date expDate) {
+        return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate)).map((rez -> {
+
+            changeCardGroup(customer, card);
+
+            return new ConvertVirtualToPlasticResponse(rez.getActionCode());
+        }
+        ));
+
     }
 
 
@@ -167,7 +175,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardTransactionListResponse> getCardTransactions(Card card, Date startDate, Date endDate) {
-        return getGPSSettings().flatMap(res -> invokeCardStatement(res, card, startDate, endDate)).map((res -> new CardTransactionListResponse(res.getActionCode(), res.getTransactions() != null? res.getTransactions().getTransaction2(): null)));
+        return getGPSSettings().flatMap(res -> invokeCardStatement(res, card, startDate, endDate)).map((res -> new CardTransactionListResponse(res.getActionCode(), res.getTransactions() != null ? res.getTransactions().getTransaction2() : null)));
     }
 
     @Override
@@ -192,6 +200,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow)).
                 map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue()));
 
+    }
+
+    @Override
+    public F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card) {
+        return getGPSSettings().flatMap(res -> invokeCardChangeGroup(res, customer, card));
     }
 
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
@@ -220,7 +233,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
 
-
 //                Product ID: 1822
 //                Scheme: MySafePay
 //                Product Name: MySafePay EUR DE
@@ -246,6 +258,56 @@ public class GlobalProcessingCardProvider implements CardProvider {
 //                Settling currency: EUR
 
 
+                HashMap<String, String> cardDesignMap = new HashMap<String, String>();
+
+                System.out.println("cardDesign = " + countrySettingsTuple._1.cardDesign);
+
+                cardDesignMap.put("EUR", StringUtils.split(countrySettingsTuple._1.cardDesign, "|")[0]);
+                cardDesignMap.put("DKK", StringUtils.split(countrySettingsTuple._1.cardDesign, "|")[1]);
+                cardDesignMap.put("GBP", StringUtils.split(countrySettingsTuple._1.cardDesign, "|")[2]);
+
+                String cardDesign = cardDesignMap.get(currency.getId());
+
+                System.out.println("cardDesign = " + cardDesign);
+
+                HashMap<String, String> limitGroupMap = new HashMap<String, String>();
+
+                System.out.println("limitGroup = " + countrySettingsTuple._1.limitGroup);
+
+                limitGroupMap.put("EUR_FULL_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.limitGroup, "|")[0]);
+                limitGroupMap.put("DKK_FULL_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.limitGroup, "|")[2]);
+                limitGroupMap.put("GBP_FULL_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.limitGroup, "|")[4]);
+
+                limitGroupMap.put("EUR_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.limitGroup, "|")[1]);
+                limitGroupMap.put("DKK_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.limitGroup, "|")[3]);
+                limitGroupMap.put("GBP_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.limitGroup, "|")[5]);
+
+                String limitGroup = limitGroupMap.get(currency.getId() + "_" + customer.getKyc().name());
+
+
+
+                System.out.println("limitGroup = " + limitGroup);
+
+                HashMap<String, String> feeGroupMap = new HashMap<String, String>();
+
+                feeGroupMap.put("EUR", StringUtils.split(countrySettingsTuple._1.feeGroup, "|")[0]);
+                feeGroupMap.put("DKK", StringUtils.split(countrySettingsTuple._1.feeGroup, "|")[1]);
+                feeGroupMap.put("GBP", StringUtils.split(countrySettingsTuple._1.feeGroup, "|")[2]);
+
+                String feeGroup = feeGroupMap.get(currency.getId());
+
+                HashMap<String, String> permGroupMap = new HashMap<String, String>();
+
+//                permGroupMap.put("default", StringUtils.split(countrySettingsTuple._1.permsGroup, "|")[0]);
+                permGroupMap.put("SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.permsGroup, "|")[0]);
+                permGroupMap.put("FULL_DUE_DILIGENCE", StringUtils.split(countrySettingsTuple._1.permsGroup, "|")[1]);
+
+
+                String permGroup = permGroupMap.get(customer.getKyc().name());
+
+                System.out.println("permGroup = " + permGroup);
+
+
                 virtualCards = service.getServiceSoap().wsCreateCard(
                         wsid, //WSID
                         countrySettingsTuple._1.issCode, //IssCode
@@ -261,7 +323,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         customer.getPostcode(), //PostCode
                         countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), //Country
                         customer.getId(), //Mobile
-                        countrySettingsTuple._1.cardDesign, //CardDesign
+                        cardDesign, //CardDesign
                         null, //ExternalRef
                         dob, //DOB
                         DateUtil.format(new Date(), "yyyy-MM-dd"), //LocDate
@@ -273,7 +335,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, //AccCode
                         0, //ItemSrc
                         "5", //LoadFundsType
-                        countrySettingsTuple._1.loadSrc, //LoadSrc
+                        "67",//countrySettingsTuple._1.loadSrc, //LoadSrc
                         0, //LoadFee
                         customer.getFullName(), //LoadedBy
                         0, //CreateImage
@@ -283,10 +345,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, //Source_desc
                         null, //ExpDate
                         cardName, //CardName
-                        countrySettingsTuple._1.limitGroup, //LimitsGroup
+                        limitGroup, //LimitsGroup
                         null, //MCCGroup
-                        countrySettingsTuple._1.permsGroup, //PERMSGroup
-                        "1822", //ProductRef
+                        permGroup, //PERMSGroup
+                        countrySettingsTuple._1.productRef, //ProductRef 1822
                         null, //CarrierType
                         null, //Fulfil1
                         null, //Fulfil2
@@ -298,7 +360,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, //LogoFrontId
                         null, //LogoBackId
                         false, //Replacement
-                        countrySettingsTuple._1.feeGroup, //FeeGroup
+                        feeGroup, //FeeGroup
                         null, //PrimaryToken
                         customer.getAddress1(), //Delv_AddrL1
                         customer.getAddress2(), //Delv_AddrL2
@@ -644,7 +706,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
 
-
     private F.Promise<StatusChange> invokeStatusChange(GPSSettings gpsSettings, Card card, String statCode, String reason) {
 
         return F.Promise.promise(() -> {
@@ -771,6 +832,58 @@ public class GlobalProcessingCardProvider implements CardProvider {
         });
     }
 
+
+    private F.Promise<ChangeGroup> invokeCardChangeGroup(GPSSettings gpsSettings, Customer customer, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Change_Group service invocation. WSID #" + wsid);
+
+            ChangeGroup changeGroup = null;
+
+            try {
+
+                HashMap<String, String> permGroupMap = new HashMap<String, String>();
+
+                permGroupMap.put("SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.permsGroup, "|")[0]);
+                permGroupMap.put("FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.permsGroup, "|")[1]);
+
+                String permGroup = permGroupMap.get(customer.getKyc().name());
+
+                HashMap<String, String> limitGroupMap = new HashMap<String, String>();
+
+                limitGroupMap.put("EUR_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[0]);
+                limitGroupMap.put("DKK_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[2]);
+                limitGroupMap.put("GBP_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[4]);
+
+                limitGroupMap.put("EUR_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[1]);
+                limitGroupMap.put("DKK_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[3]);
+                limitGroupMap.put("GBP_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[5]);
+
+                String limitGroup = limitGroupMap.get(card.getCurrencyId() + "_" + customer.getKyc().name());
+
+                changeGroup = service.getServiceSoap().wsCardChangeGroups(wsid, gpsSettings.issCode, null, card.getToken(), DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), limitGroup, "", permGroup, "", "", "", "", "", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+
+                Logger.info("/////// Ws_Change_Group service invocation was ended. WSID #" + wsid + ". Result code: " + changeGroup.getActionCode() + " ." + changeGroup.toString());
+
+                if (!StringUtils.equals("000", changeGroup.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return changeGroup;
+        });
+    }
+
     private AuthSoapHeader createAuthHeader(String soapHeaderUsername, String soapHeaderPassword) {
         AuthSoapHeader authHeader = new AuthSoapHeader();
         authHeader.setStrUserName(soapHeaderUsername);
@@ -804,7 +917,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
             String[] split = res._2.orElseThrow(WrongPropertyException::new).getValue().split(":");
 
-            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5]);
+            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
 
         });
     }
@@ -820,8 +933,9 @@ public class GlobalProcessingCardProvider implements CardProvider {
         private String permsGroup;
         private String feeGroup;
         private String loadSrc;
+        private String productRef;
 
-        public GPSSettings(String wsdlURL, String headerUsername, String headerPassword, String issCode, String cardDesign, String limitGroup, String permsGroup, String feeGroup, String loadSrc) {
+        public GPSSettings(String wsdlURL, String headerUsername, String headerPassword, String issCode, String cardDesign, String limitGroup, String permsGroup, String feeGroup, String loadSrc, String productRef) {
 
             this.wsdlURL = wsdlURL;
             this.headerUsername = headerUsername;
@@ -832,6 +946,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             this.permsGroup = permsGroup;
             this.feeGroup = feeGroup;
             this.loadSrc = loadSrc;
+            this.productRef = productRef;
 
         }
 

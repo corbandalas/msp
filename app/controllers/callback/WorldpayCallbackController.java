@@ -435,7 +435,7 @@ public class WorldpayCallbackController extends BaseController {
                                     customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
                     cardPromise.map(card -> {
-                        cardProvider.convertVirtualToPlastic(card._1, new Date(), false, instance.getTime());
+                        cardProvider.convertVirtualToPlastic(customer, card._1, new Date(), false, instance.getTime());
                         return card;
                     });
 
@@ -458,7 +458,7 @@ public class WorldpayCallbackController extends BaseController {
                                     CardType.PLASTIC, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
                                     customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
 
-                    cardPromise.flatMap(card -> cardProvider.convertVirtualToPlastic(card._1, new Date(), false, instance.getTime()));
+                    cardPromise.flatMap(card -> cardProvider.convertVirtualToPlastic(customer, card._1, new Date(), false, instance.getTime()));
 
                 }
             }

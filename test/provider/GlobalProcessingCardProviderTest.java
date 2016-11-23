@@ -41,6 +41,22 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
     private CurrencyRepository currencyRepository;
 
 
+    static {
+        //for localhost testing only
+        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+                new javax.net.ssl.HostnameVerifier(){
+
+                    public boolean verify(String hostname,
+                                          javax.net.ssl.SSLSession sslSession) {
+                        if (hostname.equals("localhost")) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+    }
+
+
     private final long WS_TIMEOUT = 10000000L;
 
     @Before
@@ -65,9 +81,9 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
         try {
 
-            long amount = 1000;
+            long amount = 17000;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card", amount, getCurrency());
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerArtur(), "My card", amount, getCurrencyDKK());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -89,7 +105,9 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 1000;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card", amount, getCurrency());
+            Customer customer = createCustomer();
+
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(customer, "My card", amount, getCurrency());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -104,7 +122,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             card.setToken(cardCreationResponse.getToken());
 
-            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
+            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(customer, card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
 
             assertNotNull(convertVirtualToPlasticResponse);
             assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
@@ -125,7 +143,9 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 1000;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomer(), "My card2", amount, getCurrency());
+            Customer customer = createCustomer();
+
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(customer, "My card2", amount, getCurrency());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -142,7 +162,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             card.setToken(cardCreationResponse.getToken());
 
-            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
+            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(customer, card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
 
             assertNotNull(convertVirtualToPlasticResponse);
             assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
@@ -193,7 +213,9 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 0;
 
-            CardCreationResponse cardCreationResponse = getEmptyVirtualCard(createCustomer(), "My card", getCurrency());
+            Customer customer = createCustomer();
+
+            CardCreationResponse cardCreationResponse = getEmptyVirtualCard(customer, "My card", getCurrency());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -208,7 +230,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             instance.add(Calendar.YEAR, 4);
 
-            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
+            ConvertVirtualToPlasticResponse convertVirtualToPlasticResponse = globalProcessingCardProvider.convertVirtualToPlastic(customer, card, new Date(), false, instance.getTime()).get(WS_TIMEOUT);
 
             assertNotNull(convertVirtualToPlasticResponse);
 
@@ -689,12 +711,97 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
     private Customer createCustomer() {
         return new Customer("4921142172244", new Date(), "Mr", "Corban", "Dallas",
-                "adress1", "adress2", "83004", "Berlin", "me@corbandalas.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "DE");
+                "37 Vladimira Vernadskogo Street", "Room 304", "49027", "Dnepr", "olsapunova@gmail.com", new Date(), true, KYC.FULL_DUE_DILIGENCE, "101dog101", "DE");
+    }
+
+    private Customer createCustomerOlga() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1984, 9, 11);
+
+        return new Customer("380951780154", new Date(), "Mrs", "Olga", "Sapunova",
+                "37 Vladimira Vernadskogo Street", "Room 304", "49027", "Dnepr", "olsapunova@gmail.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "UA");
+    }
+
+
+    private Customer createCustomerMark() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1972, 1, 31);
+
+        return new Customer("4550505012", new Date(), "Mr", "Mark", "Hojgaard",
+                "Ordrupvej 47/a", "", "2920", "Charlottenlund, Copenhagen", "mh@safepaycorp.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "DK");
+    }
+
+    private Customer createCustomerZsuzsa() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1981, 8, 13);
+
+        return new Customer("4553775012", new Date(), "Mrs", "Zsuzsa", "Somogyi",
+                "Ordrupvej 47/a", "", "2920", "Charlottenlund, Copenhagen", "zs@safepaycorp.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "DK");
+    }
+
+
+    private Customer createCustomerHans() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1972, 5, 23);
+
+        return new Customer("4550505007", new Date(), "Mr", "Hans Henrik", "Hoffmeyer",
+                "Ordrupvej 47/a", "", "2920", "Charlottenlund, Copenhagen", "hh@safepaycorp.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "DK");
+    }
+
+
+    private Customer createCustomerKrisztian() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1985, 9, 14);
+
+        return new Customer("36204201550", new Date(), "Mr", "Krisztian", "Mecseki",
+                "Ferenciek tere 7-8. 3.lph, 2. em. 11. ( WP Online )", "", "1053", "Budapest", "mecseki.krisztian@wponline.hu", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "HU");
+    }
+
+    private Customer createCustomerSteve() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1990, 1, 1);
+
+        return new Customer("35020013521", new Date(), "Mr", "Steve", "Phillips",
+                "IDT Financial Services Ltd., 1 Montarik Building, 3 Bedlam Court", "", "GX11 1AA", "Gibraltar", "steve.phillips@idtfinance.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "GI");
+    }
+
+    private Customer createCustomerArtur() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1991, 4, 29);
+
+        return new Customer("4407711800301", new Date(), "Mr", "Artur", "Palka",
+                "IGlobal Processing Services FZLLC, 2nd Floor Office, 18-20 Hill Rise", "", "TW10 6UA", "Richmond", "APalka@globalprocessing.net", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "GB");
     }
 
 
     private Currency getCurrency() throws Exception {
         return Await.result(currencyRepository.retrieveById("EUR"), Duration.apply("1000 ms")).get();
+    }
+
+    private Currency getCurrencyEUR() throws Exception {
+        return Await.result(currencyRepository.retrieveById("EUR"), Duration.apply("1000 ms")).get();
+    }
+
+    private Currency getCurrencyDKK() throws Exception {
+        return Await.result(currencyRepository.retrieveById("DKK"), Duration.apply("1000 ms")).get();
+    }
+
+    private Currency getCurrencyGBP() throws Exception {
+        return Await.result(currencyRepository.retrieveById("GBP"), Duration.apply("1000 ms")).get();
     }
 
     @After

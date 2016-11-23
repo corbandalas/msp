@@ -1,5 +1,6 @@
 package provider;
 
+import ae.globalprocessing.hyperionweb.ChangeGroup;
 import com.google.inject.ImplementedBy;
 import model.Card;
 import model.Currency;
@@ -36,7 +37,7 @@ public interface CardProvider {
     F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description);
     F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description);
     F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard);
-    F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
+    F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Customer customer, Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
     F.Promise<PhoneActivateResponse> activateCardByPhone(Card card);
     F.Promise<CardStatusChangeResponseResponse> blockCard(Card card, String reason);
     F.Promise<CardStatusChangeResponseResponse> activateCard(Card card, String reason);
@@ -48,4 +49,5 @@ public interface CardProvider {
     F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv);
     F.Promise<ChangePINResponse> obtainPIN(Card card);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
+    F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
 }

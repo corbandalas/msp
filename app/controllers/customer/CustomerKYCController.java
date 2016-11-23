@@ -9,6 +9,7 @@ import dto.customer.CustomerKYCCheck;
 import dto.customer.CustomerKYCCheckResponse;
 import dto.customer.CustomerKYCResponse;
 import dto.customer.KYCServiceResult;
+import model.Card;
 import model.Customer;
 import model.enums.KYC;
 import org.datacontract.schemas._2004._07.NeuromancerLibrary_Resources.ServiceTransactionInformation;
@@ -19,6 +20,8 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
+import provider.CardProvider;
+import repository.CardRepository;
 import repository.CustomerRepository;
 import services.W2GlobaldataService;
 
@@ -45,6 +48,12 @@ public class CustomerKYCController extends BaseController {
 
     @Inject
     CustomerRepository customerRepository;
+
+    @Inject
+    CardRepository cardRepository;
+
+    @Inject
+    CardProvider cardProvider;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -113,6 +122,9 @@ public class CustomerKYCController extends BaseController {
                                 return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
 
                             }).map(res -> {
+
+                        changeCardGroup(customer);
+
                         return ok(Json.toJson(
                                 new CustomerKYCCheckResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1._2.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue(), res._2, null, res._1._2.getProcessRequestResult().getTransactionInformation().getServiceCallReference())));
                     });
@@ -226,6 +238,14 @@ public class CustomerKYCController extends BaseController {
         return Promise.pure(ok(Json.toJson(
                 new CustomerKYCResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), customer.getKyc().name()))));
 
+    }
+
+
+    private void changeCardGroup(Customer customer) {
+
+        final F.Promise<List<Card>> cardsPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
+
+        cardsPromise.map(res -> res.stream().map(card -> cardProvider.changeCardGroup(customer, card)));
     }
 
 

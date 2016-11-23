@@ -3,6 +3,7 @@ package controllers.callback;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import controllers.BaseController;
+import model.Card;
 import model.Customer;
 import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import repository.PropertyRepository;
 import services.OperationService;
 import util.SecurityUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,6 +38,13 @@ public class W2CallbackController extends BaseController {
 
     @Inject
     private PropertyRepository propertyRepository;
+
+
+    @Inject
+    private CardProvider cardProvider;
+
+    @Inject
+    CardRepository cardRepository;
 
     /**
      * Deposit callback
@@ -97,6 +106,8 @@ public class W2CallbackController extends BaseController {
                             customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
                         }
 
+                        changeCardGroup(customer);
+
 
                         return F.Promise.wrap(customerRepository.update(customer));
 
@@ -124,6 +135,13 @@ public class W2CallbackController extends BaseController {
             return ok("OK");
         });
 
+    }
+
+    private void changeCardGroup(Customer customer) {
+
+        final F.Promise<List<Card>> cardsPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
+
+        cardsPromise.map(res -> res.stream().map(card -> cardProvider.changeCardGroup(customer, card)));
     }
 
 
