@@ -83,7 +83,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 17000;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerArtur(), "My card", amount, getCurrencyDKK());
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerFuchs(), "My card", amount, getCurrencyDKK());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -785,6 +785,16 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
         return new Customer("4407711800301", new Date(), "Mr", "Artur", "Palka",
                 "IGlobal Processing Services FZLLC, 2nd Floor Office, 18-20 Hill Rise", "", "TW10 6UA", "Richmond", "APalka@globalprocessing.net", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "GB");
+    }
+
+    private Customer createCustomerFuchs() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1965, 12, 19);
+
+        return new Customer("48539989805", new Date(), "Mr", "Henrik", "Fuchs",
+                "Ordrupvej 47/a", "", "2920", "Charlottenlund, Copenhagen", "hf@concare.net", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "GB");
     }
 
 
