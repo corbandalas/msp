@@ -6,13 +6,11 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.BaseAPIResponse;
-import dto.customer.CustomerCardManagementChangeAlias;
-import dto.customer.CustomerCardManagementChangePIN;
-import dto.customer.CustomerCardManagementChangeStatus;
-import dto.customer.PlasticCardActivation;
+import dto.customer.*;
 import exception.WrongCardException;
 import model.Card;
 import model.Customer;
+import model.enums.CardType;
 import play.Logger;
 import play.libs.F;
 import play.libs.F.Promise;
@@ -22,6 +20,8 @@ import play.mvc.With;
 import provider.CardProvider;
 import repository.CardRepository;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -289,6 +289,72 @@ public class CustomerCardManagementController extends BaseController {
             card.setAlias(request.getAlias());
 
             return F.Promise.wrap(cardRepository.update(card)).map(response
+                    -> okResponse());
+
+        });
+
+        return returnRecover(result);
+
+    }
+
+
+    @With(BaseCustomerApiAction.class)
+    @ApiOperation(
+            nickname = "convertVirtualToPlastic",
+            value = "Virtual card conversion to plastic card",
+            notes = "Convert virtual card to plastic",
+            produces = "application/json",
+            httpMethod = "POST",
+            response = BaseAPIResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+    })
+    @ApiImplicitParams(
+            value = {
+                    @ApiImplicitParam(value = "convert virtual card to plastic request", required = true, dataType = "dto.customer.PlasticCardConversion", paramType = "body"),
+                    @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
+    public Promise<Result> convertVirtualToPlastic() {
+
+        final Customer customer = (Customer) ctx().args.get("customer");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final PlasticCardConversion request;
+        try {
+            request = Json.fromJson(jsonNode, PlasticCardConversion.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (request.getCardID() == null) {
+            Logger.error("Missing parameters");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        final Promise<List<Card>> cardListPromise = Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
+        final Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(request.getCardID()));
+
+        final Promise<Result> result = cardPromise.zip(cardListPromise).flatMap(data -> {
+            Card card = data._1.orElseThrow(WrongCardException::new);
+            if (!data._2.stream().map(Card::getId).anyMatch(id -> id.equals(card.getId()))) {
+                return Promise.pure(createWrongCardResponse());
+            }
+
+            Calendar instance = Calendar.getInstance();
+
+            instance.add(Calendar.DAY_OF_YEAR, 720);
+
+            card.setType(CardType.PLASTIC);
+            cardRepository.update(card);
+
+            return cardProvider.convertVirtualToPlastic(customer, card, new Date(), false, instance.getTime()).map(response
                     -> okResponse());
 
         });

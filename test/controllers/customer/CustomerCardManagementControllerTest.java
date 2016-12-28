@@ -1,10 +1,7 @@
 package controllers.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import dto.customer.CustomerCardListResponse;
-import dto.customer.CustomerCardManagementChangeAlias;
-import dto.customer.CustomerCardManagementChangePIN;
-import dto.customer.CustomerCardManagementChangeStatus;
+import dto.customer.*;
 import org.junit.Test;
 import play.Logger;
 import play.libs.Json;
@@ -176,6 +173,55 @@ public class CustomerCardManagementControllerTest extends BaseCustomerController
             } else if (operation == 1) {
                 assertEquals("05", cardWrapper.getCardDetails().getStatCode());
             }
+
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            fail();
+        }
+    }
+
+
+    @Test
+    public void testConvertVirtualToPlastic() {
+        final JsonNode authorizeResponse = authorizeCustomer(PHONE_2, PASSWORD_2);
+        assertEquals("" + SUCCESS_CODE, authorizeResponse.get("code").asText());
+
+        final String token = authorizeResponse.get("token").asText();
+
+
+        final JsonNode cardListResponse = WS.url(getCustomerApiUrl("/card/list")).setHeader("token", token)
+                .get().get(TIMEOUT).asJson();
+
+        assertEquals("" + SUCCESS_CODE, cardListResponse.get("code").asText());
+
+        try {
+
+            CustomerCardListResponse customerCardListResponse = Json.fromJson(cardListResponse, CustomerCardListResponse.class);
+
+            assertTrue(customerCardListResponse.getList().size() == 2);
+            assertTrue(customerCardListResponse.getList().get(0).getCardDetails().getCurrency().equals("EUR"));
+            assertNotNull(customerCardListResponse.getList().get(1).getId());
+
+            CustomerCardListResponse.CardWrapper cardWrapper = customerCardListResponse.getList().get(0);
+
+            PlasticCardConversion plasticCardConversion = new PlasticCardConversion();
+
+
+            plasticCardConversion.setCardID(cardWrapper.getId());
+
+            final JsonNode response = WS.url(getCustomerApiUrl("/card/convert")).setHeader("token", token).post(Json.toJson(plasticCardConversion)).get(TIMEOUT).asJson();
+
+            assertEquals("" + SUCCESS_CODE, response.get("code").asText());
+
+//            final JsonNode cardListResponse2 = WS.url(getCustomerApiUrl("/card/list")).setHeader("token", token)
+//                    .get().get(TIMEOUT).asJson();
+//
+//            assertEquals("" + SUCCESS_CODE, cardListResponse2.get("code").asText());
+//
+//            customerCardListResponse = Json.fromJson(cardListResponse2, CustomerCardListResponse.class);
+//            cardWrapper = customerCardListResponse.getList().get(0);
+//
+//            assertEquals("corbandalas", cardWrapper.getAlias());
 
         } catch (Exception e) {
             Logger.error("Wrong request format: ", e);
