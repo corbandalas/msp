@@ -299,6 +299,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 String limitGroup = limitGroupMap.get(currency.getId() + "_" + customer.getKyc().name());
 
+                System.out.println(customer.getKyc().name());
+
 
 
                 System.out.println("limitGroup = " + limitGroup);
@@ -930,7 +932,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
             String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
             String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
             String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
-            String[] split = res._2.orElseThrow(WrongPropertyException::new).getValue().split(":");
+
+            String gpsConfigStringValue = res._2.orElseThrow(WrongPropertyException::new).getValue();
+
+            Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
+
+            String[] split = gpsConfigStringValue.split(":");
 
             return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
 
