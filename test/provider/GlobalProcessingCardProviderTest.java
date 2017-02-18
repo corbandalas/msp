@@ -1,5 +1,6 @@
 package provider;
 
+import ae.globalprocessing.hyperionweb.ChangeGroup;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import model.Card;
@@ -83,7 +84,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 17000;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerFuchs(), "My card", amount, getCurrencyDKK());
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerVegh(), "My card", amount, getCurrencyDKK());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
@@ -773,7 +774,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
         instance.set(1990, 1, 1);
 
-        return new Customer("35020013521", new Date(), "Mr", "Steve", "Phillips",
+        return new Customer("447919880798", new Date(), "Mr", "Steve", "Phillips",
                 "IDT Financial Services Ltd., 1 Montarik Building, 3 Bedlam Court", "", "GX11 1AA", "Gibraltar", "steve.phillips@idtfinance.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "GI");
     }
 
@@ -796,6 +797,60 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
         return new Customer("48539989805", new Date(), "Mr", "Henrik", "Fuchs",
                 "Ordrupvej 47/a", "", "2920", "Charlottenlund, Copenhagen", "hf@concare.net", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "GB");
     }
+
+
+    private Customer createCustomerGuttman() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1979, 11, 11);
+
+        return new Customer("4530117999", new Date(), "Mr", "Steen", "Guttman",
+                "Grumstrupsvej 29", "", "2900", "Hellerup", "steeneguttman@gmail.com", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "DK");
+    }
+
+
+    private Customer createCustomerVegh() {
+
+        Calendar instance = Calendar.getInstance();
+
+        instance.set(1961, 7, 21);
+
+        return new Customer("4526372105", new Date(), "Mr", "Michael", "Vegh",
+                "Skovvang 37 ", "", "3460", "Birkerød", "mvegh@image.dk", instance.getTime(), true, KYC.SIMPLIFIED_DUE_DILIGENCE, "101dog101", "DK");
+    }
+
+
+//    @Test
+//    public void convertVirtualToPlasticAndChangeGroup() throws Exception {
+//
+//        Thread.currentThread().sleep(1000);
+//
+//        try {
+//
+//
+//            Customer customer = new Customer();
+//
+//            customer.setKyc(KYC.FULL_DUE_DILIGENCE);
+//
+//            Card card = new Card();
+//
+//            Calendar instance = Calendar.getInstance();
+//
+//            instance.add(Calendar.DAY_OF_YEAR, 720);
+//
+//            card.setToken("376208655");
+//
+//            ChangeGroup convertVirtualToPlasticResponse = globalProcessingCardProvider.changeCardGroup(customer, card).get(WS_TIMEOUT);
+//
+//            assertNotNull(convertVirtualToPlasticResponse);
+//            assertEquals(convertVirtualToPlasticResponse.getActionCode(), "000");
+//
+//        } catch (Exception e) {
+//            Logger.error("Error", e);
+//            fail();
+//        }
+//    }
 
 
     private Currency getCurrency() throws Exception {

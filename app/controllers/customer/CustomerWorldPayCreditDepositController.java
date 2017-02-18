@@ -10,29 +10,37 @@ import controllers.BaseController;
 import dto.BankDetailsListResponse;
 import dto.BaseAPIResponse;
 import dto.customer.*;
-import exception.WrongPropertyException;
-import model.Card;
-import model.Currency;
-import model.Customer;
-import model.Property;
+import exception.*;
+import model.*;
+import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
 import play.Logger;
 import play.cache.CacheApi;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
+import provider.CardProvider;
+import provider.dto.CardCreationResponse;
+import provider.dto.CardLoadResponse;
 import repository.CardRepository;
 import repository.CurrencyRepository;
+import repository.CustomerRepository;
 import repository.PropertyRepository;
 import services.OperationService;
 import services.WorldPayPaymentService;
 import util.CurrencyUtil;
+import util.SecurityUtil;
+import util.Utils;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static configs.ReturnCodes.*;
 
@@ -62,7 +70,13 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
     OperationService operationService;
 
     @Inject
+    CardProvider cardProvider;
+
+    @Inject
     CacheApi cache;
+
+    @Inject
+    CustomerRepository customerRepository;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -75,7 +89,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
             response = CustomerWorldPayCreditCardResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerWorldPayCreditCardResponse.class),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerPaylikeCreditCardResponse.class),
             @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
@@ -151,7 +165,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
             }
 
 
-            return checkDeposit(customer, cardTo.get(), request.getAmount(), currency).flatMap(
+            return checkDeposit(customer, cardTo.get(), request.getAmount(), currency, propertyRepository, currencyRepository, operationService).flatMap(
                     checkLimit -> {
                         if (checkLimit) {
                             return worldPayPaymentService.initDepositHostedtWorldPayPayment(request).map(res -> {
@@ -187,7 +201,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
             response = CustomerWorldPayCreditCardPurchaseResponse.class
     )
     @ApiResponses(value = {
-            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerWorldPayCreditCardPurchaseResponse.class),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerPaylikeCreditCardPurchaseResponse.class),
             @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
@@ -331,91 +345,243 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
         return returnRecover(result);
     }
 
-    private F.Promise<Boolean> checkDeposit(Customer customer, Card card, long amount, Optional<Currency> currency) {
-
-
-        final F.Promise<Optional<Currency>> limitCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
-        final F.Promise<Double> depositSumPromise = operationService.getDepositSumByCard(card);
-        final F.Promise<Optional<Currency>> cardCurrencyPromise = F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()));
-        final F.Promise<Optional<Property>> limitAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.kyc." + customer.getKyc().name()));
-
-
-        return depositSumPromise.zip(cardCurrencyPromise).zip(limitCurrencyPromise).zip(limitAmountPromise).map(res -> {
-
-            final Double depositSum = res._1._1._1;
-            final Optional<Currency> limitCurrency = res._1._1._2;
-            final Optional<Currency> cardCurrency = res._1._2;
-
-            final Property property = res._2.orElseThrow(WrongPropertyException::new);
-
-            final long convertedDepositAmount = CurrencyUtil.convert(amount, currency, cardCurrency);
-            final long convertedLimitAmount = CurrencyUtil.convert(Long.parseLong(property.getValue()), limitCurrency, cardCurrency);
-
-            return depositSum.longValue() + convertedDepositAmount < convertedLimitAmount;
-
-        });
-    }
-
-    private F.Promise<Boolean> checkDepositToNew(Customer customer, long amount, Optional<Currency> currency) {
-
-
-        final F.Promise<Optional<Currency>> limitCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
-        final F.Promise<Optional<Property>> limitAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.worldpay.deposit.card.kyc." + customer.getKyc().name()));
-
-
-        return limitCurrencyPromise.zip(limitAmountPromise).map(res -> {
-
-            final Optional<Currency> limitCurrency = res._1;
-
-            final Property property = res._2.orElseThrow(WrongPropertyException::new);
-
-            final long convertedDepositAmount = CurrencyUtil.convert(amount, currency, limitCurrency);
-            final long convertedLimitAmount = Long.parseLong(property.getValue());
-
-            return convertedDepositAmount < convertedLimitAmount;
-
-        });
-    }
-
-
 
     private F.Promise<Boolean> checkCardNumberAndDepositSum(Customer customer, CardType cardType, long amount, Optional<Currency> currency) {
-        return checkDepositToNew(customer, amount, currency).zip(checkCardPurchaseNumber(customer, cardType)).map(rez -> rez._1 && rez._2);
+        return checkDepositToNew(customer, amount, currency, currencyRepository, propertyRepository).zip(checkCardPurchaseNumber(customer, cardType, cardRepository, propertyRepository)).map(rez -> rez._1 && rez._2);
     }
 
 
-    private F.Promise<Boolean> checkCardPurchaseNumber(Customer customer, CardType cardType) {
+    /**
+     * Deposit callback
+     *
+     * @return
+     */
+    public F.Promise<Result> bankDeposit() {
 
+        final String soapResponse = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+                " xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"" +
+                " xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+                "<soap:Body>" +
+                "<PaymentNotificationResponse xmlns=\"http://apilistener.envoyservices.com\">" +
+                "<PaymentNotificationResult>%s</PaymentNotificationResult>" +
+                "</PaymentNotificationResponse>" +
+                "</soap:Body>" +
+                "</soap:Envelope>";
 
-        final F.Promise<Long> virtualCardNumberPromise = F.Promise.wrap(cardRepository.countCardsByType(customer.getId(), CardType.VIRTUAL));
-        final F.Promise<Long> plasticCardNumberPromise = F.Promise.wrap(cardRepository.countCardsByType(customer.getId(), CardType.PLASTIC));
+        final Document soapRequest = request().body().asXml();
 
-        F.Promise<Optional<Property>> cardLimitNumberPromise = null;
+        Logger.info("Soap request xml: \n{}", request().body().toString());
 
-        if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
-            cardLimitNumberPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.msp.card.SIMPLIFIED_DUE_DILIGENCE"));
-        } else {
-            cardLimitNumberPromise = F.Promise.wrap(propertyRepository.retrieveById("limits.msp.card.FULL_DUE_DILIGENCE." + cardType.name()));
+        if (soapRequest == null) {
+            Logger.error("Couldn't parse SOAP body");
+            return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
         }
 
-        return virtualCardNumberPromise.zip(plasticCardNumberPromise).zip(cardLimitNumberPromise).map(res -> {
+        final String phone = soapRequest.getElementsByTagName("bankInformation").item(0).getTextContent();
 
-            long virtualCardNumber = res._1._1;
-            long plasticCardNumber = res._1._2;
+        final String currencyCode = soapRequest.getElementsByTagName("appliedCurrency").item(0).getTextContent();
+        if (currencyCode == null) {
+            Logger.error("Couldn't find currency code in SOAP request");
+            return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
+        }
 
-            long cardLimit = Long.parseLong(res._2.get().getValue());
+        final String appliedAmount = soapRequest.getElementsByTagName("appliedAmount").item(0).getTextContent();
+        if (appliedAmount == null) {
+            Logger.error("Couldn't find amount in SOAP request");
+            return F.Promise.pure(ok(String.format(soapResponse, "ERROR")));
+        }
 
-            if (customer.getKyc().equals(KYC.SIMPLIFIED_DUE_DILIGENCE)) {
-                return virtualCardNumber + 1 <= cardLimit && plasticCardNumber + 1 <= cardLimit;
-            } else {
-                if (cardType.equals(CardType.VIRTUAL)) {
-                    return virtualCardNumber + 1 <= cardLimit;
-                } else if (cardType.equals(CardType.PLASTIC)) {
-                    return plasticCardNumber + 1 <= cardLimit;
-                }
+        final Long amount = (long) (Double.parseDouble(appliedAmount) * 100);
+
+
+        final F.Promise<Result> result = makePayment(phone, amount, currencyCode, true, null, customerRepository, currencyRepository, cardProvider, cardRepository, operationService)
+                .map(res -> ok(String.format(soapResponse, "SUCCESS")));
+
+        return result.recover(throwable -> {
+            Logger.error("Error: ", throwable);
+            return ok(String.format(soapResponse, "ERROR"));
+        });
+    }
+
+    /**
+     * WorldPay Credit Card Deposit callback
+     *
+     * @return
+     */
+    public F.Promise<Result> creditCardDeposit() {
+
+        String mspOrderKey = request().getQueryString("ordk");
+
+        if (StringUtils.isBlank(mspOrderKey)) {
+            Logger.error("Internal order ID is empty!");
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        CustomerWorldPayCreditCardDeposit customerWorldPayCreditCardDeposit = cache.get(mspOrderKey);
+
+        cache.remove(mspOrderKey);
+
+        if (customerWorldPayCreditCardDeposit == null) {
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        String paymentStatus = request().getQueryString("paymentStatus");
+
+        if (StringUtils.isBlank(paymentStatus)) {
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getCancelURL()));
+        } else if (!StringUtils.equalsIgnoreCase(paymentStatus, "AUTHORISED")) {
+            Logger.error("Payment transaction is not authorised by WorldPay");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+
+        String orderKey = request().getQueryString("orderKey");
+        String paymentAmount = request().getQueryString("paymentAmount");
+        String paymentCurrency = request().getQueryString("paymentCurrency");
+        String mac = request().getQueryString("mac");
+
+        if (StringUtils.isBlank(orderKey)
+                || StringUtils.isBlank(paymentAmount)
+                || StringUtils.isBlank(paymentCurrency)
+                || StringUtils.isBlank(mac)) {
+
+            Logger.error("Missing request parameters");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+        long amount = Long.parseLong(paymentAmount);
+
+        if (amount != customerWorldPayCreditCardDeposit.getAmount()) {
+            Logger.error("Amounts are different!");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+        if (!paymentCurrency.equalsIgnoreCase(customerWorldPayCreditCardDeposit.getCurrency())) {
+            Logger.error("Currencies are different!");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
+        }
+
+        F.Promise<Result> result = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.secret")).flatMap(rez -> {
+
+            String secret = rez.get().getValue();
+
+            String generatedMAC = SecurityUtil.generateKeyFromArrayMD5(orderKey, paymentAmount, paymentCurrency, paymentStatus, secret);
+
+            if (!StringUtils.equalsIgnoreCase(generatedMAC, mac)) {
+                Logger.error("MAC is not correct!");
+                return F.Promise.pure(createRedirect(customerWorldPayCreditCardDeposit.getFailURL()));
             }
 
-            return false;
+            return makePayment(customerWorldPayCreditCardDeposit.getPhone(), amount, paymentCurrency, false, customerWorldPayCreditCardDeposit.getCardTo(), customerRepository, currencyRepository, cardProvider, cardRepository, operationService)
+                    .map(res -> createRedirect(customerWorldPayCreditCardDeposit.getSuccessURL()));
+
+        });
+
+
+        return result.recover(throwable -> {
+            Logger.error("Error: ", throwable);
+            return createRedirect(customerWorldPayCreditCardDeposit.getFailURL());
+        });
+
+    }
+
+
+    /**
+     * WorldPay Credit Card Deposit callback
+     *
+     * @return
+     */
+    public F.Promise<Result> creditCardPurchase() {
+
+        String mspOrderKey = request().getQueryString("ordk");
+
+        Logger.info("Order id: " + mspOrderKey);
+
+        if (StringUtils.isBlank(mspOrderKey)) {
+            Logger.error("Internal order ID is empty!");
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        CustomerWorldPayCreditCardPurchase customerWorldPayCreditCardPurchase = cache.get(mspOrderKey);
+
+        cache.remove(mspOrderKey);
+
+        if (customerWorldPayCreditCardPurchase == null) {
+            Logger.error("Cached order object is null");
+            return F.Promise.pure(createRedirect("https://google.com"));
+        }
+
+        String paymentStatus = request().getQueryString("paymentStatus");
+
+        if (StringUtils.isBlank(paymentStatus)) {
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getCancelURL()));
+        } else if (!StringUtils.equalsIgnoreCase(paymentStatus, "AUTHORISED")) {
+            Logger.error("Payment transaction is not authorised by WorldPay");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
+        }
+
+
+        String orderKey = request().getQueryString("orderKey");
+        String paymentAmount = request().getQueryString("paymentAmount");
+        String paymentCurrency = request().getQueryString("paymentCurrency");
+        String mac = request().getQueryString("mac");
+
+        if (StringUtils.isBlank(orderKey)
+                || StringUtils.isBlank(paymentAmount)
+                || StringUtils.isBlank(paymentCurrency)
+                || StringUtils.isBlank(mac)) {
+
+            Logger.error("Missing request parameters");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
+        }
+
+        long totalPaymentAmount = Long.parseLong(paymentAmount);
+
+
+        if (!paymentCurrency.equalsIgnoreCase(customerWorldPayCreditCardPurchase.getCurrency())) {
+            Logger.error("Currencies are different!");
+            return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
+        }
+
+        final F.Promise<Optional<Property>> priceAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card." + customerWorldPayCreditCardPurchase.getCardType()));
+        final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+        final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(customerWorldPayCreditCardPurchase.getCurrency()));
+
+        F.Promise<Result> result = F.Promise.wrap(propertyRepository.retrieveById("worldpay.hosted.payment.secret")).zip(priceAmountPromise).zip(priceCurrencyPromise).zip(currencyPromise).flatMap(rez -> {
+
+            final Optional<Currency> requestCurrency = rez._2;
+
+            final Optional<Currency> priceCurrency = rez._1._2;
+
+            final long priceAmount = Long.parseLong(rez._1._1._2.get().getValue());
+
+            final long totalCalculatedAmount = CurrencyUtil.convert(priceAmount, priceCurrency, requestCurrency) + customerWorldPayCreditCardPurchase.getAmount();
+
+            if (totalPaymentAmount != totalCalculatedAmount) {
+                Logger.error("Amounts are different!");
+                return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
+            }
+
+            String secret = rez._1._1._1.get().getValue();
+
+            String generatedMAC = SecurityUtil.generateKeyFromArrayMD5(orderKey, paymentAmount, paymentCurrency, paymentStatus, secret);
+
+            if (!StringUtils.equalsIgnoreCase(generatedMAC, mac)) {
+                Logger.error("MAC is not correct!");
+                return F.Promise.pure(createRedirect(customerWorldPayCreditCardPurchase.getFailURL()));
+            }
+
+            return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType()),
+                    customerRepository, currencyRepository, cardProvider, cardRepository)
+                    .map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res._1.getToken() + "&crdpan=" + Utils.maskCardNumber(res._2.getPan()) + "&crdexp=" + res._2.getExpDate()));
+
+        });
+
+
+        return result.recover(throwable -> {
+            Logger.error("Error: ", throwable);
+            return createRedirect(customerWorldPayCreditCardPurchase.getFailURL());
         });
 
     }

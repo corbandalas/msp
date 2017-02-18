@@ -47,6 +47,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         return false;
                     }
                 });
+
     }
 
     @Inject
@@ -142,12 +143,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Customer customer, Card card, Date convertDate, boolean applyFee, Date expDate) {
-        return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate)).map((rez -> {
-
-            changeCardGroup(customer, card);
-
-            return new ConvertVirtualToPlasticResponse(rez.getActionCode());
-        }
+        return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate).zip(changeCardGroup(customer, card))).map((rez -> new ConvertVirtualToPlasticResponse(rez._1.getActionCode())
         ));
 
     }
@@ -854,15 +850,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         return F.Promise.promise(() -> {
 
-            Service service = getService(gpsSettings.wsdlURL);
-
-
             long wsid = System.currentTimeMillis();
-            Logger.info("/////// Ws_Change_Group service invocation. WSID #" + wsid);
+            Logger.info("/////// Ws_Change_Group service invocation. WSID #" + wsid );
+
+            Service service = getService(gpsSettings.wsdlURL);
 
             ChangeGroup changeGroup = null;
 
             try {
+
 
                 HashMap<String, String> permGroupMap = new HashMap<String, String>();
 
@@ -871,11 +867,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 String permGroup = permGroupMap.get(customer.getKyc().name());
 
+
                 HashMap<String, String> limitGroupMap = new HashMap<String, String>();
 
                 limitGroupMap.put("EUR_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[0]);
                 limitGroupMap.put("DKK_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[2]);
                 limitGroupMap.put("GBP_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[4]);
+
 
                 limitGroupMap.put("EUR_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[1]);
                 limitGroupMap.put("DKK_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[3]);
@@ -935,7 +933,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             String gpsConfigStringValue = res._2.orElseThrow(WrongPropertyException::new).getValue();
 
-            Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
+//            Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
 
             String[] split = gpsConfigStringValue.split(":");
 

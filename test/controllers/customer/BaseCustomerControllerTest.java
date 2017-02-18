@@ -33,7 +33,7 @@ import static java.util.Arrays.asList;
  */
 public class BaseCustomerControllerTest extends BaseControllerTest {
 
-    public static final long TIMEOUT = 20000;
+    public static final long TIMEOUT = 200000;
 
     public static final String PHONE_1 = "4921142172244";
     public static final String PHONE_2 = "4921142172243";
@@ -106,6 +106,7 @@ public class BaseCustomerControllerTest extends BaseControllerTest {
 
 
         Optional<Currency> currency = Await.result(currencyRepository.retrieveById("EUR"), Duration.apply(TIMEOUT, "ms"));
+
 
         CardCreationResponse cardCreationResponse1 = globalProcessingCardProvider.issuePrepaidVirtualCard(customer1, "Test card", 1000L, currency.get()).get(TIMEOUT);
         CardCreationResponse cardCreationResponse2 = globalProcessingCardProvider.issuePrepaidVirtualCard(customer1, "Test card", 1000L, currency.get()).get(TIMEOUT);

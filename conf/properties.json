@@ -17,21 +17,21 @@
 
     {
       "id": "cardprovider.gps.wsdl.url",
-      "value": "https://localhost:13682/service.asmx?wsdl",
+      "value": "https://ws-test.globalprocessing.ae:10000/hyperion_its/Service.asmx?wsdl",
       "description": "Global Processing WSDL URL",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.username",
-      "value": "SafePayApS",
+      "value": "SafePay Test",
       "description": "Global Processing SOAP header username",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.password",
-      "value": "0<q-1m;94l8|W,p",
+      "value": "S@F3PAyt3ST",
       "description": "Global Processing SOAP header password",
       "category": "GPS_INTEGRATION"
     },
@@ -280,6 +280,56 @@
       "value": "EUR",
       "description": "Card price currency",
       "category": "PRICE"
+    },
+
+    {
+      "id": "paylike.app.id",
+      "value": "94f099f1-1514-450b-9211-c8f87dd7f471",
+      "description": "Paylike integration app id",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+
+    {
+      "id": "paylike.public.key",
+      "value": "ce1fbc82-56bc-468e-bb10-2f06954056c0",
+      "description": "Paylike integration public key",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "paylike.payment.url",
+      "value": "https://pos.paylike.io/",
+      "description": "Paylike integration payment URL",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "paylike.api.url",
+      "value": "https://api.paylike.io/",
+      "description": "Paylike integration API URL",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "paylike.api.msp.deposit.callback.url",
+      "value": "http://bancore.com",
+      "description": "Callback URL for Cash Deposit Paylike integration",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "paylike.api.msp.purchase.callback.url",
+      "value": "http://bancore.com",
+      "description": "Callback URL for Card Purchase Paylike integration",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "paylike.api.msp.client.error.redirect.url",
+      "value": "http://bancore.com",
+      "description": "Default error URL for Paylike callback redirection",
+      "category": "PAYLIKE_INTEGRATION"
     }
 
 
