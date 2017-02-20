@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   javaWs,
   "com.novocode" % "junit-interface" % "0.11" % "test",
   "junit" % "junit" % "4.11",
-  "com.github.alaisi.pgasync"%"postgres-async-driver"%"0.7",
+  "com.github.alaisi.pgasync"%"postgres-async-driver"%"0.9",
   "com.ning" % "async-http-client" % "1.9.3",
   "javax.inject" % "javax.inject" % "1",
   "pl.matisoft" %% "swagger-play24" % "1.4",
