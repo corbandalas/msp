@@ -38,7 +38,7 @@
 
     {
       "id": "cardprovider.gps.wsdl.api.settings",
-      "value": "SPA:1822|1981|1982:SPA-VL-002 SafePay FDD Limit EUR|SPA-VL-001 SafePay SDD Limit EUR|SPA-VL-004 SafePay FDD Limit DKK|SPA-VL-003 SafePay SDD Limit DKK|SPA-VL-006 SafePay FDD Limit GBP|SPA-VL-005 SafePay SDD Limit GBP:SPA-CU-002|SPA-CU-003:SPA-AF-001|SPA-AF-002|SPA-AF-003:9:76100G",
+      "value": "SPA:1822|1981|1982:SPA-VL-002 SafePay FDD Limit EUR|SPA-VL-001 SafePay SDD Limit EUR|SPA-VL-004 SafePay FDD Limit DKK|SPA-VL-003 SafePay SDD Limit DKK|SPA-VL-006 SafePay FDD Limit GBP|SPA-VL-005 SafePay SDD Limit GBP:SPA-CU-002|SPA-CU-003:SPA-AF-001|SPA-AF-002|SPA-AF-003:67:76100G",
       "description": "Global Processing Card settings //  issCode,  cardDesign,  limitGroup, permGroup, feeGroup, loadSrc, productRef",
       "category": "GPS_INTEGRATION"
     },
