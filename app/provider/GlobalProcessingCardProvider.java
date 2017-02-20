@@ -1,6 +1,7 @@
 package provider;
 
 import ae.globalprocessing.hyperionweb.*;
+import akka.actor.ActorSystem;
 import com.google.inject.Inject;
 import exception.CardProviderException;
 import exception.WrongCountryException;
@@ -11,7 +12,7 @@ import model.Currency;
 import model.Customer;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.core.j.HttpExecutionContext;
+import play.api.inject.guice.GuiceApplicationBuilder;
 import play.libs.Akka;
 import play.libs.F;
 import provider.dto.*;
@@ -60,9 +61,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Inject
     private CurrencyRepository currencyRepository;
-
-    @Inject
-    private ExecutionContext executionContext;
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
@@ -934,7 +932,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
         } catch (Exception e) {
             Logger.error("Specific execution context was not found. Trying to get default", e);
 
-            executionContext = this.executionContext;
+            GuiceApplicationBuilder guiceApplicationBuilder = new GuiceApplicationBuilder();
+
+            executionContext = guiceApplicationBuilder.build().injector().instanceOf(ActorSystem.class).dispatcher();
+
         }
 
 
@@ -956,8 +957,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
             String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
 
             String gpsConfigStringValue = res._2.orElseThrow(WrongPropertyException::new).getValue();
-
-//            Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
 
             String[] split = gpsConfigStringValue.split(":");
 
