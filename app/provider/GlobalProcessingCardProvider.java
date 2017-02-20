@@ -9,14 +9,15 @@ import model.*;
 import model.Card;
 import model.Currency;
 import model.Customer;
-import model.enums.KYC;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.libs.Akka;
 import play.libs.F;
 import provider.dto.*;
 import repository.CountryRepository;
 import repository.CurrencyRepository;
 import repository.PropertyRepository;
+import scala.concurrent.ExecutionContext;
 import util.CurrencyUtil;
 import util.DateUtil;
 
@@ -66,6 +67,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency) {
+
         return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, false);
     }
 
@@ -417,7 +419,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return virtualCards;
-        });
+        }, getExecutionContext());
     }
 
     private F.Promise<BalanceEnquire2> invokeCardBalance(GPSSettings gpsSettings, Card card) {
@@ -447,7 +449,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return balance;
-        });
+        }, getExecutionContext());
     }
 
     private F.Promise<Card2> invokeCardDetails(GPSSettings gpsSettings, Card card) {
@@ -477,7 +479,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return cardDetails;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -509,7 +511,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return loadCard;
-        });
+        }, getExecutionContext());
     }
 
     private F.Promise<UnLoad> invokeCardUnload(GPSSettings gpsSettings, Card card, long amount, String description, String loadType) {
@@ -540,7 +542,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return unload;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -572,7 +574,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return balanceTransfer;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -610,7 +612,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return customerUpdate;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -644,7 +646,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return convertCard;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -677,7 +679,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return phoneActivate;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -715,7 +717,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return wsActivate;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -748,7 +750,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return statusChange;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -781,7 +783,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return cardStatement;
-        });
+        }, getExecutionContext());
     }
 
     private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, Card card, String oldPin, String newPin, String confirmPin, String func) {
@@ -811,7 +813,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return pinControl;
-        });
+        }, getExecutionContext());
     }
 
     private F.Promise<CardRegenerate> invokeCardRegenerate(GPSSettings gpsSettings, Card card) {
@@ -842,7 +844,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return cardRegenerate;
-        });
+        }, getExecutionContext());
     }
 
 
@@ -896,7 +898,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return changeGroup;
-        });
+        }, getExecutionContext());
     }
 
     private AuthSoapHeader createAuthHeader(String soapHeaderUsername, String soapHeaderPassword) {
@@ -916,6 +918,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
         }
 
         return new Service();
+    }
+
+
+    private ExecutionContext getExecutionContext() {
+
+        return Akka.system().dispatchers().lookup("card-provider-dispatcher").prepare();
+
     }
 
     private F.Promise<GPSSettings> getGPSSettings() {
