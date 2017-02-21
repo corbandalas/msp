@@ -84,7 +84,7 @@ public class GlobalProcessingCardProviderTest extends BaseCardProviderTest {
 
             long amount = 17000;
 
-            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerVegh(), "My card", amount, getCurrencyDKK());
+            CardCreationResponse cardCreationResponse = getPrepaidVirtualCard(createCustomerVegh(), "My card", amount, getCurrencyEUR());
 
             assertNotNull(cardCreationResponse);
             assertNotNull(cardCreationResponse.getToken());
