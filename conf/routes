@@ -116,8 +116,8 @@ POST    /api/customer/profile/update                                   @controll
 GET     /api-docs/api/customer/card/list                                @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/list")
 GET     /api/customer/card/list                                         @controllers.customer.CustomerCardListController.cardList()
 
-GET     /api-docs/api/customer/withdraw                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/withdraw")
-POST    /api/customer/withdraw                                    @controllers.customer.CustomerWithdrawController.cardWithdraw()
+GET     /api-docs/api/customer/card/withdraw                           @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/withdraw")
+POST    /api/customer/card/withdraw                                    @controllers.customer.CustomerWithdrawController.cardWithdraw()
 
 GET     /api-docs/api/customer/card/balance                             @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/balance")
 GET     /api/customer/card/balance/:cardID                              @controllers.customer.CustomerCardBalanceController.cardBalance(cardID:Long)
