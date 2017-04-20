@@ -16,6 +16,7 @@ import play.mvc.Results;
 import provider.CardProvider;
 import provider.dto.CardCreationResponse;
 import provider.dto.CardLoadResponse;
+import provider.dto.CardUnloadResponse;
 import repository.CardRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
@@ -247,6 +248,26 @@ public class BaseController extends play.mvc.Controller {
             });
         });
     }
+
+    protected F.Promise<F.Tuple<Operation, Transaction>> makeWithdraw(long amount, Currency currency, Card cardFrom, String description,
+                                                                      CardProvider cardProvider, OperationService operationService) {
+
+
+        final F.Promise<CardUnloadResponse> cardUnloadPromise;
+
+        if (cardFrom.getType().equals(CardType.VIRTUAL)) {
+
+            cardUnloadPromise = cardProvider.unloadVirtualCard(cardFrom, amount, currency, description);
+
+        } else {
+
+            cardUnloadPromise = cardProvider.unloadPlasticCard(cardFrom, amount, currency, description);
+        }
+
+        return cardUnloadPromise.flatMap(cardLoadResponse -> operationService.createWithdrawOperation(cardFrom,
+                amount, currency, "" + System.currentTimeMillis(), description));
+    }
+
 
     protected F.Promise<F.Tuple<Card, CardCreationResponse>> cardPurchase(String phone, long amount, String currencyCode, CardType cardType, CustomerRepository customerRepository, CurrencyRepository currencyRepository, CardProvider cardProvider, CardRepository cardRepository) {
 

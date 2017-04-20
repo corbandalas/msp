@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   "javax.inject" % "javax.inject" % "1",
   "pl.matisoft" %% "swagger-play24" % "1.4",
   "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
-  "org.flywaydb" % "flyway-core" % "3.2.1",
+  "org.flywaydb" % "flyway-core" % "4.1.1",
   "com.sun.xml.ws" % "jaxws-rt" % "2.2.10",
    "com.googlecode.libphonenumber" % "libphonenumber" % "7.4.2",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0-beta4")

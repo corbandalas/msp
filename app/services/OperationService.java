@@ -85,6 +85,28 @@ public class OperationService {
         });
     }
 
+    public F.Promise<F.Tuple<Operation, Transaction>> createWithdrawOperation(Card card, Long amount, Currency currency, String orderId, String description) {
+        final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
+                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
+        final F.Promise<Optional<Account>> withdrawAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.withdraw"))
+                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
+
+        return cardAccountPromise.zip(withdrawAccountPromise).flatMap(accounts -> {
+            final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
+            final Account withdrawAccount = accounts._2.orElseThrow(WrongAccountException::new);
+
+            return getExchangeRates(currency, cardAccount, withdrawAccount, null, card).flatMap(rates ->
+                    F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.WITHDRAW, orderId, description, new Date())))
+                            .flatMap(operation -> {
+                                final F.Promise<Transaction> transactionPromise = F.Promise
+                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
+                                                cardAccount.getId(), withdrawAccount.getId(), card.getId(), null,  rates._1._1, rates._1._2, rates._2._1, null, TransactionType.WITHDRAW)));
+
+                                return transactionPromise.map(trans -> new F.Tuple<>(operation, trans));
+                            }));
+        });
+    }
+
     public F.Promise<Double> getDepositSumByCard(Card card) {
         return F.Promise.wrap(transactionRepository.retrieveSumByToCardId(card.getId())).map(sum -> (sum != null) ? sum : Double.valueOf(0));
     }

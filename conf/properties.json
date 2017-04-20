@@ -17,21 +17,21 @@
 
     {
       "id": "cardprovider.gps.wsdl.url",
-      "value": "https://ws-test.globalprocessing.ae:10000/hyperion_its/Service.asmx?wsdl",
+      "value": "https://localhost:13682/service.asmx?wsdl",
       "description": "Global Processing WSDL URL",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.username",
-      "value": "SafePay Test",
+      "value": "SafePayApS",
       "description": "Global Processing SOAP header username",
       "category": "GPS_INTEGRATION"
     },
 
     {
       "id": "cardprovider.gps.wsdl.soap.header.password",
-      "value": "S@F3PAyt3ST",
+      "value": "0<q-1m;94l8|W,p",
       "description": "Global Processing SOAP header password",
       "category": "GPS_INTEGRATION"
     },
@@ -117,6 +117,13 @@
       "id": "com.msp.accounts.deposit",
       "value": "44",
       "description": "MSP deposit account",
+      "category": "ACCOUNTS"
+    },
+
+    {
+      "id": "com.msp.accounts.withdraw",
+      "value": "45",
+      "description": "MSP withdraw account",
       "category": "ACCOUNTS"
     },
 
