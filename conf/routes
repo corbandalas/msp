@@ -136,9 +136,6 @@ POST     /api/callbacks/w2globaldata/kycCallback                        @control
 GET     /api/customer/kyc/get                                         @controllers.customer.CustomerKYCController.getKYC()
 
 
-GET     /api-docs/api/customer/withdraw                                @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/withdraw")
-POST    /api/customer/withdraw                                         @controllers.customer.CustomerWithdrawController.cardWithdraw()
-
 
 GET     /api-docs/api/customer/paylike                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/paylike")
 POST    /api/customer/paylike/initCreditCardDeposit                    @controllers.customer.CustomerPaylikeCreditDepositController.initCreditCardDeposit()
