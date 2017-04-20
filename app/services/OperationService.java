@@ -95,7 +95,7 @@ public class OperationService {
             final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
             final Account withdrawAccount = accounts._2.orElseThrow(WrongAccountException::new);
 
-            return getExchangeRates(currency, cardAccount, withdrawAccount, null, card).flatMap(rates ->
+            return getExchangeRates(currency, cardAccount, withdrawAccount, card, null).flatMap(rates ->
                     F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.WITHDRAW, orderId, description, new Date())))
                             .flatMap(operation -> {
                                 final F.Promise<Transaction> transactionPromise = F.Promise
