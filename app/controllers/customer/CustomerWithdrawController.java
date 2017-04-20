@@ -37,7 +37,7 @@ import static configs.ReturnCodes.*;
  * @author corbandalas created 19.04.2017.
  * @since 0.5.0
  */
-@Api(value = Constants.CUSTOMER_API_PATH + "/withdraw", description = "Withdraw payment methods")
+@Api(value = Constants.CUSTOMER_API_PATH + "/card/withdraw", description = "Withdraw payment methods")
 public class CustomerWithdrawController extends BaseController {
 
     @Inject

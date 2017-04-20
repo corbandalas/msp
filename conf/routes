@@ -136,10 +136,6 @@ POST     /api/callbacks/w2globaldata/kycCallback                        @control
 GET     /api/customer/kyc/get                                         @controllers.customer.CustomerKYCController.getKYC()
 
 
-GET     /api-docs/api/customer/card/withdraw                                @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/withdraw")
-POST    /api/customer/card/withdraw                                         @controllers.customer.CustomerWithdrawController.cardWithdraw()
-
-
 GET     /api-docs/api/customer/paylike                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/paylike")
 POST    /api/customer/paylike/initCreditCardDeposit                    @controllers.customer.CustomerPaylikeCreditDepositController.initCreditCardDeposit()
 POST    /api/customer/paylike/initCreditCardPurchase                   @controllers.customer.CustomerPaylikeCreditDepositController.initCreditCardPurchase()
@@ -147,9 +143,11 @@ GET    /api/customer/paylike/cardDeposit                               @controll
 GET    /api/customer/paylike/cardPurchase                              @controllers.customer.CustomerPaylikeCreditDepositController.creditCardPurchaseCallback()
 
 
-##
-##
-##
+
+GET     /api-docs/api/customer/card/withdraw                             @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/card/withdraw")
+POST    /api/customer/card/withdraw                                 @controllers.customer.CustomerWithdrawController.cardWithdraw()
+
+
 ## WorldPay API
 #GET     /api-docs/api/customer/worldpay                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/worldpay")
 #GET    /api/customer/worldpay/getbanks/:country                         @controllers.customer.CustomerWorldPayCreditDepositController.getBankDetails(country:String)
