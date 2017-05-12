@@ -562,7 +562,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
                 balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "7", null, "1", null, null, cardSource.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, null, cardDestination.getToken(), (double) amount / 100, cardSource.getCurrencyId(), gpsSettings.loadSrc, 0, null, 0, description, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                        DateUtil.format(new Date(), "hhmmss"), null, null, cardDestination.getToken(), (double) amount / 100, cardSource.getCurrencyId(), /*gpsSettings.loadSrc*/"48", 0, null, 0, description, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Transfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
 
@@ -599,7 +599,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 customerUpdate = service.getServiceSoap().wsUpdateCardholderDetails(wsid, gpsSettings.issCode, "13", null, "1", null, null, null, null, null, null, null, customer.getLastName(), customer.getTitle(), customer.getFirstName(), customer.getAddress1(), customer.getAddress2(), customer.getCity(),
                         customer.getPostcode(), country.getCode(), customer.getId(), null, null, null, null, null, null, null, null, null, customer.getEmail(), null, customer.getId(), null, null, null, null, null, null, null, null, null, null, null, null, null,
-                        null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 0, 0, 0, 0, null, 0, card.getToken(), 0, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                        null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 4, 15, 0, 0, null, 0, card.getToken(), 0, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
                 Logger.info("/////// WS_Update_CardHolder service invocation was ended. WSID #" + wsid + ". Result code: " + customerUpdate.getActionCode() + " ." + customerUpdate.toString());
@@ -871,6 +871,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 String permGroup = permGroupMap.get(customer.getKyc().name());
 
+                System.out.println(permGroup);
 
                 HashMap<String, String> limitGroupMap = new HashMap<String, String>();
 
@@ -884,6 +885,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 limitGroupMap.put("GBP_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[5]);
 
                 String limitGroup = limitGroupMap.get(card.getCurrencyId() + "_" + customer.getKyc().name());
+
+                System.out.println(limitGroup);
 
                 changeGroup = service.getServiceSoap().wsCardChangeGroups(wsid, gpsSettings.issCode, null, card.getToken(), DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), limitGroup, "", permGroup, "", "", "", "", "", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
