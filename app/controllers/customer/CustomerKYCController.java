@@ -27,6 +27,7 @@ import services.W2GlobaldataService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static configs.ReturnCodes.*;
 
@@ -245,7 +246,9 @@ public class CustomerKYCController extends BaseController {
 
         final F.Promise<List<Card>> cardsPromise = F.Promise.wrap(cardRepository.retrieveListByCustomerId(customer.getId()));
 
-        cardsPromise.map(res -> res.stream().map(card -> cardProvider.changeCardGroup(customer, card)));
+        final F.Promise<Optional<Card>> defaultCardPromise = F.Promise.wrap(cardRepository.retrieveDefaultCard(customer.getId()));
+
+        cardsPromise.map(res -> res.stream().map(card -> cardProvider.changeCardGroup(customer, card))).zip(defaultCardPromise).flatMap(result -> cardProvider.applyFee("80", result._2.get()));
     }
 
 

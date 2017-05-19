@@ -11,12 +11,11 @@ import dto.customer.CustomerPaylikeCreditCardDeposit;
 import dto.customer.CustomerPaylikeCreditCardPurchase;
 import dto.customer.CustomerPaylikeCreditCardPurchaseResponse;
 import dto.customer.CustomerPaylikeCreditCardResponse;
-import model.Card;
-import model.Currency;
-import model.Customer;
-import model.Property;
+import model.*;
 import model.enums.CardType;
+import model.enums.FeeDestinationType;
 import model.enums.KYC;
+import model.enums.OperationType;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.cache.CacheApi;
@@ -25,20 +24,16 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import provider.CardProvider;
-import repository.CardRepository;
-import repository.CurrencyRepository;
-import repository.CustomerRepository;
-import repository.PropertyRepository;
+import repository.*;
 import services.OperationService;
 import services.PaylikePaymentService;
-import util.CurrencyUtil;
+import util.FeeUtil;
 import util.Utils;
 
 import java.util.List;
 import java.util.Optional;
 
 import static configs.ReturnCodes.*;
-
 
 /**
  * API customer Paylike Credit card deposit controller
@@ -69,6 +64,12 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
 
     @Inject
     OperationService operationService;
+
+    @Inject
+    FeeIntervalRepository feeIntervalRepository;
+
+    @Inject
+    FeeRepository feeRepository;
 
     @Inject
     CacheApi cache;
@@ -254,15 +255,13 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
         }
 
         final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(request.getCurrency()));
-        final F.Promise<Optional<Property>> priceAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card." + cardType.name()));
-        final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+
+        Integer accountID = (Integer)cache.get("account_" + customer.getId());
+
+        F.Promise<Long> totalSumWithFee = FeeUtil.getTotalSumWithFee(accountID, request.getAmount(), request.getCurrency(), OperationType.CARD_PURCHASE, FeeDestinationType.THIRD_PARTY, feeRepository, feeIntervalRepository);
 
         final CardType finalCardType = cardType;
-        final F.Promise<Result> result = priceAmountPromise.zip(priceCurrencyPromise).zip(currencyPromise).flatMap(data -> {
-
-            long priceAmount = Long.parseLong(data._1._1.get().getValue());
-
-            Optional<Currency> priceCurrency = data._1._2;
+        final F.Promise<Result> result = totalSumWithFee.zip(currencyPromise).flatMap(data -> {
 
             final Optional<Currency> currency = data._2;
 
@@ -282,7 +281,7 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
                 return F.Promise.pure(createWrongKYCResponse());
             }
 
-            final long totalAmount = CurrencyUtil.convert(priceAmount, priceCurrency, currency) + request.getAmount();
+            final long totalAmount = data._1;
 
             return checkCardNumberAndDepositSum(customer, finalCardType, request.getAmount(), currency, currencyRepository, cardRepository, propertyRepository).flatMap(
                     checkLimit -> {
@@ -428,19 +427,19 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
                 String paymentCurrency = transaction.getTransaction().getCurrency();
 
 
-                final F.Promise<Optional<Property>> priceAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card." + customerPaylikeCreditCardPurchase.getCardType()));
-                final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+//                final F.Promise<Optional<Property>> priceAmountPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card." + customerPaylikeCreditCardPurchase.getCardType()));
+//                final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
+                Integer accountID = (Integer)cache.get("account_" + customerPaylikeCreditCardPurchase.getPhone());
+
+                F.Promise<Long> totalSumWithFee = FeeUtil.getTotalSumWithFee(accountID, customerPaylikeCreditCardPurchase.getAmount(), customerPaylikeCreditCardPurchase.getCurrency(), OperationType.CARD_PURCHASE, FeeDestinationType.THIRD_PARTY, feeRepository, feeIntervalRepository);
+
                 final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(customerPaylikeCreditCardPurchase.getCurrency()));
 
-                return priceAmountPromise.zip(priceCurrencyPromise).zip(currencyPromise).flatMap(rez -> {
+                return totalSumWithFee.zip(currencyPromise).flatMap(rez -> {
 
                     final Optional<Currency> requestCurrency = rez._2;
 
-                    final Optional<Currency> priceCurrency = rez._1._2;
-
-                    final long priceAmount = Long.parseLong(rez._1._1.get().getValue());
-
-                    final long totalCalculatedAmount = CurrencyUtil.convert(priceAmount, priceCurrency, requestCurrency) + customerPaylikeCreditCardPurchase.getAmount();
+                    final long totalCalculatedAmount = rez._1;
 
                     if (totalPaymentAmount != totalCalculatedAmount) {
                         Logger.error("Amounts are different!");

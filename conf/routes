@@ -145,7 +145,8 @@ POST    /api/customer/paylike/initCreditCardPurchase                   @controll
 GET    /api/customer/paylike/cardDeposit                               @controllers.customer.CustomerPaylikeCreditDepositController.creditCardDepositCallback()
 GET    /api/customer/paylike/cardPurchase                              @controllers.customer.CustomerPaylikeCreditDepositController.creditCardPurchaseCallback()
 
-
+GET     /api-docs/api/customer/fee                                 @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/fee")
+POST    /api/customer/fee/get                                      @controllers.customer.CustomerFeeController.obtainFee()
 
 
 ## WorldPay API

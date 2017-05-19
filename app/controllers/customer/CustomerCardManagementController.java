@@ -1,5 +1,6 @@
 package controllers.customer;
 
+import ae.globalprocessing.hyperionweb.ApplyFees;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
@@ -105,10 +106,10 @@ public class CustomerCardManagementController extends BaseController {
                     return cardProvider.reportCardDamaged(card, request.getReason()).map(response
                             -> okResponse());
                 case 3:
-                    return cardProvider.reportCardLost(card, request.getReason()).map(response
+                    return cardProvider.reportCardLost(card, request.getReason()).zip(cardProvider.applyFee("89", card)).map(response
                             -> okResponse());
                 case 4:
-                    return cardProvider.reportCardStolen(card, request.getReason()).map(response
+                    return cardProvider.reportCardStolen(card, request.getReason()).zip(cardProvider.applyFee("89", card)).map(response
                             -> okResponse());
                 default:
                     return Promise.pure(createWrongRequestFormatResponse());
@@ -354,7 +355,9 @@ public class CustomerCardManagementController extends BaseController {
             card.setType(CardType.PLASTIC);
             cardRepository.update(card);
 
-            return cardProvider.convertVirtualToPlastic(customer, card, new Date(), false, instance.getTime()).map(response
+            Promise<ApplyFees> applyFeesPromise = cardProvider.applyFee("80", card);
+
+            return cardProvider.convertVirtualToPlastic(customer, card, new Date(), false, instance.getTime()).zip(applyFeesPromise).map(response
                     -> okResponse());
 
         });

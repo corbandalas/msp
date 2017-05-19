@@ -7,5 +7,5 @@ package model.enums;
  * @since 0.1.0
  */
 public enum OperationType {
-    DEPOSIT, WITHDRAW, TRANSFER
+    DEPOSIT, WITHDRAW, TRANSFER, CARD_PURCHASE
 }

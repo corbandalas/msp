@@ -1,5 +1,6 @@
 package provider;
 
+import ae.globalprocessing.hyperionweb.ApplyFees;
 import ae.globalprocessing.hyperionweb.ChangeGroup;
 import com.google.inject.ImplementedBy;
 import model.Card;
@@ -50,4 +51,5 @@ public interface CardProvider {
     F.Promise<ChangePINResponse> obtainPIN(Card card);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
     F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
+    F.Promise<ApplyFees> applyFee(String code, Card card);
 }

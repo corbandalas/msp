@@ -344,4 +344,22 @@ public class ApplyFees {
         this.totalAmount = value;
     }
 
+    @Override
+    public String toString() {
+        return "ApplyFees{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", fee=" + fee +
+                ", itemId=" + itemId +
+                ", isPartial=" + isPartial +
+                ", waivedoffAmount=" + waivedoffAmount +
+                ", totalAmount=" + totalAmount +
+                '}';
+    }
+
 }

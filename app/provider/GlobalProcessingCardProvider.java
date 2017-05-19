@@ -40,7 +40,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
     static {
         //for localhost testing only
         javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-                new javax.net.ssl.HostnameVerifier(){
+                new javax.net.ssl.HostnameVerifier() {
 
                     public boolean verify(String hostname,
                                           javax.net.ssl.SSLSession sslSession) {
@@ -222,6 +222,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokeCardChangeGroup(res, customer, card));
     }
 
+    @Override
+    public F.Promise<ApplyFees> applyFee(String code, Card card) {
+        return getGPSSettings().flatMap(res -> invokeWsGenericFees(res, code, card));
+    }
+
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
         return F.Promise.promise(() -> {
@@ -300,7 +305,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 String limitGroup = limitGroupMap.get(currency.getId() + "_" + customer.getKyc().name());
 
                 System.out.println(customer.getKyc().name());
-
 
 
                 System.out.println("limitGroup = " + limitGroup);
@@ -855,7 +859,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return F.Promise.promise(() -> {
 
             long wsid = System.currentTimeMillis();
-            Logger.info("/////// Ws_Change_Group service invocation. WSID #" + wsid );
+            Logger.info("/////// Ws_Change_Group service invocation. WSID #" + wsid);
 
             Service service = getService(gpsSettings.wsdlURL);
 
@@ -903,6 +907,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return changeGroup;
+        }, getExecutionContext());
+    }
+
+
+    private F.Promise<ApplyFees> invokeWsGenericFees(GPSSettings gpsSettings, String procCode, Card card) {
+
+        return F.Promise.promise(() -> {
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Generic_Fees service invocation. WSID #" + wsid);
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            ApplyFees applyFees = null;
+
+            try {
+
+                applyFees = service.getServiceSoap().wsGenericFees(wsid, gpsSettings.issCode, null, card.getToken(), procCode, "apply fee", DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), 0, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// Ws_Generic_Fees service invocation was ended. WSID #" + wsid + ". Result code: " + applyFees.getActionCode() + " ." + applyFees.toString());
+
+                if (!StringUtils.equals("000", applyFees.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return applyFees;
         }, getExecutionContext());
     }
 

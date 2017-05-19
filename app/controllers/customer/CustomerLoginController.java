@@ -139,6 +139,8 @@ public class CustomerLoginController extends BaseController {
             //Store token to cache with expiration time out
             cache.set(token, customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
 
+            cache.set("account_" + customer.getId(), authData.getAccount().getId(), Integer.parseInt(sessionTimeOut) * 60);
+
             putLoginAttempt(customer, 0);
 
             return ok(Json.toJson(new CustomerLoginResponse("" + SUCCESS_CODE, SUCCESS_TEXT, token, customer.getTemppassword())));
