@@ -258,7 +258,7 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
 
         Integer accountID = (Integer)cache.get("account_" + customer.getId());
 
-        F.Promise<Long> totalSumWithFee = FeeUtil.getTotalSumWithFee(accountID, request.getAmount(), request.getCurrency(), OperationType.CARD_PURCHASE, FeeDestinationType.THIRD_PARTY, feeRepository, feeIntervalRepository);
+        F.Promise<Long> totalSumWithFee = FeeUtil.getTotalSumWithFee(accountID, request.getAmount(), request.getCurrency(), OperationType.valueOf("CARD_PURCHASE_" + request.getCardType()), FeeDestinationType.THIRD_PARTY, feeRepository, feeIntervalRepository);
 
         final CardType finalCardType = cardType;
         final F.Promise<Result> result = totalSumWithFee.zip(currencyPromise).flatMap(data -> {
@@ -431,13 +431,11 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
 //                final F.Promise<Optional<Currency>> priceCurrencyPromise = F.Promise.wrap(propertyRepository.retrieveById("price.msp.card.currency")).flatMap(rez -> F.Promise.wrap(currencyRepository.retrieveById(rez.get().getValue())));
                 Integer accountID = (Integer)cache.get("account_" + customerPaylikeCreditCardPurchase.getPhone());
 
-                F.Promise<Long> totalSumWithFee = FeeUtil.getTotalSumWithFee(accountID, customerPaylikeCreditCardPurchase.getAmount(), customerPaylikeCreditCardPurchase.getCurrency(), OperationType.CARD_PURCHASE, FeeDestinationType.THIRD_PARTY, feeRepository, feeIntervalRepository);
+                F.Promise<Long> totalSumWithFee = FeeUtil.getTotalSumWithFee(accountID, customerPaylikeCreditCardPurchase.getAmount(), customerPaylikeCreditCardPurchase.getCurrency(), OperationType.valueOf("CARD_PURCHASE_" + customerPaylikeCreditCardPurchase.getCardType()), FeeDestinationType.THIRD_PARTY, feeRepository, feeIntervalRepository);
 
                 final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(customerPaylikeCreditCardPurchase.getCurrency()));
 
                 return totalSumWithFee.zip(currencyPromise).flatMap(rez -> {
-
-                    final Optional<Currency> requestCurrency = rez._2;
 
                     final long totalCalculatedAmount = rez._1;
 
