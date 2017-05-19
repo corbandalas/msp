@@ -439,6 +439,9 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
 
                     final long totalCalculatedAmount = rez._1;
 
+                    Logger.info("totalPaymentAmount = " + totalPaymentAmount);
+                    Logger.info("totalCalculatedAmount = " + totalCalculatedAmount);
+
                     if (totalPaymentAmount != totalCalculatedAmount) {
                         Logger.error("Amounts are different!");
                         return F.Promise.pure(createRedirect(customerPaylikeCreditCardPurchase.getFailURL()));
