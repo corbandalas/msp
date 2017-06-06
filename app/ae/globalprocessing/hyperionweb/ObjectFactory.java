@@ -54,7 +54,6 @@ public class ObjectFactory {
     private final static QName _UpdateLoadSrc_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "UpdateLoadSrc");
     private final static QName _PassCode_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "PassCode");
     private final static QName _CustomerUpdate_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "CustomerUpdate");
-    private final static QName _PostAuth_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "PostAuth");
     private final static QName _PendingFees_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "PendingFees");
     private final static QName _TransactionXML_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "TransactionXML");
     private final static QName _Customer_QNAME = new QName("http://www.globalprocessing.ae/HyperionWeb", "Customer");
@@ -430,10 +429,6 @@ public class ObjectFactory {
      * Create an instance of {@link PostAuth }
      * 
      */
-    public PostAuth createPostAuth() {
-        return new PostAuth();
-    }
-
     /**
      * Create an instance of {@link WsGiftCardStatusChange }
      * 
@@ -3126,15 +3121,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.globalprocessing.ae/HyperionWeb", name = "CustomerUpdate")
     public JAXBElement<CustomerUpdate> createCustomerUpdate(CustomerUpdate value) {
         return new JAXBElement<CustomerUpdate>(_CustomerUpdate_QNAME, CustomerUpdate.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link PostAuth }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.globalprocessing.ae/HyperionWeb", name = "PostAuth")
-    public JAXBElement<PostAuth> createPostAuth(PostAuth value) {
-        return new JAXBElement<PostAuth>(_PostAuth_QNAME, PostAuth.class, null, value);
     }
 
     /**
