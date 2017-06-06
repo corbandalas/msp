@@ -427,14 +427,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsPostAuthResponse }
-     * 
-     */
-    public WsPostAuthResponse createWsPostAuthResponse() {
-        return new WsPostAuthResponse();
-    }
-
-    /**
      * Create an instance of {@link PostAuth }
      * 
      */
@@ -776,14 +768,6 @@ public class ObjectFactory {
      */
     public WsGiftCardPhoneActivation createWsGiftCardPhoneActivation() {
         return new WsGiftCardPhoneActivation();
-    }
-
-    /**
-     * Create an instance of {@link WsPostAuth }
-     * 
-     */
-    public WsPostAuth createWsPostAuth() {
-        return new WsPostAuth();
     }
 
     /**

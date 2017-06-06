@@ -2880,50 +2880,6 @@ public interface ServiceSoap {
      * 
      * @param wsid
      * @param locDate
-     * @param destinationToken
-     * @param note
-     * @param authSoapHeader
-     * @param destinationPAN
-     * @param issCode
-     * @param sourcePAN
-     * @param locTime
-     * @param sourceToken
-     * @param amtTxn
-     * @return
-     *     returns ae.globalprocessing.hyperionweb.PostAuth
-     */
-    @WebMethod(operationName = "Ws_Post_Auth", action = "http://www.globalprocessing.ae/HyperionWeb/Ws_Post_Auth")
-    @WebResult(name = "Ws_Post_AuthResult", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-    @RequestWrapper(localName = "Ws_Post_Auth", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsPostAuth")
-    @ResponseWrapper(localName = "Ws_Post_AuthResponse", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsPostAuthResponse")
-    public PostAuth wsPostAuth(
-        @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        long wsid,
-        @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode,
-        @WebParam(name = "SourcePAN", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String sourcePAN,
-        @WebParam(name = "SourceToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String sourceToken,
-        @WebParam(name = "LocDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locDate,
-        @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locTime,
-        @WebParam(name = "DestinationPAN", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String destinationPAN,
-        @WebParam(name = "DestinationToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String destinationToken,
-        @WebParam(name = "AmtTxn", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        double amtTxn,
-        @WebParam(name = "Note", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String note,
-        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
-        AuthSoapHeader authSoapHeader);
-
-    /**
-     * 
-     * @param wsid
-     * @param locDate
      * @param itemID
      * @param note
      * @param publicToken
