@@ -2876,43 +2876,6 @@ public interface ServiceSoap {
     @ResponseWrapper(localName = "Ws_Simple_CheckResponse", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsSimpleCheckResponse")
     public String wsSimpleCheck();
 
-    /**
-     * 
-     * @param wsid
-     * @param locDate
-     * @param itemID
-     * @param note
-     * @param publicToken
-     * @param authSoapHeader
-     * @param issCode
-     * @param locTime
-     * @param pan
-     * @return
-     *     returns ae.globalprocessing.hyperionweb.RemoveAuth
-     */
-    @WebMethod(operationName = "Ws_RemoveBlockedAmt_Posting", action = "http://www.globalprocessing.ae/HyperionWeb/Ws_RemoveBlockedAmt_Posting")
-    @WebResult(name = "Ws_RemoveBlockedAmt_PostingResult", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-    @RequestWrapper(localName = "Ws_RemoveBlockedAmt_Posting", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsRemoveBlockedAmtPosting")
-    @ResponseWrapper(localName = "Ws_RemoveBlockedAmt_PostingResponse", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsRemoveBlockedAmtPostingResponse")
-    public RemoveAuth wsRemoveBlockedAmtPosting(
-        @WebParam(name = "WSID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        long wsid,
-        @WebParam(name = "IssCode", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String issCode,
-        @WebParam(name = "PAN", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String pan,
-        @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String publicToken,
-        @WebParam(name = "LocDate", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locDate,
-        @WebParam(name = "LocTime", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String locTime,
-        @WebParam(name = "ItemID", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int itemID,
-        @WebParam(name = "Note", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String note,
-        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
-        AuthSoapHeader authSoapHeader);
 
     /**
      * 

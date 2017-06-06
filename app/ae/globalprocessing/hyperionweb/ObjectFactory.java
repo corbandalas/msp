@@ -2014,14 +2014,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsRemoveBlockedAmtPostingResponse }
-     * 
-     */
-    public WsRemoveBlockedAmtPostingResponse createWsRemoveBlockedAmtPostingResponse() {
-        return new WsRemoveBlockedAmtPostingResponse();
-    }
-
-    /**
      * Create an instance of {@link WsWebServiceResultV2 }
      * 
      */
@@ -2275,14 +2267,6 @@ public class ObjectFactory {
      */
     public WsGetCardRequest createWsGetCardRequest() {
         return new WsGetCardRequest();
-    }
-
-    /**
-     * Create an instance of {@link WsRemoveBlockedAmtPosting }
-     * 
-     */
-    public WsRemoveBlockedAmtPosting createWsRemoveBlockedAmtPosting() {
-        return new WsRemoveBlockedAmtPosting();
     }
 
     /**
