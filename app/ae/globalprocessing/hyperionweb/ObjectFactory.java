@@ -470,14 +470,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGAHGiftCardUnLoad }
-     * 
-     */
-    public WsGAHGiftCardUnLoad createWsGAHGiftCardUnLoad() {
-        return new WsGAHGiftCardUnLoad();
-    }
-
-    /**
      * Create an instance of {@link WsUpdate3DSecureDetails }
      * 
      */
@@ -579,14 +571,6 @@ public class ObjectFactory {
      */
     public CardHolderDetails createCardHolderDetails() {
         return new CardHolderDetails();
-    }
-
-    /**
-     * Create an instance of {@link WsGAHGiftCardUnLoadResponse }
-     * 
-     */
-    public WsGAHGiftCardUnLoadResponse createWsGAHGiftCardUnLoadResponse() {
-        return new WsGAHGiftCardUnLoadResponse();
     }
 
     /**
