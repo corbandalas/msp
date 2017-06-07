@@ -1526,14 +1526,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGAHGiftCardActivate }
-     * 
-     */
-    public WsGAHGiftCardActivate createWsGAHGiftCardActivate() {
-        return new WsGAHGiftCardActivate();
-    }
-
-    /**
      * Create an instance of {@link WsActivateLoadResponse }
      * 
      */
@@ -1573,13 +1565,6 @@ public class ObjectFactory {
         return new WsCardChangeGroups();
     }
 
-    /**
-     * Create an instance of {@link WsGAHGiftCardActivateResponse }
-     * 
-     */
-    public WsGAHGiftCardActivateResponse createWsGAHGiftCardActivateResponse() {
-        return new WsGAHGiftCardActivateResponse();
-    }
 
     /**
      * Create an instance of {@link WsCardHolderDetailsEnquiryV2Response }
