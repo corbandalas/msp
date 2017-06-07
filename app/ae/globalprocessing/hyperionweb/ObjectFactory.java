@@ -1325,13 +1325,6 @@ public class ObjectFactory {
         return new ApplyFees();
     }
 
-    /**
-     * Create an instance of {@link WsGAHGiftCardActivateLoadResponse }
-     * 
-     */
-    public WsGAHGiftCardActivateLoadResponse createWsGAHGiftCardActivateLoadResponse() {
-        return new WsGAHGiftCardActivateLoadResponse();
-    }
 
     /**
      * Create an instance of {@link WsBalanceAdjustment }
@@ -1638,13 +1631,6 @@ public class ObjectFactory {
         return new WsCardAcceptorBlackList();
     }
 
-    /**
-     * Create an instance of {@link WsGAHGiftCardActivateLoad }
-     * 
-     */
-    public WsGAHGiftCardActivateLoad createWsGAHGiftCardActivateLoad() {
-        return new WsGAHGiftCardActivateLoad();
-    }
 
     /**
      * Create an instance of {@link Card }
