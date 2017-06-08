@@ -393,13 +393,6 @@ public class ObjectFactory {
         return new CardRequestResponse();
     }
 
-    /**
-     * Create an instance of {@link WsGAHGiftCardSwitchAdvancedPermissionResponse }
-     * 
-     */
-    public WsGAHGiftCardSwitchAdvancedPermissionResponse createWsGAHGiftCardSwitchAdvancedPermissionResponse() {
-        return new WsGAHGiftCardSwitchAdvancedPermissionResponse();
-    }
 
     /**
      * Create an instance of {@link AdvancePermission }
@@ -742,14 +735,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGiftCardPhoneActivation }
-     * 
-     */
-    public WsGiftCardPhoneActivation createWsGiftCardPhoneActivation() {
-        return new WsGiftCardPhoneActivation();
-    }
-
-    /**
      * Create an instance of {@link CustomerUpdate }
      * 
      */
@@ -958,14 +943,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGAHGiftCardPhoneActivation }
-     * 
-     */
-    public WsGAHGiftCardPhoneActivation createWsGAHGiftCardPhoneActivation() {
-        return new WsGAHGiftCardPhoneActivation();
-    }
-
-    /**
      * Create an instance of {@link WsGiftCardActivateLoadResponse }
      * 
      */
@@ -1035,14 +1012,6 @@ public class ObjectFactory {
      */
     public WsActivateLoad createWsActivateLoad() {
         return new WsActivateLoad();
-    }
-
-    /**
-     * Create an instance of {@link WsGAHGiftCardPhysicalCardActivation }
-     * 
-     */
-    public WsGAHGiftCardPhysicalCardActivation createWsGAHGiftCardPhysicalCardActivation() {
-        return new WsGAHGiftCardPhysicalCardActivation();
     }
 
     /**
@@ -1327,27 +1296,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGiftCardActivateLoadCP }
-     * 
-     */
-    public WsGiftCardActivateLoadCP createWsGiftCardActivateLoadCP() {
-        return new WsGiftCardActivateLoadCP();
-    }
-
-    /**
      * Create an instance of {@link WsTransactionVoid }
      * 
      */
     public WsTransactionVoid createWsTransactionVoid() {
         return new WsTransactionVoid();
-    }
-
-    /**
-     * Create an instance of {@link WsGiftCardPhoneActivationResponse }
-     * 
-     */
-    public WsGiftCardPhoneActivationResponse createWsGiftCardPhoneActivationResponse() {
-        return new WsGiftCardPhoneActivationResponse();
     }
 
     /**
@@ -1592,14 +1545,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGiftCardActivateLoadCPResponse }
-     * 
-     */
-    public WsGiftCardActivateLoadCPResponse createWsGiftCardActivateLoadCPResponse() {
-        return new WsGiftCardActivateLoadCPResponse();
-    }
-
-    /**
      * Create an instance of {@link WsUpdateLastModifiedTypeResponse }
      * 
      */
@@ -1630,14 +1575,6 @@ public class ObjectFactory {
      */
     public WsWebServiceResult createWsWebServiceResult() {
         return new WsWebServiceResult();
-    }
-
-    /**
-     * Create an instance of {@link WsGAHGiftCardPhysicalCardActivationResponse }
-     * 
-     */
-    public WsGAHGiftCardPhysicalCardActivationResponse createWsGAHGiftCardPhysicalCardActivationResponse() {
-        return new WsGAHGiftCardPhysicalCardActivationResponse();
     }
 
     /**
@@ -1688,13 +1625,6 @@ public class ObjectFactory {
         return new WsSanctionsPEPCheckV2();
     }
 
-    /**
-     * Create an instance of {@link WsGAHGiftCardSwitchAdvancedPermission }
-     * 
-     */
-    public WsGAHGiftCardSwitchAdvancedPermission createWsGAHGiftCardSwitchAdvancedPermission() {
-        return new WsGAHGiftCardSwitchAdvancedPermission();
-    }
 
     /**
      * Create an instance of {@link CardEnquiry }
@@ -1894,14 +1824,6 @@ public class ObjectFactory {
      */
     public WsBulkCreation.Doc createWsBulkCreationDoc() {
         return new WsBulkCreation.Doc();
-    }
-
-    /**
-     * Create an instance of {@link WsGAHGiftCardRegenerateResponse }
-     * 
-     */
-    public WsGAHGiftCardRegenerateResponse createWsGAHGiftCardRegenerateResponse() {
-        return new WsGAHGiftCardRegenerateResponse();
     }
 
     /**
@@ -2129,14 +2051,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGAHGiftCardPhoneActivationResponse }
-     * 
-     */
-    public WsGAHGiftCardPhoneActivationResponse createWsGAHGiftCardPhoneActivationResponse() {
-        return new WsGAHGiftCardPhoneActivationResponse();
-    }
-
-    /**
      * Create an instance of {@link WsCustomerEnquiry }
      * 
      */
@@ -2182,14 +2096,6 @@ public class ObjectFactory {
      */
     public WsCardChangeCardacceptorList createWsCardChangeCardacceptorList() {
         return new WsCardChangeCardacceptorList();
-    }
-
-    /**
-     * Create an instance of {@link WsGAHGiftCardRegenerate }
-     * 
-     */
-    public WsGAHGiftCardRegenerate createWsGAHGiftCardRegenerate() {
-        return new WsGAHGiftCardRegenerate();
     }
 
     /**
