@@ -943,14 +943,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link WsGiftCardActivateLoadResponse }
-     * 
-     */
-    public WsGiftCardActivateLoadResponse createWsGiftCardActivateLoadResponse() {
-        return new WsGiftCardActivateLoadResponse();
-    }
-
-    /**
      * Create an instance of {@link WsGetPasscode }
      * 
      */
@@ -2160,14 +2152,6 @@ public class ObjectFactory {
      */
     public WsCreateCard createWsCreateCard() {
         return new WsCreateCard();
-    }
-
-    /**
-     * Create an instance of {@link WsGiftCardActivateLoad }
-     * 
-     */
-    public WsGiftCardActivateLoad createWsGiftCardActivateLoad() {
-        return new WsGiftCardActivateLoad();
     }
 
     /**
