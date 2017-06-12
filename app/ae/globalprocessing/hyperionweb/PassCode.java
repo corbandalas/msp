@@ -135,4 +135,14 @@ public class PassCode {
         this.actionCode = value;
     }
 
+
+    @Override
+    public String toString() {
+        return "PassCode{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", accCode='" + accCode + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                '}';
+    }
 }

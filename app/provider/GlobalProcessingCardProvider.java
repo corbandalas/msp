@@ -227,6 +227,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokeWsGenericFees(res, code, card));
     }
 
+    @Override
+    public F.Promise<PassCode> getPassCode(String token) {
+        return getGPSSettings().flatMap(res -> invokeWsGetPassCode(res, token));
+    }
+
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
         return F.Promise.promise(() -> {
@@ -938,6 +943,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return applyFees;
+        }, getExecutionContext());
+    }
+
+
+    private F.Promise<PassCode> invokeWsGetPassCode(GPSSettings gpsSettings, String token) {
+
+        return F.Promise.promise(() -> {
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Get_Passcode service invocation. WSID #" + wsid);
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            PassCode passCode = null;
+
+            try {
+
+                passCode = service.getServiceSoap().wsGetPasscode(wsid, gpsSettings.issCode, null, token, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// Ws_Get_Passcode service invocation was ended. WSID #" + wsid + ". Result code: " + passCode.getActionCode() + " ." + passCode.toString());
+
+                if (!StringUtils.equals("000", passCode.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return passCode;
         }, getExecutionContext());
     }
 

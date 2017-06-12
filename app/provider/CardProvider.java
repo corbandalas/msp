@@ -2,6 +2,7 @@ package provider;
 
 import ae.globalprocessing.hyperionweb.ApplyFees;
 import ae.globalprocessing.hyperionweb.ChangeGroup;
+import ae.globalprocessing.hyperionweb.PassCode;
 import com.google.inject.ImplementedBy;
 import model.Card;
 import model.Currency;
@@ -52,4 +53,6 @@ public interface CardProvider {
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
     F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
     F.Promise<ApplyFees> applyFee(String code, Card card);
+    F.Promise<PassCode> getPassCode(String token);
+
 }

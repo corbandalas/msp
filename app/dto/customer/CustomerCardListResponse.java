@@ -36,13 +36,15 @@ public class CustomerCardListResponse extends BaseAPIResponse {
         private long id;
         private String alias;
         private String type;
+        private String passCode;
         private CardDetailsResponse cardDetails;
 
-        public CardWrapper(long id, String alias, CardDetailsResponse cardDetails, String type) {
+        public CardWrapper(long id, String alias, CardDetailsResponse cardDetails, String type, String passCode) {
             this.id = id;
             this.cardDetails = cardDetails;
             this.alias = alias;
             this.type = type;
+            this.passCode = passCode;
         }
 
         public CardWrapper() {
@@ -79,6 +81,14 @@ public class CustomerCardListResponse extends BaseAPIResponse {
 
         public void setAlias(String alias) {
             this.alias = alias;
+        }
+
+        public String getPassCode() {
+            return passCode;
+        }
+
+        public void setPassCode(String passCode) {
+            this.passCode = passCode;
         }
     }
 
