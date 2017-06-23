@@ -642,7 +642,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                convertCard = service.getServiceSoap().wsConvertCard(card.getToken(), DateUtil.format(convertDate, "yyyy-MM-dd"), applyFee ? 1 : 0, DateUtil.format(expDate, "yyyy-MM-dd"), createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                convertCard = service.getServiceSoap().wsConvertCard(card.getToken(), DateUtil.format(convertDate, "yyyy-MM-dd"), applyFee ? 1 : 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
                 Logger.info("/////// Ws_Convert_Card service invocation was ended. WSID #" + wsid + ". Result code: " + convertCard.getActionCode() + " ." + convertCard.toString());
