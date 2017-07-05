@@ -210,7 +210,7 @@ public class BaseController extends play.mvc.Controller {
                                         "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
                                 .flatMap(crd -> {
                                     cardProvider.regenerateCardDetails(crd);
-                                    return operationService.createDepositOperation(crd, amount, currency, "", "Worldpay deposit");
+                                    return operationService.createDepositOperation(crd, amount, currency, "", "Debit card deposit");
                                 });
                     }
                 } else {
@@ -229,22 +229,22 @@ public class BaseController extends play.mvc.Controller {
                 if (card.getType().equals(CardType.VIRTUAL)) {
 
                     if (isBankDeposit) {
-                        cardLoadPromise = cardProvider.loadVirtualCardFromBank(card, amount, currency, "Worldpay deposit");
+                        cardLoadPromise = cardProvider.loadVirtualCardFromBank(card, amount, currency, "Debit card deposit");
                     } else {
-                        cardLoadPromise = cardProvider.loadVirtualCardFromCard(card, amount, currency, "Worldpay deposit");
+                        cardLoadPromise = cardProvider.loadVirtualCardFromCard(card, amount, currency, "Debit card deposit");
                     }
 
                 } else {
 
                     if (isBankDeposit) {
-                        cardLoadPromise = cardProvider.loadPlasticCardFromBank(card, amount, currency, "Worldpay deposit");
+                        cardLoadPromise = cardProvider.loadPlasticCardFromBank(card, amount, currency, "Debit card deposit");
                     } else {
-                        cardLoadPromise = cardProvider.loadPlasticCardFromCard(card, amount, currency, "Worldpay deposit");
+                        cardLoadPromise = cardProvider.loadPlasticCardFromCard(card, amount, currency, "Debit card deposit");
                     }
                 }
 
                 return cardLoadPromise.flatMap(cardLoadResponse -> operationService.createDepositOperation(card,
-                        amount, currency, "" + System.currentTimeMillis(), "Worldpay deposit"));
+                        amount, currency, "" + System.currentTimeMillis(), "Debit card deposit"));
             });
         });
     }
