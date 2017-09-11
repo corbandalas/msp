@@ -10,6 +10,13 @@ GET        /swagger               @controllers.SwaggerController.swagger()
 # Index
 GET     /                           @controllers.Application.index
 
+# Partner API
+GET        /api-docs/api/partner/card      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/partner/card")
+
+POST       /api/partner/card/create                                          @controllers.partner.CardPartnerController.create()
+
+
+
 #Merchant API(admin)
 
 # Property API

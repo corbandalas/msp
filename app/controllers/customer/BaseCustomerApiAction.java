@@ -1,6 +1,9 @@
 package controllers.customer;
 
 import com.google.inject.Inject;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import dto.Authentication;
 import dto.BaseAPIResponse;
 import exception.CustomerNotRegisteredException;
 import model.Customer;
@@ -39,10 +42,20 @@ public class BaseCustomerApiAction extends Action.Simple {
         }
 
         final String phone = cache.get(token);
+
+        Integer accountID = cache.get("account_" + phone);
+
         if (StringUtils.isBlank(phone)) {
             Logger.error("Authorization token was not found");
             return F.Promise.pure(createWrongAuthDataResponse());
         }
+
+        if (accountID == null) {
+            Logger.error("Authorization token was not found");
+            return F.Promise.pure(createWrongAuthDataResponse());
+        }
+
+
 
         final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).flatMap(customerOptional -> {
 
@@ -53,6 +66,17 @@ public class BaseCustomerApiAction extends Action.Simple {
                 return F.Promise.pure(createWrongCustomerAccountResponse());
             }
             ctx.args.put("customer", customer);
+
+            Config conf = ConfigFactory.load();
+
+            String sessionTimeOut = conf.getString("cache.customer.session.timeout");
+
+            //Store token to cache with expiration time out
+            cache.set(token, customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
+
+            cache.set("account_" + customer.getId(), accountID, Integer.parseInt(sessionTimeOut) * 60);
+
+
             return delegate.call(ctx);
         });
 

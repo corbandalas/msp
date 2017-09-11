@@ -315,6 +315,7 @@ public class CustomerCardManagementController extends BaseController {
             @ApiResponse(code = INCORRECT_CARD_CODE, message = INCORRECT_CARD_TEXT),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = NOT_ENOUGH_FUNDS_CODE, message = NOT_ENOUGH_FUNDS_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(

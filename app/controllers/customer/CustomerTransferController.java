@@ -74,7 +74,9 @@ public class CustomerTransferController extends BaseController {
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
             @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
+            @ApiResponse(code = CURRENCIES_NOT_EQUAL_CODE, message = CURRENCIES_NOT_EQUAL_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
+
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.CustomerTransferOwnCards", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
@@ -129,6 +131,11 @@ public class CustomerTransferController extends BaseController {
                 return F.Promise.pure(createWrongCardResponse());
             }
 
+            if (!cardFrom.get().getCurrencyId().equalsIgnoreCase(cardTo.get().getCurrencyId())) {
+                Logger.error("Sender card currency doesn't correspond to receiver card currency");
+                return F.Promise.pure(createCurrencyNotTheSameResponse());
+            }
+
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(),
                     request.getDescription()).flatMap(providerResponse -> operationService.createTransferOperation(cardFrom.get(),
                     cardTo.get(), request.getAmount(), data._2.get(), request.getOrderId(), request.getDescription())
@@ -158,6 +165,8 @@ public class CustomerTransferController extends BaseController {
             @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
             @ApiResponse(code = INCORRECT_CURRENCY_CODE, message = INCORRECT_CURRENCY_TEXT),
             @ApiResponse(code = KYC_RESTRICTION_CODE, message = KYC_RESTRICTION_TEXT),
+            @ApiResponse(code = CURRENCIES_NOT_EQUAL_CODE, message = CURRENCIES_NOT_EQUAL_TEXT),
+            @ApiResponse(code = KYC_TRANSFER_RESTRICTION_CODE, message = KYC_TRANSFER_RESTRICTION_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "transactions request", required = true, dataType = "dto.customer.TransferToAnotherCard", paramType = "body"),
@@ -213,10 +222,22 @@ public class CustomerTransferController extends BaseController {
                 return F.Promise.pure(createWrongCardResponse());
             }
 
+            if (!cardFrom.get().getCurrencyId().equalsIgnoreCase(cardTo.getCurrencyId())) {
+                Logger.error("Sender card currency doesn't correspond to receiver card currency");
+                return F.Promise.pure(createCurrencyNotTheSameResponse());
+            }
+
+
             if (!receiverCustomer.getKyc().equals(KYC.FULL_DUE_DILIGENCE)) {
                 Logger.error("Receiver is not allowed to get funds due to KYC restrictions");
-                return F.Promise.pure(createKycLimitResponse());
+                return F.Promise.pure(createWrongTransferKYCResponse());
             }
+
+            if (!customer.getKyc().equals(KYC.FULL_DUE_DILIGENCE)) {
+                Logger.error("Receiver is not allowed to get funds due to KYC restrictions");
+                return F.Promise.pure(createWrongTransferKYCResponse());
+            }
+
 
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo, request.getAmount(), currency,
                     request.getDescription()).flatMap(providerResponse -> operationService.createTransferOperation(cardFrom.get(),

@@ -72,6 +72,15 @@ public class ReturnCodes {
     public static final byte LIMITS_EXCEEDED_CODE = 20;
     public static final String LIMITS_EXCEEDED_TEXT = "Limits exceeded";
 
+    public static final byte CURRENCIES_NOT_EQUAL_CODE = 21;
+    public static final String CURRENCIES_NOT_EQUAL_TEXT = "Transfer currency must be the same";
+
+    public static final byte KYC_TRANSFER_RESTRICTION_CODE = 22;
+    public static final String KYC_TRANSFER_RESTRICTION_TEXT = "KYC level is not allowed for transfer";
+
+    public static final byte NOT_ENOUGH_FUNDS_CODE = 23;
+    public static final String NOT_ENOUGH_FUNDS_TEXT = "You don’t have enough funds";
+
 
     public static final byte GENERAL_ERROR_CODE = 100;
     public static final String GENERAL_ERROR_TEXT = "General error";

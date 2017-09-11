@@ -62,6 +62,18 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_CARD_TEXT, "" + INCORRECT_CARD_CODE)));
     }
 
+    protected Results.Status createCurrencyNotTheSameResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(CURRENCIES_NOT_EQUAL_TEXT, "" + CURRENCIES_NOT_EQUAL_CODE)));
+    }
+
+    protected Results.Status createWrongTransferKYCResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(KYC_TRANSFER_RESTRICTION_TEXT, "" + KYC_TRANSFER_RESTRICTION_CODE)));
+    }
+
+    protected Results.Status createNotEnoughFundsResponse() {
+        return badRequest(Json.toJson(new BaseAPIResponse(NOT_ENOUGH_FUNDS_TEXT, "" + NOT_ENOUGH_FUNDS_CODE)));
+    }
+
     protected Results.Status createWrongKYCResponse() {
         return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_KYC_TEXT, "" + INCORRECT_KYC_CODE)));
     }
@@ -146,6 +158,10 @@ public class BaseController extends play.mvc.Controller {
 
                     if (throwable instanceof WrongPhoneNumberException) {
                         return createWrongPhoneNumberResponse();
+                    }
+
+                    if (throwable instanceof NotEnoughFundsException) {
+                        return createNotEnoughFundsResponse();
                     }
 
                     return createGeneralErrorResponse();

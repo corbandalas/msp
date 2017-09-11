@@ -4,6 +4,7 @@ import ae.globalprocessing.hyperionweb.*;
 import akka.actor.ActorSystem;
 import com.google.inject.Inject;
 import exception.CardProviderException;
+import exception.NotEnoughFundsException;
 import exception.WrongCountryException;
 import exception.WrongPropertyException;
 import model.*;
@@ -74,6 +75,17 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.MASTER_VIRTUAL, activateNow);
+
+    }
+
+    @Override
+    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency,  boolean activateNow) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow);
+    }
+
+    @Override
     public F.Promise<CardCreationResponse> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency) {
         return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, true);
     }
@@ -81,6 +93,16 @@ public class GlobalProcessingCardProvider implements CardProvider {
     @Override
     public F.Promise<CardCreationResponse> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency) {
         return issueCard(customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, true);
+    }
+
+    @Override
+    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency,  boolean activateNow) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow);
+    }
+
+    @Override
+    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency,  boolean activateNow) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow);
     }
 
     @Override
@@ -212,6 +234,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
 
         return getGPSSettings().zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
+                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow)).
+                map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue()));
+
+    }
+
+    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
+
+
+        return getGPSSettingsForPartner(partnerID).zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
                 flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow)).
                 map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue()));
 
@@ -652,13 +683,23 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 Logger.info("/////// Ws_Convert_Card service invocation was ended. WSID #" + wsid + ". Result code: " + convertCard.getActionCode() + " ." + convertCard.toString());
 
+                if (StringUtils.equals("116", convertCard.getActionCode())) {
+                    throw new NotEnoughFundsException("You don’t have enough funds");
+                }
+
                 if (!StringUtils.equals("000", convertCard.getActionCode())) {
                     throw new CardProviderException("Bad Response");
                 }
 
+
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+
+                if (e instanceof CardProviderException) {
+                    throw new CardProviderException("GPS error");
+                } else if (e instanceof NotEnoughFundsException) {
+                    throw new NotEnoughFundsException("You don’t have enough funds");
+                }
             }
 
             return convertCard;
@@ -1028,6 +1069,28 @@ public class GlobalProcessingCardProvider implements CardProvider {
         final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
         final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
         final F.Promise<Optional<Property>> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.api.settings"));
+
+        return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
+
+            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+            String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
+            String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+
+            String gpsConfigStringValue = res._2.orElseThrow(WrongPropertyException::new).getValue();
+
+            String[] split = gpsConfigStringValue.split(":");
+
+            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
+
+        });
+    }
+
+    private F.Promise<GPSSettings> getGPSSettingsForPartner(String partnerID) {
+
+        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
+        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
+        final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
+        final F.Promise<Optional<Property>> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.api.settings." + partnerID));
 
         return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
 
