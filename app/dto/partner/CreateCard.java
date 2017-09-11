@@ -3,7 +3,7 @@ package dto.partner;
 /**
  * Create Card request DTO object
  * @author corbandalas created 11.09.2017.
- * @since 0.3.0
+ * @since 0.6.0
  */
 public class CreateCard {
 

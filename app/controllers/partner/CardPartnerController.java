@@ -9,6 +9,7 @@ import controllers.admin.BaseMerchantApiAction;
 import dto.Authentication;
 import dto.BaseAPIResponse;
 import dto.partner.CreateCard;
+import dto.partner.CreateCardResponse;
 import model.Currency;
 import model.Customer;
 import model.enums.KYC;
@@ -33,7 +34,7 @@ import static configs.ReturnCodes.*;
  * Partner card provider API controller
  *
  * @author corbandalas created 11.09.2017.
- * @since 0.3.0
+ * @since 0.6.0
  */
 @Api(value = Constants.PARTNER_API_PATH + "/card", description = "Card processing functions")
 public class CardPartnerController extends BaseController {
@@ -52,11 +53,11 @@ public class CardPartnerController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = CardCreationResponse.class
+            response = CreateCardResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardCreationResponse.class),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCardResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
             @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
@@ -179,7 +180,7 @@ public class CardPartnerController extends BaseController {
 
 
 
-            return cardCreationResponsePromise.map(res -> ok(Json.toJson(createResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT))));
+            return cardCreationResponsePromise.map(res -> ok(Json.toJson(new CreateCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
 
         });
 
