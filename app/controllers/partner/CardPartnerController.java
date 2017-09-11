@@ -66,7 +66,7 @@ public class CardPartnerController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partner.CreateCard", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+phone+firstName+lastName+amount+currency+email+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+firstName+lastName+amount+currency+email+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> create() {
@@ -105,7 +105,7 @@ public class CardPartnerController extends BaseController {
         }
 
 
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
                 createCard.getPhone(), createCard.getFirstName(), createCard.getLastName(), createCard.getAmount(), createCard.getCurrency(), createCard.getEmail(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
