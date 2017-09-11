@@ -18,4 +18,11 @@ public class CreateCardResponse extends BaseAPIResponse {
         this.cardCreationResponse = cardCreationResponse;
     }
 
+    public CardCreationResponse getCardCreationResponse() {
+        return cardCreationResponse;
+    }
+
+    public void setCardCreationResponse(CardCreationResponse cardCreationResponse) {
+        this.cardCreationResponse = cardCreationResponse;
+    }
 }
