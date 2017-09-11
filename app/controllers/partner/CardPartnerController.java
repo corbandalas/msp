@@ -67,7 +67,8 @@ public class CardPartnerController extends BaseController {
             @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partner.CreateCard", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+phone+firstName+lastName+amount+currency+email+secret)",
-                    required = true, dataType = "String", paramType = "header", name = "enckey")})
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> create() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
@@ -97,7 +98,6 @@ public class CardPartnerController extends BaseController {
                 StringUtils.isBlank(createCard.getCardName()) ||
                 StringUtils.isBlank(createCard.getPlastic()) ||
                 StringUtils.isBlank(createCard.getActivateNow()) ||
-                StringUtils.isBlank(createCard.getEnckey()) ||
                 StringUtils.isBlank(createCard.getAmount())
                 ) {
             Logger.error("Missing params");

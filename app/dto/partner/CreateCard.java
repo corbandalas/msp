@@ -24,10 +24,8 @@ public class CreateCard {
     private String cardName;
     private String activateNow;
     private String plastic;
-    private String enckey;
 
-
-    public CreateCard(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic, String enckey) {
+    public CreateCard(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic) {
         this.currency = currency;
         this.amount = amount;
         this.title = title;
@@ -45,7 +43,6 @@ public class CreateCard {
         this.cardName = cardName;
         this.activateNow = activateNow;
         this.plastic = plastic;
-        this.enckey = enckey;
     }
 
     public String getCurrency() {
@@ -160,14 +157,6 @@ public class CreateCard {
         this.kyc = kyc;
     }
 
-    public String getEnckey() {
-        return enckey;
-    }
-
-    public void setEnckey(String enckey) {
-        this.enckey = enckey;
-    }
-
     public String getCardName() {
         return cardName;
     }
@@ -204,7 +193,6 @@ public class CreateCard {
                 ", cardName='" + cardName + '\'' +
                 ", activateNow='" + activateNow + '\'' +
                 ", plastic='" + plastic + '\'' +
-                ", enckey='" + enckey + '\'' +
                 '}';
     }
 
