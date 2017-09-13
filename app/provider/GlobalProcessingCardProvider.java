@@ -127,7 +127,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardLoadResponse> loadVirtualCardForPartner(String token, long amount, Currency currency, String description, String source, String partnerID) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardLoad(res, token, amount, currency.getId(), description, source)).map((res -> new CardLoadResponse(res.getActionCode())));
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardLoad(res, token, amount, currency.getId(), description, source)).map((res -> new CardLoadResponse(res.getActionCode(), res)));
     }
 
     @Override
@@ -162,7 +162,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardUnloadResponse> unloadVirtualCardForPartner(String token, long amount, Currency currency, String description, String loadType, String partnerID) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardUnload(res, token, amount, currency.getId(), description, loadType)).map((res -> new CardUnloadResponse(res.getActionCode())));
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardUnload(res, token, amount, currency.getId(), description, loadType)).map((res -> new CardUnloadResponse(res.getActionCode(), res)));
 
     }
 

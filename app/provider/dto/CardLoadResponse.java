@@ -1,5 +1,7 @@
 package provider.dto;
 
+import ae.globalprocessing.hyperionweb.LoadCard;
+
 /**
  * Card load response
  *
@@ -8,7 +10,21 @@ package provider.dto;
  */
 public class CardLoadResponse extends BaseCardResponse{
 
+    private LoadCard loadCard;
+
+    public CardLoadResponse(String actionCode, LoadCard loadCard) {
+        super(actionCode);
+        this.loadCard = loadCard;
+    }
     public CardLoadResponse(String actionCode) {
         super(actionCode);
+    }
+
+    public LoadCard getLoadCard() {
+        return loadCard;
+    }
+
+    public void setLoadCard(LoadCard loadCard) {
+        this.loadCard = loadCard;
     }
 }
