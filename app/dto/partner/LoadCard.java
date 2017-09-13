@@ -14,6 +14,8 @@ public class LoadCard {
     private String source;
     private String description;
 
+    public LoadCard() {
+    }
 
     public LoadCard(String currency, String amount, String token, String source, String description) {
         this.currency = currency;

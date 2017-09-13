@@ -14,6 +14,8 @@ public class UnloadCard {
     private String description;
     private String loadType;
 
+    public UnloadCard() {
+    }
 
     public UnloadCard(String currency, String amount, String token, String description, String loadType) {
         this.currency = currency;
