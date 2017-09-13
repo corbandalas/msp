@@ -126,6 +126,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<CardLoadResponse> loadVirtualCardForPartner(String token, long amount, Currency currency, String description, String source, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardLoad(res, token, amount, currency.getId(), description, source)).map((res -> new CardLoadResponse(res.getActionCode())));
+    }
+
+    @Override
     public F.Promise<CardLoadResponse> loadVirtualCardFromBank(Card card, long amount, Currency currency, String description) {
         return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardLoad(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "6")).map((res -> new CardLoadResponse(res.getActionCode())));
     }
@@ -153,6 +158,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
     @Override
     public F.Promise<CardUnloadResponse> unloadVirtualCard(Card card, long amount, Currency currency, String description) {
         return getGPSSettings().zip(F.Promise.wrap(currencyRepository.retrieveById(card.getCurrencyId()))).flatMap(res -> invokeCardUnload(res._1, card, CurrencyUtil.convert(amount, Optional.ofNullable(currency), res._2), description, "3")).map((res -> new CardUnloadResponse(res.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardUnloadResponse> unloadVirtualCardForPartner(String token, long amount, Currency currency, String description, String loadType, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardUnload(res, token, amount, currency.getId(), description, loadType)).map((res -> new CardUnloadResponse(res.getActionCode())));
+
     }
 
     @Override
@@ -527,6 +538,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<LoadCard> invokeCardLoad(GPSSettings gpsSettings, Card card, long amount, String description, String loadType) {
 
+        return invokeCardLoad(gpsSettings, card.getToken(), amount, card.getCurrencyId(), description, loadType);
+    }
+
+    private F.Promise<LoadCard> invokeCardLoad(GPSSettings gpsSettings, String token, long amount, String currency, String description, String loadType) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -538,8 +554,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "20", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, card.getCurrencyId(), loadType, gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "20", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, currency, loadType, gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
 
@@ -558,6 +574,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<UnLoad> invokeCardUnload(GPSSettings gpsSettings, Card card, long amount, String description, String loadType) {
 
+        return invokeCardUnload(gpsSettings, card.getToken(), amount, card.getCurrencyId(), description, loadType);
+    }
+
+    private F.Promise<UnLoad> invokeCardUnload(GPSSettings gpsSettings, String token, long amount, String currency, String description, String loadType) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -569,8 +590,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                unload = service.getServiceSoap().wsUnLoad(wsid, gpsSettings.issCode, "8", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, loadType, gpsSettings.loadSrc, (double) amount / 100, card.getCurrencyId(), 0, null, 0, null, description, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                unload = service.getServiceSoap().wsUnLoad(wsid, gpsSettings.issCode, "8", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, loadType, gpsSettings.loadSrc, (double) amount / 100, currency, 0, null, 0, null, description, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_UnLoad service invocation was ended. WSID #" + wsid + ". Result code: " + unload.getActionCode() + " ." + unload.toString());
 
