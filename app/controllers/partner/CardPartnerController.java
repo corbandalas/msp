@@ -236,8 +236,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), loadCard.getToken(),
                 loadCard.getAmount(), loadCard.getCurrency(), loadCard.getSource(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());

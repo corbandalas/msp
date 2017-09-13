@@ -1,6 +1,7 @@
 package util;
 
 import org.apache.commons.codec.binary.Base64;
+import play.Logger;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +27,8 @@ public class SecurityUtil {
             for (final String item : params) {
                 buf.append(item);
             }
+
+            Logger.info("Concatenated string = " + buf.toString());
 
             md5.update(buf.toString().getBytes());
             byteHash = md5.digest();
