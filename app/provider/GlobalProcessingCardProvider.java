@@ -111,6 +111,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<BalanceEnquire2> getVirtualCardBalanceForPartner(String token, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardBalance(res, token));
+    }
+
+    @Override
     public F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card) {
         return getGPSSettings().flatMap(res -> invokeCardBalance(res, card)).map((res -> new CardBalanceResponse(res.getAvlBal(), res.getCurCode(), res.getActionCode())));
     }
@@ -477,6 +482,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<BalanceEnquire2> invokeCardBalance(GPSSettings gpsSettings, Card card) {
 
+        return invokeCardBalance(gpsSettings, card.getToken());
+    }
+
+    private F.Promise<BalanceEnquire2> invokeCardBalance(GPSSettings gpsSettings, String token) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -487,7 +497,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             Logger.info("/////// WsBalanceEnquiryV2 service invocation. WSID #" + wsid);
 
             try {
-                balance = service.getServiceSoap().wsBalanceEnquiryV2(wsid, gpsSettings.issCode, "3", null, 4, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                balance = service.getServiceSoap().wsBalanceEnquiryV2(wsid, gpsSettings.issCode, "3", null, 4, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, "0", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + ". Result code: " + balance.getActionCode() + " ." + balance.toString());

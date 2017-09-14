@@ -178,7 +178,6 @@ public class CardPartnerController extends BaseController {
             }
 
 
-
             return cardCreationResponsePromise.map(res -> ok(Json.toJson(new CreateCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
 
         });
@@ -205,7 +204,7 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = LoadCardResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.LoadCard", paramType = "body"),
@@ -241,7 +240,6 @@ public class CardPartnerController extends BaseController {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
-
 
 
         long amount;
@@ -286,7 +284,7 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = LoadCardResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.UnloadCard", paramType = "body"),
@@ -325,7 +323,6 @@ public class CardPartnerController extends BaseController {
         }
 
 
-
         long amount;
 
         try {
@@ -347,6 +344,60 @@ public class CardPartnerController extends BaseController {
         final long finalAmount = amount;
 
         F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.unloadVirtualCardForPartner(unloadCard.getToken(), finalAmount, currency.get(), unloadCard.getDescription(), unloadCard.getLoadType(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new UnloadCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res)))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "balanceCard",
+            value = "Card balance",
+            notes = "Method allows to obtaing balance of a card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = BalanceResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BalanceResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.UnloadCard", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+amount+currency+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> balance() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final Balance balance;
+        try {
+            balance = Json.fromJson(jsonNode, Balance.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(balance.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), balance.getToken(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.getVirtualCardBalanceForPartner(balance.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new BalanceResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
 
         return returnRecover(result);
     }

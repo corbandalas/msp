@@ -1,6 +1,7 @@
 package provider;
 
 import ae.globalprocessing.hyperionweb.ApplyFees;
+import ae.globalprocessing.hyperionweb.BalanceEnquire2;
 import ae.globalprocessing.hyperionweb.ChangeGroup;
 import ae.globalprocessing.hyperionweb.PassCode;
 import com.google.inject.ImplementedBy;
@@ -32,6 +33,7 @@ public interface CardProvider {
     F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow);
     F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow);
     F.Promise<CardBalanceResponse> getVirtualCardBalance(Card card);
+    F.Promise<BalanceEnquire2> getVirtualCardBalanceForPartner(String token, String partnerID);
     F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card);
     F.Promise<CardDetailsResponse> getVirtualCardDetails(Card card);
     F.Promise<CardDetailsResponse> getPlasticCardDetails(Card card);
