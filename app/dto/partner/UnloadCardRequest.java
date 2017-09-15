@@ -6,7 +6,7 @@ package dto.partner;
  * @author corbandalas created 12.09.2017.
  * @since 0.6.0
  */
-public class UnloadCard {
+public class UnloadCardRequest {
 
     private String currency;
     private String amount;
@@ -14,10 +14,10 @@ public class UnloadCard {
     private String description;
     private String loadType;
 
-    public UnloadCard() {
+    public UnloadCardRequest() {
     }
 
-    public UnloadCard(String currency, String amount, String token, String description, String loadType) {
+    public UnloadCardRequest(String currency, String amount, String token, String description, String loadType) {
         this.currency = currency;
         this.amount = amount;
         this.token = token;

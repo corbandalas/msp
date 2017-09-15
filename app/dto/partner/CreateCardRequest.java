@@ -5,7 +5,7 @@ package dto.partner;
  * @author corbandalas created 11.09.2017.
  * @since 0.6.0
  */
-public class CreateCard {
+public class CreateCardRequest {
 
     private String currency;
     private String amount;
@@ -25,11 +25,11 @@ public class CreateCard {
     private String activateNow;
     private String plastic;
 
-    public CreateCard() {
+    public CreateCardRequest() {
 
     }
 
-    public CreateCard(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic) {
+    public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic) {
         this.currency = currency;
         this.amount = amount;
         this.title = title;

@@ -64,7 +64,7 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partner.CreateCard", paramType = "body"),
+            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partner.CreateCardRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+firstName+lastName+amount+currency+email+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
@@ -74,9 +74,9 @@ public class CardPartnerController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final CreateCard createCard;
+        final CreateCardRequest createCard;
         try {
-            createCard = Json.fromJson(jsonNode, CreateCard.class);
+            createCard = Json.fromJson(jsonNode, CreateCardRequest.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse());
@@ -207,19 +207,19 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = LoadCardResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.LoadCard", paramType = "body"),
+            @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.LoadCardRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+amount+currency+source+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
-    public F.Promise<Result> loadCard() {
+    public F.Promise<Result> load() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final LoadCard loadCard;
+        final LoadCardRequest loadCard;
         try {
-            loadCard = Json.fromJson(jsonNode, LoadCard.class);
+            loadCard = Json.fromJson(jsonNode, LoadCardRequest.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse());
@@ -287,19 +287,19 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Unload card request", required = true, dataType = "dto.partner.UnloadCard", paramType = "body"),
+            @ApiImplicitParam(value = "Unload card request", required = true, dataType = "dto.partner.UnloadCardRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+amount+currency+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
-    public F.Promise<Result> unloadCard() {
+    public F.Promise<Result> unload() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final UnloadCard unloadCard;
+        final UnloadCardRequest unloadCard;
         try {
-            unloadCard = Json.fromJson(jsonNode, UnloadCard.class);
+            unloadCard = Json.fromJson(jsonNode, UnloadCardRequest.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse());
@@ -368,7 +368,7 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Сard balance request", required = true, dataType = "dto.partner.Balance", paramType = "body"),
+            @ApiImplicitParam(value = "Сard balance request", required = true, dataType = "dto.partner.BalanceRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
@@ -378,9 +378,9 @@ public class CardPartnerController extends BaseController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final Balance balance;
+        final BalanceRequest balance;
         try {
-            balance = Json.fromJson(jsonNode, Balance.class);
+            balance = Json.fromJson(jsonNode, BalanceRequest.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse());

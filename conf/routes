@@ -14,8 +14,8 @@ GET     /                           @controllers.Application.index
 GET        /api-docs/api/partner/card      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/partner/card")
 
 POST       /api/partner/card/create                                          @controllers.partner.CardPartnerController.create()
-POST       /api/partner/card/loadCard                                          @controllers.partner.CardPartnerController.loadCard()
-POST       /api/partner/card/unloadCard                                          @controllers.partner.CardPartnerController.unloadCard()
+POST       /api/partner/card/load                                          @controllers.partner.CardPartnerController.load()
+POST       /api/partner/card/unload                                          @controllers.partner.CardPartnerController.unload()
 POST       /api/partner/card/balance                                          @controllers.partner.CardPartnerController.balance()
 
 
