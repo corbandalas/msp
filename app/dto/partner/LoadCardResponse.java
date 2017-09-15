@@ -1,7 +1,7 @@
 package dto.partner;
 
+import ae.globalprocessing.hyperionweb.LoadCard;
 import dto.BaseAPIResponse;
-import provider.dto.CardLoadResponse;
 
 /**
  * Load Card response DTO object
@@ -11,18 +11,18 @@ import provider.dto.CardLoadResponse;
  */
 public class LoadCardResponse extends BaseAPIResponse {
 
-    private CardLoadResponse cardLoadResponse;
+    private ae.globalprocessing.hyperionweb.LoadCard loadCard;
 
-    public LoadCardResponse(String text, String code, CardLoadResponse cardLoadResponse) {
+    public LoadCardResponse(String text, String code, ae.globalprocessing.hyperionweb.LoadCard loadCard) {
         super(text, code);
-        this.cardLoadResponse = cardLoadResponse;
+        this.loadCard = loadCard;
     }
 
-    public CardLoadResponse getCardLoadResponse() {
-        return cardLoadResponse;
+    public ae.globalprocessing.hyperionweb.LoadCard getLoadCard() {
+        return loadCard;
     }
 
-    public void setCardLoadResponse(CardLoadResponse cardLoadResponse) {
-        this.cardLoadResponse = cardLoadResponse;
+    public void setLoadCard(LoadCard loadCard) {
+        this.loadCard = loadCard;
     }
 }
