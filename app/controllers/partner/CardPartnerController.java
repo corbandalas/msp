@@ -262,7 +262,7 @@ public class CardPartnerController extends BaseController {
 
         final long finalAmount = amount;
 
-        F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.loadVirtualCardForPartner(loadCard.getToken(), finalAmount, currency.get(), loadCard.getDescription(), loadCard.getSource(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new LoadCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res)))));
+        F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.loadVirtualCardForPartner(loadCard.getToken(), finalAmount, currency.get(), loadCard.getDescription(), loadCard.getSource(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new LoadCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res.getLoadCard())))));
 
         return returnRecover(result);
     }
