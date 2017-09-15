@@ -16,6 +16,7 @@ GET        /api-docs/api/partner/card      @pl.matisoft.swagger.ApiHelpControlle
 POST       /api/partner/card/create                                          @controllers.partner.CardPartnerController.create()
 POST       /api/partner/card/load                                          @controllers.partner.CardPartnerController.load()
 POST       /api/partner/card/unload                                          @controllers.partner.CardPartnerController.unload()
+POST       /api/partner/card/balance                                          @controllers.partner.CardPartnerController.balance()
 
 
 #Merchant API(admin)
