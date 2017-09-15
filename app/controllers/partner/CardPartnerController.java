@@ -151,7 +151,6 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        ;
 
         final F.Promise<Optional<Currency>> currencyPromise = F.Promise.wrap(currencyRepository.retrieveById(createCard.getCurrency()));
 
@@ -352,7 +351,7 @@ public class CardPartnerController extends BaseController {
     @ApiOperation(
             nickname = "balanceCard",
             value = "Card balance",
-            notes = "Method allows to obtaing balance of a card",
+            notes = "Method allows to obtain balance of a card",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -398,6 +397,76 @@ public class CardPartnerController extends BaseController {
         }
 
         F.Promise<Result> result = globalProcessingCardProvider.getVirtualCardBalanceForPartner(balance.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new BalanceResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "transactionsCard",
+            value = "Card transactions",
+            notes = "Method allows to retrieve card transactions",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = MiniStatementResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = MiniStatementResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Mini statement request", required = true, dataType = "dto.partner.MiniStatementRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> transactions() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final MiniStatementRequest miniStatementRequest;
+        try {
+            miniStatementRequest = Json.fromJson(jsonNode, MiniStatementRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(miniStatementRequest.getToken()) || StringUtils.isBlank(miniStatementRequest.getStartDate()) ||
+                StringUtils.isBlank(miniStatementRequest.getEndDate())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), miniStatementRequest.getToken(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        Date startDate;
+
+        Date endDate;
+
+        try {
+
+            startDate = DateUtil.parse(miniStatementRequest.getStartDate(), "yyyy-MM-dd");
+
+            endDate = DateUtil.parse(miniStatementRequest.getEndDate(), "yyyy-MM-dd");
+
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.getCardTransactions(miniStatementRequest.getToken(),startDate, endDate, authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new MiniStatementResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
 
         return returnRecover(result);
     }

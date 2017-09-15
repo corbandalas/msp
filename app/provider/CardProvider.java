@@ -1,9 +1,6 @@
 package provider;
 
-import ae.globalprocessing.hyperionweb.ApplyFees;
-import ae.globalprocessing.hyperionweb.BalanceEnquire2;
-import ae.globalprocessing.hyperionweb.ChangeGroup;
-import ae.globalprocessing.hyperionweb.PassCode;
+import ae.globalprocessing.hyperionweb.*;
 import com.google.inject.ImplementedBy;
 import model.Card;
 import model.Currency;
@@ -55,6 +52,7 @@ public interface CardProvider {
     F.Promise<CardStatusChangeResponseResponse> reportCardStolen(Card card, String reason);
     F.Promise<CardStatusChangeResponseResponse> reportCardDamaged(Card card, String reason);
     F.Promise<CardTransactionListResponse> getCardTransactions(Card card, Date startDate, Date endDate);
+    F.Promise<CardStatement2> getCardTransactions(String token, Date startDate, Date endDate, String partnerID);
     F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN);
     F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv);
     F.Promise<ChangePINResponse> obtainPIN(Card card);

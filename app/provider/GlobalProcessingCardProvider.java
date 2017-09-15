@@ -232,6 +232,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<CardStatement2> getCardTransactions(String token, Date startDate, Date endDate, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardStatement(res, token, startDate, endDate));
+    }
+
+    @Override
     public F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN) {
         return getGPSSettings().flatMap(res -> invokePinControl(res, card, currentPIN, newPIN, confirmNewPIN, "02")).map((res -> new ChangePINResponse(res.getActionCode())));
     }
@@ -844,6 +849,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<CardStatement2> invokeCardStatement(GPSSettings gpsSettings, Card card, Date startDate, Date endDate) {
 
+        return invokeCardStatement(gpsSettings, card.getToken(), startDate, endDate);
+    }
+
+    private F.Promise<CardStatement2> invokeCardStatement(GPSSettings gpsSettings, String token, Date startDate, Date endDate) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -856,7 +866,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "0", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
