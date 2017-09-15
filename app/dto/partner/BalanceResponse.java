@@ -2,7 +2,6 @@ package dto.partner;
 
 import ae.globalprocessing.hyperionweb.BalanceEnquire2;
 import dto.BaseAPIResponse;
-import provider.dto.CardCreationResponse;
 
 /**
  * Card Balance response DTO object

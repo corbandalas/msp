@@ -287,7 +287,7 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.UnloadCard", paramType = "body"),
+            @ApiImplicitParam(value = "Unload card request", required = true, dataType = "dto.partner.UnloadCard", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+amount+currency+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
@@ -368,9 +368,9 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.UnloadCard", paramType = "body"),
+            @ApiImplicitParam(value = "Load card request", required = true, dataType = "dto.partner.Balance", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+amount+currency+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> balance() {
