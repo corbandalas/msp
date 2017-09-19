@@ -247,6 +247,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, "01"));
+    }
+
+    @Override
     public F.Promise<CardDetailsResponse> regenerateCardDetails(Card card) {
         return getGPSSettings().flatMap(res -> invokeCardRegenerate(res, card)).map((res -> new CardDetailsResponse(res.getPublicToken(), res.getPAN(), null, res.getCVV(), 0.0, null, null, res.getActionCode())));
     }
@@ -886,6 +891,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, Card card, String oldPin, String newPin, String confirmPin, String func) {
 
+        return invokePinControl(gpsSettings, card.getToken(), oldPin, newPin, confirmPin, func);
+    }
+
+
+    private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, String token, String oldPin, String newPin, String confirmPin, String func) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -897,7 +908,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, card.getToken(), null, func, oldPin, newPin, confirmPin, "1", "1", null, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, token, null, func, oldPin, newPin, confirmPin, "1", "1", null, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString());
 

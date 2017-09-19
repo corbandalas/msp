@@ -56,6 +56,7 @@ public interface CardProvider {
     F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN);
     F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv);
     F.Promise<ChangePINResponse> obtainPIN(Card card);
+    F.Promise<PINControl> obtainPINForPartner(String token, String partnerID);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
     F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
     F.Promise<ApplyFees> applyFee(String code, Card card);
