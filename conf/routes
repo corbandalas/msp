@@ -19,6 +19,8 @@ POST       /api/partner/card/unload                                          @co
 POST       /api/partner/card/balance                                          @controllers.partner.CardPartnerController.balance()
 POST       /api/partner/card/transactions                                          @controllers.partner.CardPartnerController.transactions()
 POST       /api/partner/card/pin                                          @controllers.partner.CardPartnerController.obtainPIN()
+POST       /api/partner/card/status                                          @controllers.partner.CardPartnerController.changeStatus()
+POST       /api/partner/card/activate                                          @controllers.partner.CardPartnerController.activate()
 
 #Merchant API(admin)
 

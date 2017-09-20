@@ -466,7 +466,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.getCardTransactions(miniStatementRequest.getToken(),startDate, endDate, authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new MiniStatementResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.getCardTransactions(miniStatementRequest.getToken(), startDate, endDate, authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new MiniStatementResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
 
         return returnRecover(result);
     }
@@ -491,7 +491,7 @@ public class CardPartnerController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Mini statement request", required = true, dataType = "dto.partner.ObtainPINRequest", paramType = "body"),
+            @ApiImplicitParam(value = "PIN obtain request", required = true, dataType = "dto.partner.ObtainPINRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
@@ -525,5 +525,126 @@ public class CardPartnerController extends BaseController {
         return returnRecover(result);
     }
 
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "cardChangeStatus",
+            value = "Change card status",
+            notes = "Method allows to change card status",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = ChangeStatusResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = ChangeStatusResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Change card status request", required = true, dataType = "dto.partner.ChangeStatusRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+status+reason+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> changeStatus() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ChangeStatusRequest changeStatusRequest;
+        try {
+            changeStatusRequest = Json.fromJson(jsonNode, ChangeStatusRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(changeStatusRequest.getToken()) || StringUtils.isBlank(changeStatusRequest.getStatus()) || StringUtils.isBlank(changeStatusRequest.getReason())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), changeStatusRequest.getToken(), changeStatusRequest.getStatus(), changeStatusRequest.getReason(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+
+        ChangeCardStatus changeCardStatus;
+
+
+        try {
+
+            changeCardStatus = ChangeCardStatus.valueOf(changeStatusRequest.getStatus());
+
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.changeCardStatusForPartner(changeStatusRequest.getToken(), authData.getAccount().getId().toString(), changeCardStatus.getValue(), changeStatusRequest.getReason()).map(res -> ok(Json.toJson(new ChangeStatusResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "activateCard",
+            value = "Activate plastic card",
+            notes = "Method allows to activate plastic card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = ActivateCardResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = ActivateCardResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Activate card request", required = true, dataType = "dto.partner.ActivateCardRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+cvv+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> activate() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ActivateCardRequest activateCardRequest;
+        try {
+            activateCardRequest = Json.fromJson(jsonNode, ActivateCardRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(activateCardRequest.getToken()) || StringUtils.isBlank(activateCardRequest.getCvv())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), activateCardRequest.getToken(), activateCardRequest.getCvv(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+
+        F.Promise<Result> result = globalProcessingCardProvider.activatePlasticCardForPartner(activateCardRequest.getToken(), activateCardRequest.getCardNumber(), activateCardRequest.getCvv(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ActivateCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+
+        return returnRecover(result);
+    }
 
 }

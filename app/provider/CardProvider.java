@@ -47,6 +47,7 @@ public interface CardProvider {
     F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Customer customer, Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
     F.Promise<PhoneActivateResponse> activateCardByPhone(Card card);
     F.Promise<CardStatusChangeResponseResponse> blockCard(Card card, String reason);
+    F.Promise<CardStatusChangeResponseResponse> changeCardStatusForPartner(String token, String partnerID, String status, String reason);
     F.Promise<CardStatusChangeResponseResponse> activateCard(Card card, String reason);
     F.Promise<CardStatusChangeResponseResponse> reportCardLost(Card card, String reason);
     F.Promise<CardStatusChangeResponseResponse> reportCardStolen(Card card, String reason);
@@ -55,6 +56,7 @@ public interface CardProvider {
     F.Promise<CardStatement2> getCardTransactions(String token, Date startDate, Date endDate, String partnerID);
     F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN);
     F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv);
+    F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID);
     F.Promise<ChangePINResponse> obtainPIN(Card card);
     F.Promise<PINControl> obtainPINForPartner(String token, String partnerID);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);

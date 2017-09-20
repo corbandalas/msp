@@ -202,8 +202,19 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePlasticCardActivation(res, token, cardNumber, cvv)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
+    }
+
+    @Override
     public F.Promise<CardStatusChangeResponseResponse> blockCard(Card card, String reason) {
         return getGPSSettings().flatMap(res -> invokeStatusChange(res, card, "05", reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+    }
+
+    @Override
+    public F.Promise<CardStatusChangeResponseResponse> changeCardStatusForPartner(String token, String partnerID, String status, String reason) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeStatusChange(res, token, status, reason)).map((rez -> new CardStatusChangeResponseResponse(rez.getActionCode())));
+
     }
 
     @Override
@@ -783,6 +794,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card, String cardNumber, String cvv) {
 
+        return invokePlasticCardActivation(gpsSettings, card.getToken(), cardNumber, cvv);
+    }
+
+    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, String token, String cardNumber, String cvv) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -800,7 +816,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
 
             try {
-                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, null, null, null, null, null, null, null, "2", cardNumber, null, card.getToken(), null, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, null, null, null, null, null, null, null, "2", cardNumber, null, token, null, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), "Plastic card activation", 0, 0, null, 0, "2", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
@@ -821,6 +837,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<StatusChange> invokeStatusChange(GPSSettings gpsSettings, Card card, String statCode, String reason) {
 
+        return invokeStatusChange(gpsSettings, card.getToken(), statCode, reason);
+    }
+
+    private F.Promise<StatusChange> invokeStatusChange(GPSSettings gpsSettings, String token, String statCode, String reason) {
+
         return F.Promise.promise(() -> {
 
             Service service = getService(gpsSettings.wsdlURL);
@@ -833,7 +854,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                statusChange = service.getServiceSoap().wsStatusChange(wsid, gpsSettings.issCode, "2", null, "1", null, null, card.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                statusChange = service.getServiceSoap().wsStatusChange(wsid, gpsSettings.issCode, "2", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), statCode, reason, 2, null, 0, null, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// WS_StatusChange service invocation was ended. WSID #" + wsid + ". Result code: " + statusChange.getActionCode() + " ." + statusChange.toString());
