@@ -191,4 +191,15 @@ public class WsResult {
         this.actionCode = value;
     }
 
+    @Override
+    public String toString() {
+        return "WsResult{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", response='" + response + '\'' +
+                ", description='" + description + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                '}';
+    }
 }

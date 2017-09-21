@@ -647,4 +647,58 @@ public class CardPartnerController extends BaseController {
         return returnRecover(result);
     }
 
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "webServiceResult",
+            value = "Get card provider web service result",
+            notes = "Method allows to retrieve card provider web service result",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = WebServiceResultResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = WebServiceResultResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Card provider web service result request", required = true, dataType = "dto.partner.WebServiceResultRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+wsid+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> wsResult() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final WebServiceResultRequest webServiceResultRequest;
+        try {
+            webServiceResultRequest = Json.fromJson(jsonNode, WebServiceResultRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(webServiceResultRequest.getToken()) || StringUtils.isBlank(webServiceResultRequest.getWsid())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), webServiceResultRequest.getToken(), webServiceResultRequest.getWsid(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.getServiceResultForPartner(webServiceResultRequest.getToken(), webServiceResultRequest.getWsid(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new WebServiceResultResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+
+        return returnRecover(result);
+    }
+
 }

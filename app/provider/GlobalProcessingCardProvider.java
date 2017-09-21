@@ -267,6 +267,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettings().flatMap(res -> invokeCardRegenerate(res, card)).map((res -> new CardDetailsResponse(res.getPublicToken(), res.getPAN(), null, res.getCVV(), 0.0, null, null, res.getActionCode())));
     }
 
+    @Override
+    public F.Promise<WsResult> getServiceResultForPartner(String token, String wsid, String partnerID) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeWsServiceResult(res, token, wsid));
+    }
+
     private F.Promise<CardCreationResponse> issueCard(Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
 
 
@@ -1093,6 +1098,36 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return passCode;
+        }, getExecutionContext());
+    }
+
+
+    private F.Promise<WsResult> invokeWsServiceResult(GPSSettings gpsSettings, String token, String wsid) {
+
+        return F.Promise.promise(() -> {
+
+            Logger.info("/////// WS_Service_result service invocation. WSID #" + wsid);
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            WsResult wsResult = null;
+
+            try {
+
+                wsResult = service.getServiceSoap().wsWebServiceResult(Long.parseLong(String.valueOf(wsid)), gpsSettings.issCode, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// WS_Service_result service invocation was ended. WSID #" + wsid + ". Result code: " + wsResult.getActionCode() + " ." + wsResult.toString());
+
+                if (!StringUtils.equals("000", wsResult.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return wsResult;
         }, getExecutionContext());
     }
 
