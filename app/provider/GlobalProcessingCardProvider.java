@@ -965,7 +965,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                cardRegenerate = service.getServiceSoap().wsRegenerateCardDetail(card.getToken(), 0, 1, 1, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+//                cardRegenerate = service.getServiceSoap().wsRegenerateCardDetail(card.getToken(), 0, 1, 1, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + cardRegenerate.getActionCode() + " ." + cardRegenerate.toString());
 

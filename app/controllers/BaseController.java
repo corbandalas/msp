@@ -225,7 +225,7 @@ public class BaseController extends play.mvc.Controller {
                                         CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
                                         "deliveryAddress1", "deliveryAddress2", "deliveryAddress3", "deliveryCountry"))))
                                 .flatMap(crd -> {
-                                    cardProvider.regenerateCardDetails(crd);
+//                                    cardProvider.regenerateCardDetails(crd);
                                     return operationService.createDepositOperation(crd, amount, currency, "", "Debit card deposit");
                                 });
                     }
@@ -360,7 +360,7 @@ public class BaseController extends play.mvc.Controller {
             }
 
 
-            cardPromise.flatMap(card -> cardProvider.regenerateCardDetails(card._1));
+//            cardPromise.flatMap(card -> cardProvider.regenerateCardDetails(card._1));
 
             return cardPromise;
 
