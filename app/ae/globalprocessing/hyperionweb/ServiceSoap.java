@@ -5121,31 +5121,6 @@ public interface ServiceSoap {
 
 
 
-    /**
-     * 
-     * @param publicToken
-     * @param smsRequired
-     * @param authSoapHeader
-     * @param regenType
-     * @param smsContent
-     * @return
-     *     returns ae.globalprocessing.hyperionweb.CardRegenerate
-     */
-    @WebMethod(operationName = "Ws_Regenerate_CardDetail", action = "http://www.globalprocessing.ae/HyperionWeb/Ws_Regenerate_CardDetail")
-    @WebResult(name = "Ws_Regenerate_CardDetailResult", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-    @RequestWrapper(localName = "Ws_Regenerate_CardDetail", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsRegenerateCardDetail")
-    @ResponseWrapper(localName = "Ws_Regenerate_CardDetailResponse", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", className = "ae.globalprocessing.hyperionweb.WsRegenerateCardDetailResponse")
-    public CardRegenerate wsRegenerateCardDetail(
-        @WebParam(name = "PublicToken", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        String publicToken,
-        @WebParam(name = "RegenType", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int regenType,
-        @WebParam(name = "Sms_Required", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int smsRequired,
-        @WebParam(name = "Sms_Content", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb")
-        int smsContent,
-        @WebParam(name = "AuthSoapHeader", targetNamespace = "http://www.globalprocessing.ae/HyperionWeb", header = true, partName = "AuthSoapHeader")
-        AuthSoapHeader authSoapHeader);
 
     /**
      * 
