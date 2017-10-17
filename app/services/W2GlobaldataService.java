@@ -88,7 +88,7 @@ public class W2GlobaldataService {
     }
 
     public F.Promise<ServiceResponse> scandyService(String forename, String surename, Date dateOfBirth, String houseNameNumber, String postcode, String street, String country, String city, String testdatanumber, Boolean skipScandiBankId) {
-        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, null, surename, dateOfBirth, houseNameNumber, postcode, null, street, country, city, null), "TEST_SCANDI", testdatanumber, skipScandiBankId));
+        return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, null, surename, dateOfBirth, houseNameNumber, postcode, null, street, country, city, null), "KYC_SCANDI", testdatanumber, skipScandiBankId));
     }
 
     public F.Promise<ServiceResponse> kycCheckUK(String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber, String bundleName) {
@@ -206,7 +206,7 @@ public class W2GlobaldataService {
                 queryOption.setValue(w2GlobaldataSettings.redirectUrl);
                 queryOptions[0] = queryOption;
 
-                if (!bundleName.equalsIgnoreCase("TEST_SCANDI") && w2GlobaldataSettings.sandbox) {
+                if (!bundleName.equalsIgnoreCase("KYC_SCANDI") && w2GlobaldataSettings.sandbox) {
                     size++;
                     queryOption1.setKey("Sandbox");
                     queryOption1.setValue("true");
@@ -220,7 +220,7 @@ public class W2GlobaldataService {
                     queryOptions[2] = queryOption2;
                 }
 
-                if (bundleName.equalsIgnoreCase("TEST_SCANDI")) {
+                if (bundleName.equalsIgnoreCase("KYC_SCANDI")) {
                     size++;
                     queryOption3.setKey("SkipScandiBankId");
                     if (skipScandiBankId != null && skipScandiBankId) {
@@ -243,14 +243,14 @@ public class W2GlobaldataService {
 
                 serviceRequest.setQueryData(queryData);
 
-                Logger.info("invokeKycCheck request: " + queryData.toString());
-
                 ServiceAuthorisation serviceAuthorisation = new ServiceAuthorisation();
                 serviceAuthorisation.setAPIKey(w2GlobaldataSettings.apiKey);
 
                 serviceRequest.setServiceAuthorisation(serviceAuthorisation);
 
-                ServiceResponse serviceResponse = null;
+                ServiceResponse serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
+
+/*                ServiceResponse serviceResponse = null;
                 if (bundleName.equalsIgnoreCase("SafePay_CommonChecks")) {
                     serviceResponse = new ServiceResponse();
                     ProcessRequestResult pr = new ProcessRequestResult();
@@ -260,9 +260,9 @@ public class W2GlobaldataService {
                     serviceResponse.setProcessRequestResult(pr);
                 } else {
                     serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
-                }
+                }*/
 
-                if (!bundleName.equalsIgnoreCase("SafePay_CommonChecks"))
+               // if (!bundleName.equalsIgnoreCase("SafePay_CommonChecks"))
                     Logger.info("invokeKycCheck response: " + serviceResponseToString(serviceResponse));
 
                 return serviceResponse;

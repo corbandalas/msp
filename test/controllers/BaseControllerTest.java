@@ -42,7 +42,7 @@ public class BaseControllerTest extends WithServer {
     public final String ACCOUNT_3_ID = "44";
     public final String SECRET = "OMG";
     public final String ACCOUNT_NAME = "God account";
-    public final long TIMEOUT = 10000;
+    public final long TIMEOUT = 20000;
 
     public ConnectionPool connectionPool;
 
