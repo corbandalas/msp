@@ -177,7 +177,7 @@ public class CardPartnerController extends BaseController {
             }
 
 
-            return cardCreationResponsePromise.map(res -> ok(Json.toJson(new CreateCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+            return cardCreationResponsePromise.map(res -> ok(Json.toJson(new CreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         });
 
@@ -261,7 +261,7 @@ public class CardPartnerController extends BaseController {
 
         final long finalAmount = amount;
 
-        F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.loadVirtualCardForPartner(loadCard.getToken(), finalAmount, currency.get(), loadCard.getDescription(), loadCard.getSource(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new LoadCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res.getLoadCard())))));
+        F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.loadVirtualCardForPartner(loadCard.getToken(), finalAmount, currency.get(), loadCard.getDescription(), loadCard.getSource(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new LoadCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res.getLoadCard())))));
 
         return returnRecover(result);
     }
@@ -342,7 +342,7 @@ public class CardPartnerController extends BaseController {
 
         final long finalAmount = amount;
 
-        F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.unloadVirtualCardForPartner(unloadCard.getToken(), finalAmount, currency.get(), unloadCard.getDescription(), unloadCard.getLoadType(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new UnloadCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res)))));
+        F.Promise<Result> result = currencyPromise.flatMap(currency -> globalProcessingCardProvider.unloadVirtualCardForPartner(unloadCard.getToken(), finalAmount, currency.get(), unloadCard.getDescription(), unloadCard.getLoadType(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new UnloadCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
 
         return returnRecover(result);
     }
@@ -466,7 +466,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.getCardTransactions(miniStatementRequest.getToken(), startDate, endDate, authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new MiniStatementResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.getCardTransactions(miniStatementRequest.getToken(), startDate, endDate, authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new MiniStatementResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
@@ -520,7 +520,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.obtainPINForPartner(obtainPINRequest.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ObtainPINResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.obtainPINForPartner(obtainPINRequest.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ObtainPINResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
@@ -587,7 +587,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.changeCardStatusForPartner(changeStatusRequest.getToken(), authData.getAccount().getId().toString(), changeCardStatus.getValue(), changeStatusRequest.getReason()).map(res -> ok(Json.toJson(new ChangeStatusResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.changeCardStatusForPartner(changeStatusRequest.getToken(), authData.getAccount().getId().toString(), changeCardStatus.getValue(), changeStatusRequest.getReason()).map(res -> ok(Json.toJson(new ChangeStatusResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
@@ -642,7 +642,7 @@ public class CardPartnerController extends BaseController {
         }
 
 
-        F.Promise<Result> result = globalProcessingCardProvider.activatePlasticCardForPartner(activateCardRequest.getToken(), activateCardRequest.getCardNumber(), activateCardRequest.getCvv(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ActivateCardResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.activatePlasticCardForPartner(activateCardRequest.getToken(), activateCardRequest.getCardNumber(), activateCardRequest.getCvv(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ActivateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
@@ -696,7 +696,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.getServiceResultForPartner(webServiceResultRequest.getToken(), webServiceResultRequest.getWsid(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new WebServiceResultResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.getServiceResultForPartner(webServiceResultRequest.getToken(), webServiceResultRequest.getWsid(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new WebServiceResultResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
