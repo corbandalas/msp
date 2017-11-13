@@ -8,6 +8,7 @@ import util.DateUtil;
 
 /**
  * API customer profile response
+ *
  * @author ra created 17.02.2016.
  * @since 0.2.0
  */
@@ -25,6 +26,8 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
     private String dateBirth;
     private KYC kyc;
     private String country_id;
+    private String flat;
+    private String houseNameNumber;
 
     public CustomerProfileResponse(String text, String code, Customer customer) {
         super(text, code);
@@ -151,5 +154,25 @@ public class CustomerProfileResponse extends BaseAPIResponse implements Customer
     @Override
     public void setCountry_id(String country_id) {
         this.country_id = country_id;
+    }
+
+    @Override
+    public String getHouseNameNumber() {
+        return houseNameNumber;
+    }
+
+    @Override
+    public void setHouseNameNumber(String houseNameNumber) {
+        this.houseNameNumber = houseNameNumber;
+    }
+
+    @Override
+    public String getFlat() {
+        return flat;
+    }
+
+    @Override
+    public void setFlat(String flat) {
+        this.flat = flat;
     }
 }
