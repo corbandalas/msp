@@ -24,6 +24,8 @@ public class CustomerProfileRequest implements CustomerProfile {
     private String dateBirth;
     private KYC kyc;
     private String country_id;
+    private String houseNameNumber;
+    private String flat;
 
     @Override
     public String getRegistrationDate() {
@@ -32,7 +34,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setRegistrationDate(String registrationDate) {
-        this.registrationDate=registrationDate;
+        this.registrationDate = registrationDate;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setTitle(String title) {
-        this.title=title;
+        this.title = title;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setFirstName(String firstName) {
-        this.firstName=firstName;
+        this.firstName = firstName;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setLastName(String lastName) {
-        this.lastName=lastName;
+        this.lastName = lastName;
     }
 
     @Override
@@ -72,7 +74,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setAddress1(String address1) {
-        this.address1=address1;
+        this.address1 = address1;
     }
 
     @Override
@@ -82,7 +84,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setAddress2(String address2) {
-        this.address2=address2;
+        this.address2 = address2;
     }
 
     @Override
@@ -92,7 +94,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setPostcode(String postcode) {
-        this.postcode=postcode;
+        this.postcode = postcode;
     }
 
     @Override
@@ -102,7 +104,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setCity(String city) {
-        this.city=city;
+        this.city = city;
     }
 
     @Override
@@ -112,7 +114,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setEmail(String email) {
-        this.email=email;
+        this.email = email;
     }
 
     @Override
@@ -122,7 +124,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setDateBirth(String dateBirth) {
-        this.dateBirth=dateBirth;
+        this.dateBirth = dateBirth;
     }
 
     @Override
@@ -132,7 +134,7 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setKyc(KYC kyc) {
-        this.kyc=kyc;
+        this.kyc = kyc;
     }
 
     @Override
@@ -142,12 +144,32 @@ public class CustomerProfileRequest implements CustomerProfile {
 
     @Override
     public void setCountry_id(String country_id) {
-        this.country_id=country_id;
+        this.country_id = country_id;
+    }
+
+    @Override
+    public String getHouseNameNumber() {
+        return houseNameNumber;
+    }
+
+    @Override
+    public void setHouseNameNumber(String houseNameNumber) {
+        this.houseNameNumber = houseNameNumber;
+    }
+
+    @Override
+    public String getFlat() {
+        return flat;
+    }
+
+    @Override
+    public void setFlat(String flat) {
+        this.flat = flat;
     }
 
     public void copyToCustomer(Customer customer) throws ParseException {
-        BeanUtils.copyProperties(this,customer);
-        customer.setRegistrationDate(DateUtil.parse(registrationDate,"yyyy-MM-dd"));
-        customer.setDateBirth(DateUtil.parse(dateBirth,"yyyy-MM-dd"));
+        BeanUtils.copyProperties(this, customer);
+        customer.setRegistrationDate(DateUtil.parse(registrationDate, "yyyy-MM-dd"));
+        customer.setDateBirth(DateUtil.parse(dateBirth, "yyyy-MM-dd"));
     }
 }

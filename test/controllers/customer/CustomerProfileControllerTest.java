@@ -70,6 +70,8 @@ public class CustomerProfileControllerTest extends BaseControllerTest {
         customerProfileRequest.setCity("Donetsk");
         customerProfileRequest.setCountry_id("USA");
         customerProfileRequest.setPostcode("83004");
+        customerProfileRequest.setFlat("flat");
+        customerProfileRequest.setHouseNameNumber("number");
 
         customerProfileRequest.setEmail("sao@bao.com");
         final String updatedName = "Petr";

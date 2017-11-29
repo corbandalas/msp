@@ -29,6 +29,8 @@ public class Customer extends BaseEntity<String> {
     private String password;
     private String country_id;
     private Boolean temppassword;
+    private String houseNameNumber;
+    private String flat;
 
     public Customer() {
     }
@@ -52,7 +54,7 @@ public class Customer extends BaseEntity<String> {
         this.temppassword = false;
     }
 
-    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword) {
+    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword, String houseNameNumber, String flat) {
         this.setId(id);
         this.registrationDate = registrationDate;
         this.title = title;
@@ -69,6 +71,8 @@ public class Customer extends BaseEntity<String> {
         this.password = password;
         this.country_id = country_id;
         this.temppassword = temppassword;
+        this.houseNameNumber = houseNameNumber;
+        this.flat = flat;
     }
 
     public Date getRegistrationDate() {
@@ -214,6 +218,24 @@ public class Customer extends BaseEntity<String> {
                 ", password='" + password + '\'' +
                 ", country_id='" + country_id + '\'' +
                 ", temppassword='" + temppassword + '\'' +
+                ", houseNameNumber='" + houseNameNumber + '\'' +
+                ", flat='" + flat + '\'' +
                 '}';
+    }
+
+    public String getHouseNameNumber() {
+        return houseNameNumber;
+    }
+
+    public void setHouseNameNumber(String houseNameNumber) {
+        this.houseNameNumber = houseNameNumber;
+    }
+
+    public String getFlat() {
+        return flat;
+    }
+
+    public void setFlat(String flat) {
+        this.flat = flat;
     }
 }

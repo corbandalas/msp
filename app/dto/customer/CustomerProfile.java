@@ -54,4 +54,12 @@ public interface CustomerProfile {
     String getCountry_id();
 
     void setCountry_id(String country_id);
+
+    String getHouseNameNumber();
+
+    void setHouseNameNumber(String houseNameNumber);
+
+    String getFlat();
+
+    void setFlat(String flat);
 }
