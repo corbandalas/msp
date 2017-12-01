@@ -80,7 +80,7 @@ public class PayrollCardController extends BaseController {
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+description+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
-
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
     })
     public F.Promise<Result> uploadCreateCard() {
 
@@ -98,7 +98,7 @@ public class PayrollCardController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (StringUtils.isBlank(createCard.getOrderId()) ||
+        if (
                 StringUtils.isBlank(createCard.getDescription()) ||
                 (createCard.getCards() == null) ||
                 (createCard.getCards().size() == 0)
@@ -108,7 +108,7 @@ public class PayrollCardController extends BaseController {
         }
 
 
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), createCard.getOrderId(),
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
                 createCard.getDescription(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
@@ -119,7 +119,7 @@ public class PayrollCardController extends BaseController {
         payrollRequest.setAccountID(authData.getAccount().getId());
         payrollRequest.setCreateDate(new Date());
         payrollRequest.setDescription(createCard.getDescription());
-        payrollRequest.setOrderId(createCard.getOrderId());
+        payrollRequest.setOrderId(authData.getOrderId());
         payrollRequest.setPayrollRequestStatus(PayrollRequestStatus.REQUESTED);
 
         F.Promise<PayrollRequest> payrollRequestPromise = F.Promise.wrap(payrollRequestRepository.create(payrollRequest));
@@ -155,7 +155,7 @@ public class PayrollCardController extends BaseController {
 
 
             String ftpXMLRequest = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?> <CRDREQ><HEADER>" +
-                    "<order_ref>" + createCard.getOrderId() + "</order_ref> " +
+                    "<order_ref>" + authData.getOrderId() + "</order_ref> " +
                     "</HEADER>" +
                     "";
 
