@@ -62,7 +62,7 @@ public class PayrollCardController extends BaseController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = CreateCardResponse.class
+            response = PayrollCreateCardResponse.class
     )
 
     @ApiResponses(value = {
@@ -139,6 +139,8 @@ public class PayrollCardController extends BaseController {
 
 
             Property ftpProperty = ttt._1._2.get();
+
+            Logger.info("ftpProperty = " + ftpProperty.getValue());
 
             String[] ftpSplit = ftpProperty.getValue().split("|");
 
