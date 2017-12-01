@@ -8,7 +8,6 @@ import controllers.BaseController;
 import controllers.admin.BaseMerchantApiAction;
 import dto.Authentication;
 import dto.BaseAPIResponse;
-import dto.partner.*;
 import dto.payroll.PayrollCreateCardRequest;
 import dto.payroll.PayrollCreateCardResponse;
 import model.*;
@@ -142,7 +141,7 @@ public class PayrollCardController extends BaseController {
 
             Logger.info("ftpProperty = " + ftpProperty.getValue());
 
-            String[] ftpSplit = ftpProperty.getValue().split("|");
+            String[] ftpSplit = StringUtils.split(ftpProperty.getValue(), "|");
 
             String ftpHost = ftpSplit[0];
             Integer ftpPort = Integer.parseInt(ftpSplit[1]);
@@ -217,6 +216,9 @@ public class PayrollCardController extends BaseController {
             }
 
             ftpXMLRequest += "</CRDREQ>";
+
+
+            Logger.info("Constructed XML: " + ftpXMLRequest);
 
             FTPClient ftpClient = new FTPClient();
 
