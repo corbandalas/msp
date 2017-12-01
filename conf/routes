@@ -14,6 +14,14 @@ GET     /                           @controllers.Application.index
 GET        /api-docs/api/partner/card      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/partner/card")
 
 POST       /api/partner/card/create                                          @controllers.partner.CardPartnerController.create()
+
+
+# Payroll API
+GET        /api-docs/api/payroll/card      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/payroll/card")
+
+POST       /api/payroll/card/upload                                          @controllers.payroll.PayrollCardController.uploadCreateCard()
+
+
 POST       /api/partner/card/load                                          @controllers.partner.CardPartnerController.load()
 POST       /api/partner/card/unload                                          @controllers.partner.CardPartnerController.unload()
 POST       /api/partner/card/balance                                          @controllers.partner.CardPartnerController.balance()

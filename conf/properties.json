@@ -337,9 +337,21 @@
       "value": "http://bancore.com",
       "description": "Default error URL for Paylike callback redirection",
       "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "payroll.api.msp.account.settings.42",
+      "value": "123|123|1|123|123|123",
+      "description": "Payroll project settings// CRD product, design ref, producepin, mcc group, perm group, carrierref",
+      "category": "PAYROLL"
+    },
+
+    {
+      "id": "payroll.api.msp.ftp.settings",
+      "value": "localhost|21|corbandalas|x13jkw34",
+      "description": "FTP settings for payroll project",
+      "category": "PAYROLL"
     }
-
-
 
   ]
 

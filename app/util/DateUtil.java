@@ -91,24 +91,34 @@ public class DateUtil {
     }
 
     public static long getEndOfDay(Date date) {
+       return getEndDateOfDay(date).getTime();
+    }
+
+    public static Date getEndDateOfDay(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
-        return calendar.getTime().getTime();
+        return calendar.getTime();
     }
 
     public static long getStartOfDay(Date date) {
+        return getStartDateOfDay(date).getTime();
+    }
+
+    public static Date getStartDateOfDay(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime().getTime();
+        return calendar.getTime();
     }
+
+
 
     public static XMLGregorianCalendar toXmlGregorianCalendar(Date date) {
         GregorianCalendar c = new GregorianCalendar();
