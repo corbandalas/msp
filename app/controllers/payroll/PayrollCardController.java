@@ -129,7 +129,7 @@ public class PayrollCardController extends BaseController {
 
         Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), null, null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), PayrollCardStatus.REQUESTED)))).collect(Collectors.toList()))).zip(ftpPropertyPromise).zip(propertyPromise).zip(payrollRequestPromise).map(ttt -> {
 
-            Property property = ttt._1._2.get();
+            Property property = ttt._1._1._2.get();
 
             String[] split = StringUtils.split(property.getValue(), "|");
 
@@ -142,7 +142,7 @@ public class PayrollCardController extends BaseController {
             String programManagerCode = split[6];
 
 
-            Property ftpProperty = ttt._1._1._2.get();
+            Property ftpProperty = ttt._1._2.get();
 
             Logger.info("ftpProperty = " + ftpProperty.getValue());
 
