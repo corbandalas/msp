@@ -341,8 +341,8 @@
 
     {
       "id": "payroll.api.msp.account.settings.42",
-      "value": "123|123|1|123|123|123",
-      "description": "Payroll project settings// CRD product, design ref, producepin, mcc group, perm group, carrierref",
+      "value": "123|123|1|123|123|123|XXXX",
+      "description": "Payroll project settings// CRD product, design ref, producepin, mcc group, perm group, carrierref, program manager code",
       "category": "PAYROLL"
     },
 

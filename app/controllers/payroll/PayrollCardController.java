@@ -28,7 +28,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import play.libs.F.Promise;
@@ -43,6 +45,7 @@ import static configs.ReturnCodes.*;
  */
 @Api(value = Constants.PAYROLL_API_PATH + "/card", description = "Payroll card processing functions")
 public class PayrollCardController extends BaseController {
+
 
     @Inject
     PropertyRepository propertyRepository;
@@ -77,7 +80,8 @@ public class PayrollCardController extends BaseController {
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+description+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
-            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+
+    })
     public F.Promise<Result> uploadCreateCard() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
@@ -123,11 +127,11 @@ public class PayrollCardController extends BaseController {
         Promise<Optional<Property>> propertyPromise = Promise.wrap(propertyRepository.retrieveById("payroll.api.msp.account.settings." + authData.getAccount().getId()));
         Promise<Optional<Property>> ftpPropertyPromise = Promise.wrap(propertyRepository.retrieveById("payroll.api.msp.ftp.settings"));
 
-        Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), null, null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), PayrollCardStatus.REQUESTED)))).collect(Collectors.toList()))).zip(ftpPropertyPromise).zip(propertyPromise).map(ttt -> {
+        Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), null, null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), PayrollCardStatus.REQUESTED)))).collect(Collectors.toList()))).zip(ftpPropertyPromise).zip(propertyPromise).zip(payrollRequestPromise).map(ttt -> {
 
-            Property property = ttt._2.get();
+            Property property = ttt._1._2.get();
 
-            String[] split = property.getValue().split("|");
+            String[] split = StringUtils.split(property.getValue(), "|");
 
             String crdProduct = split[0];
             String designRef = split[1];
@@ -135,9 +139,10 @@ public class PayrollCardController extends BaseController {
             String mccGroup = split[3];
             String permGrpoup = split[4];
             String carrierRef = split[5];
+            String programManagerCode = split[6];
 
 
-            Property ftpProperty = ttt._1._2.get();
+            Property ftpProperty = ttt._1._1._2.get();
 
             Logger.info("ftpProperty = " + ftpProperty.getValue());
 
@@ -154,8 +159,7 @@ public class PayrollCardController extends BaseController {
                     "</HEADER>" +
                     "";
 
-
-            for (PayrollCard payrollCard : ttt._1._1) {
+            for (PayrollCard payrollCard : ttt._1._1._1) {
                 ftpXMLRequest += "<CARD>" +
                         "<recid>" + payrollCard.getId() + "</recid>" +
                         "<action>" + ((Double.parseDouble(payrollCard.getAmount()) > 0) ? "2" : "1") + "</action>" +
@@ -233,13 +237,16 @@ public class PayrollCardController extends BaseController {
 
                 InputStream stream = new ByteArrayInputStream(ftpXMLRequest.getBytes(StandardCharsets.UTF_8.name()));
 
-                String fileName = "";
+                String dateFormat = "yyMMdd";
 
+                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._2.getDaySequence();
+
+                Logger.info("File name = " + fileName);
 
                 boolean done = ftpClient.storeFile(fileName, stream);
                 stream.close();
                 if (done) {
-                    Logger.info("The first file is uploaded successfully.");
+                    Logger.info("The " + fileName + " file is uploaded successfully.");
                 }
 
 
