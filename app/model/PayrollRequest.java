@@ -15,16 +15,16 @@ public class PayrollRequest extends BaseEntity<Long> {
     private Date createDate;
     private String daySequence;
     private Integer accountID;
-    private PayrollRequestStatus payrollRequestStatus;
+    private PayrollRequestStatus errorStatus;
 
-    public PayrollRequest(Long id, String orderId, String description, Date createDate, String daySequence, Integer accountID, PayrollRequestStatus payrollRequestStatus) {
+    public PayrollRequest(Long id, String orderId, String description, Date createDate, String daySequence, Integer accountID, PayrollRequestStatus errorStatus) {
         setId(id);
         this.orderId = orderId;
         this.description = description;
         this.createDate = createDate;
         this.daySequence = daySequence;
         this.accountID = accountID;
-        this.payrollRequestStatus = payrollRequestStatus;
+        this.errorStatus = errorStatus;
     }
 
     public PayrollRequest() {
@@ -59,7 +59,7 @@ public class PayrollRequest extends BaseEntity<Long> {
         return "PayrollRequest{" +
                 ", orderId='" + orderId + '\'' +
                 ", description='" + description + '\'' +
-                ", payrollRequestStatus='" + payrollRequestStatus + '\'' +
+                ", errorStatus='" + errorStatus + '\'' +
                 ", daySequence='" + daySequence + '\'' +
                 ", accountID='" + accountID + '\'' +
                 ", createDate=" + createDate +
@@ -82,11 +82,12 @@ public class PayrollRequest extends BaseEntity<Long> {
         this.accountID = accountID;
     }
 
-    public PayrollRequestStatus getPayrollRequestStatus() {
-        return payrollRequestStatus;
+    public void setErrorStatus(PayrollRequestStatus errorStatus) {
+        this.errorStatus = errorStatus;
     }
 
-    public void setPayrollRequestStatus(PayrollRequestStatus payrollRequestStatus) {
-        this.payrollRequestStatus = payrollRequestStatus;
+    public PayrollRequestStatus getErrorStatus() {
+        return this.errorStatus;
     }
+
 }

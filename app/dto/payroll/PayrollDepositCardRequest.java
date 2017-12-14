@@ -6,18 +6,18 @@ import java.util.List;
 /**
  * Payroll create card request DTO object
  *
- * @author corbandalas created 29.09.2017.
+ * @author corbandalas created 12.12.2017.
  * @since 0.7.0
  */
-public class PayrollCreateCardRequest {
+public class PayrollDepositCardRequest {
 
     private String description;
-    private List<PayrollCardBean> cards;
+    private List<PayrollCardDepositBean> cards;
 
-    public PayrollCreateCardRequest() {
+    public PayrollDepositCardRequest() {
     }
 
-    public PayrollCreateCardRequest(String description, List<PayrollCardBean> cards) {
+    public PayrollDepositCardRequest(String description, List<PayrollCardDepositBean> cards) {
         this.description = description;
         this.cards = cards;
     }
@@ -30,11 +30,11 @@ public class PayrollCreateCardRequest {
         this.description = description;
     }
 
-    public List<PayrollCardBean> getCards() {
+    public List<PayrollCardDepositBean> getCards() {
         return cards;
     }
 
-    public void setCards(List<PayrollCardBean> cards) {
+    public void setCards(List<PayrollCardDepositBean> cards) {
         this.cards = cards;
     }
 }

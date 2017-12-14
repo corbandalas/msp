@@ -15,7 +15,7 @@ CREATE TABLE payroll_request (
     createdate timestamp with time zone DEFAULT now(),
     daysequence character varying(255) NOT NULL,
     accountid integer NOT NULL,
-    payrollrequeststatus character varying(255) NOT NULL
+    errorstatus character varying(255) NOT NULL
 );
 
 ALTER TABLE payroll_request
@@ -76,6 +76,8 @@ CREATE TABLE payroll_card (
     cardname character varying(255),
     expdate character varying(255),
     cvv character varying(255),
+    error character varying(255),
+    payrollcardtype character varying(255) NOT NULL,
     payrollcardstatus character varying(255) NOT NULL
 );
 

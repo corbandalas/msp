@@ -1,6 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Base Entity class
@@ -13,7 +12,6 @@ public abstract class BaseEntity<T> {
 
     private T id;
 
-    @JsonIgnore
     public T getId() {
         return id;
     }

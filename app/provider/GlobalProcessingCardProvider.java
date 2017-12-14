@@ -65,7 +65,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency) {
-        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.MASTER_VIRTUAL, true);
+        return issueCard(customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, true);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.MASTER_VIRTUAL, activateNow);
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow);
 
     }
 

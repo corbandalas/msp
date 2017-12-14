@@ -60,7 +60,7 @@ public class SmsGateway {
         final String clientMessageRef = RandomStringUtils.randomAlphanumeric(10);
 
         final String query = url + "?method=sendsms&returncsvstring=false&externallogin=" + apiLogin + "&password=" + apiPassword +
-                "&clientbillingreference=" + clientBillingRef + "&originator=+380632426303&clientmessagereference=" + clientMessageRef + "&destinations=%2b" + destPhone + "&body=" + text + "&validity=72&charactersetid=2&replymethodid=4&replydata=&statusnotificationurl=";
+                "&clientbillingreference=" + clientBillingRef + "&originator=+00000000&clientmessagereference=" + clientMessageRef + "&destinations=%2b" + destPhone + "&body=" + text + "&validity=72&charactersetid=2&replymethodid=4&replydata=&statusnotificationurl=";
 
 
         Logger.info("::::::::::: Sending SMS[ clientBillingRef = " + clientBillingRef + ", clientMessageRef = " + clientMessageRef + "]: " + query);

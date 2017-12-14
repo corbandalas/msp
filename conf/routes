@@ -20,6 +20,8 @@ POST       /api/partner/card/create                                          @co
 GET        /api-docs/api/payroll/card      @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/payroll/card")
 
 POST       /api/payroll/card/upload                                          @controllers.payroll.PayrollCardController.uploadCreateCard()
+POST       /api/payroll/card/request/status                                  @controllers.payroll.PayrollCardController.getPayrollRequestsStatuses()
+POST       /api/payroll/card/status                                          @controllers.payroll.PayrollCardController.getPayrollCardStatuses()
 
 
 POST       /api/partner/card/load                                          @controllers.partner.CardPartnerController.load()

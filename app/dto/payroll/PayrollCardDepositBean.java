@@ -1,21 +1,18 @@
-package model;
-
+package dto.payroll;
 
 
 /**
- * Database stored entity for managing payroll request for card
+ * Request Entity Bean for managing payroll request for card deposit
  *
- * @author corbandalas - created 23.11.2017
+ * @author corbandalas - created 12.12.2017
  * @since 0.7.0
  */
 
-public class PayrollCard extends BaseEntity<Long> {
+public class PayrollCardDepositBean {
 
-    private Long payrollRequestId;
     private String accno;
-    private String pubtoken;
-    private String pan;
     private String title;
+    private String pubToken;
     private String lastName;
     private String firstName;
     private String dob;
@@ -30,24 +27,14 @@ public class PayrollCard extends BaseEntity<Long> {
     private String amount;
     private String currency;
     private String isLive;
-    private String cardName;
-    private String expDate;
-    private String cvv;
-    private String error;
-    private PayrollCardType payrollCardType;
-    private PayrollCardStatus payrollCardStatus;
 
-
-    public PayrollCard() {
+    public PayrollCardDepositBean() {
     }
 
-    public PayrollCard(Long id, Long payrollRequestId, String accno, String pubtoken, String pan, String title, String lastName, String firstName, String dob, String email, String mobtel, String addrl1, String addrl2, String addrl3, String city, String postcode, String country, String amount, String currency, String cardName, String expDate, String cvv, String isLive, String error, PayrollCardStatus payrollCardStatus, PayrollCardType payrollCardType) {
+    public PayrollCardDepositBean(String accno, String pubToken, String title, String lastName, String firstName, String dob, String email, String mobtel, String addrl1, String addrl2, String addrl3, String city, String postcode, String country, String amount, String currency, String isLive) {
 
-        setId(id);
-        this.payrollRequestId = payrollRequestId;
         this.accno = accno;
-        this.pubtoken = pubtoken;
-        this.pan = pan;
+        this.pubToken = pubToken;
         this.title = title;
         this.lastName = lastName;
         this.firstName = firstName;
@@ -63,12 +50,6 @@ public class PayrollCard extends BaseEntity<Long> {
         this.country = country;
         this.amount = amount;
         this.currency = currency;
-        this.cardName = cardName;
-        this.expDate = expDate;
-        this.cvv = cvv;
-        this.error = error;
-        this.payrollCardType = payrollCardType;
-        this.payrollCardStatus = payrollCardStatus;
     }
 
     public String getAccno() {
@@ -159,14 +140,6 @@ public class PayrollCard extends BaseEntity<Long> {
         this.postcode = postcode;
     }
 
-    public Long getPayrollRequestId() {
-        return payrollRequestId;
-    }
-
-    public void setPayrollRequestId(Long payrollRequestId) {
-        this.payrollRequestId = payrollRequestId;
-    }
-
     public String getAmount() {
         return amount;
     }
@@ -181,22 +154,6 @@ public class PayrollCard extends BaseEntity<Long> {
 
     public void setCurrency(String currency) {
         this.currency = currency;
-    }
-
-    public String getPan() {
-        return pan;
-    }
-
-    public void setPan(String pan) {
-        this.pan = pan;
-    }
-
-    public String getPubtoken() {
-        return pubtoken;
-    }
-
-    public void setPubtoken(String pubtoken) {
-        this.pubtoken = pubtoken;
     }
 
     public String getAddrl3() {
@@ -215,38 +172,11 @@ public class PayrollCard extends BaseEntity<Long> {
         this.country = country;
     }
 
-    public String getCardName() {
-        return cardName;
-    }
-
-    public void setCardName(String cardName) {
-        this.cardName = cardName;
-    }
-
-    public String getExpDate() {
-        return expDate;
-    }
-
-    public void setExpDate(String expDate) {
-        this.expDate = expDate;
-    }
-
-    public String getCvv() {
-        return cvv;
-    }
-
-    public void setCvv(String cvv) {
-        this.cvv = cvv;
-    }
 
     @Override
     public String toString() {
         return "PropertyRequestCard{" +
-                "payrollRequestId=" + payrollRequestId +
-                ", recid=" + getId() +
                 ", accno='" + accno + '\'' +
-                ", pubtoken='" + pubtoken + '\'' +
-                ", pan='" + pan + '\'' +
                 ", title='" + title + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
@@ -261,21 +191,9 @@ public class PayrollCard extends BaseEntity<Long> {
                 ", postcode='" + postcode + '\'' +
                 ", country='" + country + '\'' +
                 ", amount='" + amount + '\'' +
+                ", pubToken='" + pubToken + '\'' +
                 ", currency='" + currency + '\'' +
-                ", cardName='" + cardName + '\'' +
-                ", expDate='" + expDate + '\'' +
-                ", error='" + error + '\'' +
-                ", payrollCardType'" + payrollCardType + '\''+
-                ", cvv='" + cvv + '\'' +
                 '}';
-    }
-
-    public PayrollCardStatus getPayrollCardStatus() {
-        return payrollCardStatus;
-    }
-
-    public void setPayrollCardStatus(PayrollCardStatus payrollCardStatus) {
-        this.payrollCardStatus = payrollCardStatus;
     }
 
     public String getIsLive() {
@@ -286,19 +204,11 @@ public class PayrollCard extends BaseEntity<Long> {
         this.isLive = isLive;
     }
 
-    public String getError() {
-        return error;
+    public String getPubToken() {
+        return pubToken;
     }
 
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public PayrollCardType getPayrollCardType() {
-        return payrollCardType;
-    }
-
-    public void setPayrollCardType(PayrollCardType payrollCardType) {
-        this.payrollCardType = payrollCardType;
+    public void setPubToken(String pubToken) {
+        this.pubToken = pubToken;
     }
 }

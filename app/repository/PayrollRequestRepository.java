@@ -12,8 +12,10 @@ import scala.concurrent.Promise;
 import util.DateUtil;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -54,12 +56,11 @@ public class PayrollRequestRepository implements BaseCRUDRepository<PayrollReque
                             daySequence = "" + daySequence;
                         }
 
-
                         final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".payroll_request (id, orderid," +
-                                " description, createdate, daysequence, accountid, payrollrequeststatus) VALUES ($1, $2, $3, $4, $5, $6, $7)";
+                                " description, createdate, daysequence, accountid, errorstatus) VALUES ($1, $2, $3, $4, $5, $6, $7)";
                         final String finalDaySequence = daySequence;
                         connectionPool.getConnection().query(query, asList(id, entity.getOrderId(), entity.getDescription(),
-                                new Timestamp(entity.getCreateDate().getTime()), daySequence, entity.getAccountID(), entity.getPayrollRequestStatus().name()),
+                                new Timestamp(entity.getCreateDate().getTime()), new SimpleDateFormat("yyMMdd").format(new Date()) + daySequence, entity.getAccountID(), entity.getErrorStatus().name()),
                                 result -> {
                                     entity.setId(idResult.row(0).getLong(0));
                                     entity.setDaySequence(finalDaySequence);
@@ -114,15 +115,26 @@ public class PayrollRequestRepository implements BaseCRUDRepository<PayrollReque
         return promise.future();
     }
 
+    public Future<Optional<PayrollRequest>> retrieveNotProcessedByDateAndSequence(String dateAndSequence) {
+
+        final Promise<Optional<PayrollRequest>> promise = Futures.promise();
+
+        final String query = "Select * FROM " + connectionPool.getSchemaName() + ".payroll_request where sequence=$1 and errorstatus='NOT_PROCESSED'";
+        connectionPool.getConnection().query(query, asList(dateAndSequence), result -> promise.success(createEntity(result))
+                , promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<PayrollRequest> update(PayrollRequest entity) {
 
         final Promise<PayrollRequest> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() + ".payroll_request SET description=$2, daysequence=$3," +
-                " payrollrequeststatus=$4 WHERE id=$1";
+                " errorstatus=$4 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getDescription(), entity.getDaySequence(),
-                entity.getPayrollRequestStatus().name()),
+                entity.getErrorStatus().name()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -167,7 +179,7 @@ public class PayrollRequestRepository implements BaseCRUDRepository<PayrollReque
     }
 
     public PayrollRequest createEntity(Row row) {
-        return new PayrollRequest(row.getLong("id"), row.getString("orderid"), row.getString("description"), row.getTimestamp("createdate"), row.getString("daysequence"), row.getInt("accountid"),  PayrollRequestStatus.valueOf(row.getString("payrollrequeststatus")));
+        return new PayrollRequest(row.getLong("id"), row.getString("orderid"), row.getString("description"), row.getTimestamp("createdate"), row.getString("daysequence"), row.getInt("accountid"),  PayrollRequestStatus.valueOf(row.getString("errorstatus")));
     }
 
 }

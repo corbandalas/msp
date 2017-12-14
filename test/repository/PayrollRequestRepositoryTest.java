@@ -44,7 +44,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
     @Test
     public void create() throws Exception {
 
-        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result = Await.result(payrollRequestRepository.create(payrollRequest), Duration.apply("15000 ms"));
 
@@ -54,7 +54,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
 
         Thread.currentThread().sleep(1000);
 
-        PayrollRequest payrollRequest2 = new PayrollRequest(2L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest2 = new PayrollRequest(2L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result2 = Await.result(payrollRequestRepository.create(payrollRequest2), Duration.apply("15000 ms"));
 
@@ -67,7 +67,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveAndUpdate() throws Exception {
 
-        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result = Await.result(payrollRequestRepository.create(payrollRequest), Duration.apply("15000 ms"));
 
@@ -76,7 +76,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
         assertEquals("01", result.getDaySequence());
 
 
-        payrollRequest.setPayrollRequestStatus(PayrollRequestStatus.CANCELED);
+        payrollRequest.setErrorStatus(PayrollRequestStatus.NOT_PROCESSED);
 
         Await.result(payrollRequestRepository.update(payrollRequest), Duration.apply("15000 ms"));
 
@@ -84,14 +84,14 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
 
         assertNotNull(payrollRequest1);
 
-        assertEquals(PayrollRequestStatus.CANCELED, payrollRequest1.getPayrollRequestStatus());
+        assertEquals(PayrollRequestStatus.NOT_PROCESSED, payrollRequest1.getErrorStatus());
     }
 
 
     @Test
     public void retrieveAll() throws Exception {
 
-        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result = Await.result(payrollRequestRepository.create(payrollRequest), Duration.apply("15000 ms"));
 
@@ -101,7 +101,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
 
         Thread.currentThread().sleep(1000);
 
-        PayrollRequest payrollRequest2 = new PayrollRequest(2L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest2 = new PayrollRequest(2L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result2 = Await.result(payrollRequestRepository.create(payrollRequest2), Duration.apply("15000 ms"));
 
@@ -120,7 +120,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
     @Test
     public void retrieveAllByAccountID() throws Exception {
 
-        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result = Await.result(payrollRequestRepository.create(payrollRequest), Duration.apply("15000 ms"));
 
@@ -130,7 +130,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
 
         Thread.currentThread().sleep(1000);
 
-        PayrollRequest payrollRequest2 = new PayrollRequest(2L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest2 = new PayrollRequest(2L, "orderID", "description", new Date(), "daysequence", ACCOUNT_1, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result2 = Await.result(payrollRequestRepository.create(payrollRequest2), Duration.apply("15000 ms"));
 
@@ -145,7 +145,7 @@ public class PayrollRequestRepositoryTest extends BaseRepositoryTest {
         assertEquals(2, result1.size());
 
 
-        PayrollRequest payrollRequest3 = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_2, PayrollRequestStatus.REQUESTED);
+        PayrollRequest payrollRequest3 = new PayrollRequest(1L, "orderID", "description", new Date(), "daysequence", ACCOUNT_2, PayrollRequestStatus.NOT_PROCESSED);
 
         PayrollRequest result4 = Await.result(payrollRequestRepository.create(payrollRequest3), Duration.apply("15000 ms"));
 

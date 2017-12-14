@@ -8,9 +8,8 @@ package model;
  */
 public enum PayrollRequestStatus {
 
-    REQUESTED("REQUESTED"),
-    CANCELED("CANCELED"),
-    COMPLETED("COMPLETED");
+    PROCESSED("PROCESSED"),
+    NOT_PROCESSED("NOT_PROCESSED");
 
     private String value;
 
