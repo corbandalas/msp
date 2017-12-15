@@ -11,14 +11,24 @@ import dto.BaseAPIResponse;
  */
 public class PayrollCreateCardResponse extends BaseAPIResponse {
 
+    private String requestID;
 
     public PayrollCreateCardResponse() {
         super("", "");
     }
 
-    public PayrollCreateCardResponse(String text, String code) {
+    public PayrollCreateCardResponse(String text, String code, String requestID) {
 
         super(text, code);
+
+        this.requestID = requestID;
     }
 
+    public String getRequestID() {
+        return requestID;
+    }
+
+    public void setRequestID(String requestID) {
+        this.requestID = requestID;
+    }
 }

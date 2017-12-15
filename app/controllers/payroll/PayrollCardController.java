@@ -263,7 +263,7 @@ public class PayrollCardController extends BaseController {
                 }
             }
 
-            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE))));
+            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + ttt._2.getId())));
         });
 
 
@@ -478,7 +478,7 @@ public class PayrollCardController extends BaseController {
                 }
             }
 
-            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE))));
+            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + ttt._2.getId())));
         });
 
 

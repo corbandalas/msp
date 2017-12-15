@@ -43,7 +43,7 @@ public class PayrollCardRepository implements BaseCRUDRepository<PayrollCard> {
                             "accno, pubtoken, pan, title, lastname, firstname, dob, email, mobtel, addrl1, addrl2, addrl3, city, postcode, country, amount, currency, cardname, expdate, cvv, islive, error, payrollcardstatus, payrollcardtype) VALUES ($1, $2, $3, $4, $5, $6, " +
                             "$7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)";
                     connectionPool.getConnection().query(query, asList(id, entity.getPayrollRequestId(), entity.getAccno(), entity.getPubtoken(), entity.getPan(), entity.getTitle(), entity.getLastName(), entity.getFirstName(), entity.getDob(), entity.getEmail(), entity.getMobtel(),
-                            entity.getAddrl1(), entity.getAddrl2(), entity.getAddrl3(), entity.getCity(), entity.getPostcode(), entity.getCountry(), entity.getAmount(), entity.getCurrency(), entity.getCardName(), entity.getExpDate(), entity.getCvv(), entity.getIsLive(), entity.getError(), entity.getPayrollCardStatus().name()),
+                            entity.getAddrl1(), entity.getAddrl2(), entity.getAddrl3(), entity.getCity(), entity.getPostcode(), entity.getCountry(), entity.getAmount(), entity.getCurrency(), entity.getCardName(), entity.getExpDate(), entity.getCvv(), entity.getIsLive(), entity.getError(), entity.getPayrollCardStatus().name(), entity.getPayrollCardType().name()),
                             result -> {
                                 entity.setId(idResult.row(0).getLong(0));
                                 promise.success(entity);
