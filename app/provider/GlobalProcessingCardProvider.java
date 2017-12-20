@@ -443,7 +443,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         activateNow ? 1 : 0, //ActivateNow
                         null, //Source_desc
                         null, //ExpDate
-                        cardName, //CardName
+                        customer.getFullName(), //CardName
                         limitGroup, //LimitsGroup
                         null, //MCCGroup
                         permGroup, //PERMSGroup
