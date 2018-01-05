@@ -228,8 +228,7 @@ public class CustomerCardManagementController extends BaseController {
                 return Promise.pure(createWrongCardResponse());
             }
 
-            return cardProvider.activatePlasticCard(card, request.getPan(), request.getCvv()).map(response
-                    -> okResponse());
+            return cardProvider.activatePlasticCard(card, request.getPan(), request.getCvv()).flatMap(act -> cardProvider.obtainPIN(card)).map(ttt -> ok(Json.toJson(new PlasticCardActivationResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, ttt.getPin()))));
 
         });
 

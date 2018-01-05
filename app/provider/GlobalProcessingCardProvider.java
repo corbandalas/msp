@@ -254,7 +254,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<ChangePINResponse> obtainPIN(Card card) {
-        return getGPSSettings().flatMap(res -> invokePinControl(res, card, null, null, null, "01")).map((res -> new ChangePINResponse(res.getActionCode())));
+        return getGPSSettings().flatMap(res -> invokePinControl(res, card, null, null, null, "01")).map((res -> new ChangePINResponse(res.getActionCode(), res.getCurrentPin())));
     }
 
     @Override
