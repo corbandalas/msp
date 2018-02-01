@@ -148,7 +148,7 @@ public class CustomerRegisterController extends BaseController {
 
         }).map(res -> {
 
-            smsGateway.sendSMS(phone, "Dear customer! Thank you for registration. Your temporary PIN code is " + res._2 + ". Please visit mysafepay.com to complete registration.");
+            smsGateway.sendSMS(phone, "Dear customer! Thank you for registration. Your temporary PIN code is " + res._2 + ". Please visit mysafepay.dk to complete registration.");
 
             return ok(Json.toJson(new CustomerRegisterResponse("" + SUCCESS_CODE, SUCCESS_TEXT)));
         });
