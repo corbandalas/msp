@@ -201,7 +201,7 @@ public class PayrollCardController extends BaseController {
                         "<thermal_line2/>" +
                         "<delv_method>0</delv_method>" +
                         "<limitsgroup/>" +
-                        "<mccgroup>" + mccGroup + "</mccgroup>" +
+//                        "<mccgroup>" + mccGroup + "</mccgroup>" +
                         "<permsgroup>" + permGrpoup + "</permsgroup>" +
                         "<carrierref>" + carrierRef + "</carrierref>" +
                         "<delv_code/>" +
@@ -239,7 +239,7 @@ public class PayrollCardController extends BaseController {
 
                 String dateFormat = "yyMMdd";
 
-                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._2.getDaySequence();
+                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._2.getDaySequence() + ".xml";
 
                 Logger.info("File name = " + fileName);
 
