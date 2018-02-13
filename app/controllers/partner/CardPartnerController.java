@@ -396,7 +396,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.getVirtualCardBalanceForPartner(balance.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new BalanceResponse(String.valueOf(SUCCESS_CODE), SUCCESS_TEXT, res))));
+        F.Promise<Result> result = globalProcessingCardProvider.getVirtualCardBalanceForPartner(balance.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new BalanceResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
