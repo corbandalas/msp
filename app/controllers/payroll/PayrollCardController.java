@@ -156,9 +156,9 @@ public class PayrollCardController extends BaseController {
 
 
             String ftpXMLRequest = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?> <CRDREQ><HEADER>" +
-                    "<order_ref>" + /*authData.getOrderId()*/ "NULL" + "</order_ref> " +
-                    "<order_value>NULL</order_value> " +
-                    "<account_number>NULL</account_number>" +
+//                    "<order_ref>" + /*authData.getOrderId()*/ "NULL" + "</order_ref> " +
+//                    "<order_value>NULL</order_value> " +
+//                    "<account_number>NULL</account_number>" +
                     "</HEADER>" +
                     "";
 
