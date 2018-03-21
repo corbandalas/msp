@@ -62,6 +62,7 @@ public class CustomerPasswordController extends BaseController {
         final JsonNode jsonNode = request().body().asJson();
         final CustomerChangePassword request;
 
+
         try {
             request = Json.fromJson(jsonNode, CustomerChangePassword.class);
 

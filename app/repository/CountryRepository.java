@@ -52,6 +52,16 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         return promise.future();
     }
 
+    public Future<Optional<Country>> retrieveByCode(String code) {
+
+        final Promise<Optional<Country>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".country WHERE code=$1";
+        connectionPool.getConnection().query(query, asList(code), result -> promise.success(createEntity(result)), promise::failure);
+
+        return promise.future();
+    }
+
     public Future<Boolean> checkCountry(Object id) {
 
         final Promise<Boolean> promise = Futures.promise();
