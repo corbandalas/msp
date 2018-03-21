@@ -125,7 +125,7 @@ public class PayrollTriggerJob implements Runnable {
 
                                     for (Card card : payrollErrorResponse.getCard()) {
                                         F.Promise.wrap(payrollCardRepository.retrieveById(Long.parseLong(card.getRecid()))).map(cardEntry -> {
-                                            if (cardEntry.isPresent()) {
+                                            if (cardEntry.isPresent() && cardEntry.get().getPayrollCardStatus().equals(PayrollCardStatus.REQUESTED)) {
                                                 PayrollCard payrollCard = cardEntry.get();
 
                                                 payrollCard.setPayrollCardStatus(PayrollCardStatus.CANCELED);
