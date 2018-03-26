@@ -128,6 +128,7 @@ POST    /api/customer/register                                        @controlle
 
 GET     /api-docs/api/customer/password                               @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/password")
 POST    /api/customer/password/change                                 @controllers.customer.CustomerPasswordController.change()
+POST    /api/customer/password/changeNew                                 @controllers.customer.CustomerPasswordController.changeToNew()
 
 GET     /api-docs/api/customer/transaction                             @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/customer/transaction")
 POST    /api/customer/transaction/list                                 @controllers.customer.CustomerTransactionController.retrieveByCard()
