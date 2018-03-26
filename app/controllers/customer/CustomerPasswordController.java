@@ -133,7 +133,7 @@ public class CustomerPasswordController extends BaseController {
             @ApiResponse(code = PASSWORD_ATTEMPTS_EXCEEDED_CODE, message = PASSWORD_ATTEMPTS_EXCEEDED_TEXT),
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
-    @ApiImplicitParams(value = {@ApiImplicitParam(value = "Change pin request", required = true, dataType = "dto.customer.CustomerChangePassword", paramType = "body"),
+    @ApiImplicitParams(value = {@ApiImplicitParam(value = "Change pin request", required = true, dataType = "dto.customer.CustomerChangeToNewPassword", paramType = "body"),
             @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
     public F.Promise<Result> changeToNew() {
         final Customer customer = (Customer) ctx().args.get("customer");
