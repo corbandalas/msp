@@ -94,7 +94,7 @@ public class CustomerProfileController extends BaseController {
                 || StringUtils.isBlank(profile.getDateBirth()) || StringUtils.isBlank(profile.getEmail())
                 || StringUtils.isBlank(profile.getFirstName()) || StringUtils.isBlank(profile.getLastName())
                 || StringUtils.isBlank(profile.getPostcode()) || StringUtils.isBlank(profile.getRegistrationDate())
-                || StringUtils.isBlank(profile.getTitle()) || StringUtils.isBlank(profile.getFlat()) || StringUtils.isBlank(profile.getHouseNameNumber()) || profile.getKyc() == null) {
+                || StringUtils.isBlank(profile.getTitle()) /*|| StringUtils.isBlank(profile.getFlat())*/ || StringUtils.isBlank(profile.getHouseNameNumber()) || profile.getKyc() == null) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
         }

@@ -4,16 +4,21 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import dto.payroll.Card;
 import dto.payroll.PayrollErrorResponseBean;
+import dto.payroll.response.CardCreationResponse;
+import dto.payroll.response.RECORD;
 import model.*;
+import model.enums.CardBrand;
+import model.enums.CardType;
+import model.enums.KYC;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import play.Logger;
 import play.libs.F;
-import repository.CurrencyRepository;
-import repository.PayrollCardRepository;
-import repository.PayrollRequestRepository;
-import repository.PropertyRepository;
+import repository.*;
+import sms.SmsGateway;
+import util.SecurityUtil;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -21,6 +26,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -44,6 +51,18 @@ public class PayrollTriggerJob implements Runnable {
 
     @Inject
     private PayrollCardRepository payrollCardRepository;
+
+    @Inject
+    private CustomerRepository customerRepository;
+
+    @Inject
+    private CountryRepository countryRepository;
+
+    @Inject
+    private SmsGateway smsGateway;
+
+    @Inject
+    private CardRepository cardRepository;
 
     @Override
     public void run() {
@@ -106,7 +125,7 @@ public class PayrollTriggerJob implements Runnable {
 
                                     for (Card card : payrollErrorResponse.getCard()) {
                                         F.Promise.wrap(payrollCardRepository.retrieveById(Long.parseLong(card.getRecid()))).map(cardEntry -> {
-                                            if (cardEntry.isPresent()) {
+                                            if (cardEntry.isPresent() && cardEntry.get().getPayrollCardStatus().equals(PayrollCardStatus.REQUESTED)) {
                                                 PayrollCard payrollCard = cardEntry.get();
 
                                                 payrollCard.setPayrollCardStatus(PayrollCardStatus.CANCELED);
@@ -136,6 +155,99 @@ public class PayrollTriggerJob implements Runnable {
                         });
 
 
+                    } else if (file.getName().contains("SafePayApS_76100G")) {
+                        Logger.info("Found success file. Get Date and sequence number from " + file.getName());
+
+
+                        try {
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            ftpClient.retrieveFile(file.getName(), outputStream);
+                            InputStream inputstream = new ByteArrayInputStream(outputStream.toByteArray());
+
+                            JAXBContext jaxbContext = JAXBContext.newInstance(CardCreationResponse.class);
+
+                            CardCreationResponse payrollSuccessResponse = (CardCreationResponse) jaxbContext.createUnmarshaller().unmarshal(inputstream);
+
+                            outputStream.close();
+                            inputstream.close();
+
+                            List<RECORD> records = payrollSuccessResponse.getCARDGEN().getPRODUCT().getRECORD();
+
+
+                            for (RECORD record : records) {
+
+
+                                F.Promise.wrap(payrollCardRepository.retrieveById(Long.parseLong(record.getUID()))).map(cardEntry -> {
+                                    if (cardEntry.isPresent() && cardEntry.get().getPayrollCardStatus() == PayrollCardStatus.REQUESTED) {
+                                        PayrollCard payrollCard = cardEntry.get();
+
+                                        if (payrollCard.getPayrollCardType().equals(PayrollCardType.CARD_CREATION)) {
+
+                                            payrollCard.setPubtoken(record.getCARD().getTRACK3());
+                                            payrollCard.setExpDate(record.getCARD().getEMBOSSEXPIRY());
+                                        }
+
+                                        payrollCard.setPayrollCardStatus(PayrollCardStatus.COMPLETED);
+
+                                        payrollCardRepository.update(payrollCard);
+
+                                        F.Promise<Optional<Customer>> isRegisteredPromise = F.Promise.wrap(customerRepository.retrieveById(payrollCard.getAccno()));
+
+                                        F.Promise<Optional<Country>> countryPromise = F.Promise.wrap(countryRepository.retrieveByCode(payrollCard.getCountry()));
+
+                                        isRegisteredPromise.zip(countryPromise).map(res -> {
+
+                                            Customer customer = new Customer();
+
+                                            boolean isRegistered = true;
+
+                                            if (res._1 != null && res._1.get() != null) {
+                                                customer = res._1.get();
+                                            } else {
+                                                isRegistered = false;
+                                            }
+
+                                            Country country = res._2.get();
+
+                                            if (!isRegistered) {
+
+
+                                                final String password = RandomStringUtils.randomNumeric(4);
+
+                                                customer.setActive(true);
+                                                customer.setCountry_id(country.getId());
+                                                customer.setKyc(KYC.NONE);
+                                                customer.setPassword(SecurityUtil.generateKeyFromArray(password));
+                                                customer.setId(payrollCard.getAccno());
+                                                customer.setRegistrationDate(new Date());
+                                                customer.setDateBirth(new Date());
+                                                customer.setTemppassword(true);
+
+                                                smsGateway.sendSMS(payrollCard.getAccno(), "Dear customer! Thank you for registration. Your temporary PIN code is " + password + ". Please visit mysafepay.dk to complete registration.");
+
+                                                F.Promise.wrap(customerRepository.create(customer));
+                                            }
+
+                                            F.Promise.wrap(cardRepository.create(new model.Card(0L, payrollCard.getPubtoken(), customer.getId(),
+                                                    CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", payrollCard.getCurrency(),
+                                                    payrollCard.getAddrl1(), payrollCard.getAddrl2(), payrollCard.getAddrl3(), payrollCard.getCountry())));
+
+
+
+                                            return true;
+                                        });
+                                    }
+                                    return cardEntry;
+                                });
+                            }
+
+                        } catch (JAXBException e) {
+                            Logger.error("XML parsing error", e);
+                        } catch (IOException e) {
+                            Logger.error("FTP file reading error", e);
+                        }
+
+
                     }
 
 
@@ -143,9 +255,7 @@ public class PayrollTriggerJob implements Runnable {
 
             } catch (Exception e) {
                 Logger.error("Error: " + e.getMessage(), e);
-            }
-
-            finally {
+            } finally {
                 try {
                     if (ftpClient.isConnected()) {
                         ftpClient.logout();
