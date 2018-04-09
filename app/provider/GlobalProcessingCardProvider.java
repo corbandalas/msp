@@ -209,7 +209,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePlasticCardActivation(res, token, cardNumber, cvv, lastName, firstName, addrl1, addrl2, city, postCode, country, dob)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePlasticCardActivation(res, token, cardNumber, cvv, lastName, firstName, addrl1, addrl2, city, postCode, country, dob, "6")).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
     }
 
     @Override
@@ -830,10 +830,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card, String cardNumber, String cvv) {
 
-        return invokePlasticCardActivation(gpsSettings, card.getToken(), cardNumber, cvv, null, null, null, null, null, null, null, null);
+        return invokePlasticCardActivation(gpsSettings, card.getToken(), cardNumber, cvv, null, null, null, null, null, null, null, null, "2");
     }
 
-    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, String token, String cardNumber, String cvv, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob) {
+    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, String token, String cardNumber, String cvv, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob, String activationCode) {
 
         return F.Promise.promise(() -> {
 
@@ -852,7 +852,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
 
             try {
-                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, lastName, firstName, addrl1, addrl2, city, postCode, country, "2", cardNumber, null, token, dob, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, lastName, firstName, addrl1, addrl2, city, postCode, country, activationCode, cardNumber, null, token, dob, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), "Plastic card activation", 0, 0, null, 0, "2", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
