@@ -63,6 +63,16 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         return promise.future();
     }
 
+    public Future<Optional<Card>> retrieveByToken(String token) {
+
+        final Promise<Optional<Card>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".card WHERE token=$1";
+        connectionPool.getConnection().query(query, asList(token), result -> promise.success(createEntity(result)), promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<List<Card>> retrieveAll() {
 

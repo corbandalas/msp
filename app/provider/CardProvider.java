@@ -44,6 +44,7 @@ public interface CardProvider {
     F.Promise<CardUnloadResponse> unloadVirtualCardForPartner(String token, long amount, Currency currency, String description, String loadType, String partnerID);
     F.Promise<CardTransferBalanceResponse> transferBetweenCards(Card sourceCard, Card destinationCard, long amount, Currency currency, String description);
     F.Promise<UpdateCustomerResponse> updateCardHolder(Customer customer, Card defaultCard);
+    F.Promise<CustomerUpdate> updateCardHolderForPartner(String partnerID, String token, Customer customer);
     F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Customer customer, Card card, java.util.Date convertDate, boolean applyFee, Date expDate);
     F.Promise<PhoneActivateResponse> activateCardByPhone(Card card);
     F.Promise<CardStatusChangeResponseResponse> blockCard(Card card, String reason);
@@ -56,13 +57,18 @@ public interface CardProvider {
     F.Promise<CardStatement2> getCardTransactions(String token, Date startDate, Date endDate, String partnerID);
     F.Promise<ChangePINResponse> changePIN(Card card, String currentPIN, String newPIN, String confirmNewPIN);
     F.Promise<PlasticCardActivateResponse> activatePlasticCard(Card card, String cardNumber, String cvv);
-    F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID);
+    F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob);
     F.Promise<WsResult> getServiceResultForPartner(String token, String wsid, String partnerID);
     F.Promise<ChangePINResponse> obtainPIN(Card card);
     F.Promise<PINControl> obtainPINForPartner(String token, String partnerID);
+    F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
     F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
+    F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup);
     F.Promise<ApplyFees> applyFee(String code, Card card);
+    F.Promise<ApplyFees> applyFeeForPartner(String partnerID, String code, Card card, double fee);
     F.Promise<PassCode> getPassCode(String token);
+    F.Promise<BalanceTransfer> balanceTransfer(String partnerID, String token, String newToken, double amount, String currency, String description, String loadedBy, String feeWaiver);
 
-}
+
+    }

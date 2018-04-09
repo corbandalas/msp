@@ -9,6 +9,7 @@ import controllers.admin.BaseMerchantApiAction;
 import dto.Authentication;
 import dto.BaseAPIResponse;
 import dto.partner.*;
+import model.Card;
 import model.Currency;
 import model.Customer;
 import model.enums.KYC;
@@ -20,6 +21,7 @@ import play.mvc.Result;
 import play.mvc.With;
 import provider.GlobalProcessingCardProvider;
 import provider.dto.CardCreationResponse;
+import repository.CardRepository;
 import repository.CurrencyRepository;
 import util.DateUtil;
 import util.SecurityUtil;
@@ -43,6 +45,9 @@ public class CardPartnerController extends BaseController {
 
     @Inject
     CurrencyRepository currencyRepository;
+
+    @Inject
+    CardRepository cardRepository;
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
@@ -520,7 +525,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.obtainPINForPartner(obtainPINRequest.getToken(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ObtainPINResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+        F.Promise<Result> result = globalProcessingCardProvider.obtainPINForPartner(obtainPINRequest.getToken(), authData.getAccount().getId().toString(), obtainPINRequest.getFunc(), obtainPINRequest.getFeeWaiver()).map(res -> ok(Json.toJson(new ObtainPINResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
@@ -614,7 +619,7 @@ public class CardPartnerController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Activate card request", required = true, dataType = "dto.partner.ActivateCardRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+cvv+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> activate() {
@@ -630,19 +635,19 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (StringUtils.isBlank(activateCardRequest.getToken()) || StringUtils.isBlank(activateCardRequest.getCvv())) {
+        if (StringUtils.isBlank(activateCardRequest.getToken())) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
 
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), activateCardRequest.getToken(), activateCardRequest.getCvv(), authData.getAccount().getSecret()))) {
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), activateCardRequest.getToken(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
 
-        F.Promise<Result> result = globalProcessingCardProvider.activatePlasticCardForPartner(activateCardRequest.getToken(), activateCardRequest.getCardNumber(), activateCardRequest.getCvv(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new ActivateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+        F.Promise<Result> result = globalProcessingCardProvider.activatePlasticCardForPartner(activateCardRequest.getToken(), activateCardRequest.getCardNumber(), activateCardRequest.getCvv(), authData.getAccount().getId().toString(), activateCardRequest.getLastName(), activateCardRequest.getFirstName(), activateCardRequest.getAddrl1(), activateCardRequest.getAddrl2(), activateCardRequest.getCity(), activateCardRequest.getPostCode(), activateCardRequest.getCountry(), activateCardRequest.getDob()).map(res -> ok(Json.toJson(new ActivateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
@@ -697,6 +702,248 @@ public class CardPartnerController extends BaseController {
         }
 
         F.Promise<Result> result = globalProcessingCardProvider.getServiceResultForPartner(webServiceResultRequest.getToken(), webServiceResultRequest.getWsid(), authData.getAccount().getId().toString()).map(res -> ok(Json.toJson(new WebServiceResultResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "changeCardGroup",
+            value = "Change card group",
+            notes = "Method allows to change card group",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = ChangeCardGroupResponse.class
+    )
+
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = ChangeStatusResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Change card group request", required = true, dataType = "dto.partner.ChangeCardGroupRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+limitGroup+permGroup+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> changeCardGroup() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ChangeCardGroupRequest changeCardGroupRequest;
+        try {
+            changeCardGroupRequest = Json.fromJson(jsonNode, ChangeCardGroupRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(changeCardGroupRequest.getToken()) || StringUtils.isBlank(changeCardGroupRequest.getLimitGroup()) || StringUtils.isBlank(changeCardGroupRequest.getPermGroup())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), changeCardGroupRequest.getToken(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(changeCardGroupRequest.getToken()));
+
+
+        F.Promise<Result> result = cardPromise.flatMap(card -> globalProcessingCardProvider.changeCardGroupForPartner(card.get(), authData.getAccount().getId().toString(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup()).map(res -> ok(Json.toJson(new ChangeCardGroupResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "applyFee",
+            value = "Apply card fees",
+            notes = "Method allows to apply card fees",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = ApplyCardFeeResponse.class
+    )
+
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = ApplyCardFeeResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Apply card fee request", required = true, dataType = "dto.partner.ApplyCardFeeRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+procCode+fee+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> applyFee() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ApplyCardFeeRequest applyCardFeeRequest;
+        try {
+            applyCardFeeRequest = Json.fromJson(jsonNode, ApplyCardFeeRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(applyCardFeeRequest.getToken()) || StringUtils.isBlank(applyCardFeeRequest.getProcCode())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), applyCardFeeRequest.getToken(), applyCardFeeRequest.getProcCode(), "" + applyCardFeeRequest.getFee(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(applyCardFeeRequest.getToken()));
+
+
+        F.Promise<Result> result = cardPromise.flatMap(card -> globalProcessingCardProvider.applyFeeForPartner(authData.getAccount().getId().toString(), applyCardFeeRequest.getProcCode(), card.get(), applyCardFeeRequest.getFee()).map(res -> ok(Json.toJson(new ApplyCardFeeResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "transferBalance",
+            value = "Card balance transfer",
+            notes = "Method allows to transfer balance between cards",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CardBalanceTransferResponse.class
+    )
+
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CardBalanceTransferResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Card balance request", required = true, dataType = "dto.partner.CardBalanceTransferRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+newToken+amount+currency+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> cardTransfer() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CardBalanceTransferRequest cardBalanceTransferRequest;
+        try {
+            cardBalanceTransferRequest = Json.fromJson(jsonNode, CardBalanceTransferRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(cardBalanceTransferRequest.getToken()) || StringUtils.isBlank(cardBalanceTransferRequest.getNewToken()) || StringUtils.isBlank(cardBalanceTransferRequest.getCurrency())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), cardBalanceTransferRequest.getToken(), cardBalanceTransferRequest.getNewToken(),  "" + cardBalanceTransferRequest.getAmount(), cardBalanceTransferRequest.getCurrency(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+
+        F.Promise<Result> result = globalProcessingCardProvider.balanceTransfer(authData.getAccount().getId().toString(), cardBalanceTransferRequest.getToken(), cardBalanceTransferRequest.getNewToken(), cardBalanceTransferRequest.getAmount(), cardBalanceTransferRequest.getCurrency(), cardBalanceTransferRequest.getDescription(), cardBalanceTransferRequest.getLoadedBy(), cardBalanceTransferRequest.getFeeWaiver()).map(res -> ok(Json.toJson(new CardBalanceTransferResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "updateCardHolder",
+            value = "Update card holder",
+            notes = "Method allows to update card holder data",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = UpdateCardHolderResponse.class
+    )
+
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = UpdateCardHolderResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Update card holder request", required = true, dataType = "dto.partner.UpdateCardHolderRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+firstName+lastName+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> updateCardHolder() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final UpdateCardHolderRequest updateCardHolderRequest;
+        try {
+            updateCardHolderRequest = Json.fromJson(jsonNode, UpdateCardHolderRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(updateCardHolderRequest.getToken()) || StringUtils.isBlank(updateCardHolderRequest.getFirstName()) || StringUtils.isBlank(updateCardHolderRequest.getLastName())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), updateCardHolderRequest.getToken(), updateCardHolderRequest.getFirstName(),  updateCardHolderRequest.getLastName(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        Customer customer = new Customer();
+
+        customer.setId(updateCardHolderRequest.getPhone());
+        customer.setAddress1(updateCardHolderRequest.getAddressl1());
+        customer.setAddress2(updateCardHolderRequest.getAddressl2());
+        customer.setFirstName(updateCardHolderRequest.getFirstName());
+        customer.setLastName(updateCardHolderRequest.getLastName());
+        customer.setCity(updateCardHolderRequest.getCity());
+        customer.setEmail(updateCardHolderRequest.getEmail());
+        customer.setPostcode(updateCardHolderRequest.getPostCode());
+        customer.setTitle(updateCardHolderRequest.getTitle());
+        customer.setCountry_id(updateCardHolderRequest.getCountry());
+
+        F.Promise<Result> result = globalProcessingCardProvider.updateCardHolderForPartner(authData.getAccount().getId().toString(), updateCardHolderRequest.getToken(), customer).map(res -> ok(Json.toJson(new UpdateCardHolderResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }

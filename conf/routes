@@ -30,6 +30,10 @@ POST       /api/partner/card/balance                                          @c
 POST       /api/partner/card/transactions                                          @controllers.partner.CardPartnerController.transactions()
 POST       /api/partner/card/pin                                          @controllers.partner.CardPartnerController.obtainPIN()
 POST       /api/partner/card/status                                          @controllers.partner.CardPartnerController.changeStatus()
+POST       /api/partner/card/group                                          @controllers.partner.CardPartnerController.changeCardGroup()
+POST       /api/partner/card/fee                                          @controllers.partner.CardPartnerController.applyFee()
+POST       /api/partner/card/transfer                                          @controllers.partner.CardPartnerController.cardTransfer()
+POST       /api/partner/card/update                                          @controllers.partner.CardPartnerController.updateCardHolder()
 POST       /api/partner/card/activate                                          @controllers.partner.CardPartnerController.activate()
 POST       /api/partner/card/result                                          @controllers.partner.CardPartnerController.wsResult()
 

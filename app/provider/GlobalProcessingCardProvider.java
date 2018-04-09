@@ -184,6 +184,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<CustomerUpdate> updateCardHolderForPartner(String partnerID, String token, Customer customer) {
+        return getGPSSettingsForPartner(partnerID).zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
+                flatMap(res -> invokeUpdateCardHolder(res, customer, token));
+    }
+
+    @Override
     public F.Promise<ConvertVirtualToPlasticResponse> convertVirtualToPlastic(Customer customer, Card card, Date convertDate, boolean applyFee, Date expDate) {
         return getGPSSettings().flatMap(res -> invokeChangeVirtualToPlastic(res, card, convertDate, applyFee, expDate).zip(changeCardGroup(customer, card))).map((rez -> new ConvertVirtualToPlasticResponse(rez._1.getActionCode())
         ));
@@ -202,8 +208,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePlasticCardActivation(res, token, cardNumber, cvv)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
+    public F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePlasticCardActivation(res, token, cardNumber, cvv, lastName, firstName, addrl1, addrl2, city, postCode, country, dob)).map((rez -> new PlasticCardActivateResponse(rez.getActionCode(), rez.isIsLive())));
     }
 
     @Override
@@ -259,7 +265,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, "01"));
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, "01", null));
+    }
+
+    @Override
+    public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, func, fee));
     }
 
     @Override
@@ -296,13 +307,28 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
+    public F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardChangeGroup(res, card, limitGroup, permGroup));
+    }
+
+    @Override
     public F.Promise<ApplyFees> applyFee(String code, Card card) {
         return getGPSSettings().flatMap(res -> invokeWsGenericFees(res, code, card));
     }
 
     @Override
+    public F.Promise<ApplyFees> applyFeeForPartner(String partnerID, String code, Card card, double fee) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeWsGenericFees(res, code, card, fee));
+    }
+
+    @Override
     public F.Promise<PassCode> getPassCode(String token) {
         return getGPSSettings().flatMap(res -> invokeWsGetPassCode(res, token));
+    }
+
+    @Override
+    public F.Promise<BalanceTransfer> balanceTransfer(String partnerID, String token, String newToken, double amount, String currency, String description, String loadedBy, String feeWaiver) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeWsBalanceTransfer(res, token, newToken, amount, currency, description, loadedBy, feeWaiver));
     }
 
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
@@ -676,8 +702,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
         }, getExecutionContext());
     }
 
-
-    private F.Promise<CustomerUpdate> invokeUpdateCardHolder(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, Card card) {
+    private F.Promise<CustomerUpdate> invokeUpdateCardHolder(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String token) {
 
         return F.Promise.promise(() -> {
 
@@ -696,7 +721,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 customerUpdate = service.getServiceSoap().wsUpdateCardholderDetails(wsid, gpsSettings.issCode, "13", null, "1", null, null, null, null, null, null, null, customer.getLastName(), customer.getTitle(), customer.getFirstName(), customer.getAddress1(), customer.getAddress2(), customer.getCity(),
                         customer.getPostcode(), country.getCode(), customer.getId(), null, null, null, null, null, null, null, null, null, customer.getEmail(), null, customer.getId(), null, null, null, null, null, null, null, null, null, null, null, null, null,
-                        null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 4, 15, 0, 0, null, 0, card.getToken(), 0, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                        null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 4, 15, 0, 0, null, 0, token, 0, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
                 Logger.info("/////// WS_Update_CardHolder service invocation was ended. WSID #" + wsid + ". Result code: " + customerUpdate.getActionCode() + " ." + customerUpdate.toString());
@@ -712,6 +737,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             return customerUpdate;
         }, getExecutionContext());
+    }
+
+    private F.Promise<CustomerUpdate> invokeUpdateCardHolder(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, Card card) {
+
+        return invokeUpdateCardHolder(countrySettingsTuple, customer, card.getToken());
+
     }
 
 
@@ -799,10 +830,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, Card card, String cardNumber, String cvv) {
 
-        return invokePlasticCardActivation(gpsSettings, card.getToken(), cardNumber, cvv);
+        return invokePlasticCardActivation(gpsSettings, card.getToken(), cardNumber, cvv, null, null, null, null, null, null, null, null);
     }
 
-    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, String token, String cardNumber, String cvv) {
+    private F.Promise<Activate> invokePlasticCardActivation(GPSSettings gpsSettings, String token, String cardNumber, String cvv, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob) {
 
         return F.Promise.promise(() -> {
 
@@ -821,7 +852,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
 
             try {
-                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, null, null, null, null, null, null, null, "2", cardNumber, null, token, null, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, lastName, firstName, addrl1, addrl2, city, postCode, country, "2", cardNumber, null, token, dob, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), "Plastic card activation", 0, 0, null, 0, "2", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
@@ -917,11 +948,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, Card card, String oldPin, String newPin, String confirmPin, String func) {
 
-        return invokePinControl(gpsSettings, card.getToken(), oldPin, newPin, confirmPin, func);
+        return invokePinControl(gpsSettings, card.getToken(), oldPin, newPin, confirmPin, func, null);
     }
 
 
-    private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, String token, String oldPin, String newPin, String confirmPin, String func) {
+    private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, String token, String oldPin, String newPin, String confirmPin, String func, String fee) {
 
         return F.Promise.promise(() -> {
 
@@ -934,7 +965,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, token, null, func, oldPin, newPin, confirmPin, "1", "1", null, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, token, null, func, oldPin, newPin, confirmPin, "1", "1", null, null, null, null, fee, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString());
 
@@ -985,6 +1016,33 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<ChangeGroup> invokeCardChangeGroup(GPSSettings gpsSettings, Customer customer, Card card) {
 
+        HashMap<String, String> permGroupMap = new HashMap<String, String>();
+
+        permGroupMap.put("SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.permsGroup, "|")[0]);
+        permGroupMap.put("FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.permsGroup, "|")[1]);
+
+        String permGroup = permGroupMap.get(customer.getKyc().name());
+
+        System.out.println(permGroup);
+
+        HashMap<String, String> limitGroupMap = new HashMap<String, String>();
+
+        limitGroupMap.put("EUR_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[0]);
+        limitGroupMap.put("DKK_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[2]);
+        limitGroupMap.put("GBP_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[4]);
+
+
+        limitGroupMap.put("EUR_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[1]);
+        limitGroupMap.put("DKK_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[3]);
+        limitGroupMap.put("GBP_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[5]);
+
+        String limitGroup = limitGroupMap.get(card.getCurrencyId() + "_" + customer.getKyc().name());
+
+        return invokeCardChangeGroup(gpsSettings, card, limitGroup, permGroup);
+    }
+
+    private F.Promise<ChangeGroup> invokeCardChangeGroup(GPSSettings gpsSettings, Card card, String limitGroup, String permGroup) {
+
         return F.Promise.promise(() -> {
 
             long wsid = System.currentTimeMillis();
@@ -996,30 +1054,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-
-                HashMap<String, String> permGroupMap = new HashMap<String, String>();
-
-                permGroupMap.put("SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.permsGroup, "|")[0]);
-                permGroupMap.put("FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.permsGroup, "|")[1]);
-
-                String permGroup = permGroupMap.get(customer.getKyc().name());
-
-                System.out.println(permGroup);
-
-                HashMap<String, String> limitGroupMap = new HashMap<String, String>();
-
-                limitGroupMap.put("EUR_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[0]);
-                limitGroupMap.put("DKK_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[2]);
-                limitGroupMap.put("GBP_FULL_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[4]);
-
-
-                limitGroupMap.put("EUR_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[1]);
-                limitGroupMap.put("DKK_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[3]);
-                limitGroupMap.put("GBP_SIMPLIFIED_DUE_DILIGENCE", StringUtils.split(gpsSettings.limitGroup, "|")[5]);
-
-                String limitGroup = limitGroupMap.get(card.getCurrencyId() + "_" + customer.getKyc().name());
-
-                System.out.println(limitGroup);
 
                 changeGroup = service.getServiceSoap().wsCardChangeGroups(wsid, gpsSettings.issCode, null, card.getToken(), DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), limitGroup, "", permGroup, "", "", "", "", "", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
@@ -1042,6 +1076,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<ApplyFees> invokeWsGenericFees(GPSSettings gpsSettings, String procCode, Card card) {
 
+        return invokeWsGenericFees(gpsSettings, procCode, card, 0);
+    }
+
+    private F.Promise<ApplyFees> invokeWsGenericFees(GPSSettings gpsSettings, String procCode, Card card, double fee) {
+
         return F.Promise.promise(() -> {
 
             long wsid = System.currentTimeMillis();
@@ -1053,7 +1092,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                applyFees = service.getServiceSoap().wsGenericFees(wsid, gpsSettings.issCode, null, card.getToken(), procCode, "apply fee", DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), 0, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                applyFees = service.getServiceSoap().wsGenericFees(wsid, gpsSettings.issCode, null, card.getToken(), procCode, "apply fee", DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), fee, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Generic_Fees service invocation was ended. WSID #" + wsid + ". Result code: " + applyFees.getActionCode() + " ." + applyFees.toString());
 
@@ -1128,6 +1167,37 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return wsResult;
+        }, getExecutionContext());
+    }
+
+    private F.Promise<BalanceTransfer> invokeWsBalanceTransfer(GPSSettings gpsSettings, String token, String newToken, double amount, String currency, String description, String loadedBy, String feeWaiver) {
+
+        return F.Promise.promise(() -> {
+
+            long wsid = System.currentTimeMillis();
+
+            Logger.info("/////// Ws_BalanceTransfer service invocation. WSID #" + wsid);
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            BalanceTransfer balanceTransfer = null;
+
+            try {
+
+                balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "0", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, null, newToken, amount, currency, gpsSettings.loadSrc, 0, null, 0, description, loadedBy, feeWaiver, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// Ws_BalanceTransfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
+
+                if (!StringUtils.equals("000", balanceTransfer.getActionCode())) {
+                    throw new CardProviderException("Bad Response");
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                throw new CardProviderException("GPS error");
+            }
+
+            return balanceTransfer;
         }, getExecutionContext());
     }
 
