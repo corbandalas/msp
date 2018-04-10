@@ -1,0 +1,1 @@
+alter table customer add COLUMN referral character varying(255);

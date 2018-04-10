@@ -110,6 +110,7 @@ public class CustomerRegisterController extends BaseController {
 
         final String country = customerRegister.getCountry();
         final String phone = customerRegister.getPhone();
+        final String referral = customerRegister.getReferral();
 
         final Promise<F.Tuple<Boolean, Boolean>> resultPromise = Promise.wrap(countryRepository.checkCountry(customerRegister.getCountry())).zip(Promise.wrap(customerRepository.isRegistered(customerRegister.getPhone())));
 
@@ -143,6 +144,10 @@ public class CustomerRegisterController extends BaseController {
             customer.setRegistrationDate(new Date());
             customer.setDateBirth(new Date());
             customer.setTemppassword(true);
+
+            if (StringUtils.isNotBlank(referral)) {
+                customer.setReferral(referral);
+            }
 
             return Promise.wrap(customerRepository.create(customer)).zip(Promise.pure(password));
 

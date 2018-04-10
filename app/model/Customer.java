@@ -31,6 +31,7 @@ public class Customer extends BaseEntity<String> {
     private Boolean temppassword;
     private String houseNameNumber;
     private String flat;
+    private String referral;
 
     public Customer() {
     }
@@ -73,6 +74,28 @@ public class Customer extends BaseEntity<String> {
         this.temppassword = temppassword;
         this.houseNameNumber = houseNameNumber;
         this.flat = flat;
+    }
+
+    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword, String houseNameNumber, String flat, String referral) {
+        this.setId(id);
+        this.registrationDate = registrationDate;
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.postcode = postcode;
+        this.city = city;
+        this.email = email;
+        this.dateBirth = dateBirth;
+        this.active = active;
+        this.kyc = kyc;
+        this.password = password;
+        this.country_id = country_id;
+        this.temppassword = temppassword;
+        this.houseNameNumber = houseNameNumber;
+        this.flat = flat;
+        this.referral = referral;
     }
 
     public Date getRegistrationDate() {
@@ -215,6 +238,7 @@ public class Customer extends BaseEntity<String> {
                 ", dateBirth=" + dateBirth +
                 ", active=" + active +
                 ", kyc=" + kyc +
+                ", referral=" + referral +
                 ", password='" + password + '\'' +
                 ", country_id='" + country_id + '\'' +
                 ", temppassword='" + temppassword + '\'' +
@@ -237,5 +261,13 @@ public class Customer extends BaseEntity<String> {
 
     public void setFlat(String flat) {
         this.flat = flat;
+    }
+
+    public String getReferral() {
+        return referral;
+    }
+
+    public void setReferral(String referral) {
+        this.referral = referral;
     }
 }
