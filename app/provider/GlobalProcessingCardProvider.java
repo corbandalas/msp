@@ -307,8 +307,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardChangeGroup(res, card, limitGroup, permGroup));
+    public F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup, String mccGroup, String feeGroup, String schedGroup, String wsFeeGroup) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardChangeGroup(res, card, limitGroup, permGroup, mccGroup, feeGroup, schedGroup, wsFeeGroup));
     }
 
     @Override
@@ -1038,10 +1038,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         String limitGroup = limitGroupMap.get(card.getCurrencyId() + "_" + customer.getKyc().name());
 
-        return invokeCardChangeGroup(gpsSettings, card, limitGroup, permGroup);
+        return invokeCardChangeGroup(gpsSettings, card, limitGroup, permGroup, "", "", "", "");
     }
 
-    private F.Promise<ChangeGroup> invokeCardChangeGroup(GPSSettings gpsSettings, Card card, String limitGroup, String permGroup) {
+    private F.Promise<ChangeGroup> invokeCardChangeGroup(GPSSettings gpsSettings, Card card, String limitGroup, String permGroup, String mccGroup, String feeGroup, String schedFeeGroup, String wsFeeGroup) {
 
         return F.Promise.promise(() -> {
 
@@ -1055,7 +1055,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
 
-                changeGroup = service.getServiceSoap().wsCardChangeGroups(wsid, gpsSettings.issCode, null, card.getToken(), DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), limitGroup, "", permGroup, "", "", "", "", "", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                changeGroup = service.getServiceSoap().wsCardChangeGroups(wsid, gpsSettings.issCode, null, card.getToken(), DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), limitGroup, mccGroup, permGroup, feeGroup, schedFeeGroup, wsFeeGroup, "", "", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
                 Logger.info("/////// Ws_Change_Group service invocation was ended. WSID #" + wsid + ". Result code: " + changeGroup.getActionCode() + " ." + changeGroup.toString());

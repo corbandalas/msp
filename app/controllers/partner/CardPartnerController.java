@@ -745,7 +745,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (StringUtils.isBlank(changeCardGroupRequest.getToken()) || StringUtils.isBlank(changeCardGroupRequest.getLimitGroup()) || StringUtils.isBlank(changeCardGroupRequest.getPermGroup())) {
+        if (StringUtils.isBlank(changeCardGroupRequest.getToken()) || StringUtils.isBlank(changeCardGroupRequest.getLimitGroup()) || StringUtils.isBlank(changeCardGroupRequest.getPermGroup()) || StringUtils.isBlank(changeCardGroupRequest.getFeeGroup()) || StringUtils.isBlank(changeCardGroupRequest.getMccGroup()) || StringUtils.isBlank(changeCardGroupRequest.getSchedFeeGroup()) || StringUtils.isBlank(changeCardGroupRequest.getWsFeeGroup())) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
@@ -759,7 +759,7 @@ public class CardPartnerController extends BaseController {
         F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(changeCardGroupRequest.getToken()));
 
 
-        F.Promise<Result> result = cardPromise.flatMap(card -> globalProcessingCardProvider.changeCardGroupForPartner(card.get(), authData.getAccount().getId().toString(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup()).map(res -> ok(Json.toJson(new ChangeCardGroupResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
+        F.Promise<Result> result = cardPromise.flatMap(card -> globalProcessingCardProvider.changeCardGroupForPartner(card.get(), authData.getAccount().getId().toString(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup(), changeCardGroupRequest.getMccGroup(), changeCardGroupRequest.getFeeGroup(), changeCardGroupRequest.getSchedFeeGroup(), changeCardGroupRequest.getWsFeeGroup()).map(res -> ok(Json.toJson(new ChangeCardGroupResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
 
         return returnRecover(result);
     }

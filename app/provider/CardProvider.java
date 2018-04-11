@@ -64,7 +64,7 @@ public interface CardProvider {
     F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
     F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
-    F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup);
+    F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup, String mccGroup, String feeGroup, String schedGroup, String wsFeeGroup);
     F.Promise<ApplyFees> applyFee(String code, Card card);
     F.Promise<ApplyFees> applyFeeForPartner(String partnerID, String code, Card card, double fee);
     F.Promise<PassCode> getPassCode(String token);
