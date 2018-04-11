@@ -75,14 +75,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow);
+    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow, cardDesign);
 
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency,  boolean activateNow) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow);
+    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign);
     }
 
     @Override
@@ -96,13 +96,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency,  boolean activateNow) {
-        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow);
+    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow, cardDesign);
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency,  boolean activateNow) {
-        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow);
+    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign);
     }
 
     @Override
@@ -292,11 +292,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     }
 
-    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
+    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign) {
 
 
         return getGPSSettingsForPartner(partnerID).zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
-                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow)).
+                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow, cardDesign)).
                 map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue()));
 
     }
@@ -332,6 +332,10 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
+        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow);
+    }
+
+    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign) {
 
         return F.Promise.promise(() -> {
 
@@ -390,7 +394,8 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 cardDesignMap.put("DKK", StringUtils.split(countrySettingsTuple._1.cardDesign, "|")[1]);
                 cardDesignMap.put("GBP", StringUtils.split(countrySettingsTuple._1.cardDesign, "|")[2]);
 
-                String cardDesign = cardDesignMap.get(currency.getId());
+
+                final String cardDesignVal = (StringUtils.isBlank(cardDesign)) ? cardDesignMap.get(currency.getId()) : cardDesign;
 
                 System.out.println("cardDesign = " + cardDesign);
 
@@ -448,7 +453,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         customer.getPostcode(), //PostCode
                         countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), //Country
                         customer.getId(), //Mobile
-                        cardDesign, //CardDesign
+                        cardDesignVal, //CardDesign
                         null, //ExternalRef
                         dob, //DOB
                         DateUtil.format(new Date(), "yyyy-MM-dd"), //LocDate

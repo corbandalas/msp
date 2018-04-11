@@ -24,12 +24,13 @@ public class CreateCardRequest {
     private String cardName;
     private String activateNow;
     private String plastic;
+    private String cardDesign;
 
     public CreateCardRequest() {
 
     }
 
-    public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic) {
+    public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic, String cardDesign) {
         this.currency = currency;
         this.amount = amount;
         this.title = title;
@@ -47,6 +48,7 @@ public class CreateCardRequest {
         this.cardName = cardName;
         this.activateNow = activateNow;
         this.plastic = plastic;
+        this.cardDesign = cardDesign;
     }
 
     public String getCurrency() {
@@ -206,5 +208,13 @@ public class CreateCardRequest {
 
     public void setPlastic(String plastic) {
         this.plastic = plastic;
+    }
+
+    public String getCardDesign() {
+        return cardDesign;
+    }
+
+    public void setCardDesign(String cardDesign) {
+        this.cardDesign = cardDesign;
     }
 }
