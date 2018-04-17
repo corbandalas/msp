@@ -382,7 +382,7 @@ public class BaseController extends play.mvc.Controller {
 
 
             final Double depositSum = res._1._1._1;
-            Logger.error("Deposit sum by card: " + depositSum);
+                Logger.error("Deposit sum by card: " + depositSum);
 
             final Optional<Currency> limitCurrency = res._1._1._2;
             Logger.error("Limit currency: " + limitCurrency.get().getId());
@@ -399,7 +399,7 @@ public class BaseController extends play.mvc.Controller {
 
             final long convertedLimitAmount = CurrencyUtil.convert(Long.parseLong(property.getValue()), limitCurrency, cardCurrency);
 
-            Logger.error("Converted limit amount: " + convertedDepositAmount);
+            Logger.error("Converted limit amount: " + convertedLimitAmount);
 
             return depositSum.longValue() + convertedDepositAmount < convertedLimitAmount;
 
