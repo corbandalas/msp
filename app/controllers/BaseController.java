@@ -380,14 +380,26 @@ public class BaseController extends play.mvc.Controller {
 
         return depositSumPromise.zip(cardCurrencyPromise).zip(limitCurrencyPromise).zip(limitAmountPromise).map(res -> {
 
+
             final Double depositSum = res._1._1._1;
+            Logger.error("Deposit sum by card: " + depositSum);
+
             final Optional<Currency> limitCurrency = res._1._1._2;
+            Logger.error("Limit currency: " + limitCurrency.get().getId());
+
             final Optional<Currency> cardCurrency = res._1._2;
+
+            Logger.error("Card currency: " + cardCurrency.get().getId());
 
             final Property property = res._2.orElseThrow(WrongPropertyException::new);
 
             final long convertedDepositAmount = CurrencyUtil.convert(amount, currency, cardCurrency);
+
+            Logger.error("Converted deposit amount: " + convertedDepositAmount);
+
             final long convertedLimitAmount = CurrencyUtil.convert(Long.parseLong(property.getValue()), limitCurrency, cardCurrency);
+
+            Logger.error("Converted limit amount: " + convertedDepositAmount);
 
             return depositSum.longValue() + convertedDepositAmount < convertedLimitAmount;
 
