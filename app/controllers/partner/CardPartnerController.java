@@ -729,7 +729,7 @@ public class CardPartnerController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Change card group request", required = true, dataType = "dto.partner.ChangeCardGroupRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+limitGroup+permGroup+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> changeCardGroup() {
@@ -745,13 +745,13 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (StringUtils.isBlank(changeCardGroupRequest.getToken()) || StringUtils.isBlank(changeCardGroupRequest.getLimitGroup()) || StringUtils.isBlank(changeCardGroupRequest.getPermGroup()) || StringUtils.isBlank(changeCardGroupRequest.getFeeGroup()) || StringUtils.isBlank(changeCardGroupRequest.getMccGroup()) || StringUtils.isBlank(changeCardGroupRequest.getSchedFeeGroup()) || StringUtils.isBlank(changeCardGroupRequest.getWsFeeGroup())) {
+        if (StringUtils.isBlank(changeCardGroupRequest.getToken()) /*|| StringUtils.isBlank(changeCardGroupRequest.getLimitGroup()) || StringUtils.isBlank(changeCardGroupRequest.getPermGroup()) || StringUtils.isBlank(changeCardGroupRequest.getFeeGroup()) || StringUtils.isBlank(changeCardGroupRequest.getMccGroup()) || StringUtils.isBlank(changeCardGroupRequest.getSchedFeeGroup()) || StringUtils.isBlank(changeCardGroupRequest.getWsFeeGroup())*/) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
 
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), changeCardGroupRequest.getToken(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup(), authData.getAccount().getSecret()))) {
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), changeCardGroupRequest.getToken(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
