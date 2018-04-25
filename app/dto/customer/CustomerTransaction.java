@@ -25,6 +25,9 @@ public class CustomerTransaction {
     private String txnTime;
     private String locDate;
     private long wsid;
+    private double fixedFee;
+    private long feeId;
+    private double rateFee;
 
     public CustomerTransaction(Transaction2 transaction2) {
         BeanUtils.copyProperties(transaction2,this);
@@ -156,5 +159,29 @@ public class CustomerTransaction {
 
     public void setWsid(long wsid) {
         this.wsid = wsid;
+    }
+
+    public double getFixedFee() {
+        return fixedFee;
+    }
+
+    public void setFixedFee(double fixedFee) {
+        this.fixedFee = fixedFee;
+    }
+
+    public long getFeeId() {
+        return feeId;
+    }
+
+    public void setFeeId(long feeId) {
+        this.feeId = feeId;
+    }
+
+    public double getRateFee() {
+        return rateFee;
+    }
+
+    public void setRateFee(double rateFee) {
+        this.rateFee = rateFee;
     }
 }
