@@ -11,10 +11,17 @@ public class BaseAPIResponse {
 
     private String text;
     private String code;
+    private String errorCode;
 
     public BaseAPIResponse(String text, String code) {
         this.text = text;
         this.code = code;
+    }
+
+    public BaseAPIResponse(String text, String code, String errorCode) {
+        this.text = text;
+        this.code = code;
+        this.errorCode = errorCode;
     }
 
     public String getText() {
@@ -38,6 +45,15 @@ public class BaseAPIResponse {
         return "BaseAPIResponse{" +
                 "text='" + text + '\'' +
                 ", code='" + code + '\'' +
+                ", errorCode='" + errorCode + '\'' +
                 '}';
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 }

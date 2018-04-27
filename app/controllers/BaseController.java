@@ -74,6 +74,10 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(NOT_ENOUGH_FUNDS_TEXT, "" + NOT_ENOUGH_FUNDS_CODE)));
     }
 
+    protected Results.Status createCardProviderException(String errorCode) {
+        return badRequest(Json.toJson(new BaseAPIResponse(CARD_PROVIDER_EXCEPTION_TEXT, "" + CARD_PROVIDER_EXCEPTION_CODE, errorCode)));
+    }
+
     protected Results.Status createWrongKYCResponse() {
         return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_KYC_TEXT, "" + INCORRECT_KYC_CODE)));
     }
@@ -162,6 +166,10 @@ public class BaseController extends play.mvc.Controller {
 
                     if (throwable instanceof NotEnoughFundsException) {
                         return createNotEnoughFundsResponse();
+                    }
+
+                    if (throwable instanceof CardProviderException) {
+                        return createCardProviderException(((CardProviderException)throwable).getErrorCode());
                     }
 
                     return createGeneralErrorResponse();

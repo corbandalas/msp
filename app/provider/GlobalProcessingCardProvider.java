@@ -524,13 +524,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + ". Result code: " + virtualCards.getActionCode() + " ." + virtualCards.toString());
 
                 if (!StringUtils.equals("000", virtualCards.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", virtualCards.getActionCode());
                 }
 
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return virtualCards;
@@ -560,12 +562,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + ". Result code: " + balance.getActionCode() + " ." + balance.toString());
 
                 if (!StringUtils.equals("000", balance.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", balance.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return balance;
@@ -590,12 +594,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + ". Result code: " + cardDetails.getActionCode() + " ." + cardDetails.toString());
 
                 if (!StringUtils.equals("000", cardDetails.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", cardDetails.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return cardDetails;
@@ -627,12 +633,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
 
                 if (!StringUtils.equals("000", loadCard.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", loadCard.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return loadCard;
@@ -663,12 +671,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_UnLoad service invocation was ended. WSID #" + wsid + ". Result code: " + unload.getActionCode() + " ." + unload.toString());
 
                 if (!StringUtils.equals("000", unload.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", unload.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return unload;
@@ -695,12 +705,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Transfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
 
                 if (!StringUtils.equals("000", balanceTransfer.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", balanceTransfer.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return balanceTransfer;
@@ -732,12 +745,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WS_Update_CardHolder service invocation was ended. WSID #" + wsid + ". Result code: " + customerUpdate.getActionCode() + " ." + customerUpdate.toString());
 
                 if (!StringUtils.equals("000", customerUpdate.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", customerUpdate.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return customerUpdate;
@@ -781,7 +796,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 }
 
                 if (!StringUtils.equals("000", convertCard.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", convertCard.getActionCode());
                 }
 
 
@@ -789,7 +804,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.error("GPS connection error: ", e);
 
                 if (e instanceof CardProviderException) {
-                    throw new CardProviderException("GPS error");
+                    throw new CardProviderException("GPS error", ((CardProviderException)e).getErrorCode());
                 } else if (e instanceof NotEnoughFundsException) {
                     throw new NotEnoughFundsException("You don’t have enough funds");
                 }
@@ -820,12 +835,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Card_Phone_Activation service invocation was ended. WSID #" + wsid + ". Result code: " + phoneActivate.getActionCode() + " ." + phoneActivate.toString());
 
                 if (!StringUtils.equals("000", phoneActivate.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", phoneActivate.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return phoneActivate;
@@ -863,12 +880,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
 
                 if (!StringUtils.equals("000", wsActivate.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", wsActivate.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return wsActivate;
@@ -901,12 +920,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WS_StatusChange service invocation was ended. WSID #" + wsid + ". Result code: " + statusChange.getActionCode() + " ." + statusChange.toString());
 
                 if (!StringUtils.equals("000", statusChange.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", statusChange.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return statusChange;
@@ -939,12 +960,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
 
                 if (!StringUtils.equals("000", cardStatement.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", cardStatement.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return cardStatement;
@@ -975,12 +999,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString());
 
                 if (!StringUtils.equals("000", pinControl.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", pinControl.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return pinControl;
@@ -1006,12 +1032,15 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + cardRegenerate.getActionCode() + " ." + cardRegenerate.toString());
 
                 if (!StringUtils.equals("000", cardRegenerate.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+
+                    throw new CardProviderException("Bad Response", cardRegenerate.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return cardRegenerate;
@@ -1066,12 +1095,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Change_Group service invocation was ended. WSID #" + wsid + ". Result code: " + changeGroup.getActionCode() + " ." + changeGroup.toString());
 
                 if (!StringUtils.equals("000", changeGroup.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", changeGroup.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return changeGroup;
@@ -1102,12 +1133,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Generic_Fees service invocation was ended. WSID #" + wsid + ". Result code: " + applyFees.getActionCode() + " ." + applyFees.toString());
 
                 if (!StringUtils.equals("000", applyFees.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", applyFees.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return applyFees;
@@ -1133,12 +1166,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_Get_Passcode service invocation was ended. WSID #" + wsid + ". Result code: " + passCode.getActionCode() + " ." + passCode.toString());
 
                 if (!StringUtils.equals("000", passCode.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", passCode.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return passCode;
@@ -1163,12 +1198,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// WS_Service_result service invocation was ended. WSID #" + wsid + ". Result code: " + wsResult.getActionCode() + " ." + wsResult.toString());
 
                 if (!StringUtils.equals("000", wsResult.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", wsResult.getActionCode());
                 }
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return wsResult;
@@ -1194,12 +1231,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.info("/////// Ws_BalanceTransfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
 
                 if (!StringUtils.equals("000", balanceTransfer.getActionCode())) {
-                    throw new CardProviderException("Bad Response");
+                    throw new CardProviderException("Bad Response", balanceTransfer.getActionCode());
                 }
 
             } catch (Exception e) {
+                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+
                 Logger.error("GPS connection error: ", e);
-                throw new CardProviderException("GPS error");
+                throw new CardProviderException("GPS error", errorCode);
             }
 
             return balanceTransfer;

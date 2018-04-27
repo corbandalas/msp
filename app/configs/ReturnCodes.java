@@ -81,6 +81,8 @@ public class ReturnCodes {
     public static final byte NOT_ENOUGH_FUNDS_CODE = 23;
     public static final String NOT_ENOUGH_FUNDS_TEXT = "You don’t have enough funds";
 
+    public static final byte CARD_PROVIDER_EXCEPTION_CODE = 24;
+    public static final String CARD_PROVIDER_EXCEPTION_TEXT = "Card Provider exception";
 
     public static final byte GENERAL_ERROR_CODE = 100;
     public static final String GENERAL_ERROR_TEXT = "General error";
