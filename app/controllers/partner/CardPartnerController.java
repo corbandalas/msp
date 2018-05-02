@@ -808,8 +808,13 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
+        Logger.info("Request enckey = " + authData.getEnckey());
 
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), applyCardFeeRequest.getToken(), applyCardFeeRequest.getProcCode(), "" + applyCardFeeRequest.getFee(), authData.getAccount().getSecret()))) {
+        String calculatedEnckey = SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), applyCardFeeRequest.getToken(), applyCardFeeRequest.getProcCode(), "" + applyCardFeeRequest.getFee(), authData.getAccount().getSecret());
+
+        Logger.info("Calculated enckey = " + calculatedEnckey);
+
+        if (!authData.getEnckey().equalsIgnoreCase(calculatedEnckey)) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
