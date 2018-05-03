@@ -26,7 +26,9 @@ import repository.CardRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
 import services.OperationService;
+import sms.SmsGateway;
 
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +58,9 @@ public class CustomerTransferController extends BaseController {
 
     @Inject
     OperationService operationService;
+
+    @Inject
+    SmsGateway smsGateway;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -139,7 +144,13 @@ public class CustomerTransferController extends BaseController {
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo.get(), request.getAmount(), data._2.get(),
                     request.getDescription()).flatMap(providerResponse -> operationService.createTransferOperation(cardFrom.get(),
                     cardTo.get(), request.getAmount(), data._2.get(), request.getOrderId(), request.getDescription())
-                    .map(res -> ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())))));
+                    .map(res -> {
+
+                                smsGateway.sendSMS(cardTo.get().getCustomerId(), "Transfer completed! You just moved " + getFormattedAmountText(data._2.get().getId(), (double)request.getAmount() / 100, 2) + " between your MySafePay cards.");
+
+                                return ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())));
+                            }
+                    ));
         });
 
         return returnRecover(result);
@@ -242,12 +253,25 @@ public class CustomerTransferController extends BaseController {
             return cardProvider.transferBetweenCards(cardFrom.get(), cardTo, request.getAmount(), currency,
                     request.getDescription()).flatMap(providerResponse -> operationService.createTransferOperation(cardFrom.get(),
                     cardTo, request.getAmount(), currency, request.getOrderId(), request.getDescription())
-                    .map(res -> ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())))));
+                    .map(res -> {
 
+                                smsGateway.sendSMS(cardTo.getCustomerId(), "You have received " + getFormattedAmountText(currency.getId(), (double)request.getAmount() / 100, 2) + " from " + receiverCustomer.getFirstName() + " " + receiverCustomer.getLastName());
 
+                                return ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())));
+                            }
+                    ));
         });
 
         return returnRecover(result);
 
+    }
+
+    private final String getFormattedAmountText(String currency,
+                                                Double amount, int minimumDigitsCount) {
+        final NumberFormat format = NumberFormat.getInstance();
+        format.setMinimumFractionDigits(minimumDigitsCount);
+        StringBuffer result = new StringBuffer(format.format(amount)).append(
+                " ").append(currency);
+        return result.toString();
     }
 }
