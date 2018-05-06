@@ -2,6 +2,8 @@ package controllers.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
@@ -9,11 +11,14 @@ import controllers.admin.BaseMerchantApiAction;
 import dto.Authentication;
 import dto.BaseAPIResponse;
 import dto.customer.*;
+import exception.CustomerNotRegisteredException;
 import model.Customer;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.cache.CacheApi;
 import play.libs.F;
+import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
@@ -21,8 +26,9 @@ import repository.CustomerRepository;
 import sms.SmsGateway;
 import util.SecurityUtil;
 
-import static configs.ReturnCodes.*;
+import java.util.Optional;
 
+import static configs.ReturnCodes.*;
 /**
  * Customer password operations
  *
@@ -115,7 +121,7 @@ public class CustomerPasswordController extends BaseController {
         return returnRecover(result);
     }
 
-    @With(BaseCustomerApiAction.class)
+    @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "changePassword",
             value = "change cardholder password",
@@ -135,12 +141,16 @@ public class CustomerPasswordController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT)
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Change pin request", required = true, dataType = "dto.customer.CustomerChangeToNewPassword", paramType = "body"),
-            @ApiImplicitParam(value = "Access token header", required = true, dataType = "String", paramType = "header", name = "token")})
-    public F.Promise<Result> changeToNew() {
-        final Customer customer = (Customer) ctx().args.get("customer");
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey")
+    })
+    public Promise<Result> changeToNew() {
 
         final JsonNode jsonNode = request().body().asJson();
         final CustomerChangeToNewPassword request;
+
 
 
         try {
@@ -152,32 +162,41 @@ public class CustomerPasswordController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (checkLoginAttempt(customer)) {
-            Logger.error("Customer has exceeded number of wrong change pin attempts per day");
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(request.getPhone()));
 
-            return F.Promise.pure(createPasswordExceededResponse());
-        }
 
-        if (StringUtils.isBlank(request.getHashedPassword())) {
-            Logger.error("Missing parameters");
+        final Promise<Result> result = customerPromise.map(res -> {
 
-            return F.Promise.pure(createWrongRequestFormatResponse());
-        }
+            Customer customer = res.get();
 
-        if (customer.getPassword().equalsIgnoreCase(request.getHashedPassword())) {
-            Logger.error("Specified password equals to existing");
+            if (checkLoginAttempt(customer)) {
+                Logger.error("Customer has exceeded number of wrong change pin attempts per day");
 
-            return F.Promise.pure(createPasswordEqualsToExistedResponse());
-        }
+                return createPasswordExceededResponse();
+            }
 
-        customer.setPassword(request.getHashedPassword());
-        customer.setTemppassword(false);
-        putLoginAttempt(customer, 0);
+            if (StringUtils.isBlank(request.getHashedPassword())) {
+                Logger.error("Missing parameters");
 
-        smsGateway.sendSMS(customer.getId(), "Your password was changed");
+                return createWrongRequestFormatResponse();
+            }
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.update(customer)).map(updCustomer ->
-                ok(Json.toJson(new BaseAPIResponse(SUCCESS_TEXT, "" + SUCCESS_CODE))));
+            if (customer.getPassword().equalsIgnoreCase(request.getHashedPassword())) {
+                Logger.error("Specified password equals to existing");
+
+                return createPasswordEqualsToExistedResponse();
+            }
+
+            customer.setPassword(request.getHashedPassword());
+            customer.setTemppassword(false);
+            putLoginAttempt(customer, 0);
+
+            smsGateway.sendSMS(customer.getId(), "Your password was changed");
+
+            customerRepository.update(customer);
+            return ok(Json.toJson(new BaseAPIResponse(SUCCESS_TEXT, "" + SUCCESS_CODE)));
+
+        });
 
         return returnRecover(result);
     }
@@ -203,8 +222,9 @@ public class CustomerPasswordController extends BaseController {
     })
     @ApiImplicitParams(value = {@ApiImplicitParam(value = "Get customer email request", required = true, dataType = "dto.customer.CustomerEmail", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+phone+secret)",
-                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+                    required = true, dataType = "String", paramType = "header", name = "enckey")
     })
     public F.Promise<Result> obtainEmail() {
 

@@ -6,6 +6,8 @@ package dto.customer;
  * @since 0.4.0
  */
 public class CustomerChangeToNewPassword {
+
+    private String phone;
     private String hashedPassword;
 
     public String getHashedPassword() {
@@ -16,4 +18,11 @@ public class CustomerChangeToNewPassword {
         this.hashedPassword = hashedPassword;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }
