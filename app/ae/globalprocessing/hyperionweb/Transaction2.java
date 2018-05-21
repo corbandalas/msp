@@ -991,4 +991,47 @@ public class Transaction2 {
         this.txnCodeType = value;
     }
 
+    @Override
+    public String toString() {
+        return "Transaction2{" +
+                "txnDate='" + txnDate + '\'' +
+                ", postDate='" + postDate + '\'' +
+                ", amtBill=" + amtBill +
+                ", amtTxn=" + amtTxn +
+                ", billConvRate=" + billConvRate +
+                ", debOrCred=" + debOrCred +
+                ", terminalId='" + terminalId + '\'' +
+                ", description='" + description + '\'' +
+                ", rrn='" + rrn + '\'' +
+                ", curTxn='" + curTxn + '\'' +
+                ", itemId=" + itemId +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", transactionType='" + transactionType + '\'' +
+                ", statusCode='" + statusCode + '\'' +
+                ", statusDesc='" + statusDesc + '\'' +
+                ", txnTime='" + txnTime + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", feeId=" + feeId +
+                ", wsid=" + wsid +
+                ", fixedFee=" + fixedFee +
+                ", rateFee=" + rateFee +
+                ", fxPdg=" + fxPdg +
+                ", mccPdg=" + mccPdg +
+                ", linkId='" + linkId + '\'' +
+                ", mcc='" + mcc + '\'' +
+                ", origStan='" + origStan + '\'' +
+                ", procCode='" + procCode + '\'' +
+                ", mccDescription='" + mccDescription + '\'' +
+                ", domFeeFixed='" + domFeeFixed + '\'' +
+                ", domFeeRate='" + domFeeRate + '\'' +
+                ", nonDomFeeFixed='" + nonDomFeeFixed + '\'' +
+                ", nonDomFeeRate='" + nonDomFeeRate + '\'' +
+                ", fxFeeFixed='" + fxFeeFixed + '\'' +
+                ", fxFeeRate='" + fxFeeRate + '\'' +
+                ", otherFeeDesc='" + otherFeeDesc + '\'' +
+                ", otherFeeAmt='" + otherFeeAmt + '\'' +
+                ", txnCodeType='" + txnCodeType + '\'' +
+                '}';
+    }
 }

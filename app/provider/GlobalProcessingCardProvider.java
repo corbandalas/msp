@@ -959,6 +959,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
 
+                for (Transaction2 transaction2: cardStatement.getTransactions().getTransaction2()) {
+                    Logger.info("Transaction:" + transaction2.toString());
+                }
+
+
                 if (!StringUtils.equals("000", cardStatement.getActionCode())) {
                     throw new CardProviderException("Bad Response", cardStatement.getActionCode());
                 }
