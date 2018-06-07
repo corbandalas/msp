@@ -332,7 +332,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
-        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow);
+        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow, "");
     }
 
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign) {
