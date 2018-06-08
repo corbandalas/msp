@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
   "org.flywaydb" % "flyway-core" % "4.1.1",
   "com.sun.xml.ws" % "jaxws-rt" % "2.2.10",
   "commons-net" % "commons-net" % "3.6",
-   "com.googlecode.libphonenumber" % "libphonenumber" % "7.4.2",
+   "com.googlecode.libphonenumber" % "libphonenumber" % "8.9.7",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0-beta4")
 
 libraryDependencies += filters
