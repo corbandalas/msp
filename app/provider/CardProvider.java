@@ -23,12 +23,12 @@ public interface CardProvider {
 
     F.Promise<CardCreationResponse> issueEmptyVirtualCard(Customer customer, String cardName, Currency currency);
     F.Promise<CardCreationResponse> issueEmptyPlasticCard(Customer customer, String cardName, Currency currency);
-    F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign);
-    F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign);
+    F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod);
+    F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod);
     F.Promise<CardCreationResponse> issuePrepaidVirtualCard(Customer customer, String cardName, long amount, Currency currency);
     F.Promise<CardCreationResponse> issuePrepaidPlasticCard(Customer customer, String cardName, long amount, Currency currency);
-    F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign);
-    F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign);
+    F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod);
+    F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod);
     F.Promise<CardBalanceResponse> getVirtualCardBalance(Card card);
     F.Promise<BalanceEnquire2> getVirtualCardBalanceForPartner(String token, String partnerID);
     F.Promise<CardBalanceResponse> getPlasticCardBalance(Card card);
