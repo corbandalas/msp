@@ -25,9 +25,40 @@ public class CreateCardRequest {
     private String activateNow;
     private String plastic;
     private String cardDesign;
+    private String deliveryAddress1;
+    private String deliveryCity;
+    private String deliveryPostCode;
+    private String deliveryCountry;
+    private String deliveryMethod;
 
     public CreateCardRequest() {
 
+    }
+
+    public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+        this.currency = currency;
+        this.amount = amount;
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.city = city;
+        this.postcode = postcode;
+        this.phone = phone;
+        this.dob = dob;
+        this.country = country;
+        this.kyc = kyc;
+        this.cardName = cardName;
+        this.activateNow = activateNow;
+        this.plastic = plastic;
+        this.cardDesign = cardDesign;
+        this.deliveryAddress1 = deliveryAddress1;
+        this.deliveryCity = deliveryCity;
+        this.deliveryPostCode = deliveryPostCode;
+        this.deliveryCountry = deliveryCountry;
+        this.deliveryMethod = deliveryMethod;
     }
 
     public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic, String cardDesign) {
@@ -199,6 +230,11 @@ public class CreateCardRequest {
                 ", cardName='" + cardName + '\'' +
                 ", activateNow='" + activateNow + '\'' +
                 ", plastic='" + plastic + '\'' +
+                ", deliveryAddress1='" + deliveryAddress1 + '\'' +
+                ", deliveryCity='" + deliveryCity + '\'' +
+                ", deliveryPostCode='" + deliveryPostCode + '\'' +
+                ", deliveryCountry='" + deliveryCountry + '\'' +
+                ", deliveryMethod='" + deliveryMethod + '\'' +
                 '}';
     }
 
@@ -216,5 +252,45 @@ public class CreateCardRequest {
 
     public void setCardDesign(String cardDesign) {
         this.cardDesign = cardDesign;
+    }
+
+    public String getDeliveryAddress1() {
+        return deliveryAddress1;
+    }
+
+    public void setDeliveryAddress1(String deliveryAddress1) {
+        this.deliveryAddress1 = deliveryAddress1;
+    }
+
+    public String getDeliveryCity() {
+        return deliveryCity;
+    }
+
+    public void setDeliveryCity(String deliveryCity) {
+        this.deliveryCity = deliveryCity;
+    }
+
+    public String getDeliveryPostCode() {
+        return deliveryPostCode;
+    }
+
+    public void setDeliveryPostCode(String deliveryPostCode) {
+        this.deliveryPostCode = deliveryPostCode;
+    }
+
+    public String getDeliveryCountry() {
+        return deliveryCountry;
+    }
+
+    public void setDeliveryCountry(String deliveryCountry) {
+        this.deliveryCountry = deliveryCountry;
+    }
+
+    public String getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
     }
 }

@@ -75,14 +75,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow, cardDesign);
+    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod);
 
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign);
+    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod);
     }
 
     @Override
@@ -96,13 +96,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign) {
-        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow, cardDesign);
+    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod);
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign) {
-        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign);
+    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod);
     }
 
     @Override
@@ -292,11 +292,19 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     }
 
-    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign) {
+    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
 
+        F.Promise<Optional<Country>> countryPromise;
 
-        return getGPSSettingsForPartner(partnerID).zip(F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()))).
-                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow, cardDesign)).
+        if (StringUtils.isBlank(deliveryCountry)) {
+            countryPromise = F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()));
+        }
+        else {
+            countryPromise = F.Promise.wrap(countryRepository.retrieveById(deliveryCountry));
+        }
+
+        return getGPSSettingsForPartner(partnerID).zip(countryPromise).
+                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod)).
                 map(res -> new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue()));
 
     }
@@ -332,10 +340,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
-        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow, null);
+        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow, null, customer.getAddress1(), customer.getCity(), customer.getPostcode(), null, "0");
     }
 
-    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign) {
+
+    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign,  String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
 
         return F.Promise.promise(() -> {
 
@@ -359,7 +368,6 @@ public class GlobalProcessingCardProvider implements CardProvider {
             Logger.info("/////// WsCreateCard service invocation. WSID #" + wsid);
 
             try {
-
 
 //                Product ID: 1822
 //                Scheme: MySafePay
@@ -482,7 +490,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, //CarrierType
                         null, //Fulfil1
                         null, //Fulfil2
-                        "0", //DelvMethod
+                        deliveryMethod, //"0" default DelvMethod
                         null, //ThermalLine1
                         null, //ThermalLine2
                         null, //EmbossLine4
@@ -492,12 +500,12 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         false, //Replacement
                         feeGroup, //FeeGroup
                         null, //PrimaryToken
-                        customer.getAddress1(), //Delv_AddrL1
-                        customer.getAddress2(), //Delv_AddrL2
-                        customer.getAddress2(), //Delv_AddrL3
-                        customer.getCity(), //Delv_City
-                        customer.getAddress2(), //Delv_County
-                        customer.getPostcode(), //Delv_PostCode
+                        deliveryAddress1, //Delv_AddrL1
+                        deliveryAddress1, //Delv_AddrL2
+                        deliveryAddress1, //Delv_AddrL3
+                        deliveryCity, //Delv_City
+                        deliveryAddress1, //Delv_County
+                        deliveryPostCode, //Delv_PostCode
                         countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), //Delv_Country
                         null, //Delv_Code
                         "En", //Lang
