@@ -819,10 +819,13 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(applyCardFeeRequest.getToken()));
+//        F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(applyCardFeeRequest.getToken()));
 
+        Card card = new Card();
 
-        F.Promise<Result> result = cardPromise.flatMap(card -> globalProcessingCardProvider.applyFeeForPartner(authData.getAccount().getId().toString(), applyCardFeeRequest.getProcCode(), card.get(), applyCardFeeRequest.getFee()).map(res -> ok(Json.toJson(new ApplyCardFeeResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
+        card.setToken(applyCardFeeRequest.getToken());
+
+        F.Promise<Result> result = globalProcessingCardProvider.applyFeeForPartner(authData.getAccount().getId().toString(), applyCardFeeRequest.getProcCode(), card, applyCardFeeRequest.getFee()).map(res -> ok(Json.toJson(new ApplyCardFeeResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
