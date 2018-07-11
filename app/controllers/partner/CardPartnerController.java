@@ -756,10 +756,14 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(changeCardGroupRequest.getToken()));
+//        F.Promise<Optional<Card>> cardPromise = F.Promise.wrap(cardRepository.retrieveByToken(changeCardGroupRequest.getToken()));
+
+        Card card = new Card();
+
+        card.setToken(changeCardGroupRequest.getToken());
 
 
-        F.Promise<Result> result = cardPromise.flatMap(card -> globalProcessingCardProvider.changeCardGroupForPartner(card.get(), authData.getAccount().getId().toString(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup(), changeCardGroupRequest.getMccGroup(), changeCardGroupRequest.getFeeGroup(), changeCardGroupRequest.getSchedFeeGroup(), changeCardGroupRequest.getWsFeeGroup()).map(res -> ok(Json.toJson(new ChangeCardGroupResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res)))));
+        F.Promise<Result> result  = globalProcessingCardProvider.changeCardGroupForPartner(card, authData.getAccount().getId().toString(), changeCardGroupRequest.getLimitGroup(), changeCardGroupRequest.getPermGroup(), changeCardGroupRequest.getMccGroup(), changeCardGroupRequest.getFeeGroup(), changeCardGroupRequest.getSchedFeeGroup(), changeCardGroupRequest.getWsFeeGroup()).map(res -> ok(Json.toJson(new ChangeCardGroupResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
