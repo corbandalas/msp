@@ -255,7 +255,7 @@ public class CustomerTransferController extends BaseController {
                     cardTo, request.getAmount(), currency, request.getOrderId(), request.getDescription())
                     .map(res -> {
 
-                                smsGateway.sendSMS(cardTo.getCustomerId(), "You have received " + getFormattedAmountText(currency.getId(), (double)request.getAmount() / 100, 2) + " from " + receiverCustomer.getFirstName() + " " + receiverCustomer.getLastName());
+                                smsGateway.sendSMS(cardTo.getCustomerId(), "You have received " + getFormattedAmountText(currency.getId(), (double)request.getAmount() / 100, 2) + " from " + customer.getFirstName() + " " + customer.getLastName());
 
                                 return ok(Json.toJson(new CustomerTransferResponse(SUCCESS_TEXT, "" + SUCCESS_CODE, res._1.getId())));
                             }
