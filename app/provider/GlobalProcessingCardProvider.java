@@ -454,7 +454,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         customer.getTitle(), //Title
                         customer.getLastName(), //LastName
                         customer.getFirstName(), //FirstName
-                        customer.getAddress1(), //Addrl1
+                        customer.getAddress1() + ((!StringUtils.isBlank(customer.getHouseNameNumber()))? " " + customer.getHouseNameNumber() :""), //Addrl1
                         customer.getAddress2(),//Addrl2
                         customer.getAddress2(), //Addrl3
                         customer.getCity(), //City
