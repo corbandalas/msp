@@ -963,7 +963,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
                 cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "0", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                        DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "1", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
 
