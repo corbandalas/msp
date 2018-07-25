@@ -264,13 +264,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, "01", null));
+    public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String sms) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, "01", null, sms));
     }
 
     @Override
-    public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee) {
-        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, func, fee));
+    public F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee, String sms) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokePinControl(res, token, null, null, null, func, fee, sms));
     }
 
     @Override
@@ -963,7 +963,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             try {
 
                 cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
-                        DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "1", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                        DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "1WS_PinControl", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
 
@@ -990,11 +990,11 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, Card card, String oldPin, String newPin, String confirmPin, String func) {
 
-        return invokePinControl(gpsSettings, card.getToken(), oldPin, newPin, confirmPin, func, null);
+        return invokePinControl(gpsSettings, card.getToken(), oldPin, newPin, confirmPin, func, null, "1");
     }
 
 
-    private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, String token, String oldPin, String newPin, String confirmPin, String func, String fee) {
+    private F.Promise<PINControl> invokePinControl(GPSSettings gpsSettings, String token, String oldPin, String newPin, String confirmPin, String func, String fee, String sms) {
 
         return F.Promise.promise(() -> {
 
@@ -1007,7 +1007,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             try {
 
-                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, token, null, func, oldPin, newPin, confirmPin, "1", "1", null, null, null, null, fee, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, token, null, func, oldPin, newPin, confirmPin, sms, "1", null, null, null, null, fee, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
                 Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString());
 

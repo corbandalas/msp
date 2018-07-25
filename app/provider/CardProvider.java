@@ -60,8 +60,8 @@ public interface CardProvider {
     F.Promise<PlasticCardActivateResponse> activatePlasticCardForPartner(String token, String cardNumber, String cvv, String partnerID, String lastName, String firstName, String addrl1, String addrl2, String city, String postCode, String country, String dob);
     F.Promise<WsResult> getServiceResultForPartner(String token, String wsid, String partnerID);
     F.Promise<ChangePINResponse> obtainPIN(Card card);
-    F.Promise<PINControl> obtainPINForPartner(String token, String partnerID);
-    F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee);
+    F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String sms);
+    F.Promise<PINControl> obtainPINForPartner(String token, String partnerID, String func, String fee, String sms);
     F.Promise<CardDetailsResponse> regenerateCardDetails(Card card);
     F.Promise<ChangeGroup> changeCardGroup(Customer customer, Card card);
     F.Promise<ChangeGroup> changeCardGroupForPartner(Card card, String partnerID, String limitGroup, String permGroup, String mccGroup, String feeGroup, String schedGroup, String wsFeeGroup);

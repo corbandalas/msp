@@ -525,7 +525,9 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.obtainPINForPartner(obtainPINRequest.getToken(), authData.getAccount().getId().toString(), obtainPINRequest.getFunc(), obtainPINRequest.getFeeWaiver()).map(res -> ok(Json.toJson(new ObtainPINResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+        String needSMS = (StringUtils.isBlank(obtainPINRequest.getSms()))? "1": obtainPINRequest.getSms();
+
+        F.Promise<Result> result = globalProcessingCardProvider.obtainPINForPartner(obtainPINRequest.getToken(), authData.getAccount().getId().toString(), obtainPINRequest.getFunc(), obtainPINRequest.getFeeWaiver(), needSMS).map(res -> ok(Json.toJson(new ObtainPINResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }

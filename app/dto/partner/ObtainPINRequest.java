@@ -11,6 +11,7 @@ public class ObtainPINRequest {
     private String token;
     private String feeWaiver;
     private String func;
+    private String sms;
 
     public ObtainPINRequest() {
     }
@@ -18,10 +19,11 @@ public class ObtainPINRequest {
         this.token = token;
     }
 
-    public ObtainPINRequest(String token, String feeWaiver, String func) {
+    public ObtainPINRequest(String token, String feeWaiver, String func, String sms) {
         this.token = token;
         this.feeWaiver = feeWaiver;
         this.func = func;
+        this.sms = sms;
     }
 
     public String getToken() {
@@ -46,5 +48,13 @@ public class ObtainPINRequest {
 
     public void setFunc(String func) {
         this.func = func;
+    }
+
+    public String getSms() {
+        return sms;
+    }
+
+    public void setSms(String sms) {
+        this.sms = sms;
     }
 }
