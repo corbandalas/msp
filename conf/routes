@@ -37,6 +37,8 @@ POST       /api/partner/card/transfer                                          @
 POST       /api/partner/card/update                                          @controllers.partner.CardPartnerController.updateCardHolder()
 POST       /api/partner/card/activate                                          @controllers.partner.CardPartnerController.activate()
 POST       /api/partner/card/result                                          @controllers.partner.CardPartnerController.wsResult()
+POST       /api/partner/card/balanceadjust                                          @controllers.partner.CardPartnerController.balanceAdjustment()
+POST       /api/partner/card/sms                                          @controllers.partner.CardPartnerController.sendSms()
 
 #Merchant API(admin)
 

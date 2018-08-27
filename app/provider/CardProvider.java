@@ -69,6 +69,6 @@ public interface CardProvider {
     F.Promise<ApplyFees> applyFeeForPartner(String partnerID, String code, Card card, double fee);
     F.Promise<PassCode> getPassCode(String token);
     F.Promise<BalanceTransfer> balanceTransfer(String partnerID, String token, String newToken, double amount, String currency, String description, String loadedBy, String feeWaiver);
-
-
+    F.Promise<BalanceAdjust> balanceAdjustmentForPartner(String partnerID, String token, double balance, String currencyCode, String debOrCredit, String description, boolean forcePost);
+    F.Promise<AlertResponse> sendMessageForPartner(String partnerID, String token, int event);
     }

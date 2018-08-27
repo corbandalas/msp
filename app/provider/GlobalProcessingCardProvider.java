@@ -24,6 +24,7 @@ import scala.concurrent.ExecutionContext;
 import util.CurrencyUtil;
 import util.DateUtil;
 
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -298,8 +299,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
         if (StringUtils.isBlank(deliveryCountry)) {
             countryPromise = F.Promise.wrap(countryRepository.retrieveById(customer.getCountry_id()));
-        }
-        else {
+        } else {
             countryPromise = F.Promise.wrap(countryRepository.retrieveById(deliveryCountry));
         }
 
@@ -339,12 +339,22 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeWsBalanceTransfer(res, token, newToken, amount, currency, description, loadedBy, feeWaiver));
     }
 
+    @Override
+    public F.Promise<BalanceAdjust> balanceAdjustmentForPartner(String partnerID, String token, double balance, String currencyCode, String debOrCredit, String description, boolean forcePost) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeBalanceAdjustment(res, token, balance, currencyCode, debOrCredit, description, forcePost));
+    }
+
+    @Override
+    public F.Promise<AlertResponse> sendMessageForPartner(String partnerID, String token, int event) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeSendMessage(res, token, event));
+    }
+
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
         return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow, null, customer.getAddress1(), customer.getCity(), customer.getPostcode(), null, "0");
     }
 
 
-    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign,  String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
 
         return F.Promise.promise(() -> {
 
@@ -454,7 +464,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         customer.getTitle(), //Title
                         customer.getLastName(), //LastName
                         customer.getFirstName(), //FirstName
-                        customer.getAddress1() + ((!StringUtils.isBlank(customer.getHouseNameNumber()))? " " + customer.getHouseNameNumber() :""), //Addrl1
+                        customer.getAddress1() + ((!StringUtils.isBlank(customer.getHouseNameNumber())) ? " " + customer.getHouseNameNumber() : ""), //Addrl1
                         customer.getAddress2(),//Addrl2
                         customer.getAddress2(), //Addrl3
                         customer.getCity(), //City
@@ -538,7 +548,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -575,7 +585,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -607,7 +617,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -646,7 +656,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -684,7 +694,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -719,7 +729,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
 
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -758,7 +768,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -812,7 +822,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 Logger.error("GPS connection error: ", e);
 
                 if (e instanceof CardProviderException) {
-                    throw new CardProviderException("GPS error", ((CardProviderException)e).getErrorCode());
+                    throw new CardProviderException("GPS error", ((CardProviderException) e).getErrorCode());
                 } else if (e instanceof NotEnoughFundsException) {
                     throw new NotEnoughFundsException("You don’t have enough funds");
                 }
@@ -848,12 +858,83 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
 
             return phoneActivate;
+        }, getExecutionContext());
+    }
+
+
+    private F.Promise<BalanceAdjust> invokeBalanceAdjustment(GPSSettings gpsSettings, String token, double balance, String currencyCode, String debOrCredit, String description, boolean forcePost) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_Balance_Adjustment service invocation. WSID #" + wsid);
+
+            BalanceAdjust balanceAdjust = null;
+
+
+            try {
+
+                balanceAdjust = service.getServiceSoap().wsBalanceAdjustment(wsid, gpsSettings.issCode, "2", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), BigDecimal.valueOf(balance), currencyCode, debOrCredit, description, forcePost, null, 0, null, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+
+                Logger.info("/////// Ws_Balance_Adjustment service invocation was ended. WSID #" + wsid + ". Result code: " + balanceAdjust.getActionCode() + " ." + balanceAdjust.toString());
+
+                if (!StringUtils.equals("000", balanceAdjust.getActionCode())) {
+                    throw new CardProviderException("Bad Response", balanceAdjust.getActionCode());
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
+
+                throw new CardProviderException("GPS error", errorCode);
+            }
+
+            return balanceAdjust;
+        }, getExecutionContext());
+    }
+
+
+    private F.Promise<AlertResponse> invokeSendMessage(GPSSettings gpsSettings, String token, int event) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_SendMessage service invocation. WSID #" + wsid);
+
+            AlertResponse alertResponse = null;
+
+            try {
+
+                alertResponse = service.getServiceSoap().wsSendMessage(wsid, gpsSettings.issCode, "1", null, token, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, null, null, null, event, 0, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+                Logger.info("/////// Ws_SendMessage service invocation was ended. WSID #" + wsid + ". Result code: " + alertResponse.getActionCode() + " ." + alertResponse.toString());
+
+                if (!StringUtils.equals("000", alertResponse.getActionCode())) {
+                    throw new CardProviderException("Bad Response", alertResponse.getActionCode());
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
+
+                throw new CardProviderException("GPS error", errorCode);
+            }
+
+            return alertResponse;
         }, getExecutionContext());
     }
 
@@ -893,7 +974,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -933,7 +1014,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -967,7 +1048,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
 
-                for (Transaction2 transaction2: cardStatement.getTransactions().getTransaction2()) {
+                for (Transaction2 transaction2 : cardStatement.getTransactions().getTransaction2()) {
                     Logger.info("Transaction:" + transaction2.toString());
                 }
 
@@ -979,7 +1060,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
 
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1017,7 +1098,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1051,7 +1132,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1113,7 +1194,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1151,7 +1232,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1184,7 +1265,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1216,7 +1297,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             } catch (Exception e) {
                 Logger.error("GPS connection error: ", e);
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 throw new CardProviderException("GPS error", errorCode);
             }
@@ -1248,7 +1329,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 }
 
             } catch (Exception e) {
-                String errorCode =  (e instanceof CardProviderException)? ((CardProviderException)e).getErrorCode(): "";
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
 
                 Logger.error("GPS connection error: ", e);
                 throw new CardProviderException("GPS error", errorCode);

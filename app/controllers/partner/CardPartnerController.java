@@ -1,5 +1,6 @@
 package controllers.partner;
 
+import ae.globalprocessing.hyperionweb.BalanceAdjust;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
@@ -958,6 +959,129 @@ public class CardPartnerController extends BaseController {
         customer.setCountry_id(updateCardHolderRequest.getCountry());
 
         F.Promise<Result> result = globalProcessingCardProvider.updateCardHolderForPartner(authData.getAccount().getId().toString(), updateCardHolderRequest.getToken(), customer).map(res -> ok(Json.toJson(new UpdateCardHolderResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "balanceAdjustmentCard",
+            value = "Card balance adjustment",
+            notes = "Method allows to adjust card balance",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = BalanceAdjustmentResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = BalanceAdjustmentResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Сard balance adjustmentrequest", required = true, dataType = "dto.partner.BalanceAdjustmentRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+balance+currencyCode+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> balanceAdjustment() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final BalanceAdjustmentRequest balance;
+        try {
+            balance = Json.fromJson(jsonNode, BalanceAdjustmentRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(balance.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (balance.getBalance() <= 0) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(balance.getCurrencyCode())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), balance.getToken(), "" + balance.getBalance(), balance.getCurrencyCode(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.balanceAdjustmentForPartner(authData.getAccount().getId().toString(), balance.getToken(), balance.getBalance(), balance.getCurrencyCode(), balance.getDebOrCredit(), balance.getDescription(), balance.isForcePost()).map(res -> ok(Json.toJson(new BalanceAdjustmentResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "sendMessage",
+            value = "send sms message",
+            notes = "Method allows to send sms message",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SendMessageResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SendMessageResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Send sms request", required = true, dataType = "dto.partner.SendMessageRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+event+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> sendSms() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final SendMessageRequest sendMessageRequest;
+        try {
+            sendMessageRequest = Json.fromJson(jsonNode, SendMessageRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(sendMessageRequest.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (sendMessageRequest.getEvent() < 0) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), sendMessageRequest.getToken(), "" + sendMessageRequest.getEvent(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.sendMessageForPartner(authData.getAccount().getId().toString(), sendMessageRequest.getToken(), sendMessageRequest.getEvent()).map(res -> ok(Json.toJson(new SendMessageResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
 
         return returnRecover(result);
     }
