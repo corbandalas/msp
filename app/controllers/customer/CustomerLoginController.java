@@ -147,7 +147,7 @@ public class CustomerLoginController extends BaseController {
 
             putLoginAttempt(customer, 0);
 
-            mailService.sendEMail("noreply@mysafepay.dk", "olsapunova@gmail.com", "Hello world!!!");
+//            mailService.sendEMail("noreply@mysafepay.dk", "olsapunova@gmail.com", "Hello world!!!");
 
             return ok(Json.toJson(new CustomerLoginResponse("" + SUCCESS_CODE, SUCCESS_TEXT, token, customer.getTemppassword())));
         });
