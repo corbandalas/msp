@@ -23,6 +23,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.CustomerRepository;
+import services.MailService;
 import util.SecurityUtil;
 
 import java.util.Optional;
@@ -41,6 +42,9 @@ public class CustomerLoginController extends BaseController {
 
     @Inject
     CustomerRepository customerRepository;
+
+    @Inject
+    MailService mailService;
 
     @Inject
     CacheApi cache;
@@ -142,6 +146,8 @@ public class CustomerLoginController extends BaseController {
             cache.set("account_" + customer.getId(), authData.getAccount().getId(), Integer.parseInt(sessionTimeOut) * 60);
 
             putLoginAttempt(customer, 0);
+
+            mailService.sendEMail("noreply@mysafepay.dk", "olsapunova@gmail.com", "Hello world!!!");
 
             return ok(Json.toJson(new CustomerLoginResponse("" + SUCCESS_CODE, SUCCESS_TEXT, token, customer.getTemppassword())));
         });
