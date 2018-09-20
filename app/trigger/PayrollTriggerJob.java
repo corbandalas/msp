@@ -17,6 +17,8 @@ import org.apache.commons.net.ftp.FTPFile;
 import play.Logger;
 import play.libs.F;
 import repository.*;
+import scala.concurrent.Future;
+import services.OperationService;
 import sms.SmsGateway;
 import util.SecurityUtil;
 
@@ -63,6 +65,12 @@ public class PayrollTriggerJob implements Runnable {
 
     @Inject
     private CardRepository cardRepository;
+
+    @Inject
+    private OperationService operationService;
+
+    @Inject
+    private AccountRepository accountRepository;
 
     @Override
     public void run() {
@@ -194,6 +202,11 @@ public class PayrollTriggerJob implements Runnable {
                                         F.Promise<Optional<Customer>> isRegisteredPromise = F.Promise.wrap(customerRepository.retrieveById(payrollCard.getAccno()));
 
                                         F.Promise<Optional<Country>> countryPromise = F.Promise.wrap(countryRepository.retrieveByCode(payrollCard.getCountry()));
+
+                                        F.Promise.wrap(accountRepository.retrieveById(payrollCard.getAccountID()))
+                                                .flatMap(acc -> F.Promise.wrap(cardRepository.retrieveById(acc.get().getCardId())))
+                                                .flatMap(ccc -> F.Promise.pure(ccc).zip(F.Promise.wrap(currencyRepository.retrieveById(ccc.get().getCurrencyId()))))
+                                                .flatMap(rez -> operationService.createWithdrawOperation(rez._1.get(), Long.parseLong(payrollCard.getAmount()), rez._2.get(), "" + System.currentTimeMillis(), "Payment for payroll operation"));
 
                                         isRegisteredPromise.zip(countryPromise).map(res -> {
 

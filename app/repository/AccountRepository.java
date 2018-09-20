@@ -33,9 +33,9 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final Promise<Account> promise = Futures.promise();
 
         final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".account(id, currency_id, name," +
-                " createdate, active, secret) VALUES ($1, $2, $3, $4, $5, $6)";
+                " createdate, active, secret, card_id) VALUES ($1, $2, $3, $4, $5, $6, $7)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(), entity.getSecret()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(), entity.getSecret(), entity.getCardId()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -72,9 +72,9 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
         final Promise<Account> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() + ".account SET currency_id=$2, name=$3," +
-                " createdate=$4, active=$5, secret=$6 WHERE id=$1";
+                " createdate=$4, active=$5, secret=$6, card_id=$7 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getCurrencyId(), entity.getName(),
-                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(), entity.getSecret()),
+                new Timestamp(entity.getCreateDate().getTime()), entity.getActive(), entity.getSecret(), entity.getCardId()),
                 result -> promise.success(entity), promise::failure);
 
         return promise.future();
@@ -87,7 +87,7 @@ public class AccountRepository implements BaseCRUDRepository<Account> {
 
     public Account createEntity(Row row) {
         return new Account(row.getBigInteger("id").intValue(), row.getString("name"), row.getString("currency_id"),
-                row.getTimestamp("createdate"), row.getBoolean("active"), row.getString("secret"));
+                row.getTimestamp("createdate"), row.getBoolean("active"), row.getString("secret"), row.getLong("card_id"));
     }
 
 }

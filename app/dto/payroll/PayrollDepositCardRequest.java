@@ -13,13 +13,17 @@ public class PayrollDepositCardRequest {
 
     private String description;
     private List<PayrollCardDepositBean> cards;
+    private long totalSum;
+    private String currency;
 
     public PayrollDepositCardRequest() {
     }
 
-    public PayrollDepositCardRequest(String description, List<PayrollCardDepositBean> cards) {
+    public PayrollDepositCardRequest(Long totalSum, String currency, String description, List<PayrollCardDepositBean> cards) {
         this.description = description;
         this.cards = cards;
+        this.totalSum = totalSum;
+        this.currency = currency;
     }
 
     public String getDescription() {
@@ -36,5 +40,21 @@ public class PayrollDepositCardRequest {
 
     public void setCards(List<PayrollCardDepositBean> cards) {
         this.cards = cards;
+    }
+
+    public long getTotalSum() {
+        return totalSum;
+    }
+
+    public void setTotalSum(long totalSum) {
+        this.totalSum = totalSum;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

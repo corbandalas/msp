@@ -10,6 +10,7 @@ import play.libs.Akka;
 import play.mvc.Action;
 import play.mvc.Http.Request;
 import scala.concurrent.duration.Duration;
+import trigger.BankStatementTriggerJob;
 import trigger.ExchangeRatesTriggerJob;
 import trigger.PayrollTriggerJob;
 
@@ -46,6 +47,11 @@ public class Global extends GlobalSettings {
 
             Akka.system().scheduler().schedule(Duration.create(1, TimeUnit.MINUTES), Duration.create(10, TimeUnit.MINUTES),
                     injector.getInstance(PayrollTriggerJob.class), Akka.system().dispatcher());
+
+            Akka.system().scheduler().schedule(Duration.create(1, TimeUnit.MINUTES), Duration.create(10, TimeUnit.MINUTES),
+                    injector.getInstance(BankStatementTriggerJob.class), Akka.system().dispatcher());
+
+
         }
     }
 

@@ -107,6 +107,7 @@ public class BaseController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIResponse(WRONG_REQUEST_FORMAT_TEXT, "" + WRONG_REQUEST_FORMAT_CODE)));
     }
 
+
     protected Results.Status createWrongPhoneNumberResponse() {
         return badRequest(Json.toJson(new BaseAPIResponse(INCORRECT_PHONE_NUMBER_TEXT, "" + INCORRECT_PHONE_NUMBER_CODE)));
     }

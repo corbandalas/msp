@@ -34,6 +34,7 @@ public class PayrollCard extends BaseEntity<Long> {
     private String expDate;
     private String cvv;
     private String error;
+    private int accountID;
     private PayrollCardType payrollCardType;
     private PayrollCardStatus payrollCardStatus;
 
@@ -67,6 +68,37 @@ public class PayrollCard extends BaseEntity<Long> {
         this.expDate = expDate;
         this.cvv = cvv;
         this.error = error;
+        this.payrollCardType = payrollCardType;
+        this.payrollCardStatus = payrollCardStatus;
+    }
+
+    public PayrollCard(Long id, Long payrollRequestId, String accno, String pubtoken, String pan, String title, String lastName, String firstName, String dob, String email, String mobtel, String addrl1, String addrl2, String addrl3, String city, String postcode, String country, String amount, String currency, String cardName, String expDate, String cvv, String isLive, String error, PayrollCardStatus payrollCardStatus, PayrollCardType payrollCardType, int accountID) {
+
+        setId(id);
+        this.payrollRequestId = payrollRequestId;
+        this.accno = accno;
+        this.pubtoken = pubtoken;
+        this.pan = pan;
+        this.title = title;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.dob = dob;
+        this.email = email;
+        this.mobtel = mobtel;
+        this.addrl1 = addrl1;
+        this.addrl2 = addrl2;
+        this.addrl3 = addrl3;
+        this.city = city;
+        this.isLive = isLive;
+        this.postcode = postcode;
+        this.country = country;
+        this.amount = amount;
+        this.currency = currency;
+        this.cardName = cardName;
+        this.expDate = expDate;
+        this.cvv = cvv;
+        this.error = error;
+        this.accountID = accountID;
         this.payrollCardType = payrollCardType;
         this.payrollCardStatus = payrollCardStatus;
     }
@@ -300,5 +332,13 @@ public class PayrollCard extends BaseEntity<Long> {
 
     public void setPayrollCardType(PayrollCardType payrollCardType) {
         this.payrollCardType = payrollCardType;
+    }
+
+    public int getAccountID() {
+        return accountID;
+    }
+
+    public void setAccountID(int accountID) {
+        this.accountID = accountID;
     }
 }

@@ -12,14 +12,18 @@ import java.util.List;
 public class PayrollCreateCardRequest {
 
     private String description;
+    private long totalSum;
+    private String currency;
     private List<PayrollCardBean> cards;
 
     public PayrollCreateCardRequest() {
     }
 
-    public PayrollCreateCardRequest(String description, List<PayrollCardBean> cards) {
+    public PayrollCreateCardRequest(String description, long totalSum, String currency, List<PayrollCardBean> cards) {
         this.description = description;
         this.cards = cards;
+        this.totalSum = totalSum;
+        this.currency = currency;
     }
 
     public String getDescription() {
@@ -36,5 +40,21 @@ public class PayrollCreateCardRequest {
 
     public void setCards(List<PayrollCardBean> cards) {
         this.cards = cards;
+    }
+
+    public long getTotalSum() {
+        return totalSum;
+    }
+
+    public void setTotalSum(long totalSum) {
+        this.totalSum = totalSum;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

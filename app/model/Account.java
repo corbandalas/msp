@@ -15,6 +15,7 @@ public class Account extends BaseEntity<Integer> {
     private Date createDate;
     private Boolean active;
     private String secret;
+    private Long cardId;
 
     public Account(Integer id, String name, String currencyId, Date createDate, Boolean active, String secret) {
         this.setId(id);
@@ -23,6 +24,16 @@ public class Account extends BaseEntity<Integer> {
         this.createDate = createDate;
         this.active = active;
         this.secret = secret;
+    }
+
+    public Account(Integer id, String name, String currencyId, Date createDate, Boolean active, String secret, Long cardId) {
+        this.setId(id);
+        this.name = name;
+        this.currencyId = currencyId;
+        this.createDate = createDate;
+        this.active = active;
+        this.secret = secret;
+        this.cardId = cardId;
     }
 
     public Account() {
@@ -76,5 +87,13 @@ public class Account extends BaseEntity<Integer> {
                 ", createDate=" + createDate +
                 ", active=" + active +
                 '}';
+    }
+
+    public Long getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(Long cardId) {
+        this.cardId = cardId;
     }
 }

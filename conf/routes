@@ -23,7 +23,9 @@ POST       /api/payroll/card/upload                                          @co
 POST       /api/payroll/card/deposit                                          @controllers.payroll.PayrollCardController.depositCard()
 POST       /api/payroll/card/request/status                                  @controllers.payroll.PayrollCardController.getPayrollRequestsStatuses()
 POST       /api/payroll/card/status                                          @controllers.payroll.PayrollCardController.getPayrollCardStatuses()
-
+POST       /api/payroll/account/balance                                          @controllers.payroll.PayrollCardController.getPayrollAccountBalance()
+POST       /api/payroll/account/create                                          @controllers.payroll.PayrollCardController.createPayrollAccount()
+POST       /api/payroll/account/deposit                                          @controllers.payroll.PayrollCardController.deposit()
 
 POST       /api/partner/card/load                                          @controllers.partner.CardPartnerController.load()
 POST       /api/partner/card/unload                                          @controllers.partner.CardPartnerController.unload()

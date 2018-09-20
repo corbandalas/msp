@@ -9,7 +9,15 @@ import controllers.admin.BaseMerchantApiAction;
 import dto.Authentication;
 import dto.BaseAPIResponse;
 import dto.payroll.*;
+import exception.CustomerAlreadyRegisteredException;
+import exception.WrongCountryException;
+import exception.WrongPhoneNumberException;
 import model.*;
+import model.Card;
+import model.enums.CardBrand;
+import model.enums.CardType;
+import model.enums.KYC;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -18,9 +26,11 @@ import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
-import repository.PayrollCardRepository;
-import repository.PayrollRequestRepository;
-import repository.PropertyRepository;
+import repository.*;
+import services.OperationService;
+import services.PayrollService;
+import sms.SmsGateway;
+import util.CurrencyUtil;
 import util.SecurityUtil;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import play.libs.F.Promise;
+import util.Utils;
 
 import static configs.ReturnCodes.*;
 
@@ -55,6 +66,32 @@ public class PayrollCardController extends BaseController {
 
     @Inject
     PayrollRequestRepository payrollRequestRepository;
+
+    @Inject
+    PayrollService payrollService;
+
+    @Inject
+    AccountRepository accountRepository;
+
+    @Inject
+    CountryRepository countryRepository;
+
+    @Inject
+    CustomerRepository customerRepository;
+
+    @Inject
+    SmsGateway smsGateway;
+
+    @Inject
+    CardRepository cardRepository;
+
+    @Inject
+    OperationService operationService;
+
+    @Inject
+    CurrencyRepository currencyRepository;
+
+
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
@@ -78,7 +115,7 @@ public class PayrollCardController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.payroll.PayrollCreateCardRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+description+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+totalSum+currency+description+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
     })
@@ -101,15 +138,15 @@ public class PayrollCardController extends BaseController {
         if (
                 StringUtils.isBlank(createCard.getDescription()) ||
                         (createCard.getCards() == null) ||
-                        (createCard.getCards().size() == 0)
-                ) {
+                        StringUtils.isBlank(createCard.getCurrency()) ||
+                        (createCard.getCards().size() == 0)) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
-                createCard.getDescription(), authData.getAccount().getSecret()))) {
+                "" + createCard.getTotalSum(),  createCard.getCurrency(), createCard.getDescription(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
@@ -127,9 +164,28 @@ public class PayrollCardController extends BaseController {
         Promise<Optional<Property>> propertyPromise = Promise.wrap(propertyRepository.retrieveById("payroll.api.msp.account.settings." + authData.getAccount().getId()));
         Promise<Optional<Property>> ftpPropertyPromise = Promise.wrap(propertyRepository.retrieveById("payroll.api.msp.ftp.settings"));
 
-        Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), null, null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), null, PayrollCardStatus.REQUESTED, PayrollCardType.CARD_CREATION)))).collect(Collectors.toList()))).zip(ftpPropertyPromise).zip(propertyPromise).zip(payrollRequestPromise).map(ttt -> {
 
-            Property property = ttt._1._2.get();
+        F.Promise<Optional<Currency>> payrollCurrencyPromise = F.Promise.wrap(currencyRepository.retrieveById(createCard.getCurrency()));
+        Promise<F.Tuple<Double, Currency>> payrollAccountBalance = payrollService.getPayrollAccountBalance(authData.getAccount().getId());
+
+
+        Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), null, null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), null, PayrollCardStatus.REQUESTED, PayrollCardType.CARD_CREATION, authData.getAccount().getId())))).collect(Collectors.toList()))).zip(payrollAccountBalance).zip(ftpPropertyPromise).zip(payrollRequestPromise).zip(propertyPromise).zip(payrollCurrencyPromise).map(ttt -> {
+
+            Currency payrollCurrency = ttt._2.get();
+
+            F.Tuple<Double, Currency> walletBalance = ttt._1._1._1._1._2;
+
+            Long convertedPayrollAmount = CurrencyUtil.convert(createCard.getTotalSum(), Optional.of(payrollCurrency), Optional.of(walletBalance._2));
+
+            Logger.info("Total payroll amount " + createCard.getTotalSum() + " " + createCard.getCurrency() + " is " + convertedPayrollAmount + " " + walletBalance._2.getId());
+
+            if (walletBalance._1.longValue() < convertedPayrollAmount) {
+                Logger.error("Not enough funds error");
+                return createNotEnoughFundsResponse();
+            }
+
+            Property property = ttt._1._1._1._2.get();
+            Logger.info("Property = " + property.getValue());
 
             String[] split = StringUtils.split(property.getValue(), "|");
 
@@ -142,7 +198,7 @@ public class PayrollCardController extends BaseController {
             String programManagerCode = split[6];
 
 
-            Property ftpProperty = ttt._1._1._2.get();
+            Property ftpProperty = ttt._1._2.get();
 
             Logger.info("ftpProperty = " + ftpProperty.getValue());
 
@@ -154,7 +210,6 @@ public class PayrollCardController extends BaseController {
             String ftpPassword = ftpSplit[3];
 
 
-
             String ftpXMLRequest = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?> <CRDREQ><HEADER>" +
 //                    "<order_ref>" + /*authData.getOrderId()*/ "NULL" + "</order_ref> " +
 //                    "<order_value>NULL</order_value> " +
@@ -162,7 +217,7 @@ public class PayrollCardController extends BaseController {
                     "</HEADER>" +
                     "";
 
-            for (PayrollCard payrollCard : ttt._1._1._1) {
+            for (PayrollCard payrollCard : ttt._1._1._1._1._1) {
                 ftpXMLRequest += "<CARD>" +
                         "<recid>" + payrollCard.getId() + "</recid>" +
                         "<action>" + ((Double.parseDouble(payrollCard.getAmount()) > 0) ? "2" : "1") + "</action>" +
@@ -242,7 +297,7 @@ public class PayrollCardController extends BaseController {
 
                 String dateFormat = "yyMMdd";
 
-                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._2.getDaySequence() + ".xml";
+                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._1._1._2.getDaySequence() + ".xml";
 
                 Logger.info("File name = " + fileName);
 
@@ -266,7 +321,7 @@ public class PayrollCardController extends BaseController {
                 }
             }
 
-            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + ttt._2.getId())));
+            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + ttt._1._1._2.getId())));
         });
 
 
@@ -296,7 +351,7 @@ public class PayrollCardController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Deposit card request", required = true, dataType = "dto.payroll.PayrollDepositCardRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+description+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+totalSum+currency+description+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
     })
@@ -319,6 +374,7 @@ public class PayrollCardController extends BaseController {
         if (
                 StringUtils.isBlank(createCard.getDescription()) ||
                         (createCard.getCards() == null) ||
+                        StringUtils.isBlank(createCard.getCurrency()) ||
                         (createCard.getCards().size() == 0)
                 ) {
             Logger.error("Missing params");
@@ -327,7 +383,7 @@ public class PayrollCardController extends BaseController {
 
 
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
-                createCard.getDescription(), authData.getAccount().getSecret()))) {
+                "" + createCard.getTotalSum(), createCard.getCurrency(), createCard.getDescription(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
@@ -345,9 +401,28 @@ public class PayrollCardController extends BaseController {
         Promise<Optional<Property>> propertyPromise = Promise.wrap(propertyRepository.retrieveById("payroll.api.msp.account.settings." + authData.getAccount().getId()));
         Promise<Optional<Property>> ftpPropertyPromise = Promise.wrap(propertyRepository.retrieveById("payroll.api.msp.ftp.settings"));
 
-        Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), t.getPubToken(), null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), null, PayrollCardStatus.REQUESTED, PayrollCardType.CARD_DEPOSIT)))).collect(Collectors.toList()))).zip(ftpPropertyPromise).zip(propertyPromise).zip(payrollRequestPromise).map(ttt -> {
+        F.Promise<Optional<Currency>> payrollCurrencyPromise = F.Promise.wrap(currencyRepository.retrieveById(createCard.getCurrency()));
+        Promise<F.Tuple<Double, Currency>> payrollAccountBalance = payrollService.getPayrollAccountBalance(authData.getAccount().getId());
 
-            Property property = ttt._1._2.get();
+
+        Promise<Result> result = payrollRequestPromise.flatMap(res -> Promise.sequence(createCard.getCards().parallelStream().map(t -> Promise.wrap(payrollCardRepository.create(new PayrollCard(1L, res.getId(), t.getAccno(), t.getPubToken(), null, t.getTitle(), t.getLastName(), t.getFirstName(), t.getDob(), t.getEmail(), t.getMobtel(), t.getAddrl1(), t.getAddrl2(), t.getAddrl3(), t.getCity(), t.getPostcode(), t.getCountry(), t.getAmount(), t.getCurrency(), null, null, null, t.getIsLive(), null, PayrollCardStatus.REQUESTED, PayrollCardType.CARD_DEPOSIT, authData.getAccount().getId())))).collect(Collectors.toList()))).zip(payrollAccountBalance).zip(ftpPropertyPromise).zip(payrollRequestPromise).zip(propertyPromise).zip(payrollCurrencyPromise).map(ttt -> {
+
+            Currency payrollCurrency = ttt._2.get();
+
+            F.Tuple<Double, Currency> walletBalance = ttt._1._1._1._1._2;
+
+            Long convertedPayrollAmount = CurrencyUtil.convert(createCard.getTotalSum(), Optional.of(payrollCurrency), Optional.of(walletBalance._2));
+
+            Logger.info("Total payroll amount " + createCard.getTotalSum() + " " + createCard.getCurrency() + " is " + convertedPayrollAmount + " " + walletBalance._2.getId());
+
+            if (walletBalance._1.longValue() < convertedPayrollAmount) {
+                Logger.error("Not enough funds error");
+                return createNotEnoughFundsResponse();
+            }
+
+
+            Property property = ttt._1._1._1._2.get();
+            Logger.info("Property = " + property.getValue());
 
             String[] split = StringUtils.split(property.getValue(), "|");
 
@@ -360,7 +435,7 @@ public class PayrollCardController extends BaseController {
             String programManagerCode = split[6];
 
 
-            Property ftpProperty = ttt._1._1._2.get();
+            Property ftpProperty = ttt._1._2.get();
 
             Logger.info("ftpProperty = " + ftpProperty.getValue());
 
@@ -377,7 +452,7 @@ public class PayrollCardController extends BaseController {
                     "</HEADER>" +
                     "";
 
-            for (PayrollCard payrollCard : ttt._1._1._1) {
+            for (PayrollCard payrollCard : ttt._1._1._1._1._1) {
                 ftpXMLRequest += "<CARD>" +
                         "<recid>" + payrollCard.getId() + "</recid>" +
                         "<action>3</action>" +
@@ -457,7 +532,7 @@ public class PayrollCardController extends BaseController {
 
                 String dateFormat = "yyMMdd";
 
-                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._2.getDaySequence() + ".xml";
+                String fileName = programManagerCode + "-GPScrdreq" + (new SimpleDateFormat(dateFormat, Locale.ENGLISH)).format(new Date()) + ttt._1._1._2.getDaySequence() + ".xml";
 
                 Logger.info("File name = " + fileName);
 
@@ -481,7 +556,7 @@ public class PayrollCardController extends BaseController {
                 }
             }
 
-            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + ttt._2.getId())));
+            return ok(Json.toJson(new PayrollCreateCardResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + ttt._1._1._2.getId())));
         });
 
 
@@ -600,6 +675,254 @@ public class PayrollCardController extends BaseController {
         }
 
         Promise<Result> result = Promise.wrap(payrollCardRepository.retrieveAllByRequestID(Long.parseLong(payrollStatusCardRequest.getPayrollRequestID()))).map(list -> ok(Json.toJson(new PayrollRequestCardStatusesResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), list))));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "getPayrollAccountBalance",
+            value = "Retrieve payroll account balance",
+            notes = "Method allows to retrieve payroll account balance",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = PayrollAccountBalanceResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = PayrollAccountBalanceResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Retrieve payroll account balance request", required = true, dataType = "dto.payroll.PayrollAccountBalanceRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
+    })
+    public F.Promise<Result> getPayrollAccountBalance() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+
+        Promise<Result> result = payrollService.getPayrollAccountBalance(authData.getAccount().getId()).map(balance -> ok(Json.toJson(new PayrollAccountBalanceResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), balance._1, balance._2.getId()))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "createPayrollAccount",
+            value = "Create payroll account",
+            notes = "Method allows to create payroll account",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = PayrollCreateAccountResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = PayrollCreateAccountResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Retrieve payroll account balance request", required = true, dataType = "dto.payroll.PayrollCreateAccountRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+name+currency+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
+    })
+    public F.Promise<Result> createPayrollAccount() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final PayrollCreateAccountRequest payrollCreateAccountRequest;
+
+        try {
+
+            payrollCreateAccountRequest = Json.fromJson(jsonNode, PayrollCreateAccountRequest.class);
+
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(payrollCreateAccountRequest.getName())
+                || StringUtils.isBlank(payrollCreateAccountRequest.getCurrencyId())
+                || StringUtils.isBlank(payrollCreateAccountRequest.getContactFirstName())
+                || StringUtils.isBlank(payrollCreateAccountRequest.getContactLastName())
+                || StringUtils.isBlank(payrollCreateAccountRequest.getPhoneNumber())
+                || StringUtils.isBlank(payrollCreateAccountRequest.getCountry())
+                ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), payrollCreateAccountRequest.getName(), payrollCreateAccountRequest.getCurrencyId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        final String country = payrollCreateAccountRequest.getCountry();
+        final String phone = payrollCreateAccountRequest.getPhoneNumber();
+
+        final Promise<F.Tuple<Boolean, Boolean>> resultPromise = Promise.wrap(countryRepository.checkCountry(country)).zip(Promise.wrap(customerRepository.isRegistered(phone)));
+
+        final Promise<Result> result = resultPromise.flatMap(rez -> {
+
+            if (!rez._1) {
+                Logger.error("Country is not exist");
+
+                throw new WrongCountryException("Country is not exist or inactive");
+            }
+
+            if (rez._2) {
+                Logger.error("Customer is already registered");
+
+                throw new CustomerAlreadyRegisteredException("Customer is already registered");
+            }
+
+            final String password = RandomStringUtils.randomNumeric(4);
+
+
+            if (!Utils.isValidPhoneNumber(phone, country)) {
+                throw new WrongPhoneNumberException();
+            }
+
+            final Customer customer = new Customer();
+
+            customer.setActive(true);
+            customer.setCountry_id(country);
+            customer.setKyc(KYC.NONE);
+            customer.setPassword(SecurityUtil.generateKeyFromArray(password));
+            customer.setId(phone);
+            customer.setRegistrationDate(new Date());
+            customer.setDateBirth(new Date());
+            customer.setTemppassword(true);
+            customer.setFirstName(payrollCreateAccountRequest.getContactFirstName());
+            customer.setLastName(payrollCreateAccountRequest.getContactLastName());
+
+            Card card = new Card();
+
+            card.setActive(true);
+            card.setAlias("alias");
+            card.setBrand(CardBrand.WALLET);
+            card.setCardDefault(true);
+            card.setCreateDate(new Date());
+            card.setCurrencyId("EUR");
+            card.setCustomerId(phone);
+            card.setDeliveryAddress1("address 1");
+            card.setDeliveryAddress2("address 2");
+            card.setDeliveryAddress3("address 3");
+            card.setDeliveryCountry(country);
+            card.setInfo("");
+            card.setToken(SecurityUtil.generateKeyFromArray(phone, country, payrollCreateAccountRequest.getContactFirstName()));
+            card.setType(CardType.VIRTUAL);
+
+
+            return Promise.wrap(customerRepository.create(customer)).zip(Promise.wrap(cardRepository.create(card))).zip(Promise.pure(password));
+
+        }).map(res -> {
+
+            Account account = new Account();
+            account.setActive(true);
+            account.setCreateDate(new Date());
+            account.setName(payrollCreateAccountRequest.getName());
+            account.setCurrencyId(payrollCreateAccountRequest.getCurrencyId());
+            account.setSecret(SecurityUtil.generateKeyFromArray(payrollCreateAccountRequest.getName(), payrollCreateAccountRequest.getCurrencyId()));
+            account.setCardId(res._1._2.getId());
+
+            accountRepository.create(account);
+
+
+            smsGateway.sendSMS(phone, "Dear customer! Thank you for registration. Your temporary PIN code is " + res._2 + ". Please visit mysafepay.dk to complete registration.");
+
+            return ok(Json.toJson(new PayrollCreateAccountResponse("" + SUCCESS_CODE, SUCCESS_TEXT)));
+        });
+
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "depositPayrollAccount",
+            value = "Deposit payroll account",
+            notes = "Method allows to deposit payroll account",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = PayrollAccountBalanceResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = PayrollDepositAccountResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = PayrollDepositAccountResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Deposit payroll account request", required = true, dataType = "dto.payroll.DepositPayrollAccountRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+amount+currency+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")
+    })
+    public F.Promise<Result> deposit() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+
+        final PayrollDepositAccountRequest payrollDepositAccountRequest;
+
+        try {
+
+            payrollDepositAccountRequest = Json.fromJson(jsonNode, PayrollDepositAccountRequest.class);
+
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(payrollDepositAccountRequest.getCurrency())
+                || payrollDepositAccountRequest.getAmount() == null
+                ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), "" + payrollDepositAccountRequest.getAmount(), payrollDepositAccountRequest.getCurrency(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        Account account = authData.getAccount();
+
+        Promise<Optional<Card>> cardPromise = Promise.wrap(cardRepository.retrieveById(account.getCardId()));
+        Promise<Optional<Currency>> currencyPromise = Promise.wrap(currencyRepository.retrieveById(payrollDepositAccountRequest.getCurrency()));
+
+
+        final Promise<Result> result = cardPromise.zip(currencyPromise).flatMap(res -> operationService.createDepositOperation(res._1.get(), payrollDepositAccountRequest.getAmount(), res._2.get(), payrollDepositAccountRequest.getOrderId(), payrollDepositAccountRequest.getDescription()).map(ttt -> ok(Json.toJson(new PayrollDepositAccountResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE))))));
 
         return returnRecover(result);
     }
