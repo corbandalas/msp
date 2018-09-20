@@ -20,8 +20,8 @@ import java.nio.file.Paths;
 @Singleton
 public class MailService {
 
-    @Inject
-    MailerClient mailerClient;
+//    @Inject
+//    MailerClient mailerClient;
 
     public void sendBankStatementEmail(String emailFrom, String emailTo, String countryLocale, String name) {
         try {
@@ -70,7 +70,7 @@ public class MailService {
 //                .setBodyHtml("<html><body><p>An <b>html</b> message with cid <img src=\"cid:" + cid + "\"></p></body></html>")
                     .setBodyHtml(textHtml)
                     ;
-            mailerClient.send(email);
+//            mailerClient.send(email);
         } catch (Exception e) {
             Logger.error("Error while sending email", e);
         }
