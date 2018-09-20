@@ -1,8 +1,8 @@
 package services;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import play.Logger;
+import play.Play;
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerClient;
 
@@ -70,7 +70,7 @@ public class MailService {
 //                .setBodyHtml("<html><body><p>An <b>html</b> message with cid <img src=\"cid:" + cid + "\"></p></body></html>")
                     .setBodyHtml(textHtml)
                     ;
-//            mailerClient.send(email);
+            Play.application().injector().instanceOf(MailerClient.class).send(email);
         } catch (Exception e) {
             Logger.error("Error while sending email", e);
         }
