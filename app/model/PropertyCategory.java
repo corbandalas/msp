@@ -16,7 +16,8 @@ public enum PropertyCategory {
     LIMITS("LIMITS"),
     PRICE("PRICE"),
     PAYLIKE_INTEGRATION("PAYLIKE_INTEGRATION"),
-    PAYROLL("PAYROLL");
+    PAYROLL("PAYROLL"),
+    KVANTO_INTEGRATION("KVANTO_INTEGRATION");
 
     private String value;
 

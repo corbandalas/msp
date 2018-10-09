@@ -16,13 +16,13 @@ import model.Customer;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.cache.CacheApi;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.CustomerRepository;
+import services.CacheProvider;
 import services.MailService;
 import util.SecurityUtil;
 
@@ -42,12 +42,6 @@ public class CustomerLoginController extends BaseController {
 
     @Inject
     CustomerRepository customerRepository;
-
-    @Inject
-    MailService mailService;
-
-    @Inject
-    CacheApi cache;
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
@@ -141,13 +135,11 @@ public class CustomerLoginController extends BaseController {
             String sessionTimeOut = conf.getString("cache.customer.session.timeout");
 
             //Store token to cache with expiration time out
-            cache.set(token, customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
+            CacheProvider.getInstance().putObject(token, customer.getId()/*, Integer.parseInt(sessionTimeOut) * 60*/);
 
-            cache.set("account_" + customer.getId(), authData.getAccount().getId(), Integer.parseInt(sessionTimeOut) * 60);
+            CacheProvider.getInstance().putObject("account_" + customer.getId(), authData.getAccount().getId()/*, Integer.parseInt(sessionTimeOut) * 60*/);
 
             putLoginAttempt(customer, 0);
-
-//            mailService.sendEMail("noreply@mysafepay.dk", "olsapunova@gmail.com", "Hello world!!!");
 
             return ok(Json.toJson(new CustomerLoginResponse("" + SUCCESS_CODE, SUCCESS_TEXT, token, customer.getTemppassword())));
         });
@@ -165,7 +157,7 @@ public class CustomerLoginController extends BaseController {
 
     private void putLoginAttempt(Customer customer, Integer count) {
         //Store login attepmpts to cache with expiration time out
-        cache.set("login#attempt#" + customer.getId(), count, 60 * 24 * 60);
+        CacheProvider.getInstance().putObject("login#attempt#" + customer.getId(), count/*, 60 * 24 * 60*/);
     }
 
     private boolean checkLoginAttempt(Customer customer) {
@@ -176,7 +168,7 @@ public class CustomerLoginController extends BaseController {
     }
 
     private Integer getWrongLoginAttempt(Customer customer) {
-        Object objeAttempt = cache.get("login#attempt#" + customer.getId());
+        Object objeAttempt = CacheProvider.getInstance().getObject("login#attempt#" + customer.getId());
 
         int count = 0;
 

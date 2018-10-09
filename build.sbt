@@ -27,6 +27,7 @@ libraryDependencies ++= Seq(
   "commons-net" % "commons-net" % "3.6",
    "com.googlecode.libphonenumber" % "libphonenumber" % "8.9.7",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0-beta4",
+  "org.apache.commons" % "commons-jcs-core" % "2.2",
   "com.typesafe.play" %% "play-mailer" % "4.0.0")
 
 

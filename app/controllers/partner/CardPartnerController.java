@@ -1,6 +1,5 @@
 package controllers.partner;
 
-import ae.globalprocessing.hyperionweb.BalanceAdjust;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;

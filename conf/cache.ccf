@@ -1,0 +1,28 @@
+# sets the default aux value for any non configured caches
+jcs.default=DC
+jcs.default.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=1000
+jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
+jcs.default.elementattributes.IsEternal=false
+jcs.default.elementattributes.MaxLife=86400
+jcs.default.elementattributes.IdleTime=1800
+jcs.default.elementattributes.IsSpool=true
+jcs.default.elementattributes.IsRemote=true
+jcs.default.elementattributes.IsLateral=true
+
+# AVAILABLE AUXILIARY CACHES
+jcs.auxiliary.DC=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheFactory
+jcs.auxiliary.DC.attributes=org.apache.commons.jcs.auxiliary.disk.indexed.IndexedDiskCacheAttributes
+jcs.auxiliary.DC.attributes.DiskPath=${user.dir}/jcs_customer_swap
+jcs.auxiliary.DC.attributes.MaxPurgatorySize=10000000
+jcs.auxiliary.DC.attributes.MaxKeySize=1000000
+jcs.auxiliary.DC.attributes.OptimizeAtRemoveCount=300000
+jcs.auxiliary.DC.attributes.ShutdownSpoolTimeLimit=60
+
+jcs.auxiliary.LTCP=org.apache.commons.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
+jcs.auxiliary.LTCP.attributes=org.apache.commons.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
+jcs.auxiliary.LTCP.attributes.TransmissionTypeName=TCP
+jcs.auxiliary.LTCP.attributes.TcpServers=localhost:1111
+jcs.auxiliary.LTCP.attributes.TcpListenerPort=1111
+jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=false
+jcs.auxiliary.LTCP.attributes.AllowGet=true

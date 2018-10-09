@@ -351,8 +351,43 @@
       "value": "localhost|21|corbandalas|x13jkw34",
       "description": "FTP settings for payroll project",
       "category": "PAYROLL"
-    }
+    },
 
+
+    {
+      "id": "kvanto.api.msp.url",
+      "value": "https://kvanto.com/",
+      "description": "Kvanto api url",
+      "category": "KVANTO_INTEGRATION"
+    },
+
+    {
+      "id": "kvanto.api.msp.id",
+      "value": "23|24|25",
+      "description": "Kvanto IDs // kvanto_id|customer_id|merchant_id",
+      "category": "KVANTO_INTEGRATION"
+    },
+
+    {
+      "id": "kvanto.api.msp.deposit.callback.url",
+      "value": "http://bancore.com",
+      "description": "Callback URL for Cash Deposit Paylike integration",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "kvanto.api.msp.purchase.callback.url",
+      "value": "http://bancore.com",
+      "description": "Callback URL for Card Purchase Kvanto integration",
+      "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "kvanto.api.msp.client.error.redirect.url",
+      "value": "http://bancore.com",
+      "description": "Default error URL for Kvanto callback redirection",
+      "category": "PAYLIKE_INTEGRATION"
+    }
   ]
 
 }
