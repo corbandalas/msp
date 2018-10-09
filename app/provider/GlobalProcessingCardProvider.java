@@ -539,7 +539,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         createAuthHeader(countrySettingsTuple._1.headerUsername, countrySettingsTuple._1.headerPassword));
 
 
-                Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + ". Result code: " + virtualCards.getActionCode() + " ." + virtualCards.toString());
+                Logger.info("/////// WsCreateCard service invocation was ended. WSID #" + wsid + ". Result code: " + virtualCards.getActionCode() + " ." + virtualCards.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", virtualCards.getActionCode())) {
                     throw new CardProviderException("Bad Response", virtualCards.getActionCode());
@@ -577,7 +577,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 balance = service.getServiceSoap().wsBalanceEnquiryV2(wsid, gpsSettings.issCode, "3", null, 4, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, "0", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + ". Result code: " + balance.getActionCode() + " ." + balance.toString());
+                Logger.info("/////// WsBalanceEnquiryV2 service invocation was ended. WSID #" + wsid + ". Result code: " + balance.getActionCode() + " ." + balance.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", balance.getActionCode())) {
                     throw new CardProviderException("Bad Response", balance.getActionCode());
@@ -609,7 +609,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 cardDetails = service.getServiceSoap().wsEnquiry(System.currentTimeMillis(), gpsSettings.issCode, "9", "1", null, null, null, card.getToken(), null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), 5, null, null, null, null, 0, null, 0, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + ". Result code: " + cardDetails.getActionCode() + " ." + cardDetails.toString());
+                Logger.info("/////// WsEnquiry service invocation was ended. WSID #" + wsid + ". Result code: " + cardDetails.getActionCode() + " ." + cardDetails.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", cardDetails.getActionCode())) {
                     throw new CardProviderException("Bad Response", cardDetails.getActionCode());
@@ -648,7 +648,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 loadCard = service.getServiceSoap().wsLoad(wsid, gpsSettings.issCode, "20", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, (double) amount / 100, currency, loadType, gpsSettings.loadSrc, 0f, 0, null, 0, null, description, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString());
+                Logger.info("/////// Ws_Load service invocation was ended. WSID #" + wsid + ". Result code: " + loadCard.getActionCode() + " ." + loadCard.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", loadCard.getActionCode())) {
                     throw new CardProviderException("Bad Response", loadCard.getActionCode());
@@ -686,7 +686,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 unload = service.getServiceSoap().wsUnLoad(wsid, gpsSettings.issCode, "8", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, loadType, gpsSettings.loadSrc, (double) amount / 100, currency, 0, null, 0, null, description, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_UnLoad service invocation was ended. WSID #" + wsid + ". Result code: " + unload.getActionCode() + " ." + unload.toString());
+                Logger.info("/////// Ws_UnLoad service invocation was ended. WSID #" + wsid + ". Result code: " + unload.getActionCode() + " ." + unload.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", unload.getActionCode())) {
                     throw new CardProviderException("Bad Response", unload.getActionCode());
@@ -720,7 +720,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "7", null, "1", null, null, cardSource.getToken(), null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, null, cardDestination.getToken(), (double) amount / 100, cardSource.getCurrencyId(), /*gpsSettings.loadSrc*/"48", 0, null, 0, description, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Transfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
+                Logger.info("/////// Ws_Transfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", balanceTransfer.getActionCode())) {
                     throw new CardProviderException("Bad Response", balanceTransfer.getActionCode());
@@ -760,7 +760,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, null, null, null, null, null, null, 0, null, 2, null, null, null, null, null, null, null, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, 0, 0, 4, 15, 0, 0, null, 0, token, 0, null, null, null, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
-                Logger.info("/////// WS_Update_CardHolder service invocation was ended. WSID #" + wsid + ". Result code: " + customerUpdate.getActionCode() + " ." + customerUpdate.toString());
+                Logger.info("/////// WS_Update_CardHolder service invocation was ended. WSID #" + wsid + ". Result code: " + customerUpdate.getActionCode() + " ." + customerUpdate.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", customerUpdate.getActionCode())) {
                     throw new CardProviderException("Bad Response", customerUpdate.getActionCode());
@@ -807,7 +807,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 convertCard = service.getServiceSoap().wsConvertCard(card.getToken(), DateUtil.format(convertDate, "yyyy-MM-dd"), applyFee ? 1 : 0, DateUtil.format(instance.getTime(), "yyyy-MM-dd"), createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
-                Logger.info("/////// Ws_Convert_Card service invocation was ended. WSID #" + wsid + ". Result code: " + convertCard.getActionCode() + " ." + convertCard.toString());
+                Logger.info("/////// Ws_Convert_Card service invocation was ended. WSID #" + wsid + ". Result code: " + convertCard.getActionCode() + " ." + convertCard.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (StringUtils.equals("116", convertCard.getActionCode())) {
                     throw new NotEnoughFundsException("You don’t have enough funds");
@@ -850,7 +850,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 phoneActivate = service.getServiceSoap().wsPhoneActivation(null, card.getToken(), 0, 1, "1", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Card_Phone_Activation service invocation was ended. WSID #" + wsid + ". Result code: " + phoneActivate.getActionCode() + " ." + phoneActivate.toString());
+                Logger.info("/////// Ws_Card_Phone_Activation service invocation was ended. WSID #" + wsid + ". Result code: " + phoneActivate.getActionCode() + " ." + phoneActivate.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", phoneActivate.getActionCode())) {
                     throw new CardProviderException("Bad Response", phoneActivate.getActionCode());
@@ -887,7 +887,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         DateUtil.format(new Date(), "hhmmss"), BigDecimal.valueOf(balance), currencyCode, debOrCredit, description, forcePost, null, 0, null, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
-                Logger.info("/////// Ws_Balance_Adjustment service invocation was ended. WSID #" + wsid + ". Result code: " + balanceAdjust.getActionCode() + " ." + balanceAdjust.toString());
+                Logger.info("/////// Ws_Balance_Adjustment service invocation was ended. WSID #" + wsid + ". Result code: " + balanceAdjust.getActionCode() + " ." + balanceAdjust.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", balanceAdjust.getActionCode())) {
                     throw new CardProviderException("Bad Response", balanceAdjust.getActionCode());
@@ -921,7 +921,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 alertResponse = service.getServiceSoap().wsSendMessage(wsid, gpsSettings.issCode, "1", null, token, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, null, null, null, event, 0, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_SendMessage service invocation was ended. WSID #" + wsid + ". Result code: " + alertResponse.getActionCode() + " ." + alertResponse.toString());
+                Logger.info("/////// Ws_SendMessage service invocation was ended. WSID #" + wsid + ". Result code: " + alertResponse.getActionCode() + " ." + alertResponse.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", alertResponse.getActionCode())) {
                     throw new CardProviderException("Bad Response", alertResponse.getActionCode());
@@ -966,7 +966,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 wsActivate = service.getServiceSoap().wsActivate(wsid, gpsSettings.issCode, "0", null, null, lastName, firstName, addrl1, addrl2, city, postCode, country, activationCode, cardNumber, null, token, dob, cvv, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), "Plastic card activation", 0, 0, null, 0, "2", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString());
+                Logger.info("/////// Ws_Activate service invocation was ended. WSID #" + wsid + ". Result code: " + wsActivate.getActionCode() + " ." + wsActivate.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", wsActivate.getActionCode())) {
                     throw new CardProviderException("Bad Response", wsActivate.getActionCode());
@@ -1006,7 +1006,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 statusChange = service.getServiceSoap().wsStatusChange(wsid, gpsSettings.issCode, "2", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), statCode, reason, 2, null, 0, null, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WS_StatusChange service invocation was ended. WSID #" + wsid + ". Result code: " + statusChange.getActionCode() + " ." + statusChange.toString());
+                Logger.info("/////// WS_StatusChange service invocation was ended. WSID #" + wsid + ". Result code: " + statusChange.getActionCode() + " ." + statusChange.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", statusChange.getActionCode())) {
                     throw new CardProviderException("Bad Response", statusChange.getActionCode());
@@ -1046,7 +1046,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 cardStatement = service.getServiceSoap().wsCardStatement(wsid, gpsSettings.issCode, "5", null, 2, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"),
                         DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, "1WS_PinControl", DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), 0, 0, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString());
+                Logger.info("/////// Ws_Card_Statement service invocation was ended. WSID #" + wsid + ". Result code: " + cardStatement.getActionCode() + " ." + cardStatement.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 for (Transaction2 transaction2 : cardStatement.getTransactions().getTransaction2()) {
                     Logger.info("Transaction:" + transaction2.toString());
@@ -1090,7 +1090,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 pinControl = service.getServiceSoap().wsPinControl(wsid, gpsSettings.issCode, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, token, null, func, oldPin, newPin, confirmPin, sms, "1", null, null, null, null, fee, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString());
+                Logger.info("/////// WS_PinControl service invocation was ended. WSID #" + wsid + ". Result code: " + pinControl.getActionCode() + " ." + pinControl.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", pinControl.getActionCode())) {
                     throw new CardProviderException("Bad Response", pinControl.getActionCode());
@@ -1123,7 +1123,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
 //                cardRegenerate = service.getServiceSoap().wsRegenerateCardDetail(card.getToken(), 0, 1, 1, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + cardRegenerate.getActionCode() + " ." + cardRegenerate.toString());
+                Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + cardRegenerate.getActionCode() + " ." + cardRegenerate.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", cardRegenerate.getActionCode())) {
 
@@ -1186,7 +1186,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 changeGroup = service.getServiceSoap().wsCardChangeGroups(wsid, gpsSettings.issCode, null, card.getToken(), DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), limitGroup, mccGroup, permGroup, feeGroup, schedFeeGroup, wsFeeGroup, "", "", createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
 
-                Logger.info("/////// Ws_Change_Group service invocation was ended. WSID #" + wsid + ". Result code: " + changeGroup.getActionCode() + " ." + changeGroup.toString());
+                Logger.info("/////// Ws_Change_Group service invocation was ended. WSID #" + wsid + ". Result code: " + changeGroup.getActionCode() + " ." + changeGroup.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", changeGroup.getActionCode())) {
                     throw new CardProviderException("Bad Response", changeGroup.getActionCode());
@@ -1224,7 +1224,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 applyFees = service.getServiceSoap().wsGenericFees(wsid, gpsSettings.issCode, null, card.getToken(), procCode, "apply fee", DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), fee, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Generic_Fees service invocation was ended. WSID #" + wsid + ". Result code: " + applyFees.getActionCode() + " ." + applyFees.toString());
+                Logger.info("/////// Ws_Generic_Fees service invocation was ended. WSID #" + wsid + ". Result code: " + applyFees.getActionCode() + " ." + applyFees.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", applyFees.getActionCode())) {
                     throw new CardProviderException("Bad Response", applyFees.getActionCode());
@@ -1257,7 +1257,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 passCode = service.getServiceSoap().wsGetPasscode(wsid, gpsSettings.issCode, null, token, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_Get_Passcode service invocation was ended. WSID #" + wsid + ". Result code: " + passCode.getActionCode() + " ." + passCode.toString());
+                Logger.info("/////// Ws_Get_Passcode service invocation was ended. WSID #" + wsid + ". Result code: " + passCode.getActionCode() + " ." + passCode.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", passCode.getActionCode())) {
                     throw new CardProviderException("Bad Response", passCode.getActionCode());
@@ -1285,11 +1285,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             WsResult wsResult = null;
 
+            long time = System.currentTimeMillis();
+
             try {
 
                 wsResult = service.getServiceSoap().wsWebServiceResult(Long.parseLong(String.valueOf(wsid)), gpsSettings.issCode, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WS_Service_result service invocation was ended. WSID #" + wsid + ". Result code: " + wsResult.getActionCode() + " ." + wsResult.toString());
+                Logger.info("/////// WS_Service_result service invocation was ended. WSID #" + wsid + ". Result code: " + wsResult.getActionCode() + " ." + wsResult.toString() + " .Total time: " + (System.currentTimeMillis() - time));
 
                 if (!StringUtils.equals("000", wsResult.getActionCode())) {
                     throw new CardProviderException("Bad Response", wsResult.getActionCode());
@@ -1322,7 +1324,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
                 balanceTransfer = service.getServiceSoap().wsBalanceTransfer(wsid, gpsSettings.issCode, "0", null, "1", null, null, token, null, null, null, null, DateUtil.format(new Date(), "yyyy-MM-dd"), DateUtil.format(new Date(), "yyyy-MM-dd"), null, null, newToken, amount, currency, gpsSettings.loadSrc, 0, null, 0, description, loadedBy, feeWaiver, null, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// Ws_BalanceTransfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString());
+                Logger.info("/////// Ws_BalanceTransfer service invocation was ended. WSID #" + wsid + ". Result code: " + balanceTransfer.getActionCode() + " ." + balanceTransfer.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
                 if (!StringUtils.equals("000", balanceTransfer.getActionCode())) {
                     throw new CardProviderException("Bad Response", balanceTransfer.getActionCode());
