@@ -17,6 +17,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import repository.CustomerRepository;
+import services.CacheProvider;
 
 import static configs.ReturnCodes.*;
 
@@ -27,8 +28,6 @@ import static configs.ReturnCodes.*;
  * @since 0.2.0
  */
 public class BaseCustomerApiAction extends Action.Simple {
-    @Inject
-    CacheApi cache;
 
     @Inject
     CustomerRepository customerRepository;
@@ -41,9 +40,9 @@ public class BaseCustomerApiAction extends Action.Simple {
             return F.Promise.pure(createWrongAuthDataResponse());
         }
 
-        final String phone = cache.get(token);
+        final String phone = (String)CacheProvider.getInstance().getObject(token);
 
-        Integer accountID = cache.get("account_" + phone);
+        Integer accountID = (Integer)CacheProvider.getInstance().getObject("account_" + phone);
 
         if (StringUtils.isBlank(phone)) {
             Logger.error("Authorization token was not found");
@@ -72,9 +71,9 @@ public class BaseCustomerApiAction extends Action.Simple {
             String sessionTimeOut = conf.getString("cache.customer.session.timeout");
 
             //Store token to cache with expiration time out
-            cache.set(token, customer.getId(), Integer.parseInt(sessionTimeOut) * 60);
+            CacheProvider.getInstance().putObject(token, customer.getId()/*, Integer.parseInt(sessionTimeOut) * 60*/);
 
-            cache.set("account_" + customer.getId(), accountID, Integer.parseInt(sessionTimeOut) * 60);
+            CacheProvider.getInstance().putObject("account_" + customer.getId(), accountID/*, Integer.parseInt(sessionTimeOut) * 60*/);
 
 
             return delegate.call(ctx);

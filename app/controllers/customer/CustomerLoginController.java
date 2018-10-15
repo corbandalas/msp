@@ -23,7 +23,6 @@ import play.mvc.Result;
 import play.mvc.With;
 import repository.CustomerRepository;
 import services.CacheProvider;
-import services.MailService;
 import util.SecurityUtil;
 
 import java.util.Optional;
