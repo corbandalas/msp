@@ -30,11 +30,11 @@ public class BankStatementTriggerJob implements Runnable {
         Logger.info("////////////////////////////// BankStatementTriggerJob WORKS!!!!");
 
 
-        F.Promise.wrap(customerRepository.retrieveAll()).map(res -> {
-            res.parallelStream().forEach(customer -> mailService.sendBankStatementEmail("", customer.getEmail(), customer.getCountry_id(), customer.getFirstName() + " " + customer.getLastName()));
-
-            return F.Promise.pure("OK");
-        });
+//        F.Promise.wrap(customerRepository.retrieveAll()).map(res -> {
+//            res.parallelStream().forEach(customer -> mailService.sendBankStatementEmail("", customer.getEmail(), customer.getCountry_id(), customer.getFirstName() + " " + customer.getLastName()));
+//
+//            return F.Promise.pure("OK");
+//        });
     }
 
 }
