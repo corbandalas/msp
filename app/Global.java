@@ -6,6 +6,7 @@ import play.Application;
 import play.GlobalSettings;
 import play.Logger;
 import play.Play;
+import play.api.mvc.EssentialFilter;
 import play.libs.Akka;
 import play.mvc.Action;
 import play.mvc.Http.Request;
@@ -67,5 +68,8 @@ public class Global extends GlobalSettings {
         return super.onRequest(request, method);
     }
 
+    public <T extends EssentialFilter> Class<T>[] filters() {
+        return new Class[] { TimeLoggingFilter.class  };
+    }
 
 }
