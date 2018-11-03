@@ -470,7 +470,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         customer.getCity(), //City
                         customer.getPostcode(), //PostCode
                         countrySettingsTuple._2.orElseThrow(WrongCountryException::new).getCode(), //Country
-                        customer.getId(), //Mobile
+                        "+" + customer.getId(), //Mobile
                         cardDesignVal, //CardDesign
                         null, //ExternalRef
                         dob, //DOB
