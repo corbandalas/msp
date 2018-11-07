@@ -23,6 +23,7 @@ import play.mvc.With;
 import provider.CardProvider;
 import repository.CardRepository;
 import repository.CustomerRepository;
+import services.CacheProvider;
 import services.W2GlobaldataService;
 
 import java.util.ArrayList;
@@ -43,9 +44,6 @@ public class CustomerKYCController extends BaseController {
 
     @Inject
     W2GlobaldataService w2GlobaldataService;
-
-    @Inject
-    CacheApi cache;
 
     @Inject
     CustomerRepository customerRepository;
@@ -152,7 +150,7 @@ public class CustomerKYCController extends BaseController {
                                     }
                                 }*/
 
-                                cache.set(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId().concat("|").concat(request.getKycType()), 24 * 60 * 60);
+                                CacheProvider.getInstance().putObject(details2.getProcessRequestResult().getTransactionInformation().getServiceCallReference(), customer.getId().concat("|").concat(request.getKycType())/*, 24 * 60 * 60*/);
 
                                 return Promise.wrap(customerRepository.update(customer)).zip(Promise.pure(details2)).zip(Promise.pure(kycServiceResults2));
 
