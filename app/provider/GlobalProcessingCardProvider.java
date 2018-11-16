@@ -1398,7 +1398,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             String gpsConfigStringValue = res.orElseThrow(WrongPropertyException::new).getValue();
 
-            String[] split = gpsConfigStringValue.split(":");
+            String[] split = gpsConfigStringValue.split("%");
 
             return new GPSSettings(split[0], split[1], split[2], split[3], split[4], split[5], split[6], split[7], split[8], split[9]);
 
@@ -1421,7 +1421,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
             String gpsConfigStringValue = res.orElseThrow(WrongPropertyException::new).getValue();
 
-            String[] split = gpsConfigStringValue.split(":");
+            String[] split = gpsConfigStringValue.split("%");
 
             return new GPSSettings(split[0], split[1], split[2], split[3], split[4], split[5], split[6], split[7], split[8], split[9]);
         });
