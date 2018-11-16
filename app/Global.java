@@ -46,11 +46,11 @@ public class Global extends GlobalSettings {
             Akka.system().scheduler().schedule(Duration.create(20, TimeUnit.MINUTES), Duration.create(240, TimeUnit.MINUTES),
                     injector.getInstance(ExchangeRatesTriggerJob.class), Akka.system().dispatcher());
 
-            Akka.system().scheduler().schedule(Duration.create(1, TimeUnit.MINUTES), Duration.create(10, TimeUnit.MINUTES),
-                    injector.getInstance(PayrollTriggerJob.class), Akka.system().dispatcher());
-
-            Akka.system().scheduler().schedule(Duration.create(1, TimeUnit.MINUTES), Duration.create(10, TimeUnit.MINUTES),
-                    injector.getInstance(BankStatementTriggerJob.class), Akka.system().dispatcher());
+//            Akka.system().scheduler().schedule(Duration.create(1, TimeUnit.MINUTES), Duration.create(10, TimeUnit.MINUTES),
+//                    injector.getInstance(PayrollTriggerJob.class), Akka.system().dispatcher());
+//
+//            Akka.system().scheduler().schedule(Duration.create(1, TimeUnit.MINUTES), Duration.create(10, TimeUnit.MINUTES),
+//                    injector.getInstance(BankStatementTriggerJob.class), Akka.system().dispatcher());
 
 
         }

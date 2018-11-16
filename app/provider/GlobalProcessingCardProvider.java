@@ -1383,45 +1383,47 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     private F.Promise<GPSSettings> getGPSSettings() {
 
-        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
-        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
-        final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
+//        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
+//        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
+//        final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
         final F.Promise<Optional<Property>> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.api.settings"));
 
-        return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
+//        return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
 
-            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
-            String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
-            String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+        return otherSettingsPromise.map(res -> {
 
-            String gpsConfigStringValue = res._2.orElseThrow(WrongPropertyException::new).getValue();
+//            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+//            String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
+//            String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+
+            String gpsConfigStringValue = res.orElseThrow(WrongPropertyException::new).getValue();
 
             String[] split = gpsConfigStringValue.split(":");
 
-            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
+            return new GPSSettings(split[0], split[1], split[2], split[3], split[4], split[5], split[6], split[7], split[8], split[9]);
 
         });
     }
 
     private F.Promise<GPSSettings> getGPSSettingsForPartner(String partnerID) {
 
-        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
-        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
-        final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
+//        final F.Promise<Optional<Property>> wsdlPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.url"));
+//        final F.Promise<Optional<Property>> usernameHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.username"));
+//        final F.Promise<Optional<Property>> passwrodHeaderPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.soap.header.password"));
         final F.Promise<Optional<Property>> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.gps.wsdl.api.settings." + partnerID));
 
-        return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
+//        return wsdlPromise.zip(usernameHeaderPromise).zip(passwrodHeaderPromise).zip(otherSettingsPromise).map(res -> {
 
-            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
-            String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
-            String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
+        return otherSettingsPromise.map(res -> {
+//            String url = res._1._1._1.orElseThrow(WrongPropertyException::new).getValue();
+//            String userName = res._1._1._2.orElseThrow(WrongPropertyException::new).getValue();
+//            String password = res._1._2.orElseThrow(WrongPropertyException::new).getValue();
 
-            String gpsConfigStringValue = res._2.orElseThrow(WrongPropertyException::new).getValue();
+            String gpsConfigStringValue = res.orElseThrow(WrongPropertyException::new).getValue();
 
             String[] split = gpsConfigStringValue.split(":");
 
-            return new GPSSettings(url, userName, password, split[0], split[1], split[2], split[3], split[4], split[5], split[6]);
-
+            return new GPSSettings(split[0], split[1], split[2], split[3], split[4], split[5], split[6], split[7], split[8], split[9]);
         });
     }
 
