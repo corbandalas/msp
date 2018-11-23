@@ -28,7 +28,7 @@ public class CacheProvider {
 
         compositeCacheManager.configure();
 
-        defaultCache = JCS.getInstance("payLikeDepositCache");
+        defaultCache = JCS.getInstance("default");
     }
 
 
