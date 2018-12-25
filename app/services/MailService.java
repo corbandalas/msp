@@ -1,6 +1,7 @@
 package services;
 
 import com.google.inject.Singleton;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.Play;
 import play.libs.mailer.Email;
@@ -20,20 +21,47 @@ import java.nio.file.Paths;
 @Singleton
 public class MailService {
 
-//    @Inject
-//    MailerClient mailerClient;
-
     public void sendBankStatementEmail(String emailFrom, String emailTo, String countryLocale, String name) {
+
+        if (StringUtils.isBlank(emailTo)) {
+            return;
+        }
+
         try {
+
+            String subject = "Take a close look";
 
             String url = "conf/templates/bank_en.html";
 
             if (countryLocale.equalsIgnoreCase("DK")) {
                 url = "conf/templates/bank_dk.html";
+                subject = "Bliv klogere";
             }
 
             String html = new String(Files.readAllBytes(Paths.get(url)));
-            send(emailFrom, emailTo, html, "Bank statement");
+
+
+            if (countryLocale.equalsIgnoreCase("DK")) {
+
+                html = StringUtils.replace(html, "Kære", "Kære " + name);
+
+            } else {
+                html = StringUtils.replace(html, "Dear", "Dear " + name);
+            }
+
+            try {
+                Email email = new Email()
+                        .setSubject(subject)
+                        .setFrom(emailFrom)
+                        .addTo(emailTo)
+                        .setBodyHtml(html);
+                Logger.info("Sending bank statement email to " + emailTo);
+
+                Play.application().injector().instanceOf(MailerClient.class).send(email);
+
+            } catch (Exception e) {
+                Logger.error("Error while sending email", e);
+            }
 
         } catch (IOException e) {
             Logger.error("Mail sending error", e);
@@ -41,39 +69,52 @@ public class MailService {
     }
 
     public void sendWelcomeEmail(String emailFrom, String emailTo, String countryLocale, String name, String token) {
+
+        if (StringUtils.isBlank(emailTo)) {
+            return;
+        }
+
         try {
+
+            String subject = "WELCOME TO MYSAFEPAY!";
 
             String url = "conf/templates/welcome_en.html";
 
             if (countryLocale.equalsIgnoreCase("DK")) {
                 url = "conf/templates/welcome_dk.html";
+                subject = "VELKOMMEN TIL MYSAFEPAY!";
             }
 
             String html = new String(Files.readAllBytes(Paths.get(url)));
-            send(emailFrom, emailTo, html, "Welcome");
+
+
+            if (countryLocale.equalsIgnoreCase("DK")) {
+
+                html = StringUtils.replace(html, "Telefonnummer:", "Telefonnummer: " + name);
+                html = StringUtils.replace(html, "Sikkerhedskode:", "Sikkerhedskode: " + token);
+
+            } else {
+                html = StringUtils.replace(html, "Phone number:", "Phone number: " + name);
+                html = StringUtils.replace(html, "Token number:", "Token number: " + token);
+            }
+
+            try {
+                Email email = new Email()
+                        .setSubject(subject)
+                        .setFrom(emailFrom)
+                        .addTo(emailTo)
+                        .setBodyHtml(html);
+                Logger.info("Sending welcome email to " + emailTo);
+
+                Play.application().injector().instanceOf(MailerClient.class).send(email);
+
+            } catch (Exception e) {
+                Logger.error("Error while sending email", e);
+            }
 
         } catch (IOException e) {
             Logger.error("Mail sending error", e);
         }
     }
 
-    private void send(String emailFrom, String emailTo, String textHtml, String subject) {
-        try {
-            Email email = new Email()
-                    .setSubject(subject)
-                    .setFrom(emailFrom)
-                    .addTo(emailTo)
-//                .addAttachment("attachment.pdf", new File("/some/path/attachment.pdf"))
-//                .addAttachment("data.txt", "data".getBytes(), "text/plain", "Simple data", EmailAttachment.INLINE)
-//                .addAttachment("image.jpg", new File("/some/path/image.jpg"), cid)
-//                .setBodyText(text)
-//                .setBodyHtml("<html><body><p>An <b>html</b> message with cid <img src=\"cid:" + cid + "\"></p></body></html>")
-                    .setBodyHtml(textHtml)
-                    ;
-            Play.application().injector().instanceOf(MailerClient.class).send(email);
-        } catch (Exception e) {
-            Logger.error("Error while sending email", e);
-        }
-
-    }
 }

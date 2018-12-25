@@ -25,6 +25,7 @@ import play.mvc.With;
 import provider.CardProvider;
 import repository.*;
 import services.CacheProvider;
+import services.MailService;
 import services.OperationService;
 import services.PaylikePaymentService;
 import util.FeeUtil;
@@ -70,6 +71,9 @@ public class CustomerPaylikeController extends BaseController {
 
     @Inject
     FeeRepository feeRepository;
+
+    @Inject
+    MailService mailService;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(

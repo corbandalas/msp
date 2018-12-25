@@ -21,6 +21,7 @@ import repository.CardRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
 import repository.PropertyRepository;
+import services.MailService;
 import services.OperationService;
 import util.CurrencyUtil;
 
@@ -170,7 +171,7 @@ public class BaseController extends play.mvc.Controller {
                     }
 
                     if (throwable instanceof CardProviderException) {
-                        return createCardProviderException(((CardProviderException)throwable).getErrorCode());
+                        return createCardProviderException(((CardProviderException) throwable).getErrorCode());
                     }
 
                     return createGeneralErrorResponse();
@@ -294,7 +295,7 @@ public class BaseController extends play.mvc.Controller {
     }
 
 
-    protected F.Promise<F.Tuple<Card, CardCreationResponse>> cardPurchase(String phone, long amount, String currencyCode, CardType cardType, CustomerRepository customerRepository, CurrencyRepository currencyRepository, CardProvider cardProvider, CardRepository cardRepository) {
+    protected F.Promise<F.Tuple<Card, CardCreationResponse>> cardPurchase(String phone, long amount, String currencyCode, CardType cardType, CustomerRepository customerRepository, CurrencyRepository currencyRepository, CardProvider cardProvider, CardRepository cardRepository, MailService mailService) {
 
         final F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(phone));
 
@@ -327,6 +328,7 @@ public class BaseController extends play.mvc.Controller {
                             F.Promise.wrap(cardRepository.create(new Card(0L, cardCreationResponse.getToken(), customer.getId(),
                                     CardType.VIRTUAL, CardBrand.VISA, true, new Date(), "alias", true, "info", currency.getId(),
                                     customer.getAddress1(), customer.getAddress2(), customer.getAddress2(), customer.getCountry_id()))).zip(F.Promise.pure(cardCreationResponse)));
+
 
                 } else {
 
@@ -368,6 +370,12 @@ public class BaseController extends play.mvc.Controller {
                 }
             }
 
+            cardPromise.map(card -> {
+                        mailService.sendWelcomeEmail("noreply@mysafepay.dk", customer.getEmail(), customer.getCountry_id(), customer.getId(), card._2.getToken());
+
+                        return card;
+                    }
+            );
 
 //            cardPromise.flatMap(card -> cardProvider.regenerateCardDetails(card._1));
 
