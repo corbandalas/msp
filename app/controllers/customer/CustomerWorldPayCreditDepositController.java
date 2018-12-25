@@ -30,6 +30,7 @@ import repository.CardRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
 import repository.PropertyRepository;
+import services.MailService;
 import services.OperationService;
 import services.WorldPayPaymentService;
 import util.CurrencyUtil;
@@ -77,6 +78,9 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
 
     @Inject
     CustomerRepository customerRepository;
+
+    @Inject
+    MailService mailService;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -573,7 +577,7 @@ public class CustomerWorldPayCreditDepositController extends BaseController {
             }
 
             return cardPurchase(customerWorldPayCreditCardPurchase.getPhone(), customerWorldPayCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerWorldPayCreditCardPurchase.getCardType()),
-                    customerRepository, currencyRepository, cardProvider, cardRepository)
+                    customerRepository, currencyRepository, cardProvider, cardRepository, mailService)
                     .map(res -> createRedirect(customerWorldPayCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res._1.getToken() + "&crdpan=" + Utils.maskCardNumber(res._2.getPan()) + "&crdexp=" + res._2.getExpDate()));
 
         });

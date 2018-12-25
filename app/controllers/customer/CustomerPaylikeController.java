@@ -450,7 +450,7 @@ public class CustomerPaylikeController extends BaseController {
                         if (capture.getTransaction().getCapturedAmount().equals(transaction.getTransaction().getAmount())) {
                             Logger.info("Paylike transaction was captured successfully");
 
-                            return cardPurchase(customerPaylikeCreditCardPurchase.getPhone(), customerPaylikeCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerPaylikeCreditCardPurchase.getCardType()), customerRepository, currencyRepository, cardProvider, cardRepository)
+                            return cardPurchase(customerPaylikeCreditCardPurchase.getPhone(), customerPaylikeCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(customerPaylikeCreditCardPurchase.getCardType()), customerRepository, currencyRepository, cardProvider, cardRepository, mailService)
                                     .map(res -> createRedirect(customerPaylikeCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res._1.getToken() + "&crdpan=" + Utils.maskCardNumber(res._2.getPan()) + "&crdexp=" + res._2.getExpDate()))
                                     .map(res -> createRedirect(customerPaylikeCreditCardPurchase.getSuccessURL()))
                                     .recover(

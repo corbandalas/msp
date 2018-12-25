@@ -26,6 +26,7 @@ import provider.CardProvider;
 import repository.*;
 import services.CacheProvider;
 import services.KvantoPaymentService;
+import services.MailService;
 import services.OperationService;
 import util.FeeUtil;
 import util.Utils;
@@ -71,6 +72,9 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
 
     @Inject
     FeeRepository feeRepository;
+
+    @Inject
+    MailService mailService;
 
     @With(BaseCustomerApiAction.class)
     @ApiOperation(
@@ -453,7 +457,7 @@ public class CustomerPaylikeCreditDepositController extends BaseController {
                         if (capture.getStatus().equalsIgnoreCase("Approved")) {
                             Logger.info("Paylike transaction was captured successfully");
 
-                            return cardPurchase(kvantoCreditCardPurchase.getPhone(), kvantoCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(kvantoCreditCardPurchase.getCardType()), customerRepository, currencyRepository, cardProvider, cardRepository)
+                            return cardPurchase(kvantoCreditCardPurchase.getPhone(), kvantoCreditCardPurchase.getAmount(), paymentCurrency, CardType.valueOf(kvantoCreditCardPurchase.getCardType()), customerRepository, currencyRepository, cardProvider, cardRepository, mailService)
                                     .map(res -> createRedirect(kvantoCreditCardPurchase.getSuccessURL() + "?crdtcn=" + res._1.getToken() + "&crdpan=" + Utils.maskCardNumber(res._2.getPan()) + "&crdexp=" + res._2.getExpDate()))
                                     .map(res -> createRedirect(kvantoCreditCardPurchase.getSuccessURL()))
                                     .recover(
