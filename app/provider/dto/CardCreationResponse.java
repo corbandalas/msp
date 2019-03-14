@@ -13,6 +13,7 @@ public class CardCreationResponse extends BaseCardResponse{
     private String pan;
     private String expDate;
     private double loadValue;
+    private String image;
 
     public CardCreationResponse(String token, String actionCode, String cvv, String pan, String expDate, double loadValue) {
         super(actionCode);
@@ -21,6 +22,16 @@ public class CardCreationResponse extends BaseCardResponse{
         this.pan = pan;
         this.expDate = expDate;
         this.loadValue = loadValue;
+    }
+
+    public CardCreationResponse(String token, String actionCode, String cvv, String pan, String expDate, double loadValue, String image) {
+        super(actionCode);
+        this.token = token;
+        this.cvv = cvv;
+        this.pan = pan;
+        this.expDate = expDate;
+        this.loadValue = loadValue;
+        this.image = image;
     }
 
     public String getToken() {
@@ -61,5 +72,13 @@ public class CardCreationResponse extends BaseCardResponse{
 
     public void setLoadValue(double loadValue) {
         this.loadValue = loadValue;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

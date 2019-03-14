@@ -31,6 +31,8 @@ import java.util.Optional;
 
 import static configs.ReturnCodes.*;
 
+//https://localhost:13682/service.asmx?wsdl%SafePayApS%0<q-1m;94l8|W,p%SPA%1822|1981|1982%SPA-VL-002 SafePay FDD Limit EUR|SPA-VL-001 SafePay SDD Limit EUR|SPA-VL-004 SafePay FDD Limit DKK|SPA-VL-003 SafePay SDD Limit DKK|SPA-VL-006 SafePay FDD Limit GBP|SPA-VL-005 SafePay SDD Limit GBP%SPA-CU-002|SPA-CU-003%SPA-AF-001|SPA-AF-002|SPA-AF-003%67%76100G
+//https://localhost:13682/service.asmx?wsdl%SafePayApS%0<q-1m;94l8|W,p%SPA%1822|1981|1982%SPA-VL-002 SafePay FDD Limit EUR|SPA-VL-001 SafePay SDD Limit EUR|SPA-VL-004 SafePay FDD Limit DKK|SPA-VL-003 SafePay SDD Limit DKK|SPA-VL-006 SafePay FDD Limit GBP|SPA-VL-005 SafePay SDD Limit GBP%SPA-CU-002|SPA-CU-003%SPA-AF-001|SPA-AF-002|SPA-AF-003%67%76100G
 /**
  * Partner card provider API controller
  *
@@ -135,8 +137,14 @@ public class CardPartnerController extends BaseController {
 
         boolean plastic = false;
         boolean activateNow = false;
+        boolean image = false;
 
         try {
+
+            if (StringUtils.isNotBlank(createCard.getImage())) {
+                image = Boolean.parseBoolean(createCard.getImage());
+            }
+
             KYC kyc = KYC.valueOf(createCard.getKyc().toUpperCase());
 
             customer.setKyc(kyc);
@@ -163,21 +171,22 @@ public class CardPartnerController extends BaseController {
         final boolean finalPlastic = plastic;
 
         final boolean finalActivateNow = activateNow;
+        final boolean finalImage = image;
         F.Promise<Result> result = currencyPromise.flatMap(currency -> {
 
             F.Promise<CardCreationResponse> cardCreationResponsePromise;
 
             if (!finalPlastic) {
                 if (finalAmount > 0) {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage);
                 } else {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage);
                 }
             } else {
                 if (finalAmount > 0) {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage);
                 } else {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage);
                 }
             }
 
