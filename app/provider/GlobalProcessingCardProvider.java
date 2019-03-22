@@ -76,14 +76,14 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image);
+    public F.Promise<CardCreationResponse> issueEmptyVirtualCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image, String expDate) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.VIRTUAL_TO_PLASTIC, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image, expDate);
 
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image) {
-        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image);
+    public F.Promise<CardCreationResponse> issueEmptyPlasticCardForPartner(String partnerID, Customer customer, String cardName, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image, String expDate) {
+        return issueCardPartner(partnerID, customer, cardName, 0, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image, expDate);
     }
 
     @Override
@@ -97,13 +97,13 @@ public class GlobalProcessingCardProvider implements CardProvider {
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image) {
-        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image);
+    public F.Promise<CardCreationResponse> issuePrepaidVirtualCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image, String expDate) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.VIRTUAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image, expDate);
     }
 
     @Override
-    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image) {
-        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image);
+    public F.Promise<CardCreationResponse> issuePrepaidPlasticCardForPartner(String partnerID, Customer customer, String cardName, long amount, Currency currency, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image, String expDate) {
+        return issueCardPartner(partnerID, customer, cardName, amount, currency, GlobalProcessingCardCreateType.PHYSICAL_WITH_AMOUNT, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, image, expDate);
     }
 
     @Override
@@ -293,7 +293,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     }
 
-    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image) {
+    private F.Promise<CardCreationResponse> issueCardPartner(String partnerID, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, boolean image, String expDate) {
 
         F.Promise<Optional<Country>> countryPromise;
 
@@ -304,7 +304,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
         }
 
         return getGPSSettingsForPartner(partnerID).zip(countryPromise).
-                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod)).
+                flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, expDate)).
                 map(res -> {
 
                     if (image) {
@@ -356,12 +356,17 @@ public class GlobalProcessingCardProvider implements CardProvider {
         return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeSendMessage(res, token, event));
     }
 
+    @Override
+    public F.Promise<ExtendExpiry> extendExpDate(String partnerID, String token, String expDate) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeExtendExpiry(res, token, expDate));
+    }
+
     private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow) {
-        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow, null, customer.getAddress1(), customer.getCity(), customer.getPostcode(), null, "0");
+        return invokeCreateCard(countrySettingsTuple, customer, cardName, loadValue, currency, type, activateNow, null, customer.getAddress1(), customer.getCity(), customer.getPostcode(), null, "0", null);
     }
 
 
-    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod) {
+    private F.Promise<VirtualCards> invokeCreateCard(F.Tuple<GPSSettings, Optional<Country>> countrySettingsTuple, Customer customer, String cardName, long loadValue, Currency currency, GlobalProcessingCardCreateType type, boolean activateNow, String cardDesign, String deliveryAddress1, String deliveryCity, String deliveryPostCode, String deliveryCountry, String deliveryMethod, String expDate) {
 
         return F.Promise.promise(() -> {
 
@@ -498,7 +503,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         null, //CustAccount
                         activateNow ? 1 : 0, //ActivateNow
                         null, //Source_desc
-                        null, //ExpDate
+                        expDate, //ExpDate
                         customer.getFullName(), //CardName
                         limitGroup, //LimitsGroup
                         null, //MCCGroup
@@ -669,6 +674,40 @@ public class GlobalProcessingCardProvider implements CardProvider {
             }
 
             return loadCard;
+        }, getExecutionContext());
+    }
+
+    private F.Promise<ExtendExpiry> invokeExtendExpiry(GPSSettings gpsSettings, String token, String expDate) {
+
+        return F.Promise.promise(() -> {
+
+            Service service = getService(gpsSettings.wsdlURL);
+
+            ExtendExpiry extendExpiry = null;
+
+            long wsid = System.currentTimeMillis();
+            Logger.info("/////// Ws_ExtendExpiry service invocation. WSID #" + wsid);
+
+            try {
+
+                extendExpiry = service.getServiceSoap().wsExtendExpiry(wsid, gpsSettings.issCode, "17", null, null, "1", null, null, token, null, null, null, expDate, DateUtil.format(new Date(), "yyyy-MM-dd"),
+                        DateUtil.format(new Date(), "hhmmss"), null, 0, null, 0, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+
+
+                Logger.info("/////// Ws_ExtendExpiry service invocation was ended. WSID #" + wsid + ". Result code: " + extendExpiry.getActionCode() + " ." + extendExpiry.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
+
+                if (!StringUtils.equals("000", extendExpiry.getActionCode())) {
+                    throw new CardProviderException("Bad Response", extendExpiry.getActionCode());
+                }
+
+            } catch (Exception e) {
+                Logger.error("GPS connection error: ", e);
+                String errorCode = (e instanceof CardProviderException) ? ((CardProviderException) e).getErrorCode() : "";
+
+                throw new CardProviderException("GPS error", errorCode);
+            }
+
+            return extendExpiry;
         }, getExecutionContext());
     }
 

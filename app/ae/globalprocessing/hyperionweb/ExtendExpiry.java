@@ -371,4 +371,22 @@ public class ExtendExpiry {
         this.curCode = value;
     }
 
+    @Override
+    public String toString() {
+        return "ExtendExpiry{" +
+                "wsid=" + wsid +
+                ", issCode='" + issCode + '\'' +
+                ", txnCode='" + txnCode + '\'' +
+                ", publicToken='" + publicToken + '\'' +
+                ", locDate='" + locDate + '\'' +
+                ", locTime='" + locTime + '\'' +
+                ", expDate='" + expDate + '\'' +
+                ", clientCode='" + clientCode + '\'' +
+                ", sysDate='" + sysDate + '\'' +
+                ", actionCode='" + actionCode + '\'' +
+                ", avlBal=" + avlBal +
+                ", blkAmt=" + blkAmt +
+                ", curCode='" + curCode + '\'' +
+                '}';
+    }
 }

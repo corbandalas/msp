@@ -41,6 +41,7 @@ POST       /api/partner/card/activate                                          @
 POST       /api/partner/card/result                                          @controllers.partner.CardPartnerController.wsResult()
 POST       /api/partner/card/balanceadjust                                          @controllers.partner.CardPartnerController.balanceAdjustment()
 POST       /api/partner/card/sms                                          @controllers.partner.CardPartnerController.sendSms()
+POST       /api/partner/card/extend                                          @controllers.partner.CardPartnerController.extendExpDate()
 
 #Merchant API(admin)
 
