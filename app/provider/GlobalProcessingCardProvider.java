@@ -307,7 +307,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 flatMap(res -> invokeCreateCard(res, customer, cardName, loadValue, currency, type, activateNow, cardDesign, deliveryAddress1, deliveryCity, deliveryPostCode, deliveryCountry, deliveryMethod, expDate)).
                 map(res -> {
 
-                    if (image) {
+                    if (image && res.getImage() != null) {
                         return new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue(), new String(res.getImage()));
                     } else {
                         return new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue());
