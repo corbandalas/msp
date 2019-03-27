@@ -498,7 +498,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                         "67",//countrySettingsTuple._1.loadSrc, //LoadSrc
                         0, //LoadFee
                         customer.getFullName(), //LoadedBy
-                        0, //CreateImage
+                        1, //CreateImage
                         type.getValue(), //CreateType
                         null, //CustAccount
                         activateNow ? 1 : 0, //ActivateNow
