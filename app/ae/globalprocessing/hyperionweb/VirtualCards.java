@@ -521,7 +521,7 @@ public class VirtualCards {
                 ", isLive=" + isLive +
                 ", startDate='" + startDate + '\'' +
                 ", expDate='" + expDate + '\'' +
-                ", cvv='" + cvv + '\'' +
+//                ", cvv='" + cvv + '\'' +
                 ", maskedPAN='" + maskedPAN + '\'' +
                 ", image=" + Arrays.toString(image) +
                 '}';
