@@ -308,7 +308,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 map(res -> {
 
                     if (image && res.getImage() != null) {
-                        return new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue(), new String(res.getImage()));
+                        return new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue(), res.getImage());
                     } else {
                         return new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue());
                     }
