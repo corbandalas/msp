@@ -523,7 +523,7 @@ public class VirtualCards {
                 ", expDate='" + expDate + '\'' +
 //                ", cvv='" + cvv + '\'' +
                 ", maskedPAN='" + maskedPAN + '\'' +
-                ", image=" + (new String(image)).toString() +
+                ", image=" + ((image != null )? (new String(image)).toString(): "" ) +
                 '}';
     }
 }
