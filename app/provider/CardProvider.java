@@ -72,4 +72,6 @@ public interface CardProvider {
     F.Promise<BalanceAdjust> balanceAdjustmentForPartner(String partnerID, String token, double balance, String currencyCode, String debOrCredit, String description, boolean forcePost);
     F.Promise<AlertResponse> sendMessageForPartner(String partnerID, String token, int event);
     F.Promise<ExtendExpiry> extendExpDate(String partnerID, String token, String expDate);
+    F.Promise<Regenerate> regenerateCard(Card card, int regenType, int smsRequired, int smsContent, String extRef, String mailOrSms);
+    F.Promise<Regenerate> regenerateCardForPartner(String partnerID, String token, int regenType, int smsRequired, int smsContent, String extRef, String mailOrSms);
     }

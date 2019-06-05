@@ -1,7 +1,7 @@
 package dto.partner;
 
-import ae.globalprocessing.hyperionweb.BalanceEnquire2;
 import ae.globalprocessing.hyperionweb.ExtendExpiry;
+import ae.globalprocessing.hyperionweb.Regenerate;
 import dto.BaseAPIResponse;
 
 /**
@@ -14,10 +14,12 @@ import dto.BaseAPIResponse;
 public class ExtendExpDateResponse extends BaseAPIResponse {
 
     private ExtendExpiry extendExpiry;
+    private Regenerate regenerate;
 
-    public ExtendExpDateResponse(String text, String code, ExtendExpiry extendExpiry) {
+    public ExtendExpDateResponse(String text, String code, ExtendExpiry extendExpiry, Regenerate regenerate) {
         super(text, code);
         this.extendExpiry = extendExpiry;
+        this.regenerate = regenerate;
     }
 
     public ExtendExpiry getExtendExpiry() {
@@ -26,5 +28,13 @@ public class ExtendExpDateResponse extends BaseAPIResponse {
 
     public void setExtendExpiry(ExtendExpiry extendExpiry) {
         this.extendExpiry = extendExpiry;
+    }
+
+    public Regenerate getRegenerate() {
+        return regenerate;
+    }
+
+    public void setRegenerate(Regenerate regenerate) {
+        this.regenerate = regenerate;
     }
 }

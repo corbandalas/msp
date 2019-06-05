@@ -276,7 +276,17 @@ public class GlobalProcessingCardProvider implements CardProvider {
 
     @Override
     public F.Promise<CardDetailsResponse> regenerateCardDetails(Card card) {
-        return getGPSSettings().flatMap(res -> invokeCardRegenerate(res, card)).map((res -> new CardDetailsResponse(res.getPublicToken(), res.getPAN(), null, res.getCVV(), 0.0, null, null, res.getActionCode())));
+        return null;
+    }
+
+    @Override
+    public F.Promise<Regenerate> regenerateCard(Card card, int regenType, int smsRequired, int smsContent, String extRef, String mailOrSms) {
+        return getGPSSettings().flatMap(res -> invokeCardRegenerate(res, card.getToken(), regenType, smsRequired, smsContent, extRef, mailOrSms));
+    }
+
+    @Override
+    public F.Promise<Regenerate> regenerateCardForPartner(String partnerID, String token, int regenType, int smsRequired, int smsContent, String extRef, String mailOrSms) {
+        return getGPSSettingsForPartner(partnerID).flatMap(res -> invokeCardRegenerate(res, token, regenType, smsRequired, smsContent, extRef, mailOrSms));
     }
 
     @Override
@@ -312,7 +322,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                     } else {
                         return new CardCreationResponse(res.getPublicToken(), res.getActionCode(), res.getCVV(), res.getMaskedPAN(), res.getExpDate(), res.getLoadValue());
                     }
-        });
+                });
 
     }
 
@@ -1153,7 +1163,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
         }, getExecutionContext());
     }
 
-    private F.Promise<CardRegenerate> invokeCardRegenerate(GPSSettings gpsSettings, Card card) {
+    private F.Promise<Regenerate> invokeCardRegenerate(GPSSettings gpsSettings, String token, int regenType, int smsRequired, int smsContent, String extRef, String mailOrSms) {
 
         return F.Promise.promise(() -> {
 
@@ -1163,17 +1173,17 @@ public class GlobalProcessingCardProvider implements CardProvider {
             long wsid = System.currentTimeMillis();
             Logger.info("/////// WS_Regenerate service invocation. WSID #" + wsid);
 
-            CardRegenerate cardRegenerate = null;
+            Regenerate regenerate = null;
 
             try {
 
-//                cardRegenerate = service.getServiceSoap().wsRegenerateCardDetail(card.getToken(), 0, 1, 1, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
+                regenerate = service.getServiceSoap().wsRegenerate(token, regenType, smsRequired, smsContent, extRef, null, mailOrSms, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));// wsRegenerateCardDetail(card.getToken(), 0, 1, 1, createAuthHeader(gpsSettings.headerUsername, gpsSettings.headerPassword));
 
-                Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + cardRegenerate.getActionCode() + " ." + cardRegenerate.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
+                Logger.info("/////// WS_Regenerate service invocation was ended. WSID #" + wsid + ". Result code: " + regenerate.getActionCode() + " ." + regenerate.toString() + " .Total time: " + (System.currentTimeMillis() - wsid));
 
-                if (!StringUtils.equals("000", cardRegenerate.getActionCode())) {
+                if (!StringUtils.equals("000", regenerate.getActionCode())) {
 
-                    throw new CardProviderException("Bad Response", cardRegenerate.getActionCode());
+                    throw new CardProviderException("Bad Response", regenerate.getActionCode());
                 }
 
             } catch (Exception e) {
@@ -1183,7 +1193,7 @@ public class GlobalProcessingCardProvider implements CardProvider {
                 throw new CardProviderException("GPS error", errorCode);
             }
 
-            return cardRegenerate;
+            return regenerate;
         }, getExecutionContext());
     }
 

@@ -1147,7 +1147,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.extendExpDate(authData.getAccount().getId().toString(), extendExpDateRequest.getToken(), extendExpDateRequest.getExpDate()).map(res -> ok(Json.toJson(new ExtendExpDateResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+        F.Promise<Result> result = globalProcessingCardProvider.extendExpDate(authData.getAccount().getId().toString(), extendExpDateRequest.getToken(), extendExpDateRequest.getExpDate()).zip(globalProcessingCardProvider.regenerateCardForPartner(authData.getAccount().getId().toString(), extendExpDateRequest.getToken(), 2, 0, 0, null, "1")).map(res -> ok(Json.toJson(new ExtendExpDateResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res._1, res._2))));
 
         return returnRecover(result);
     }
