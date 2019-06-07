@@ -23,6 +23,7 @@ import provider.GlobalProcessingCardProvider;
 import provider.dto.CardCreationResponse;
 import repository.CardRepository;
 import repository.CurrencyRepository;
+import services.W2GlobaldataService;
 import util.DateUtil;
 import util.SecurityUtil;
 
@@ -50,6 +51,9 @@ public class CardPartnerController extends BaseController {
 
     @Inject
     CardRepository cardRepository;
+
+    @Inject
+    W2GlobaldataService w2GlobaldataService;
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
@@ -1152,5 +1156,74 @@ public class CardPartnerController extends BaseController {
         return returnRecover(result);
     }
 
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "checkUserSanctions",
+            value = "check user sanctions list",
+            notes = "Method allows to check whether customer is in sanction list",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CheckUserSanctionResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CheckUserSanctionResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Check user sanction request request", required = true, dataType = "dto.partner.CheckUserSanctionRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+fullName+dayOfBirth+monthOfBirth+yearOfBirth+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> checkUserSanctions() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CheckUserSanctionRequest checkUserSanctionRequest;
+        try {
+            checkUserSanctionRequest = Json.fromJson(jsonNode, CheckUserSanctionRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(checkUserSanctionRequest.getFullName())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(checkUserSanctionRequest.getDayOfBirth())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(checkUserSanctionRequest.getMonthOfBirth())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(checkUserSanctionRequest.getYearOfBirth())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), checkUserSanctionRequest.getFullName(), checkUserSanctionRequest.getDayOfBirth(), checkUserSanctionRequest.getMonthOfBirth(), checkUserSanctionRequest.getYearOfBirth(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+
+        F.Promise<Result> result = w2GlobaldataService.checkUserSanction(checkUserSanctionRequest.getFullName(), checkUserSanctionRequest.getDayOfBirth(), checkUserSanctionRequest.getMonthOfBirth(), checkUserSanctionRequest.getYearOfBirth()).map(res -> ok(Json.toJson(new CheckUserSanctionResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + res.getProcessRequestResult().getServiceResult().getPEPDeskCheckResult().getMatchResults()[0].getNameMatchScore(), (res.getProcessRequestResult().getServiceResult().getPEPDeskCheckResult().getMatchResults()[0].getNameMatchScore() > 80)))));
+
+        return returnRecover(result);
+    }
 
 }

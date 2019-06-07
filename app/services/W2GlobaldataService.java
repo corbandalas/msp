@@ -59,6 +59,7 @@ public class W2GlobaldataService {
     private QueryData createQueryData(W2GlobaldataSettings w2GlobaldataSettings, String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth, String houseNameNumber, String postcode, String flat, String street, String country, String city, String phoneNumber) throws W2GlobaldataValidationException {
 
         QueryData queryData = new QueryData();
+
         if (StringUtils.isNotBlank(nameQuery))
             queryData.setNameQuery(nameQuery);
         queryData.setForename(forename);
@@ -87,6 +88,30 @@ public class W2GlobaldataService {
         return queryData;
     }
 
+    private QueryData createQueryDataForSanctionCheck(String fullName, String dayOfBirth, String monthOfBirth, String yearOfBirth) throws W2GlobaldataValidationException {
+
+        QueryData queryData = new QueryData();
+
+        if (StringUtils.isNotBlank(fullName))
+            queryData.setNameQuery(fullName);
+        if (StringUtils.isNotBlank(dayOfBirth))
+            queryData.setDayOfBirth(Integer.parseInt(dayOfBirth));
+
+        if (StringUtils.isNotBlank(monthOfBirth))
+            queryData.setMonthOfBirth(Integer.parseInt(monthOfBirth));
+
+        if (StringUtils.isNotBlank(yearOfBirth))
+            queryData.setYearOfBirth(Integer.parseInt(yearOfBirth));
+
+
+       /* queryData.setNameQueryMatchThreshold(w2GlobaldataSettings.nameQueryMatchThreshold);
+        queryData.setDateOfBirthMatchThreshold(w2GlobaldataSettings.dateOfBirthMatchThreshold);*/
+
+//        queryData = fillDateOfBirth(queryData, dateOfBirth);
+
+        return queryData;
+    }
+
     public F.Promise<ServiceResponse> scandyService(String forename, String surename, Date dateOfBirth, String houseNameNumber, String postcode, String street, String country, String city, String testdatanumber, Boolean skipScandiBankId) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, null, forename, null, surename, dateOfBirth, houseNameNumber, postcode, null, street, country, city, null), "KYC_SCANDI", testdatanumber, skipScandiBankId));
     }
@@ -98,6 +123,12 @@ public class W2GlobaldataService {
     public F.Promise<ServiceResponse> kycCheckCommon(String nameQuery, String forename, String middleNames, String surname, Date dateOfBirth) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, forename, middleNames, surname, dateOfBirth, null, null, null, null, null, null, null), "SafePay_CommonChecks", null, null));
     }
+
+    public F.Promise<ServiceResponse> checkUserSanction(String fullName, String dayOfBirth, String monthOfBirth, String yearOfBirth) {
+        return getW2GlobaldataSettings().flatMap(res -> invokeSanctionCheck(res, fullName, dayOfBirth, monthOfBirth, yearOfBirth, null));
+    }
+
+
 /*    public F.Promise<ServiceResponse> standardInternationalSanctionsService(String nameQuery, Date dateOfBirth) {
         return getW2GlobaldataSettings().flatMap(res -> invokeKycCheck(res, createQueryData(res, nameQuery, dateOfBirth)));
     }
@@ -250,6 +281,7 @@ public class W2GlobaldataService {
 
                 ServiceResponse serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
 
+
 /*                ServiceResponse serviceResponse = null;
                 if (bundleName.equalsIgnoreCase("SafePay_CommonChecks")) {
                     serviceResponse = new ServiceResponse();
@@ -270,6 +302,78 @@ public class W2GlobaldataService {
             } catch (Exception ex) {
                 Logger.error("W2 global data kycCheck error: ", ex);
                 throw new W2GlobaldataException("W2 global data  kycCheck error");
+            }
+        });
+    }
+
+    private F.Promise<ServiceResponse> invokeSanctionCheck(W2GlobaldataSettings w2GlobaldataSettings, String fullName, String dayOfBirth, String monthOfBirth, String yearOfBirth, String testdatanumber) {
+        return F.Promise.promise(() -> {
+            try {
+
+                ServiceLocator serviceLocator = new ServiceLocator();
+                IService basicHttpsBinding_iService = serviceLocator.getBasicHttpsBinding_IService(new URL(w2GlobaldataSettings.wsdlURL));
+
+                ServiceRequest serviceRequest = new ServiceRequest();
+
+                final BundleData bundleData = new BundleData("Safepay_SIS_PEP");
+                serviceRequest.setBundleData(bundleData);
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] queryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[4];
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption1 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption2 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring queryOption3 = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring();
+
+
+                int size = 1;
+
+                queryOption.setKey("RedirectUrl");
+                queryOption.setValue(w2GlobaldataSettings.redirectUrl);
+                queryOptions[0] = queryOption;
+
+
+                if (StringUtils.isNotBlank(testdatanumber)) {
+                    size++;
+                    queryOption2.setKey("testdatanumber");
+                    queryOption2.setValue(testdatanumber);
+                    queryOptions[2] = queryOption2;
+                }
+
+
+                final ArrayOfKeyValueOfstringstringKeyValueOfstringstring[] resultQueryOptions = new ArrayOfKeyValueOfstringstringKeyValueOfstringstring[size];
+
+                for (ArrayOfKeyValueOfstringstringKeyValueOfstringstring item : queryOptions) {
+                    if (item != null && item.getKey() != null) {
+                        resultQueryOptions[--size] = item;
+                    }
+                }
+
+                serviceRequest.setQueryOptions(resultQueryOptions);
+
+                QueryData queryData = createQueryDataForSanctionCheck(fullName, dayOfBirth, monthOfBirth, yearOfBirth);
+
+                serviceRequest.setQueryData(queryData);
+
+                ServiceAuthorisation serviceAuthorisation = new ServiceAuthorisation();
+                serviceAuthorisation.setAPIKey(w2GlobaldataSettings.apiKey);
+
+                serviceRequest.setServiceAuthorisation(serviceAuthorisation);
+
+                ServiceResponse serviceResponse = basicHttpsBinding_iService.KYCCheck(serviceRequest);
+
+
+                // if (!bundleName.equalsIgnoreCase("SafePay_CommonChecks"))
+                Logger.info("invokeSanctionCheck response: " + serviceResponseToString(serviceResponse));
+
+                return serviceResponse;
+
+            } catch (Exception ex) {
+                Logger.error("W2 global data invokeSanctionCheck error: ", ex);
+                throw new W2GlobaldataException("W2 global data  invokeSanctionCheck error");
             }
         });
     }
@@ -346,6 +450,9 @@ public class W2GlobaldataService {
                 documentUploadRequest.setServiceAuthorisation(serviceAuthorisation);
 
                 final DocumentUploadResponse documentUploadResponse = basicHttpsBinding_iService.uploadDocument(documentUploadRequest);
+
+
+
 
                 return documentUploadResponse;
 
