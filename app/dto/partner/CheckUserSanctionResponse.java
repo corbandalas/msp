@@ -10,28 +10,13 @@ import dto.BaseAPIResponse;
  */
 public class CheckUserSanctionResponse extends BaseAPIResponse {
 
-    private String matchScore;
-    private boolean match;
+    private String result;
 
-    public CheckUserSanctionResponse(String text, String code, String matchScore, boolean match) {
+    public CheckUserSanctionResponse(String text, String code, String result) {
         super(text, code);
-        this.matchScore = matchScore;
-        this.match = match;
+
+        this.result = result;
+
     }
 
-    public String getMatchScore() {
-        return matchScore;
-    }
-
-    public void setMatchScore(String matchScore) {
-        this.matchScore = matchScore;
-    }
-
-    public boolean getMatch() {
-        return match;
-    }
-
-    public void setMatch(boolean match) {
-        this.match = match;
-    }
 }

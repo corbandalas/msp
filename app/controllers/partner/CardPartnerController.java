@@ -1221,7 +1221,7 @@ public class CardPartnerController extends BaseController {
         }
 
 
-        F.Promise<Result> result = w2GlobaldataService.checkUserSanction(checkUserSanctionRequest.getFullName(), checkUserSanctionRequest.getDayOfBirth(), checkUserSanctionRequest.getMonthOfBirth(), checkUserSanctionRequest.getYearOfBirth()).map(res -> ok(Json.toJson(new CheckUserSanctionResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), "" + res.getProcessRequestResult().getServiceResult().getPEPDeskCheckResult().getMatchResults()[0].getNameMatchScore(), (res.getProcessRequestResult().getServiceResult().getPEPDeskCheckResult().getMatchResults()[0].getNameMatchScore() > 80)))));
+        F.Promise<Result> result = w2GlobaldataService.checkUserSanction(checkUserSanctionRequest.getFullName(), checkUserSanctionRequest.getDayOfBirth(), checkUserSanctionRequest.getMonthOfBirth(), checkUserSanctionRequest.getYearOfBirth()).map(res -> ok(Json.toJson(new CheckUserSanctionResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res.getProcessRequestResult().getTransactionInformation().getInterpretResult().getValue()))));
 
         return returnRecover(result);
     }
