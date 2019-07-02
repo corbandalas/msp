@@ -30,6 +30,7 @@ public class CreateCardRequest {
     private String deliveryPostCode;
     private String deliveryCountry;
     private String deliveryMethod;
+    private String smsRequired;
     private String image;
     private String expDate;
 
@@ -86,7 +87,7 @@ public class CreateCardRequest {
         this.image = image;
     }
 
-    public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic, String cardDesign, String image, String expDate) {
+    public CreateCardRequest(String currency, String amount, String title, String firstName, String lastName, String email, String address1, String address2, String city, String postcode, String phone, String dob, String country, String kyc, String cardName, String activateNow, String plastic, String cardDesign, String image, String expDate, String smsRequired) {
         this.currency = currency;
         this.amount = amount;
         this.title = title;
@@ -107,6 +108,7 @@ public class CreateCardRequest {
         this.cardDesign = cardDesign;
         this.image = image;
         this.expDate = expDate;
+        this.smsRequired = smsRequired;
     }
 
     public String getCurrency() {
@@ -335,5 +337,13 @@ public class CreateCardRequest {
 
     public void setExpDate(String expDate) {
         this.expDate = expDate;
+    }
+
+    public String getSmsRequired() {
+        return smsRequired;
+    }
+
+    public void setSmsRequired(String smsRequired) {
+        this.smsRequired = smsRequired;
     }
 }

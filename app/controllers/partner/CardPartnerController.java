@@ -109,6 +109,7 @@ public class CardPartnerController extends BaseController {
                 StringUtils.isBlank(createCard.getCardName()) ||
                 StringUtils.isBlank(createCard.getPlastic()) ||
                 StringUtils.isBlank(createCard.getActivateNow()) ||
+                StringUtils.isBlank(createCard.getSmsRequired()) ||
                 StringUtils.isBlank(createCard.getAmount())
                 ) {
             Logger.error("Missing params");
@@ -141,6 +142,7 @@ public class CardPartnerController extends BaseController {
 
         boolean plastic = false;
         boolean activateNow = false;
+        boolean smsRequired = false;
         boolean image = false;
 
         try {
@@ -163,6 +165,8 @@ public class CardPartnerController extends BaseController {
 
             activateNow = Boolean.parseBoolean(createCard.getActivateNow());
 
+            smsRequired = Boolean.parseBoolean(createCard.getSmsRequired());
+
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse());
@@ -176,21 +180,22 @@ public class CardPartnerController extends BaseController {
 
         final boolean finalActivateNow = activateNow;
         final boolean finalImage = image;
+        final boolean finalSmsRequired = smsRequired;
         F.Promise<Result> result = currencyPromise.flatMap(currency -> {
 
             F.Promise<CardCreationResponse> cardCreationResponsePromise;
 
             if (!finalPlastic) {
                 if (finalAmount > 0) {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate(), finalSmsRequired);
                 } else {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyVirtualCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate(), finalSmsRequired);
                 }
             } else {
                 if (finalAmount > 0) {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issuePrepaidPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), finalAmount, currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate(), finalSmsRequired);
                 } else {
-                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate());
+                    cardCreationResponsePromise = globalProcessingCardProvider.issueEmptyPlasticCardForPartner(authData.getAccount().getId().toString(), customer, createCard.getCardName(), currency.get(), finalActivateNow, createCard.getCardDesign(), createCard.getDeliveryAddress1(), createCard.getDeliveryCity(), createCard.getDeliveryPostCode(), createCard.getDeliveryCountry(), createCard.getDeliveryMethod(), finalImage, createCard.getExpDate(), finalSmsRequired);
                 }
             }
 
