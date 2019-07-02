@@ -109,7 +109,7 @@ public class CardPartnerController extends BaseController {
                 StringUtils.isBlank(createCard.getCardName()) ||
                 StringUtils.isBlank(createCard.getPlastic()) ||
                 StringUtils.isBlank(createCard.getActivateNow()) ||
-                StringUtils.isBlank(createCard.getSmsRequired()) ||
+//                StringUtils.isBlank(createCard.getSmsRequired()) ||
                 StringUtils.isBlank(createCard.getAmount())
                 ) {
             Logger.error("Missing params");
