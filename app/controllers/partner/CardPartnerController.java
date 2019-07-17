@@ -1164,6 +1164,74 @@ public class CardPartnerController extends BaseController {
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
+            nickname = "regenerate",
+            value = "regenerate",
+            notes = "Method allows to regenerate card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = RegenerateResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = RegenerateResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Extend exp date request", required = true, dataType = "dto.partner.RegenerateRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+token+smsRequired+secret)",
+                    required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public F.Promise<Result> regenerate() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final RegenerateRequest regenerateRequest;
+        try {
+            regenerateRequest = Json.fromJson(jsonNode, RegenerateRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(regenerateRequest.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(regenerateRequest.getSmsRequired())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        boolean needSms = false;
+
+        try {
+            needSms = Boolean.parseBoolean(regenerateRequest.getSmsRequired());
+
+        } catch (Exception e) {
+
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), regenerateRequest.getToken(), regenerateRequest.getSmsRequired(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        F.Promise<Result> result = globalProcessingCardProvider.regenerateCardForPartner(authData.getAccount().getId().toString(), regenerateRequest.getToken(), 1, needSms? 1: 0, 0, null, "1").map(res -> ok(Json.toJson(new RegenerateResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
             nickname = "checkUserSanctions",
             value = "check user sanctions list",
             notes = "Method allows to check whether customer is in sanction list",
