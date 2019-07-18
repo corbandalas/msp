@@ -1,6 +1,5 @@
 package dto.partner;
 
-import ae.globalprocessing.hyperionweb.Regenerate;
 import dto.BaseAPIResponse;
 
 /**

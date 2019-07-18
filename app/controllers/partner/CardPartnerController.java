@@ -1224,7 +1224,7 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        F.Promise<Result> result = globalProcessingCardProvider.regenerateCardForPartner(authData.getAccount().getId().toString(), regenerateRequest.getToken(), 1, needSms? 1: 0, 0, null, "1").map(res -> ok(Json.toJson(new RegenerateResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+        F.Promise<Result> result = globalProcessingCardProvider.regenerateCardForPartner(authData.getAccount().getId().toString(), regenerateRequest.getToken(), 1, needSms? 1: 0, 0, null, "1").map(res -> ok(Json.toJson(new RegenerateResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), new Regenerate(res.getPublicToken(), res.getActionCode(), res.getImage())))));
 
         return returnRecover(result);
     }
