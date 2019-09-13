@@ -335,6 +335,12 @@ public class W2GlobaldataService {
                 queryOption.setValue(w2GlobaldataSettings.redirectUrl);
                 queryOptions[0] = queryOption;
 
+                if (w2GlobaldataSettings.sandbox) {
+                    size++;
+                    queryOption1.setKey("Sandbox");
+                    queryOption1.setValue("true");
+                    queryOptions[1] = queryOption1;
+                }
 
                 if (StringUtils.isNotBlank(testdatanumber)) {
                     size++;
