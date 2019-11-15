@@ -1260,7 +1260,7 @@ public class CardPartnerController extends BaseController {
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Check user sanction request request", required = true, dataType = "dto.partner.CheckUserSanctionRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+fullName+dayOfBirth+monthOfBirth+yearOfBirth+secret)",
+            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+fullName+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> checkUserSanctions() {
@@ -1281,22 +1281,22 @@ public class CardPartnerController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (StringUtils.isBlank(checkUserSanctionRequest.getDayOfBirth())) {
-            Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse());
-        }
+//        if (StringUtils.isBlank(checkUserSanctionRequest.getDayOfBirth())) {
+//            Logger.error("Missing params");
+//            return F.Promise.pure(createWrongRequestFormatResponse());
+//        }
+//
+//        if (StringUtils.isBlank(checkUserSanctionRequest.getMonthOfBirth())) {
+//            Logger.error("Missing params");
+//            return F.Promise.pure(createWrongRequestFormatResponse());
+//        }
+//
+//        if (StringUtils.isBlank(checkUserSanctionRequest.getYearOfBirth())) {
+//            Logger.error("Missing params");
+//            return F.Promise.pure(createWrongRequestFormatResponse());
+//        }
 
-        if (StringUtils.isBlank(checkUserSanctionRequest.getMonthOfBirth())) {
-            Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse());
-        }
-
-        if (StringUtils.isBlank(checkUserSanctionRequest.getYearOfBirth())) {
-            Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse());
-        }
-
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), checkUserSanctionRequest.getFullName(), checkUserSanctionRequest.getDayOfBirth(), checkUserSanctionRequest.getMonthOfBirth(), checkUserSanctionRequest.getYearOfBirth(), authData.getAccount().getSecret()))) {
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(), checkUserSanctionRequest.getFullName(), /*checkUserSanctionRequest.getDayOfBirth(), checkUserSanctionRequest.getMonthOfBirth(), checkUserSanctionRequest.getYearOfBirth(),*/ authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
