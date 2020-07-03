@@ -36,7 +36,7 @@ libraryDependencies += filters
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
-resolvers += "DefaultMavenRepository"
+resolvers += DefaultMavenRepository
 
 flywayUrl :=conf.getString("flywayUrl")
 
