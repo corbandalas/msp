@@ -79,7 +79,7 @@ public class CardPartnerAccomplishController extends BaseController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerv2.CreateCustomerRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerV2.CreateCustomerRequest", paramType = "body"),
             @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
             @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+mobilePhone+firstName+lastName+email+secret)",
                     required = true, dataType = "String", paramType = "header", name = "enckey"),
