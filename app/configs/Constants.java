@@ -13,6 +13,7 @@ public class Constants {
     public static final String ADMIN_API_PATH = BASE_API_PATH + "/admin";
     public static final String CUSTOMER_API_PATH = BASE_API_PATH + "/customer";
     public static final String PARTNER_API_PATH = BASE_API_PATH + "/partner";
+    public static final String PARTNERV2_API_PATH = BASE_API_PATH + "/partnerV2";
     public static final String PAYROLL_API_PATH = BASE_API_PATH + "/payroll";
 
 }

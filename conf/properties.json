@@ -387,7 +387,16 @@
       "value": "http://bancore.com",
       "description": "Default error URL for Kvanto callback redirection",
       "category": "PAYLIKE_INTEGRATION"
+    },
+
+    {
+      "id": "cardprovider.accomplish.api.settings",
+      "value": "https://demoapi.domain.com/|safepayrest|SAFEWErvg123!|",
+      "description": "API domain",
+      "category": "ACCOMPLISH_INTEGRATION"
     }
+
+
   ]
 
 }
