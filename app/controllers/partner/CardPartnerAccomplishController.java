@@ -47,7 +47,7 @@ import static configs.ReturnCodes.*;
  * @author corbandalas created 02.07.2020.
  * @since 0.6.0
  */
-@Api(value = Constants.PARTNERV2_API_PATH + "/card", description = "Card processing functions")
+@Api(value = Constants.PARTNERV2_API_PATH, description = "Partner API v2")
 public class CardPartnerAccomplishController extends BaseController {
 
     @Inject
