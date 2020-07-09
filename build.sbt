@@ -29,8 +29,8 @@ libraryDependencies ++= Seq(
   "com.google.inject.extensions" % "guice-multibindings" % "4.0-beta4",
   "org.apache.commons" % "commons-jcs-core" % "2.2",
   "com.google.code.gson" % "gson" % "2.8.2",
+  "org.projectlombok" % "lombok" % "1.18.12" % "provided",
   "com.typesafe.play" %% "play-mailer" % "4.0.0")
-
 
 libraryDependencies += filters
 

@@ -3,15 +3,16 @@ package util;
 import org.apache.commons.codec.binary.Base64;
 import play.Logger;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 
 /**
  * SecurityUtils cls for MD5 based checksum calculation
  *
  * @author corbandalas - created 31.01.2016
  * @since 0.1.0
- *
  */
 
 public class SecurityUtil {
@@ -70,6 +71,28 @@ public class SecurityUtil {
         }
         return sb.toString();
     }
+
+    public static String generateSH1(String... params) {
+        String sha1 = "";
+        try {
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+
+            final StringBuilder buf = new StringBuilder();
+            for (final String item : params) {
+                buf.append(item);
+            }
+
+            crypt.update(buf.toString().getBytes("UTF-8"));
+            sha1 = toHexString(crypt.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return sha1;
+    }
+
 
     public static String encodeString(String str) {
         return new String(theBase64Codec.encode(str.getBytes())).trim();

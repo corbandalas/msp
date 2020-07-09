@@ -1,8 +1,9 @@
 package dto.partnerV2;
 
-import accomplish.dto.user.CreateUserResponse;
-import dto.BaseAPIResponse;
-import provider.dto.CardCreationResponse;
+import dto.partnerV2.entity.Customer;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Create Card request DTO object
@@ -11,19 +12,11 @@ import provider.dto.CardCreationResponse;
  * @since 0.6.0
  */
 
-public class CreateCustomerResponse extends BaseAPIResponse {
-    private CreateUserResponse createUserResponse;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateCustomerResponse  {
 
-    public CreateCustomerResponse(String text, String code, CreateUserResponse createUserResponse) {
-        super(text, code);
-        this.createUserResponse = createUserResponse;
-    }
+    private Customer customer;
 
-    public CreateUserResponse getCreateUserResponse() {
-        return createUserResponse;
-    }
-
-    public void setCreateUserResponse(CreateUserResponse createUserResponse) {
-        this.createUserResponse = createUserResponse;
-    }
 }

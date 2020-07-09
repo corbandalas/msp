@@ -5,37 +5,38 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
-import controllers.BaseController;
+import controllers.BaseAccomplishController;
 import controllers.admin.BaseMerchantApiAction;
+import controllers.admin.BaseMerchantApiV2Action;
 import dto.Authentication;
 import dto.BaseAPIResponse;
-import dto.partner.*;
 import dto.partnerV2.CreateCustomerIdentificationRequest;
 import dto.partnerV2.CreateCustomerIdentificationResponse;
 import dto.partnerV2.CreateCustomerRequest;
 import dto.partnerV2.CreateCustomerResponse;
-import model.Card;
+import exception.CustomerAlreadyRegisteredException;
+import exception.WrongCountryException;
+import exception.WrongPhoneNumberException;
 import model.Country;
-import model.Currency;
 import model.Customer;
 import model.enums.KYC;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
-import provider.GlobalProcessingCardProvider;
-import provider.dto.CardCreationResponse;
-import repository.CardRepository;
 import repository.CountryRepository;
 import repository.CurrencyRepository;
+import repository.CustomerRepository;
 import services.AccomplishService;
-import services.W2GlobaldataService;
 import util.DateUtil;
 import util.SecurityUtil;
+import util.Utils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static configs.ReturnCodes.*;
@@ -48,10 +49,13 @@ import static configs.ReturnCodes.*;
  * @since 0.6.0
  */
 @Api(value = Constants.PARTNERV2_API_PATH, description = "Partner API v2")
-public class CardPartnerAccomplishController extends BaseController {
+public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @Inject
     CurrencyRepository currencyRepository;
+
+    @Inject
+    CustomerRepository customerRepository;
 
     @Inject
     CountryRepository countryRepository;
@@ -59,7 +63,7 @@ public class CardPartnerAccomplishController extends BaseController {
     @Inject
     AccomplishService accomplishService;
 
-    @With(BaseMerchantApiAction.class)
+    @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
             nickname = "createCustomer",
             value = "Create new customer",
@@ -80,10 +84,10 @@ public class CardPartnerAccomplishController extends BaseController {
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerV2.CreateCustomerRequest", paramType = "body"),
-            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+mobilePhone+firstName+lastName+email+secret)",
-                    required = true, dataType = "String", paramType = "header", name = "enckey"),
-            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
     public F.Promise<Result> createCustomer() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
@@ -94,7 +98,7 @@ public class CardPartnerAccomplishController extends BaseController {
             createCard = Json.fromJson(jsonNode, CreateCustomerRequest.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
-            return F.Promise.pure(createWrongRequestFormatResponse());
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format. Check your json"));
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone()) ||
@@ -108,18 +112,10 @@ public class CardPartnerAccomplishController extends BaseController {
                 StringUtils.isBlank(createCard.getBirthdayDate()) ||
                 StringUtils.isBlank(createCard.getLang()) ||
                 StringUtils.isBlank(createCard.getEmail())
-                ) {
+        ) {
             Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse());
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
         }
-
-
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
-                createCard.getMobilePhone(), createCard.getFirstName(), createCard.getLastName(), createCard.getEmail(), authData.getAccount().getSecret()))) {
-            Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(createWrongEncKeyResponse());
-        }
-
 
         Customer customer = new Customer();
 
@@ -133,13 +129,15 @@ public class CardPartnerAccomplishController extends BaseController {
         customer.setCountry_id(createCard.getCountry());
         customer.setPostcode(createCard.getZip());
         customer.setTitle(createCard.getTitle());
+        customer.setActive(true);
 
+        if (StringUtils.isNoneBlank(createCard.getPassword())) {
+            customer.setPassword(SecurityUtil.generateKeyFromArray(createCard.getPassword()));
+        }
 
         try {
 
-//            KYC kyc = KYC.valueOf(createCard.getKyc().toUpperCase());
-
-            customer.setKyc(KYC.SIMPLIFIED_DUE_DILIGENCE);
+            customer.setKyc(KYC.NONE);
 
             Date dob = DateUtil.parse(createCard.getBirthdayDate(), "DD/MM/YYYY");
 
@@ -147,13 +145,40 @@ public class CardPartnerAccomplishController extends BaseController {
 
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
-            return F.Promise.pure(createWrongRequestFormatResponse());
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong date format"));
         }
 
+        F.Promise<F.Tuple<F.Tuple<Optional<Country>, List<Customer>>, Boolean>> promise = F.Promise.wrap(countryRepository.retrieveById(createCard.getCountry()))
+                .zip(F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()))).zip(F.Promise.wrap(customerRepository.isRegistered(createCard.getMobilePhone())));
 
-        final F.Promise<Optional<Country>> countryPromise = F.Promise.wrap(countryRepository.retrieveById(createCard.getCountry()));
+        F.Promise<Result> result = promise.flatMap(res -> {
 
-        F.Promise<Result> result = countryPromise.flatMap(country -> {
+            boolean isRegisteredByPhone = res._2.booleanValue();
+
+            List<Customer> customersByEMail = res._1._2;
+
+            Optional<Country> country = res._1._1;
+
+            if (!country.isPresent()) {
+                Logger.error("Country is not exist");
+                throw new WrongCountryException("Country is not exist or inactive");
+            }
+
+            if (isRegisteredByPhone) {
+                Logger.error("Customer is already registered");
+
+                throw new CustomerAlreadyRegisteredException("Customer is already registered");
+            }
+
+            if (customersByEMail != null && customersByEMail.size() > 0) {
+                Logger.error("Customer is already registered");
+
+                throw new CustomerAlreadyRegisteredException("Customer is already registered");
+            }
+
+            if (!Utils.isValidPhoneNumber(createCard.getMobilePhone(), country.get().getCode())) {
+                throw new WrongPhoneNumberException();
+            }
 
             F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUser(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                     createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
@@ -162,7 +187,17 @@ public class CardPartnerAccomplishController extends BaseController {
                     createCard.getLang(), createCard.getPassword(), "" + authData.getAccount().getId());
 
 
-            return userResponsePromise.map(res -> ok(Json.toJson(new CreateCustomerResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+            return userResponsePromise.map(rez -> {
+
+                customer.setReferral("" + rez.getInfo().getId());
+
+                customerRepository.create(customer);
+
+                return ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
+                        createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
+                        createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
+                        createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode()))));
+            });
 
         });
 
@@ -192,10 +227,10 @@ public class CardPartnerAccomplishController extends BaseController {
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Create identification request", required = true, dataType = "dto.partnerV2.CreateCustomerIdentificationRequest", paramType = "body"),
-            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
-            @ApiImplicitParam(value = "Enckey header. SHA256(accountId+orderId+number+type+userID+secret)",
-                    required = true, dataType = "String", paramType = "header", name = "enckey"),
-            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
     public F.Promise<Result> createIdentification() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
@@ -206,7 +241,7 @@ public class CardPartnerAccomplishController extends BaseController {
             createCard = Json.fromJson(jsonNode, CreateCustomerIdentificationRequest.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
-            return F.Promise.pure(createWrongRequestFormatResponse());
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
         }
 
         if (StringUtils.isBlank(createCard.getNumber()) ||
@@ -214,17 +249,10 @@ public class CardPartnerAccomplishController extends BaseController {
                 StringUtils.isBlank(createCard.getExpiryDate()) ||
                 StringUtils.isBlank(createCard.getIssuanceCountry()) ||
                 StringUtils.isBlank(createCard.getResidenceCountry()) ||
-                StringUtils.isBlank(createCard.getUserID())
-                ) {
+                StringUtils.isBlank(createCard.getEmail())
+        ) {
             Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse());
-        }
-
-
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), authData.getOrderId(),
-                createCard.getNumber(), createCard.getType(), createCard.getUserID(), authData.getAccount().getSecret()))) {
-            Logger.error("Provided and calculated enckeys do not match");
-            return F.Promise.pure(createWrongEncKeyResponse());
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
 
@@ -236,7 +264,6 @@ public class CardPartnerAccomplishController extends BaseController {
 
         return returnRecover(result);
     }
-
 
 
 }
