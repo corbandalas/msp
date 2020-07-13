@@ -15,6 +15,9 @@ public class Attachment {
     @SerializedName("content")
     @Expose
     private String content;
+    @SerializedName("file_id")
+    @Expose
+    private Integer fileId;
 
     public String getFileName() {
         return fileName;
@@ -38,6 +41,14 @@ public class Attachment {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
     }
 
 }

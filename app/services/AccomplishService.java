@@ -1,9 +1,13 @@
 package services;
 
 import accomplish.*;
+import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.identification.CreateIdentification;
 import accomplish.dto.identification.CreateIdentificationResponse;
 import accomplish.dto.identification.Identification;
+import accomplish.dto.identification.document.Attachment;
+import accomplish.dto.identification.document.CreateDocument;
+import accomplish.dto.identification.document.CreateDocumentResponse;
 import accomplish.dto.user.CreateUserResponse;
 import akka.dispatch.Futures;
 import com.google.gson.Gson;
@@ -15,6 +19,7 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
 import exception.WrongPropertyException;
 import model.Property;
+import org.springframework.util.StringUtils;
 import play.Logger;
 import play.libs.F;
 import repository.PropertyRepository;
@@ -202,7 +207,7 @@ public class AccomplishService {
 
 
     public F.Promise<CreateIdentificationResponse> createIdentification(String userID, String issuanceCountry,
-                                            String residenceCountry, String issueDate, String expiryDate, String type, String number, String partnerID) {
+                                                                        String residenceCountry, String issueDate, String expiryDate, String type, String number, String partnerID) {
 
         CreateIdentification createIdentification = new CreateIdentification();
 
@@ -217,19 +222,16 @@ public class AccomplishService {
 
         int typeValue = 3;
 
-        //TODO:
-
         if (type.equalsIgnoreCase("passport")) {
-            typeValue = 3;
-
+            typeValue = 0;
         } else if (type.equalsIgnoreCase("driverLicence")) {
-            typeValue = 3;
+            typeValue = 1;
         } else if (type.equalsIgnoreCase("nationalId")) {
-            typeValue = 3;
+            typeValue = 2;
         } else if (type.equalsIgnoreCase("socialSecurityNumber")) {
             typeValue = 3;
         } else if (type.equalsIgnoreCase("socialInsuranceNumber")) {
-            typeValue = 3;
+            typeValue = 4;
         }
 
 
@@ -251,6 +253,201 @@ public class AccomplishService {
 
         return promise.map(res -> {
             CreateIdentificationResponse createUserResponse = gson.fromJson(res, CreateIdentificationResponse.class);
+
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+            return createUserResponse;
+        });
+    }
+
+    public F.Promise<GetCustomerResponse> getCustomer(String userID, String partnerID) {
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+
+        F.Promise<String> promise = execute("service/v1/user/" + userID, "", "GET", partnerID);
+
+        return promise.map(res -> {
+            GetCustomerResponse createUserResponse = gson.fromJson(res, GetCustomerResponse.class);
+
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+            return createUserResponse;
+        });
+    }
+
+    public F.Promise<CreateDocumentResponse> sendDocument(String userID, String fileName, String content, String type, String partnerID) {
+
+        CreateDocument createDocument = new CreateDocument();
+
+        List<Attachment> attachments = new ArrayList<>();
+
+        Attachment attachment = new Attachment();
+
+        attachment.setFileName(fileName);
+        attachment.setFileExtension(".jpg");
+        attachment.setContent(content);
+
+        attachments.add(attachment);
+
+        createDocument.setAttachment(attachments);
+
+        accomplish.dto.identification.document.Info info = new accomplish.dto.identification.document.Info();
+
+        int entityValue = 15;
+        int typeValue = 1;
+
+        if (type.equalsIgnoreCase("profilePicture")) {
+            typeValue = 1;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("passport")) {
+            typeValue = 2;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("nationalId")) {
+            typeValue = 3;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("driverLicence")) {
+            typeValue = 4;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("utilityBill")) {
+            typeValue = 5;
+            entityValue = 15;
+        } else if (type.equalsIgnoreCase("creditcardStatement")) {
+            typeValue = 6;
+            entityValue = 15;
+        } else if (type.equalsIgnoreCase("bankStatement")) {
+            typeValue = 7;
+            entityValue = 15;
+        } else if (type.equalsIgnoreCase("financialStatement")) {
+            typeValue = 8;
+            entityValue = 60;
+        } else if (type.equalsIgnoreCase("receipt")) {
+            typeValue = 9;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("taxDocument")) {
+            typeValue = 10;
+            entityValue = 60;
+        } else if (type.equalsIgnoreCase("insuranceDocument")) {
+            typeValue = 11;
+            entityValue = 60;
+        } else if (type.equalsIgnoreCase("other")) {
+            typeValue = 12;
+            entityValue = 60;
+        }
+
+
+        info.setEntity(entityValue);
+        info.setType(typeValue);
+        info.setSubject("Identification");
+//        info.setFirstName("Artyom");
+//        info.setLastName("Terehschenko");
+        info.setLanguage("en");
+        info.setEntityId(0);
+
+        createDocument.setInfo(info);
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+        String json = gson.toJson(createDocument);
+
+
+        F.Promise<String> promise = execute("service/v1/user/document/" + userID, json, "POST", partnerID);
+
+        return promise.map(res -> {
+            CreateDocumentResponse createUserResponse = gson.fromJson(res, CreateDocumentResponse.class);
+
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+            return createUserResponse;
+        });
+    }
+
+    public F.Promise<CreateDocumentResponse> createCard(String userID, String fileName, String content, String type, String partnerID) {
+
+        CreateDocument createDocument = new CreateDocument();
+
+        List<Attachment> attachments = new ArrayList<>();
+
+        Attachment attachment = new Attachment();
+
+        attachment.setFileName(fileName);
+        attachment.setFileExtension(".jpg");
+        attachment.setContent(content);
+
+        attachments.add(attachment);
+
+        createDocument.setAttachment(attachments);
+
+        accomplish.dto.identification.document.Info info = new accomplish.dto.identification.document.Info();
+
+        int entityValue = 15;
+        int typeValue = 1;
+
+        if (type.equalsIgnoreCase("profilePicture")) {
+            typeValue = 1;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("passport")) {
+            typeValue = 2;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("nationalId")) {
+            typeValue = 3;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("driverLicence")) {
+            typeValue = 4;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("utilityBill")) {
+            typeValue = 5;
+            entityValue = 15;
+        } else if (type.equalsIgnoreCase("creditcardStatement")) {
+            typeValue = 6;
+            entityValue = 15;
+        } else if (type.equalsIgnoreCase("bankStatement")) {
+            typeValue = 7;
+            entityValue = 15;
+        } else if (type.equalsIgnoreCase("financialStatement")) {
+            typeValue = 8;
+            entityValue = 60;
+        } else if (type.equalsIgnoreCase("receipt")) {
+            typeValue = 9;
+            entityValue = 25;
+        } else if (type.equalsIgnoreCase("taxDocument")) {
+            typeValue = 10;
+            entityValue = 60;
+        } else if (type.equalsIgnoreCase("insuranceDocument")) {
+            typeValue = 11;
+            entityValue = 60;
+        } else if (type.equalsIgnoreCase("other")) {
+            typeValue = 12;
+            entityValue = 60;
+        }
+
+
+        info.setEntity(entityValue);
+        info.setType(typeValue);
+        info.setSubject("Identification");
+//        info.setFirstName("Artyom");
+//        info.setLastName("Terehschenko");
+        info.setLanguage("en");
+        info.setEntityId(0);
+
+        createDocument.setInfo(info);
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+        String json = gson.toJson(createDocument);
+
+
+        F.Promise<String> promise = execute("service/v1/user/document/" + userID, json, "POST", partnerID);
+
+        return promise.map(res -> {
+            CreateDocumentResponse createUserResponse = gson.fromJson(res, CreateDocumentResponse.class);
 
             Logger.info("Result = " + createUserResponse.getResult().getCode());
 

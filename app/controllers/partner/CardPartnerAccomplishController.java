@@ -10,10 +10,8 @@ import controllers.admin.BaseMerchantApiAction;
 import controllers.admin.BaseMerchantApiV2Action;
 import dto.Authentication;
 import dto.BaseAPIResponse;
-import dto.partnerV2.CreateCustomerIdentificationRequest;
-import dto.partnerV2.CreateCustomerIdentificationResponse;
-import dto.partnerV2.CreateCustomerRequest;
-import dto.partnerV2.CreateCustomerResponse;
+import dto.partnerV2.*;
+import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
 import exception.WrongPhoneNumberException;
@@ -30,6 +28,7 @@ import play.mvc.With;
 import repository.CountryRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
+import scala.concurrent.Future;
 import services.AccomplishService;
 import util.DateUtil;
 import util.SecurityUtil;
@@ -76,11 +75,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @ApiResponses(value = {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerResponse.class),
-            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerV2.CreateCustomerRequest", paramType = "body"),
@@ -206,7 +205,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
     }
 
 
-    @With(BaseMerchantApiAction.class)
+    @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
             nickname = "createIdentification",
             value = "Create identification",
@@ -214,16 +213,16 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = CreateCustomerResponse.class
+            response = CreateCustomerIdentificationResponse.class
     )
 
     @ApiResponses(value = {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerIdentificationResponse.class),
-            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
-            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
     })
     @ApiImplicitParams(value = {
             @ApiImplicitParam(value = "Create identification request", required = true, dataType = "dto.partnerV2.CreateCustomerIdentificationRequest", paramType = "body"),
@@ -255,12 +254,129 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
+        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
 
-        F.Promise<Result> result = accomplishService.createIdentification(createCard.getUserID(), createCard.getIssuanceCountry(),
+
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createIdentification(customers.get(0).getReferral(), createCard.getIssuanceCountry(),
                 createCard.getResidenceCountry(), createCard.getIssueDate(), createCard.getExpiryDate(),
                 createCard.getType(), createCard.getNumber(), "" + authData.getAccount().getId())
-                .map(res -> ok(Json.toJson(new CreateCustomerIdentificationResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), res))));
+                .map(res -> ok(Json.toJson(new CreateCustomerIdentificationResponse("" + res.getIdentification().get(0).getId())))));
 
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "sendDocument",
+            value = "Send document",
+            notes = "Method allows to send document",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CreateCustomerDocumentResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerDocumentResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Create identification request", required = true, dataType = "dto.partnerV2.CreateDocumentRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> sendDocument() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CreateDocumentRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, CreateDocumentRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getDocument()) ||
+                StringUtils.isBlank(createCard.getDocumentType()) ||
+                StringUtils.isBlank(createCard.getDocumentName()) ||
+                StringUtils.isBlank(createCard.getEmail())
+                ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
+        }
+
+        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
+
+
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.sendDocument(customers.get(0).getReferral(), createCard.getDocumentName(), createCard.getDocument(),
+                createCard.getDocumentType(),  "" + authData.getAccount().getId())
+                .map(res -> ok(Json.toJson(new CreateCustomerDocumentResponse(new Document("" + res.getInfo().getDocumentId(), "" + res.getInfo().getStatus()))))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getCustomer",
+            value = "Get customer",
+            notes = "Method allows to get customer",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CreateCustomerResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerIdentificationResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Create identification request", required = true, dataType = "dto.partnerV2.CreateDocumentRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> getCustomer() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final GetCustomerRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, GetCustomerRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getEmail())
+                ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
+        }
+
+        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
+
+
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.getCustomer(customers.get(0).getReferral(),  "" + authData.getAccount().getId())
+                .map(res -> ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(res.getEmail().get(0).getAddress(),
+                        res.getPersonalInfo().getTitle(), res.getPersonalInfo().getFirstName(),
+                        res.getPersonalInfo().getLastName(), res.getPersonalInfo().getDateOfBirth(),
+                        res.getPhone().get(0).getNumber(), res.getAddress().getCountryCode(), customers.get(0).getKyc().name(),
+                        res.getAddress().getCountryCode(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
+                        res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))))));
 
         return returnRecover(result);
     }
