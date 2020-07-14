@@ -13,11 +13,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateDocumentRequest {
+public class CreateCardRequest {
 
-    private String documentType;
-    private String documentName;
-    private String document;
+    private String cardModel;
+    private String cardData;
     private String mobilePhone;
 
 }

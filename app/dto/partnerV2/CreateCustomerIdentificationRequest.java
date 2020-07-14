@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateCustomerIdentificationRequest {
 
-    private String email;
+    private String mobilePhone;
     private String issuanceCountry;
     private String residenceCountry;
     private String issueDate;

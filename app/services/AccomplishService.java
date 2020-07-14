@@ -1,6 +1,9 @@
 package services;
 
 import accomplish.*;
+import accomplish.dto.card.CreateCard;
+import accomplish.dto.card.CreateCardResponse;
+import accomplish.dto.card.Info;
 import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.identification.CreateIdentification;
 import accomplish.dto.identification.CreateIdentificationResponse;
@@ -49,13 +52,15 @@ public class AccomplishService {
         private String apiURL;
         private String userName;
         private String password;
-        private String programID;
+        private String programID1;
+        private String programID2;
 
-        public AccomplishSettings(String apiURL, String userName, String password, String programID) {
+        public AccomplishSettings(String apiURL, String userName, String password, String programID1,  String programID2) {
             this.apiURL = apiURL;
             this.userName = userName;
             this.password = password;
-            this.programID = programID;
+            this.programID1 = programID1;
+            this.programID2 = programID2;
         }
     }
 
@@ -78,7 +83,7 @@ public class AccomplishService {
                 .addFormParam("grant_type", "program_credential")
                 .addFormParam("user_name", accomplishSettings.userName)
                 .addFormParam("password", accomplishSettings.password)
-                .addFormParam("program_Id", accomplishSettings.programID)
+                .addFormParam("program_Id", accomplishSettings.programID1)
                 .addFormParam("language", "en")
 
                 .execute(new AsyncCompletionHandler<String>() {
@@ -367,93 +372,69 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<CreateDocumentResponse> createCard(String userID, String fileName, String content, String type, String partnerID) {
+    public F.Promise<CreateCardResponse> createCard(String userID, String cardModel, String partnerID) {
 
-        CreateDocument createDocument = new CreateDocument();
+        return getSettingsForPartner(partnerID).flatMap(accomplishSettings -> {
+            CreateCard createCard = new CreateCard();
 
-        List<Attachment> attachments = new ArrayList<>();
+            long bin = 0;
+            String currency = "DKK";
+            int type = 0;
+            int status = 0;
 
-        Attachment attachment = new Attachment();
+            if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
+                bin = Long.parseLong(accomplishSettings.programID1);
+                type = 1;
+                status = 1;
+            } else if (cardModel.equalsIgnoreCase("mymonii_childcard")) {
+                bin = Long.parseLong(accomplishSettings.programID2);
+                status = 12;
+                type = 0;
+            }
 
-        attachment.setFileName(fileName);
-        attachment.setFileExtension(".jpg");
-        attachment.setContent(content);
-
-        attachments.add(attachment);
-
-        createDocument.setAttachment(attachments);
-
-        accomplish.dto.identification.document.Info info = new accomplish.dto.identification.document.Info();
-
-        int entityValue = 15;
-        int typeValue = 1;
-
-        if (type.equalsIgnoreCase("profilePicture")) {
-            typeValue = 1;
-            entityValue = 25;
-        } else if (type.equalsIgnoreCase("passport")) {
-            typeValue = 2;
-            entityValue = 25;
-        } else if (type.equalsIgnoreCase("nationalId")) {
-            typeValue = 3;
-            entityValue = 25;
-        } else if (type.equalsIgnoreCase("driverLicence")) {
-            typeValue = 4;
-            entityValue = 25;
-        } else if (type.equalsIgnoreCase("utilityBill")) {
-            typeValue = 5;
-            entityValue = 15;
-        } else if (type.equalsIgnoreCase("creditcardStatement")) {
-            typeValue = 6;
-            entityValue = 15;
-        } else if (type.equalsIgnoreCase("bankStatement")) {
-            typeValue = 7;
-            entityValue = 15;
-        } else if (type.equalsIgnoreCase("financialStatement")) {
-            typeValue = 8;
-            entityValue = 60;
-        } else if (type.equalsIgnoreCase("receipt")) {
-            typeValue = 9;
-            entityValue = 25;
-        } else if (type.equalsIgnoreCase("taxDocument")) {
-            typeValue = 10;
-            entityValue = 60;
-        } else if (type.equalsIgnoreCase("insuranceDocument")) {
-            typeValue = 11;
-            entityValue = 60;
-        } else if (type.equalsIgnoreCase("other")) {
-            typeValue = 12;
-            entityValue = 60;
-        }
+//        if (currency.equalsIgnoreCase("EUR")) {
+//            bin = 4560;
+//        } else if (currency.equalsIgnoreCase("GBP")) {
+//            bin = 4560;
+//        }
 
 
-        info.setEntity(entityValue);
-        info.setType(typeValue);
-        info.setSubject("Identification");
-//        info.setFirstName("Artyom");
-//        info.setLastName("Terehschenko");
-        info.setLanguage("en");
-        info.setEntityId(0);
+            Info info = new Info();
+            info.setBinId("" + bin);
+            info.setCurrency(currency);
+            info.setType("" + type);
+            info.setStatus("" + status);
+            info.setUserId(Integer.parseInt(userID));
 
-        createDocument.setInfo(info);
+            createCard.setInfo(info);
 
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.disableHtmlEscaping();
+            accomplish.dto.card.CustomField customField = new accomplish.dto.card.CustomField();
+            customField.setAcceptance("1");
+            customField.setAcceptance2("2");
 
-        final Gson gson = gsonBuilder.create();
-        String json = gson.toJson(createDocument);
+            createCard.setCustomField(customField);
 
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
 
-        F.Promise<String> promise = execute("service/v1/user/document/" + userID, json, "POST", partnerID);
+            final Gson gson = gsonBuilder.create();
+            String json = gson.toJson(createCard);
 
-        return promise.map(res -> {
-            CreateDocumentResponse createUserResponse = gson.fromJson(res, CreateDocumentResponse.class);
+            F.Promise<String> promise = execute("service/v1/account/", json, "POST", partnerID);
 
-            Logger.info("Result = " + createUserResponse.getResult().getCode());
+            return promise.map(res -> {
+                CreateCardResponse createCardresponse = gson.fromJson(res, CreateCardResponse.class);
 
-            return createUserResponse;
+                return createCardresponse;
+            });
         });
+
+
     }
+
+
+
+
 
 
     private F.Promise<String> execute(String url, String body, String method, String partnerID) {
@@ -523,7 +504,7 @@ public class AccomplishService {
 
             String[] split = gpsConfigStringValue.split("|");
 
-            return new AccomplishSettings(split[0], split[1], split[2], split[3]);
+            return new AccomplishSettings(split[0], split[1], split[2], split[3], split[4]);
         });
     }
 }

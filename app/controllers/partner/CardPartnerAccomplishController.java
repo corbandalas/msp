@@ -6,29 +6,29 @@ import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseAccomplishController;
-import controllers.admin.BaseMerchantApiAction;
 import controllers.admin.BaseMerchantApiV2Action;
 import dto.Authentication;
-import dto.BaseAPIResponse;
 import dto.partnerV2.*;
 import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
 import exception.WrongPhoneNumberException;
+import model.Card;
 import model.Country;
 import model.Customer;
+import model.enums.CardBrand;
+import model.enums.CardType;
 import model.enums.KYC;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
+import repository.CardRepository;
 import repository.CountryRepository;
 import repository.CurrencyRepository;
 import repository.CustomerRepository;
-import scala.concurrent.Future;
 import services.AccomplishService;
 import util.DateUtil;
 import util.SecurityUtil;
@@ -52,6 +52,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @Inject
     CurrencyRepository currencyRepository;
+
+    @Inject
+    CardRepository cardRepository;
 
     @Inject
     CustomerRepository customerRepository;
@@ -188,14 +191,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
             return userResponsePromise.map(rez -> {
 
-                customer.setReferral("" + rez.getInfo().getId());
+                if (rez.getResult().getCode().equalsIgnoreCase("0000")) {
+                    customer.setReferral("" + rez.getInfo().getId());
 
-                customerRepository.create(customer);
+                    customerRepository.create(customer);
 
-                return ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
-                        createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
-                        createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
-                        createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode()))));
+                    return ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
+                            createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
+                            createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
+                            createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode()))));
+                } else {
+                    return createCardProviderException("" + rez.getResult().getCode());
+                }
+
             });
 
         });
@@ -248,19 +256,26 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getExpiryDate()) ||
                 StringUtils.isBlank(createCard.getIssuanceCountry()) ||
                 StringUtils.isBlank(createCard.getResidenceCountry()) ||
-                StringUtils.isBlank(createCard.getEmail())
+                StringUtils.isBlank(createCard.getMobilePhone())
         ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
-        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
 
 
-        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createIdentification(customers.get(0).getReferral(), createCard.getIssuanceCountry(),
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createIdentification(customers.get().getReferral(), createCard.getIssuanceCountry(),
                 createCard.getResidenceCountry(), createCard.getIssueDate(), createCard.getExpiryDate(),
                 createCard.getType(), createCard.getNumber(), "" + authData.getAccount().getId())
-                .map(res -> ok(Json.toJson(new CreateCustomerIdentificationResponse("" + res.getIdentification().get(0).getId())))));
+                .map(res -> {
+
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+                        return ok(Json.toJson(new CreateCustomerIdentificationResponse("" + res.getIdentification().get(0).getId())));
+                    } else {
+                        return createCardProviderException(res.getResult().getCode());
+                    }
+                }));
 
         return returnRecover(result);
     }
@@ -307,18 +322,24 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         if (StringUtils.isBlank(createCard.getDocument()) ||
                 StringUtils.isBlank(createCard.getDocumentType()) ||
                 StringUtils.isBlank(createCard.getDocumentName()) ||
-                StringUtils.isBlank(createCard.getEmail())
-                ) {
+                StringUtils.isBlank(createCard.getMobilePhone())
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
-        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
 
 
-        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.sendDocument(customers.get(0).getReferral(), createCard.getDocumentName(), createCard.getDocument(),
-                createCard.getDocumentType(),  "" + authData.getAccount().getId())
-                .map(res -> ok(Json.toJson(new CreateCustomerDocumentResponse(new Document("" + res.getInfo().getDocumentId(), "" + res.getInfo().getStatus()))))));
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.sendDocument(customers.get().getReferral(), createCard.getDocumentName(), createCard.getDocument(),
+                createCard.getDocumentType(), "" + authData.getAccount().getId())
+                .map(res -> {
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+                        return ok(Json.toJson(new CreateCustomerDocumentResponse(new Document("" + res.getInfo().getDocumentId(), "" + res.getInfo().getStatus()))));
+                    } else {
+                        return createCardProviderException(res.getResult().getCode());
+                    }
+                }));
 
         return returnRecover(result);
     }
@@ -361,25 +382,149 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
         }
 
-        if (StringUtils.isBlank(createCard.getEmail())
-                ) {
+        if (StringUtils.isBlank(createCard.getMobilePhone())
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
-        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
 
 
-        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.getCustomer(customers.get(0).getReferral(),  "" + authData.getAccount().getId())
-                .map(res -> ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(res.getEmail().get(0).getAddress(),
-                        res.getPersonalInfo().getTitle(), res.getPersonalInfo().getFirstName(),
-                        res.getPersonalInfo().getLastName(), res.getPersonalInfo().getDateOfBirth(),
-                        res.getPhone().get(0).getNumber(), res.getAddress().getCountryCode(), customers.get(0).getKyc().name(),
-                        res.getAddress().getCountryCode(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
-                        res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))))));
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.getCustomer(customers.get().getReferral(), "" + authData.getAccount().getId())
+                .map(res -> {
+
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+                        return ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(res.getEmail().get(0).getAddress(),
+                                res.getPersonalInfo().getTitle(), res.getPersonalInfo().getFirstName(),
+                                res.getPersonalInfo().getLastName(), res.getPersonalInfo().getDateOfBirth(),
+                                res.getPhone().get(0).getNumber(), res.getAddress().getCountryCode(), customers.get().getKyc().name(),
+                                res.getAddress().getCountryCode(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
+                                res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
+                    } else {
+                        return createCardProviderException(res.getResult().getCode());
+                    }
+
+                }));
 
         return returnRecover(result);
     }
 
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "createCard",
+            value = "Create card",
+            notes = "Method allows to create new card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CreateCardResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCardResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerV2.CreateCardRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> createCard() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CreateCardRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, CreateCardRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getMobilePhone())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
+        }
+
+        if (StringUtils.isBlank(createCard.getCardData())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardData"));
+        }
+
+        if (StringUtils.isBlank(createCard.getCardModel())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardModel"));
+        }
+
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+
+
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createCard(customers.get().getReferral(),
+                createCard.getCardModel(), "" + authData.getAccount().getId())
+                .flatMap(res -> {
+
+                            F.Promise<Result> returnPromise = null;
+
+                            if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+                                Card card = new Card();
+
+                                String currency = "DKK";
+                                CardBrand cardBrand = CardBrand.WALLET;
+                                CardType cardType = CardType.VIRTUAL;
+                                String type = "";
+
+                                if (createCard.getCardModel().equalsIgnoreCase("mymonii_parentwallet")) {
+                                    cardBrand = CardBrand.WALLET;
+                                    currency = "DKK";
+                                    cardType = CardType.VIRTUAL;
+                                    type = "mvc";
+                                } else if (createCard.getCardModel().equalsIgnoreCase("mymonii_childcard")) {
+                                    cardBrand = CardBrand.WALLET;
+                                    currency = "DKK";
+                                    cardType = CardType.PLASTIC;
+                                    type = "physical";
+                                }
+
+                                card.setToken("" + res.getInfo().getId());
+
+                                card.setActive(true);
+                                card.setAlias(createCard.getCardModel());
+                                card.setBrand(cardBrand);
+                                card.setType(cardType);
+                                card.setCardDefault(true);
+                                card.setCreateDate(new Date());
+                                card.setCurrencyId(currency);
+                                card.setCustomerId(createCard.getMobilePhone());
+                                card.setDeliveryAddress1("address 1");
+                                card.setDeliveryAddress2("address 2");
+                                card.setDeliveryAddress3("address 3");
+                                card.setDeliveryCountry("DK");
+                                card.setInfo("");
+
+
+                                String finalCurrency = currency;
+                                String finalType = type;
+                                returnPromise = F.Promise.wrap(cardRepository.create(card)).map(rez -> ok(Json.toJson(new CreateCardResponse(null, "0", createCard.getCardData(), finalCurrency, res.getInfo().getNumber(),
+                                        "mymonii_feegroup_dkk", "ready", "" + res.getInfo().getId(), finalType, "MYMONII"))));
+                            } else {
+                                returnPromise = F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                            }
+                            return returnPromise;
+                        }
+                ));
+
+        return returnRecover(result);
+    }
 
 }
