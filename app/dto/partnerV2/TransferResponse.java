@@ -2,7 +2,6 @@ package dto.partnerV2;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Success API response for Partner V2 API
@@ -14,8 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class SuccessAPIV2Response {
-
+public class TransferResponse extends  SuccessAPIV2Response{
     private boolean success;
+    private String status;
 }

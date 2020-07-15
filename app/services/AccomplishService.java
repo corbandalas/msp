@@ -4,6 +4,7 @@ import accomplish.*;
 import accomplish.dto.card.CreateCard;
 import accomplish.dto.card.CreateCardResponse;
 import accomplish.dto.card.Info;
+import accomplish.dto.customerget.Account;
 import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.identification.CreateIdentification;
 import accomplish.dto.identification.CreateIdentificationResponse;
@@ -11,6 +12,11 @@ import accomplish.dto.identification.Identification;
 import accomplish.dto.identification.document.Attachment;
 import accomplish.dto.identification.document.CreateDocument;
 import accomplish.dto.identification.document.CreateDocumentResponse;
+import accomplish.dto.transfer.AccountInfo;
+import accomplish.dto.transfer.Info_;
+import accomplish.dto.transfer.Transfer;
+import accomplish.dto.transfer.Transfer_;
+import accomplish.dto.transfer.response.TransferResponse;
 import accomplish.dto.user.CreateUserResponse;
 import akka.dispatch.Futures;
 import com.google.gson.Gson;
@@ -431,6 +437,56 @@ public class AccomplishService {
 
 
     }
+
+    public F.Promise<TransferResponse> transfer(String userID, String receiverID, String amount, String currency, String partnerID) {
+
+        return getSettingsForPartner(partnerID).flatMap(accomplishSettings -> {
+
+
+            Transfer transfer = new Transfer();
+
+            accomplish.dto.transfer.Account account = new accomplish.dto.transfer.Account ();
+
+            accomplish.dto.transfer.Info info = new accomplish.dto.transfer.Info();
+
+            info.setAmount(amount);
+            info.setCurrency(currency);
+            info.setType("220"); //TODO: wtf?
+
+            Info_ info_ = new Info_();
+            info_.setId(Integer.parseInt(userID));
+            account.setInfo(info_);
+
+            Transfer_ transfer_ = new Transfer_();
+
+            AccountInfo accountInfo = new AccountInfo();
+            accountInfo.setId(Integer.parseInt(receiverID));
+            transfer_.setAccountInfo(accountInfo);
+
+
+            transfer.setAccount(account);
+            transfer.setInfo(info);
+            transfer.setTransfer(transfer_);
+            transfer.setValidate("0");
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+            String json = gson.toJson(transfer);
+
+            F.Promise<String> promise = execute("service/v1/transaction/", json, "POST", partnerID);
+
+            return promise.map(res -> {
+                TransferResponse createCardresponse = gson.fromJson(res, TransferResponse.class);
+
+                return createCardresponse;
+            });
+        });
+
+
+    }
+
 
 
 
