@@ -1,35 +1,17 @@
 package controllers;
 
-import dto.BaseAPIResponse;
 import dto.PropertyListResponse;
 import dto.PropertyResponse;
 import dto.partnerV2.BaseAPIV2ErrorResponse;
 import exception.*;
-import model.*;
-import model.enums.CardBrand;
-import model.enums.CardType;
-import model.enums.KYC;
+import model.Property;
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
-import provider.CardProvider;
-import provider.dto.CardCreationResponse;
-import provider.dto.CardLoadResponse;
-import provider.dto.CardUnloadResponse;
-import repository.CardRepository;
-import repository.CurrencyRepository;
-import repository.CustomerRepository;
-import repository.PropertyRepository;
-import services.MailService;
-import services.OperationService;
-import util.CurrencyUtil;
+import play.mvc.Results;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 import static configs.ReturnCodesV2.*;
 
