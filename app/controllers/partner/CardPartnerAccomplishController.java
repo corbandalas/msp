@@ -632,4 +632,96 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         return returnRecover(result);
 
     }
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "cardActivation",
+            value = "Card activation",
+            notes = "Method allows to activate card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Transfer request", required = true, dataType = "dto.partnerV2.ActivateRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> activation() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ActivateRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, ActivateRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        if (StringUtils.isBlank(createCard.getLastDigits())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: last4digit"));
+        }
+
+        if (StringUtils.isBlank(createCard.getMobilePhone())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
+        }
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+        F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
+
+        final F.Promise<F.Tuple<F.Tuple<Optional<Card>, Optional<Card>>, Optional<Currency>>> zip = senderCardPromise.zip(receiverCardPromise).zip(F.Promise.wrap(currencyRepository.retrieveById(createCard.getCurrency())));
+
+        final F.Promise<Result> result = zip.flatMap(data -> {
+            if (!data._2.isPresent()) {
+                Logger.error("Specified currency doesn't exist");
+                return F.Promise.pure(createIncorrectCurrencyResponse());
+            }
+
+            if (!data._1._1.isPresent()) {
+                Logger.error("Specified currency doesn't exist");
+                return F.Promise.pure(createWrongCardResponse());
+            }
+
+            return accomplishService.transfer(createCard.getToken(), createCard.getReceiver(), "" + createCard.getAmount(),
+                    createCard.getCurrency(), "" + authData.getAccount().getId()).flatMap(providerResponse -> {
+
+                F.Promise<Result> returnPromise = null;
+
+                if (providerResponse.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                    returnPromise = operationService.createTransferOperation(data._1._1.get(),
+                            data._1._2.get(), (long) createCard.getAmount() * 100, data._2.get(), "" + System.currentTimeMillis(), "Transfer funds")
+                            .map(res -> ok(Json.toJson(new TransferResponse(true, "ready")
+                            )));
+                } else {
+                    returnPromise = F.Promise.pure(createCardProviderException(providerResponse.getResult().getCode()));
+                }
+
+                return returnPromise;
+
+            });
+        });
+        return returnRecover(result);
+
+    }
 }
