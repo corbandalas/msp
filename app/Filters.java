@@ -16,6 +16,9 @@ public class Filters implements HttpFilters {
     @Inject
     CORSFilter corsFilter;
 
+//    @Inject
+//    TimeLoggingFilter timeLoggingFilter;
+
     public EssentialFilter[] filters() {
         return new EssentialFilter[] { corsFilter };
     }

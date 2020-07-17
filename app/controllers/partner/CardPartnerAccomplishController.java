@@ -1,5 +1,6 @@
 package controllers.partner;
 
+import accomplish.dto.account.GetAccountResponse;
 import accomplish.dto.user.CreateUserResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
@@ -519,7 +520,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 card.setDeliveryAddress2("address 2");
                                 card.setDeliveryAddress3("address 3");
                                 card.setDeliveryCountry("DK");
-                                card.setInfo("");
+                                card.setInfo(res.getInfo().getBinId());
 
 
                                 String finalCurrency = currency;
@@ -606,7 +607,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             }
 
             if (!data._1._1.isPresent()) {
-                Logger.error("Specified currency doesn't exist");
+                Logger.error("Specified card doesn't exist");
                 return F.Promise.pure(createWrongCardResponse());
             }
 
@@ -658,7 +659,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
             @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
-    public F.Promise<Result> activation() {
+    public F.Promise<Result> cardLoad() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
@@ -687,41 +688,41 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
-        F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
 
-        final F.Promise<F.Tuple<F.Tuple<Optional<Card>, Optional<Card>>, Optional<Currency>>> zip = senderCardPromise.zip(receiverCardPromise).zip(F.Promise.wrap(currencyRepository.retrieveById(createCard.getCurrency())));
 
-        final F.Promise<Result> result = zip.flatMap(data -> {
-            if (!data._2.isPresent()) {
-                Logger.error("Specified currency doesn't exist");
-                return F.Promise.pure(createIncorrectCurrencyResponse());
-            }
+        final F.Promise<Result> result = customerPromise.zip(senderCardPromise).flatMap(data -> {
 
-            if (!data._1._1.isPresent()) {
-                Logger.error("Specified currency doesn't exist");
-                return F.Promise.pure(createWrongCardResponse());
-            }
 
-            return accomplishService.transfer(createCard.getToken(), createCard.getReceiver(), "" + createCard.getAmount(),
-                    createCard.getCurrency(), "" + authData.getAccount().getId()).flatMap(providerResponse -> {
+            F.Promise<GetAccountResponse> account = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
+
+            return account.flatMap(acc -> {
 
                 F.Promise<Result> returnPromise = null;
 
-                if (providerResponse.getResult().getCode().equalsIgnoreCase("0000")) {
+                if (!data._1.isPresent()) {
+                    Logger.error("Specified customer doesn't exist");
+                    returnPromise = F.Promise.pure(createWrongCustomerAccountResponse());
+                    return returnPromise;
+                }
 
-                    returnPromise = operationService.createTransferOperation(data._1._1.get(),
-                            data._1._2.get(), (long) createCard.getAmount() * 100, data._2.get(), "" + System.currentTimeMillis(), "Transfer funds")
-                            .map(res -> ok(Json.toJson(new TransferResponse(true, "ready")
+                if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
+                    return accomplishService.activateAccount(createCard.getToken(), data._2.get().getInfo(),
+                            data._1.get().getReferral(), data._2.get().getCurrencyId(), acc.getInfo().getNumber(), "0",
+                            acc.getInfo().getSecurity().getActivationCode(), "" + authData.getAccount().getId()).map(rez ->
+                            ok(Json.toJson(new SuccessAPIV2Response(true)
                             )));
                 } else {
-                    returnPromise = F.Promise.pure(createCardProviderException(providerResponse.getResult().getCode()));
+                    returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
                 }
 
                 return returnPromise;
-
             });
         });
+
         return returnRecover(result);
 
     }
+
+
 }

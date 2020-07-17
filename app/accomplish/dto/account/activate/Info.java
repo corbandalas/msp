@@ -6,6 +6,10 @@ import com.google.gson.annotations.SerializedName;
 
 public class Info {
 
+    @SerializedName("id")
+    @Expose
+    private String id;
+
     @SerializedName("bin_id")
     @Expose
     private String binId;
@@ -73,4 +77,11 @@ public class Info {
         this.security = security;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

@@ -57,6 +57,8 @@ POST       /api/partner/v2/sendDocument                               @controlle
 POST       /api/partner/v2/getCustomer                                  @controllers.partner.CardPartnerAccomplishController.getCustomer()
 POST       /api/partner/v2/createCard                                  @controllers.partner.CardPartnerAccomplishController.createCard()
 POST       /api/partner/v2/cardTransfer                                  @controllers.partner.CardPartnerAccomplishController.transfer()
+POST       /api/partner/v2/cardActivation                                  @controllers.partner.CardPartnerAccomplishController.activation()
+
 
 #Merchant API(admin)
 

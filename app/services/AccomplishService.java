@@ -1,8 +1,10 @@
 package services;
 
 import accomplish.*;
+import accomplish.Security;
 import accomplish.dto.account.GetAccountResponse;
-import accomplish.dto.account.activate.Activate;
+import accomplish.dto.account.activate.*;
+import accomplish.dto.account.activate.response.ActivateResponse;
 import accomplish.dto.card.CreateCard;
 import accomplish.dto.card.CreateCardResponse;
 import accomplish.dto.card.Info;
@@ -438,7 +440,7 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<TransferResponse> transfer(String userID, String receiverID, String amount, String currency, String partnerID) {
+    public F.Promise<TransferResponse> transfer(String senderID, String receiverID, String amount, String currency, String partnerID) {
 
         return getSettingsForPartner(partnerID).flatMap(accomplishSettings -> {
 
@@ -454,7 +456,7 @@ public class AccomplishService {
             info.setType("220"); //TODO: wtf?
 
             Info_ info_ = new Info_();
-            info_.setId(Integer.parseInt(userID));
+            info_.setId(Integer.parseInt(senderID));
             account.setInfo(info_);
 
             Transfer_ transfer_ = new Transfer_();
@@ -486,14 +488,14 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<GetAccountResponse> getAccount(String card, String partnerID) {
+    public F.Promise<GetAccountResponse> getAccount(String cardID, String partnerID) {
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.disableHtmlEscaping();
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/" + card, "", "GET", partnerID);
+        F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID);
         return promise.map(res -> {
             GetAccountResponse getAccountResponse = gson.fromJson(res, GetAccountResponse.class);
 
@@ -501,15 +503,27 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<GetAccountResponse> activateAccount(String card, String partnerID) {
+    public F.Promise<ActivateResponse> activateAccount(String cardID, String binID, String userID, String currency,
+                                                         String number, String type, String activationCode,
+                                                         String partnerID) {
 
         Activate activate = new Activate();
 
         accomplish.dto.account.activate.Info info = new accomplish.dto.account.activate.Info();
 
-//        info.set
+        info.setId(cardID);
+        info.setBinId(binID);
+        info.setCurrency(currency);
+        info.setNumber(number);
+        info.setUserId(userID);
+        info.setType(type);
 
-//        activate.setInfo();
+        accomplish.dto.account.activate.Security security = new accomplish.dto.account.activate.Security();
+        security.setActivationCode(activationCode);
+
+        info.setSecurity(security);
+
+        activate.setInfo(info);
 
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
@@ -517,9 +531,9 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/" + card, "", "GET", partnerID);
+        F.Promise<String> promise = execute("service/v1/account/activate" + cardID, "", "POST", partnerID);
         return promise.map(res -> {
-            GetAccountResponse getAccountResponse = gson.fromJson(res, GetAccountResponse.class);
+            ActivateResponse getAccountResponse = gson.fromJson(res, ActivateResponse.class);
 
             return getAccountResponse;
         });
