@@ -5,10 +5,11 @@ import accomplish.Security;
 import accomplish.dto.account.GetAccountResponse;
 import accomplish.dto.account.activate.*;
 import accomplish.dto.account.activate.response.ActivateResponse;
+import accomplish.dto.account.load.Account;
+import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.card.CreateCard;
 import accomplish.dto.card.CreateCardResponse;
 import accomplish.dto.card.Info;
-import accomplish.dto.customerget.Account;
 import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.identification.CreateIdentification;
 import accomplish.dto.identification.CreateIdentificationResponse;
@@ -531,11 +532,47 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/activate" + cardID, "", "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/account/activate" + cardID, gson.toJson(activate), "POST", partnerID);
         return promise.map(res -> {
             ActivateResponse getAccountResponse = gson.fromJson(res, ActivateResponse.class);
 
             return getAccountResponse;
+        });
+    }
+
+    public F.Promise<LoadResponse> load(String amount, String currency, String token,
+                                                       String partnerID) {
+
+        accomplish.dto.account.load.Load load = new accomplish.dto.account.load.Load();
+
+        accomplish.dto.account.load.Account account = new Account();
+
+        accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
+        info.setAmount(amount);
+        info.setCurrency(currency);
+        info.setType("84");
+
+        accomplish.dto.account.load.Info_ info_ = new accomplish.dto.account.load.Info_();
+
+        info_.setId(Integer.parseInt(token));
+
+        account.setInfo(info_);
+
+        load.setInfo(info);
+        load.setAccount(account);
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        String body = gson.toJson(load);
+
+        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID);
+        return promise.map(res -> {
+            LoadResponse loadResponse = gson.fromJson(res, LoadResponse.class);
+
+            return loadResponse;
         });
     }
 

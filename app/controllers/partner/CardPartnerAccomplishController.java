@@ -1,6 +1,7 @@
 package controllers.partner;
 
 import accomplish.dto.account.GetAccountResponse;
+import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.user.CreateUserResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
@@ -654,12 +655,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Transfer request", required = true, dataType = "dto.partnerV2.ActivateRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Card activation request", required = true, dataType = "dto.partnerV2.ActivateRequest", paramType = "body"),
             @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
             @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
-    public F.Promise<Result> cardLoad() {
+    public F.Promise<Result> activation() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
@@ -719,6 +720,84 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 return returnPromise;
             });
         });
+
+        return returnRecover(result);
+
+    }
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "cardLoad",
+            value = "Card load",
+            notes = "Method allows to load card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = LoadResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = LoadResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Card load request", required = true, dataType = "dto.partnerV2.LoadRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> load() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final LoadRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, LoadRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        if (StringUtils.isBlank(createCard.getAmount())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: amount"));
+        }
+
+        String ref = StringUtils.isBlank(createCard.getReference())? "" + System.currentTimeMillis(): createCard.getReference();
+
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+
+        final F.Promise<Result> result = senderCardPromise.flatMap(data -> F.Promise.wrap(currencyRepository.retrieveById(data.get().getCurrencyId())).flatMap(currency -> {
+            F.Promise<LoadResponse> load = accomplishService.load(createCard.getAmount(), data.get().getCurrencyId(), createCard.getToken(), "" + authData.getAccount().getId());
+
+            return load.flatMap(acc -> {
+
+                F.Promise<Result> returnPromise = null;
+
+
+                if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
+                    return operationService.createDepositOperation(data.get(),
+                            (long) (Float.parseFloat(createCard.getAmount()) * 100), currency.get(), ref, StringUtils.isBlank(createCard.getLabel())?"Debit card deposit":createCard.getLabel()).map(rez ->
+                            ok(Json.toJson(new dto.partnerV2.LoadResponse(createCard.getToken(), "done", createCard.getAmount(), acc.getInfo().getAvailableBalance(), ref)
+                            )));
+                } else {
+                    returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
+                }
+
+                return returnPromise;
+            });
+        }));
 
         return returnRecover(result);
 
