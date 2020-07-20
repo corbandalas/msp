@@ -13,11 +13,16 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LoadResponse {
+public class CheckCardResponse {
 
     private String token;
     private String status;
-    private String amount;
-    private String walletBalance;
-    private String reference;
+    private String activationDate;
+    private String balance;
+    private String cardData;
+    private String currency;
+    private String group;
+    private String panNumber;
+    private String type;
+    private String walletReference;
 }

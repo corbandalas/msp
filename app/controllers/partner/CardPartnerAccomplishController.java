@@ -1,7 +1,6 @@
 package controllers.partner;
 
 import accomplish.dto.account.GetAccountResponse;
-import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.user.CreateUserResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
@@ -44,6 +43,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static configs.ReturnCodes.*;
+
+import dto.partnerV2.LoadResponse;
 
 
 /**
@@ -125,7 +126,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getBirthdayDate()) ||
                 StringUtils.isBlank(createCard.getLang()) ||
                 StringUtils.isBlank(createCard.getEmail())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
         }
@@ -268,7 +269,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getIssuanceCountry()) ||
                 StringUtils.isBlank(createCard.getResidenceCountry()) ||
                 StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
@@ -334,7 +335,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getDocumentType()) ||
                 StringUtils.isBlank(createCard.getDocumentName()) ||
                 StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
@@ -394,7 +395,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
@@ -461,19 +462,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
 
         if (StringUtils.isBlank(createCard.getCardData())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardData"));
         }
 
         if (StringUtils.isBlank(createCard.getCardModel())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardModel"));
         }
@@ -773,31 +774,126 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: amount"));
         }
 
-        String ref = StringUtils.isBlank(createCard.getReference())? "" + System.currentTimeMillis(): createCard.getReference();
+        String ref = StringUtils.isBlank(createCard.getReference()) ? "" + System.currentTimeMillis() : createCard.getReference();
 
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
 
-        final F.Promise<Result> result = senderCardPromise.flatMap(data -> F.Promise.wrap(currencyRepository.retrieveById(data.get().getCurrencyId())).flatMap(currency -> {
-            F.Promise<LoadResponse> load = accomplishService.load(createCard.getAmount(), data.get().getCurrencyId(), createCard.getToken(), "" + authData.getAccount().getId());
+        final F.Promise<Result> result = senderCardPromise.flatMap(data -> F.Promise.wrap(currencyRepository.retrieveById(data.get().getCurrencyId())).flatMap(currency -> accomplishService.load(createCard.getAmount(), data.get().getCurrencyId(), createCard.getToken(), "" + authData.getAccount().getId()).flatMap(acc -> {
 
-            return load.flatMap(acc -> {
-
-                F.Promise<Result> returnPromise = null;
+            F.Promise<Result> returnPromise = null;
 
 
-                if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
-                    return operationService.createDepositOperation(data.get(),
-                            (long) (Float.parseFloat(createCard.getAmount()) * 100), currency.get(), ref, StringUtils.isBlank(createCard.getLabel())?"Debit card deposit":createCard.getLabel()).map(rez ->
-                            ok(Json.toJson(new dto.partnerV2.LoadResponse(createCard.getToken(), "done", createCard.getAmount(), acc.getInfo().getAvailableBalance(), ref)
-                            )));
-                } else {
-                    returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
+            if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
+                return operationService.createDepositOperation(data.get(),
+                        (long) (Float.parseFloat(createCard.getAmount()) * 100), currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
+                        ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", createCard.getAmount(), acc.getInfo().getAvailableBalance(), ref)
+                        )));
+            } else {
+                returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
+            }
+
+            return returnPromise;
+        })));
+
+        return returnRecover(result);
+
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "checkCard",
+            value = "Card check",
+            notes = "Method allows to check card",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CheckCardResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CheckCardResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Card check request", required = true, dataType = "dto.partnerV2.CheckCardRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> checkCard() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CheckCardRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, CheckCardRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+        F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
+
+        final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
+
+            F.Promise<Result> returnPromise = null;
+
+
+            if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
+
+
+                String accStatus = acc._2.getInfo().getStatus();
+
+                String status = "active";
+
+                if (accStatus.equalsIgnoreCase("0")) {
+                    status = "closed";
+                } else if (accStatus.equalsIgnoreCase("1")) {
+                    status = "active";
+                } else if (accStatus.equalsIgnoreCase("2")) {
+                    status = "lost_or_stolen";
+                } else if (accStatus.equalsIgnoreCase("3")) {
+                    status = "lost_or_stolen";
+                } else if (accStatus.equalsIgnoreCase("4")) {
+                    status = "closed";
+                } else if (accStatus.equalsIgnoreCase("5")) {
+                    status = "blocked";
+                } else if (accStatus.equalsIgnoreCase("6")) {
+                    status = "blocked";
+                } else if (accStatus.equalsIgnoreCase("7")) {
+                    status = "expired";
+                } else if (accStatus.equalsIgnoreCase("8")) {
+                    status = "expired";
+                } else if (accStatus.equalsIgnoreCase("9")) {
+                    status = "blocked";
+                } else if (accStatus.equalsIgnoreCase("12")) {
+                    status = "active";
                 }
 
-                return returnPromise;
-            });
-        }));
+
+                returnPromise =
+                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.CheckCardResponse(createCard.getToken(), status, acc._2.getInfo().getActivationDateTime(), acc._2.getInfo().getAvailableBalance(), "", acc._1.get().getCurrencyId(), "", acc._2.getInfo().getNumber(),
+                                "", ""))));
+            } else {
+                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+            }
+
+            return returnPromise;
+        });
 
         return returnRecover(result);
 

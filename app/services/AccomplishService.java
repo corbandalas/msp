@@ -576,6 +576,42 @@ public class AccomplishService {
         });
     }
 
+    public F.Promise<LoadResponse> checkCard(String amount, String currency, String token,
+                                        String partnerID) {
+
+        accomplish.dto.account.load.Load load = new accomplish.dto.account.load.Load();
+
+        accomplish.dto.account.load.Account account = new Account();
+
+        accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
+        info.setAmount(amount);
+        info.setCurrency(currency);
+        info.setType("84");
+
+        accomplish.dto.account.load.Info_ info_ = new accomplish.dto.account.load.Info_();
+
+        info_.setId(Integer.parseInt(token));
+
+        account.setInfo(info_);
+
+        load.setInfo(info);
+        load.setAccount(account);
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        String body = gson.toJson(load);
+
+        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID);
+        return promise.map(res -> {
+            LoadResponse loadResponse = gson.fromJson(res, LoadResponse.class);
+
+            return loadResponse;
+        });
+    }
+
 
     private F.Promise<String> execute(String url, String body, String method, String partnerID) {
         return getSettingsForPartner(partnerID).flatMap(res -> F.Promise.wrap(getOauth(res)).flatMap(token -> F.Promise.wrap(invokeAPI(url, body, token, method, res))));
