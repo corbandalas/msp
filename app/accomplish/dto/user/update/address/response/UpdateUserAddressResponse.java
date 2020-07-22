@@ -13,7 +13,7 @@ public class UpdateUserAddressResponse {
     private Info info;
     @SerializedName("address")
     @Expose
-    private Info.Address address;
+    private Address address;
 
     public Result getResult() {
         return result;
@@ -31,11 +31,11 @@ public class UpdateUserAddressResponse {
         this.info = info;
     }
 
-    public Info.Address getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(Info.Address address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
