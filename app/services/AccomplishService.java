@@ -11,6 +11,7 @@ import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.card.CreateCard;
 import accomplish.dto.card.CreateCardResponse;
 import accomplish.dto.card.Info;
+import accomplish.dto.customerget.Address_;
 import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.identification.CreateIdentification;
 import accomplish.dto.identification.CreateIdentificationResponse;
@@ -24,8 +25,13 @@ import accomplish.dto.transfer.Transfer;
 import accomplish.dto.transfer.Transfer_;
 import accomplish.dto.transfer.response.TransferResponse;
 import accomplish.dto.user.CreateUserResponse;
+import accomplish.dto.user.update.address.UpdateUserAddressRequest;
+import accomplish.dto.user.update.address.response.AddressRequestBean;
+import accomplish.dto.user.update.address.response.UpdateUserAddressResponse;
 import accomplish.dto.user.update.email.*;
 import accomplish.dto.user.update.email.response.UpdateUserEmailResponse;
+import accomplish.dto.user.update.phone.UpdateUserPhone;
+import accomplish.dto.user.update.phone.response.UpdateUserPhoneResponse;
 import akka.dispatch.Futures;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -36,7 +42,6 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
 import exception.WrongPropertyException;
 import model.Property;
-import org.springframework.util.StringUtils;
 import play.Logger;
 import play.libs.F;
 import repository.PropertyRepository;
@@ -580,31 +585,118 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<UpdateUserEmailResponse> updateUserEmail(String email, String token,
+    public F.Promise<UpdateUserEmailResponse> updateUserEmail(String userID, String emailValue,
 
                                                               String partnerID) {
 
-        UpdateUserEmailRequest request = new UpdateUserEmailRequest();
 
-        request.setEmail();
+        return getCustomer(userID, partnerID).flatMap(cust -> {
 
-        accomplish.dto.user.update.email.Email email1 = new accomplish.dto.user.update.email.Email();
+            accomplish.dto.customerget.Email serverEmail = cust.getEmail().get(0);
 
-        email1.setId();
+            UpdateUserEmailRequest request = new UpdateUserEmailRequest();
+
+            List<accomplish.dto.user.update.email.Email> emails = new ArrayList<>();
+            accomplish.dto.user.update.email.Email email = new accomplish.dto.user.update.email.Email();
+            email.setAddress(emailValue);
+            email.setId(serverEmail.getId());
+            email.setVerificationStatus(serverEmail.getVerificationStatus());
+
+            emails.add(email);
+            request.setEmail(emails);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+
+            String body = gson.toJson(request);
+
+            F.Promise<String> promise = execute("service/v1/user/email/" + userID, body, "PUT", partnerID);
+            return promise.map(res -> {
+                UpdateUserEmailResponse loadResponse = gson.fromJson(res, UpdateUserEmailResponse.class);
+
+                return loadResponse;
+            });
+        });
+    }
+
+    public F.Promise<UpdateUserAddressResponse> updateUserAddress(String userID, AddressRequestBean addressRequestBean,
+
+                                                                  String partnerID) {
+
+        return getCustomer(userID, partnerID).flatMap(cust -> {
+
+            Address_ serverEmail = cust.getAddresses().get(0);
+
+            UpdateUserAddressRequest request = new UpdateUserAddressRequest();
+
+            List<accomplish.dto.user.update.address.Address> addresses = new ArrayList<>();
+
+            accomplish.dto.user.update.address.Address address1 = new  accomplish.dto.user.update.address.Address();
+            address1.setAddressLine1(addressRequestBean.getAddress1());
+            address1.setAddressLine2(addressRequestBean.getAddress2());
+            address1.setCityTown(addressRequestBean.getCity());
+            address1.setCountryCode(addressRequestBean.getCountry());
+            address1.setPostalZipCode(addressRequestBean.getZip());
+            address1.setId(serverEmail.getId());
+
+            addresses.add(address1);
+            request.setAddresses(addresses);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+
+            String body = gson.toJson(request);
+
+            F.Promise<String> promise = execute("service/v1/user/address/" + userID, body, "PUT", partnerID);
+            return promise.map(res -> {
+                UpdateUserAddressResponse loadResponse = gson.fromJson(res, UpdateUserAddressResponse.class);
+
+                return loadResponse;
+            });
+        });
+    }
+
+    public F.Promise<UpdateUserPhoneResponse> updateUserPhone(String userID, String phoneValue,
+
+                                                              String partnerID) {
 
 
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.disableHtmlEscaping();
+        return getCustomer(userID, partnerID).flatMap(cust -> {
 
-        final Gson gson = gsonBuilder.create();
+            accomplish.dto.customerget.Phone phoneFromServer = cust.getPhone().get(0);
 
-        String body = gson.toJson(load);
+            UpdateUserPhone request = new UpdateUserPhone();
 
-        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID);
-        return promise.map(res -> {
-            LoadResponse loadResponse = gson.fromJson(res, LoadResponse.class);
+            List<accomplish.dto.user.update.phone.Phone> phones = new ArrayList<>();
+            accomplish.dto.user.update.phone.Phone phone = new accomplish.dto.user.update.phone.Phone();
 
-            return loadResponse;
+            phone.setCountryCode(phoneFromServer.getCountryCode());
+            phone.setId(phoneFromServer.getId());
+            phone.setNumber(phoneValue);
+            phone.setIsPrimary(phoneFromServer.getIsPrimary());
+            phone.setType(phoneFromServer.getType());
+            phone.setVerificationStatus(phoneFromServer.getVerificationStatus());
+
+            phones.add(phone);
+            request.setPhone(phones);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+
+            String body = gson.toJson(request);
+
+            F.Promise<String> promise = execute("service/v1/user/phone/" + userID, body, "PUT", partnerID);
+            return promise.map(res -> {
+                UpdateUserPhoneResponse loadResponse = gson.fromJson(res, UpdateUserPhoneResponse.class);
+
+                return loadResponse;
+            });
         });
     }
 

@@ -13,6 +13,10 @@ public class Email {
     @Expose
     private Integer verificationStatus;
 
+    @SerializedName("address")
+    @Expose
+    private String address;
+
     public Integer getId() {
         return id;
     }
@@ -29,4 +33,11 @@ public class Email {
         this.verificationStatus = verificationStatus;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
 }

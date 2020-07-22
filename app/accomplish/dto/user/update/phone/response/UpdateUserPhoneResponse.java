@@ -1,9 +1,11 @@
-package accomplish.dto.user.update.address.response;
 
+package accomplish.dto.user.update.phone.response;
+
+import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class UpdateUserAddressResponse {
+public class UpdateUserPhoneResponse {
 
     @SerializedName("result")
     @Expose
@@ -11,9 +13,9 @@ public class UpdateUserAddressResponse {
     @SerializedName("info")
     @Expose
     private Info info;
-    @SerializedName("address")
+    @SerializedName("phone")
     @Expose
-    private Info.Address address;
+    private List<Phone> phone = null;
 
     public Result getResult() {
         return result;
@@ -31,12 +33,12 @@ public class UpdateUserAddressResponse {
         this.info = info;
     }
 
-    public Info.Address getAddress() {
-        return address;
+    public List<Phone> getPhone() {
+        return phone;
     }
 
-    public void setAddress(Info.Address address) {
-        this.address = address;
+    public void setPhone(List<Phone> phone) {
+        this.phone = phone;
     }
 
 }

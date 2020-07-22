@@ -2,7 +2,10 @@ package controllers.partner;
 
 import accomplish.dto.account.GetAccountResponse;
 import accomplish.dto.user.CreateUserResponse;
+import accomplish.dto.user.update.address.response.AddressRequestBean;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
@@ -126,7 +129,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getBirthdayDate()) ||
                 StringUtils.isBlank(createCard.getLang()) ||
                 StringUtils.isBlank(createCard.getEmail())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
         }
@@ -269,7 +272,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getIssuanceCountry()) ||
                 StringUtils.isBlank(createCard.getResidenceCountry()) ||
                 StringUtils.isBlank(createCard.getMobilePhone())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
@@ -335,7 +338,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getDocumentType()) ||
                 StringUtils.isBlank(createCard.getDocumentName()) ||
                 StringUtils.isBlank(createCard.getMobilePhone())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
@@ -395,7 +398,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
@@ -462,19 +465,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
 
         if (StringUtils.isBlank(createCard.getCardData())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardData"));
         }
 
         if (StringUtils.isBlank(createCard.getCardModel())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardModel"));
         }
@@ -890,6 +893,133 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 "", ""))));
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+            }
+
+            return returnPromise;
+        });
+
+        return returnRecover(result);
+
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "updateCustomer",
+            value = "Update customer",
+            notes = "Method allows to update customer",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Update customer request", required = true, dataType = "dto.partnerV2.UpdateCustomerRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> updateCustomer() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final UpdateCustomerRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, UpdateCustomerRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getMobilePhone())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobile phone"));
+        }
+
+        if (StringUtils.isBlank(createCard.getType())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: type"));
+        }
+
+        if (StringUtils.isBlank(createCard.getData())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: data"));
+        }
+
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+
+
+        final F.Promise<Result> result = customerPromise.flatMap(acc -> {
+
+            F.Promise<Result> returnPromise = null;
+
+            if (createCard.getType().equalsIgnoreCase("address")) {
+
+                final GsonBuilder gsonBuilder = new GsonBuilder();
+                gsonBuilder.disableHtmlEscaping();
+
+                final Gson gson = gsonBuilder.create();
+
+                AddressRequestBean addressRequestBean = gson.fromJson(createCard.getData(), AddressRequestBean.class);
+
+                return accomplishService.updateUserAddress(acc.get().getReferral(), addressRequestBean, "" + authData.getAccount().getId()).flatMap(res -> {
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                        Customer customer = acc.get();
+
+                        customer.setAddress1(addressRequestBean.getAddress1());
+                        customer.setAddress2(addressRequestBean.getAddress2());
+                        customer.setCity(addressRequestBean.getCity());
+                        customer.setCountry_id(addressRequestBean.getCountry());
+                        customer.setPostcode(addressRequestBean.getZip());
+
+                        customerRepository.update(customer);
+
+                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+                    } else {
+                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                    }
+                });
+            } else if (createCard.getType().equalsIgnoreCase("email")) {
+                return accomplishService.updateUserEmail(acc.get().getReferral(), createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                        Customer customer = acc.get();
+
+                        customer.setEmail(createCard.getData());
+
+                        customerRepository.update(customer);
+
+                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+                    } else {
+                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                    }
+                });
+            }  else if (createCard.getType().equalsIgnoreCase("phone")) {
+                return accomplishService.updateUserPhone(acc.get().getReferral(), createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
+//                        Customer customer = acc.get();
+//
+//                        customer.setEmail(createCard.getData());
+//
+//                        customerRepository.update(customer);
+
+                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+                    } else {
+                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                    }
+                });
             }
 
             return returnPromise;

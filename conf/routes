@@ -60,6 +60,7 @@ POST       /api/partner/v2/cardTransfer                                  @contro
 POST       /api/partner/v2/cardActivation                                  @controllers.partner.CardPartnerAccomplishController.activation()
 POST       /api/partner/v2/cardLoad                                  @controllers.partner.CardPartnerAccomplishController.load()
 POST       /api/partner/v2/checkCard                                  @controllers.partner.CardPartnerAccomplishController.checkCard()
+POST       /api/partner/v2/updateCustomer                                  @controllers.partner.CardPartnerAccomplishController.updateCustomer()
 
 #Merchant API(admin)
 

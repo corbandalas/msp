@@ -1,4 +1,3 @@
-
 package accomplish.dto.user.update.address.response;
 
 import com.google.gson.annotations.Expose;
@@ -6,15 +5,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Address {
 
-    @SerializedName("id")
-    @Expose
-    private Integer id;
     @SerializedName("type")
     @Expose
     private Integer type;
-    @SerializedName("is_primary")
-    @Expose
-    private Integer isPrimary;
     @SerializedName("is_billing")
     @Expose
     private Integer isBilling;
@@ -42,14 +35,18 @@ public class Address {
     @SerializedName("verification_status")
     @Expose
     private Integer verificationStatus;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @SerializedName("original_source_id")
+    @Expose
+    private String originalSourceId;
+    @SerializedName("server_date")
+    @Expose
+    private String serverDate;
+    @SerializedName("date_utc")
+    @Expose
+    private String dateUtc;
+    @SerializedName("update_date_utc")
+    @Expose
+    private String updateDateUtc;
 
     public Integer getType() {
         return type;
@@ -57,14 +54,6 @@ public class Address {
 
     public void setType(Integer type) {
         this.type = type;
-    }
-
-    public Integer getIsPrimary() {
-        return isPrimary;
-    }
-
-    public void setIsPrimary(Integer isPrimary) {
-        this.isPrimary = isPrimary;
     }
 
     public Integer getIsBilling() {
@@ -137,6 +126,38 @@ public class Address {
 
     public void setVerificationStatus(Integer verificationStatus) {
         this.verificationStatus = verificationStatus;
+    }
+
+    public String getOriginalSourceId() {
+        return originalSourceId;
+    }
+
+    public void setOriginalSourceId(String originalSourceId) {
+        this.originalSourceId = originalSourceId;
+    }
+
+    public String getServerDate() {
+        return serverDate;
+    }
+
+    public void setServerDate(String serverDate) {
+        this.serverDate = serverDate;
+    }
+
+    public String getDateUtc() {
+        return dateUtc;
+    }
+
+    public void setDateUtc(String dateUtc) {
+        this.dateUtc = dateUtc;
+    }
+
+    public String getUpdateDateUtc() {
+        return updateDateUtc;
+    }
+
+    public void setUpdateDateUtc(String updateDateUtc) {
+        this.updateDateUtc = updateDateUtc;
     }
 
 }
