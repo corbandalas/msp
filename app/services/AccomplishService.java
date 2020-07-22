@@ -1,6 +1,7 @@
 package services;
 
 import accomplish.*;
+import accomplish.Email;
 import accomplish.Security;
 import accomplish.dto.account.GetAccountResponse;
 import accomplish.dto.account.activate.*;
@@ -23,6 +24,8 @@ import accomplish.dto.transfer.Transfer;
 import accomplish.dto.transfer.Transfer_;
 import accomplish.dto.transfer.response.TransferResponse;
 import accomplish.dto.user.CreateUserResponse;
+import accomplish.dto.user.update.email.*;
+import accomplish.dto.user.update.email.response.UpdateUserEmailResponse;
 import akka.dispatch.Futures;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -576,26 +579,19 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<LoadResponse> checkCard(String amount, String currency, String token,
-                                        String partnerID) {
 
-        accomplish.dto.account.load.Load load = new accomplish.dto.account.load.Load();
+    public F.Promise<UpdateUserEmailResponse> updateUserEmail(String email, String token,
 
-        accomplish.dto.account.load.Account account = new Account();
+                                                              String partnerID) {
 
-        accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
-        info.setAmount(amount);
-        info.setCurrency(currency);
-        info.setType("84");
+        UpdateUserEmailRequest request = new UpdateUserEmailRequest();
 
-        accomplish.dto.account.load.Info_ info_ = new accomplish.dto.account.load.Info_();
+        request.setEmail();
 
-        info_.setId(Integer.parseInt(token));
+        accomplish.dto.user.update.email.Email email1 = new accomplish.dto.user.update.email.Email();
 
-        account.setInfo(info_);
+        email1.setId();
 
-        load.setInfo(info);
-        load.setAccount(account);
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.disableHtmlEscaping();
@@ -635,6 +631,8 @@ public class AccomplishService {
 
         } else if (method.equalsIgnoreCase("GET")) {
             boundRequestBuilder = asyncHttpClient.prepareGet(query);
+        }  else if (method.equalsIgnoreCase("PUT")) {
+            boundRequestBuilder = asyncHttpClient.preparePut(query);
         }
 
 
