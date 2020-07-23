@@ -10,6 +10,18 @@ public class Security {
     @Expose
     private String activationCode;
 
+    @SerializedName("pin_code")
+    @Expose
+    private String pin_code;
+
+    public String getPin_code() {
+        return pin_code;
+    }
+
+    public void setPin_code(String pin_code) {
+        this.pin_code = pin_code;
+    }
+
     public String getActivationCode() {
         return activationCode;
     }
