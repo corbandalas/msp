@@ -52,7 +52,7 @@ public class BaseMerchantApiV2Action extends Action.Simple {
                     String.valueOf(ReturnCodesV2.INCORRECT_AUTHORIZATION_DATA_CODE), ReturnCodesV2.INCORRECT_AUTHORIZATION_DATA_TEXT, ""))));
         }
 
-        final String orderId = ctx.request().getHeader("");
+        final String orderId = ctx.request().getHeader("X-Request-Nonce");
 
         Logger.info("///// X-Request-Nonce(orderId) = " + orderId);
 
