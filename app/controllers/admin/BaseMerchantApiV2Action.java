@@ -71,7 +71,7 @@ public class BaseMerchantApiV2Action extends Action.Simple {
 
             Account authAccount = authAccountOptional.get();
 
-            String generatedEnckey = SecurityUtil.generateSH1(SecurityUtil.encodeString(orderId + authAccount.getSecret()));
+            String generatedEnckey = SecurityUtil.encodeString(SecurityUtil.generateSH1(orderId + authAccount.getSecret()));
 
             if (!generatedEnckey.equalsIgnoreCase(enckey)) {
                 return F.Promise.pure(ok(Json.toJson(new BaseAPIResponse(ReturnCodes.WRONG_REQUEST_ENCKEY_TEXT,
