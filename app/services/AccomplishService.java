@@ -19,6 +19,7 @@ import accomplish.dto.identification.Identification;
 import accomplish.dto.identification.document.Attachment;
 import accomplish.dto.identification.document.CreateDocument;
 import accomplish.dto.identification.document.CreateDocumentResponse;
+import accomplish.dto.transaction.GetTransactionResponse;
 import accomplish.dto.transfer.AccountInfo;
 import accomplish.dto.transfer.Info_;
 import accomplish.dto.transfer.Transfer;
@@ -697,6 +698,27 @@ public class AccomplishService {
 
                 return loadResponse;
             });
+        });
+    }
+
+    public F.Promise<GetTransactionResponse> getTransaction(String userID, String cardID, int limit, int offset,  String fromDate, String toDate, String partnerID) {
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+
+        F.Promise<String> promise = execute("service/v1/transaction/inquiry?user_id=" + userID +
+                "&account_id=" + cardID + "&status=0&from_date=" + fromDate + "&to_date=" + toDate +
+                "&page_size=" + limit + "&start_index=" + offset + "&sort_flag='asc'&show_custom_field=1" , "", "GET", partnerID);
+
+        return promise.map(res -> {
+            GetTransactionResponse createUserResponse = gson.fromJson(res, GetTransactionResponse.class);
+
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+            return createUserResponse;
         });
     }
 

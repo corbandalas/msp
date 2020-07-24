@@ -41,6 +41,7 @@ import util.DateUtil;
 import util.SecurityUtil;
 import util.Utils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -1005,7 +1006,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
                     }
                 });
-            }  else if (createCard.getType().equalsIgnoreCase("phone")) {
+            } else if (createCard.getType().equalsIgnoreCase("phone")) {
                 return accomplishService.updateUserPhone(acc.get().getReferral(), createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
@@ -1038,11 +1039,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = CreateCustomerIdentificationResponse.class
+            response = GetPINImageCardResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerIdentificationResponse.class),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = GetPINImageCardResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
             @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
@@ -1087,6 +1088,161 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 returnPromise =
                         F.Promise.pure(ok(Json.toJson(new dto.partnerV2.GetPINImageCardResponse(acc._2.getInfo().getSecurity().getPin_code()))));
+            } else {
+                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+            }
+
+            return returnPromise;
+        });
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getTransactions",
+            value = "Get transactions",
+            notes = "Method allows to obtain card transactions",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = TransactionResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = TransactionResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Get transaction request", required = true, dataType = "dto.partnerV2.TransactionRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> getTransactions() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final TransactionRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, TransactionRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        int offset = 0;
+        int limit = 0;
+        String dateFrom = null;
+        String dateTo = null;
+
+
+        if (StringUtils.isNotBlank(createCard.getOffset())) {
+            try {
+                offset = Integer.parseInt(createCard.getOffset());
+            } catch (Exception e) {
+                Logger.error("Parse error", e);
+            }
+        }
+
+        if (StringUtils.isNotBlank(createCard.getLimit())) {
+            try {
+                limit = Integer.parseInt(createCard.getLimit());
+            } catch (Exception e) {
+                Logger.error("Parse error", e);
+            }
+        }
+
+        if (StringUtils.isNotBlank(createCard.getDateStart())) {
+            try {
+                dateFrom = createCard.getDateStart();
+            } catch (Exception e) {
+                Logger.error("Parse error", e);
+            }
+        }
+
+        if (StringUtils.isNotBlank(createCard.getDateEnd())) {
+            try {
+                dateTo = createCard.getDateEnd();
+            } catch (Exception e) {
+                Logger.error("Parse error", e);
+            }
+        }
+
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+        F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
+
+        int finalLimit = limit;
+        int finalOffset = offset;
+        String finalDateFrom = dateFrom;
+        String finalDateTo = dateTo;
+        final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
+
+            F.Promise<Result> returnPromise = null;
+
+
+            if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                returnPromise = accomplishService.getTransaction("" + acc._2.getInfo().getUserId(), createCard.getToken(), finalLimit,
+                        finalOffset, finalDateFrom, finalDateTo, "" + authData.getAccount().getId()).flatMap(res -> {
+
+                    F.Promise<Result> promise = null;
+
+
+                    if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                        TransactionResponse transactionResponse = new TransactionResponse();
+
+                        List<Transaction> transactions = new ArrayList<>();
+
+                        for (accomplish.dto.transaction.Transaction transaction: res.getTransactions()) {
+
+                            Transaction resTransaction = new Transaction();
+
+                            resTransaction.setAmount(Double.parseDouble(transaction.getInfo().getAmount()));
+                            resTransaction.setBalance(Double.parseDouble(transaction.getInfo().getBalance()));
+                            resTransaction.setCurrency(transaction.getInfo().getCurrency());
+                            resTransaction.setDesc(transaction.getInfo().getNotes());
+                            resTransaction.setDirection(transaction.getInfo().getOperation());
+                            resTransaction.setLocalDate((int)DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
+                            resTransaction.setSettlementDate((int)DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
+
+                            resTransaction.setOriginalAmount(Double.parseDouble(transaction.getConversion().getOriginalAmount()));
+                            resTransaction.setOriginalCurrency(transaction.getConversion().getTransactionCurrency());
+                            resTransaction.setType(transaction.getInfo().getOperation());
+                            resTransaction.setOriginalSourceId(transaction.getInfo().getOriginalSourceId());
+
+                            transactions.add(resTransaction);
+                        }
+
+                        transactionResponse.setFrom(res.getResultSet().getFromDate());
+                        transactionResponse.setTo(res.getResultSet().getToDate());
+                        transactionResponse.setCount("" + res.getResultSet().getTotalRecords());
+
+                        transactionResponse.setTransactions(transactions);
+
+                        promise =
+                                F.Promise.pure(ok(Json.toJson(transactionResponse)));
+                    } else {
+                        promise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+                    }
+
+                    return promise;
+
+                });
+
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
             }

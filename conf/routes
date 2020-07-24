@@ -62,7 +62,7 @@ POST       /api/partner/v2/cardLoad                                  @controller
 POST       /api/partner/v2/checkCard                                  @controllers.partner.CardPartnerAccomplishController.checkCard()
 POST       /api/partner/v2/updateCustomer                                  @controllers.partner.CardPartnerAccomplishController.updateCustomer()
 POST       /api/partner/v2/getPinImage                                  @controllers.partner.CardPartnerAccomplishController.getPinImage()
-
+POST       /api/partner/v2/getTransactions                                  @controllers.partner.CardPartnerAccomplishController.getTransactions()
 
 #Merchant API(admin)
 
