@@ -43,6 +43,7 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
 import exception.WrongPropertyException;
 import model.Property;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
 import repository.PropertyRepository;
@@ -795,7 +796,7 @@ public class AccomplishService {
 
             Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
 
-            String[] split = gpsConfigStringValue.split("|");
+            String[] split = StringUtils.split(gpsConfigStringValue, "|") ;
 
             return new AccomplishSettings(split[0], split[1], split[2], split[3], split[4]);
         });
