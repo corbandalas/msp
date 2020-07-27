@@ -161,11 +161,11 @@ public class AccomplishService {
         String titleValue = "10";
 
         if (title.equalsIgnoreCase("Mr")) {
-            titleValue = "10";
+            titleValue = "1";
         } else if (title.equalsIgnoreCase("Mrs")) {
-            titleValue = "10";
+            titleValue = "1";
         } else if (title.equalsIgnoreCase("Ms")) {
-            titleValue = "10";
+            titleValue = "1";
         }
 
         personalInfo.setTitle(titleValue);
