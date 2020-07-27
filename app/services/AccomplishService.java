@@ -157,7 +157,18 @@ public class AccomplishService {
         personalInfo.setLastName(lastName);
         personalInfo.setJobTitle(title);
 //        personalInfo.setNickName();
-        personalInfo.setTitle(title);
+
+        String titleValue = "10";
+
+        if (title.equalsIgnoreCase("Mr")) {
+            titleValue = "10";
+        } else if (title.equalsIgnoreCase("Mrs")) {
+            titleValue = "10";
+        } else if (title.equalsIgnoreCase("Ms")) {
+            titleValue = "10";
+        }
+
+        personalInfo.setTitle(titleValue);
         personalInfo.setGender("0");
         personalInfo.setDateOfBirth(birthdayDate);
         personalInfo.setVerificationStatus("1");
