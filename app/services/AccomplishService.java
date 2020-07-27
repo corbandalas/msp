@@ -73,15 +73,19 @@ public class AccomplishService {
         private String apiURL;
         private String userName;
         private String password;
-        private String programID1;
-        private String programID2;
+        private String programID;
+        private String productID1;
+        private String productID2;
 
-        public AccomplishSettings(String apiURL, String userName, String password, String programID1, String programID2) {
+
+        public AccomplishSettings(String apiURL, String userName, String password, String programID, String productID1,
+                                  String productID2) {
             this.apiURL = apiURL;
             this.userName = userName;
             this.password = password;
-            this.programID1 = programID1;
-            this.programID2 = programID2;
+            this.programID = programID;
+            this.productID1 = productID1;
+            this.productID2 = productID2;
         }
     }
 
@@ -107,7 +111,7 @@ public class AccomplishService {
                 .addFormParam("grant_type", "program_credential")
                 .addFormParam("user_name", accomplishSettings.userName)
                 .addFormParam("password", accomplishSettings.password)
-                .addFormParam("program_Id", accomplishSettings.programID1)
+                .addFormParam("program_Id", accomplishSettings.programID)
                 .addFormParam("language", "en")
 
                 .execute(new AsyncCompletionHandler<String>() {
@@ -407,11 +411,11 @@ public class AccomplishService {
             int status = 0;
 
             if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
-                bin = Long.parseLong(accomplishSettings.programID1);
+                bin = Long.parseLong(accomplishSettings.productID1);
                 type = 1;
                 status = 1;
             } else if (cardModel.equalsIgnoreCase("mymonii_childcard")) {
-                bin = Long.parseLong(accomplishSettings.programID2);
+                bin = Long.parseLong(accomplishSettings.productID2);
                 status = 12;
                 type = 0;
             }
@@ -798,7 +802,7 @@ public class AccomplishService {
 
             String[] split = StringUtils.split(gpsConfigStringValue, "|") ;
 
-            return new AccomplishSettings(split[0], split[1], split[2], split[3], split[4]);
+            return new AccomplishSettings(split[0], split[1], split[2], split[5], split[3], split[4]);
         });
     }
 }

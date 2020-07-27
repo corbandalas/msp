@@ -391,7 +391,7 @@
 
     {
       "id": "cardprovider.accomplish.api.settings",
-      "value": "https://demoapi.domain.com/|safepayrest|SAFEWErvg123!|1436|1435",
+      "value": "https://demoapi.domain.com/|safepayrest|SAFEWErvg123!|1436|1435|2092",
       "description": "API domain",
       "category": "ACCOMPLISH_INTEGRATION"
     }
