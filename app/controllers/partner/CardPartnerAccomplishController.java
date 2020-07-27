@@ -148,6 +148,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         customer.setPostcode(createCard.getZip());
         customer.setTitle(createCard.getTitle());
         customer.setActive(true);
+        customer.setId(createCard.getMobilePhone());
+        customer.setFlat("");
 
         if (StringUtils.isNoneBlank(createCard.getPassword())) {
             customer.setPassword(SecurityUtil.generateKeyFromArray(createCard.getPassword()));
@@ -160,6 +162,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             Date dob = DateUtil.parse(createCard.getBirthdayDate(), "DD/MM/YYYY");
 
             customer.setDateBirth(dob);
+            customer.setRegistrationDate(new Date());
 
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
