@@ -194,9 +194,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 throw new CustomerAlreadyRegisteredException("Customer is already registered");
             }
 
-            if (!Utils.isValidPhoneNumber(createCard.getMobilePhone(), country.get().getCode())) {
-                throw new WrongPhoneNumberException();
-            }
+//            if (!Utils.isValidPhoneNumber(createCard.getMobilePhone(), country.get().getCode())) {
+//                throw new WrongPhoneNumberException();
+//            }
 
             F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUser(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                     createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),

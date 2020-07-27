@@ -76,7 +76,7 @@ public class BaseMerchantApiV2Action extends Action.Simple {
             Account authAccount = authAccountOptional.get();
 
 
-            String sh1 = SecurityUtil.generateSH1(orderId + authAccount.getSecret());
+            String sh1 = SecurityUtil.generateSH1(orderId + authAccount.getSecret()).toUpperCase();
 
             Logger.error("Generated SH1:" +  sh1);
 
