@@ -85,6 +85,9 @@ public class AccomplishService {
     }
 
     public String getAccessUrl(AccomplishSettings accomplishSettings, String relativeURL) {
+
+        Logger.info("accomplishSettings.apiURL = " + accomplishSettings.apiURL);
+
         return accomplishSettings.apiURL + relativeURL;
     }
 
