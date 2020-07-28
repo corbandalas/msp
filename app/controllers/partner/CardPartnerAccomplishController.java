@@ -528,7 +528,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 card.setCardDefault(true);
                                 card.setCreateDate(new Date());
                                 card.setCurrencyId(currency);
-                                card.setCustomerId(createCard.getMobilePhone());
+                                card.setCustomerId(StringUtils.removeStart(createCard.getMobilePhone(), "+"));
                                 card.setDeliveryAddress1("address 1");
                                 card.setDeliveryAddress2("address 2");
                                 card.setDeliveryAddress3("address 3");
