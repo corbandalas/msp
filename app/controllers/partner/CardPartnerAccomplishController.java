@@ -1260,7 +1260,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         promise =
                                 F.Promise.pure(ok(Json.toJson(transactionResponse)));
                     } else {
-                        promise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+                        promise = F.Promise.pure(createCardProviderException(res.getResult().getCode()));
                     }
 
                     return promise;
