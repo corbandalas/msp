@@ -746,7 +746,7 @@ public class AccomplishService {
 
         F.Promise<String> promise = execute("service/v1/transaction/inquiry?user_id=" + userID +
                 "&account_id=" + cardID + "&status=0&from_date=" + fromDate + "&to_date=" + toDate +
-                "&page_size=" + limit + "&start_index=" + offset + "&sort_flag='asc'&show_custom_field=1" , "", "GET", partnerID);
+                "&page_size=" + limit + "&start_index=" + offset + "&sort_flag=asc&show_custom_field=1" , "", "GET", partnerID);
 
         return promise.map(res -> {
             GetTransactionResponse createUserResponse = gson.fromJson(res, GetTransactionResponse.class);

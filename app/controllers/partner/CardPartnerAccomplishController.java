@@ -555,8 +555,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                 String finalCurrency = currency;
                                 String finalType = type;
-                                returnPromise = F.Promise.wrap(cardRepository.create(card)).map(rez -> ok(Json.toJson(new CreateCardResponse(null, "0", createCard.getCardData(), finalCurrency, res.getInfo().getNumber(),
-                                        "mymonii_feegroup_dkk", "ready", "" + res.getInfo().getId(), finalType, "MYMONII"))));
+                                returnPromise = F.Promise.wrap(cardRepository.create(card)).map(rez -> ok(Json.toJson(new CreateCardResponse(null, "0", createCard.getCardData(), finalCurrency,
+                                        "mymonii_feegroup_dkk", res.getInfo().getNumber(), "ready", "" + res.getInfo().getId(), finalType, "MYMONII"))));
                             } else {
                                 returnPromise = F.Promise.pure(createCardProviderException(res.getResult().getCode()));
                             }
@@ -1225,7 +1225,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     F.Promise<Result> promise = null;
 
 
-                    if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
                         TransactionResponse transactionResponse = new TransactionResponse();
 
