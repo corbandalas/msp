@@ -24,6 +24,7 @@ import model.Customer;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -150,9 +151,13 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         customer.setActive(true);
         customer.setId(createCard.getMobilePhone());
         customer.setFlat("");
+        customer.setHouseNameNumber("");
+        customer.setTemppassword(false);
 
         if (StringUtils.isNoneBlank(createCard.getPassword())) {
             customer.setPassword(SecurityUtil.generateKeyFromArray(createCard.getPassword()));
+        } else {
+            customer.setPassword(SecurityUtil.generateKeyFromArray(RandomStringUtils.random(8)));
         }
 
         try {
