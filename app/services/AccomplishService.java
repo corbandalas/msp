@@ -41,6 +41,8 @@ import com.google.inject.Singleton;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import exception.WrongPropertyException;
 import model.Property;
 import org.apache.commons.lang3.StringUtils;
@@ -421,16 +423,29 @@ public class AccomplishService {
             int type = 0;
             int status = 0;
 
-            if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
+            Config conf = ConfigFactory.load();
+
+            String accomplishProd = conf.getString("accomplish.environment.prod");
+
+            if (accomplishProd.equalsIgnoreCase("false")) {
                 bin = Long.parseLong(accomplishSettings.productID1);
-//                type = 1;
-                type = 0;//only dev
-                status = 1;
-            } else if (cardModel.equalsIgnoreCase("mymonii_childcard")) {
-                bin = Long.parseLong(accomplishSettings.productID2);
-                status = 12;
                 type = 0;
+                status = 1;
+                currency = "EUR";
+
+            } else {
+                if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    type = 1;
+                    status = 1;
+                } else if (cardModel.equalsIgnoreCase("mymonii_childcard")) {
+                    bin = Long.parseLong(accomplishSettings.productID2);
+                    status = 12;
+                    type = 0;
+                }
             }
+
+
 
 //        if (currency.equalsIgnoreCase("EUR")) {
 //            bin = 4560;
