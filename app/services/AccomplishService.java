@@ -423,7 +423,8 @@ public class AccomplishService {
 
             if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
                 bin = Long.parseLong(accomplishSettings.productID1);
-                type = 1;
+//                type = 1;
+                type = 0;//only dev
                 status = 1;
             } else if (cardModel.equalsIgnoreCase("mymonii_childcard")) {
                 bin = Long.parseLong(accomplishSettings.productID2);
