@@ -16,7 +16,6 @@ import dto.partnerV2.*;
 import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
-import exception.WrongPhoneNumberException;
 import model.Card;
 import model.Country;
 import model.Currency;
@@ -40,7 +39,6 @@ import services.AccomplishService;
 import services.OperationService;
 import util.DateUtil;
 import util.SecurityUtil;
-import util.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,8 +46,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static configs.ReturnCodes.*;
-
-import dto.partnerV2.LoadResponse;
 
 
 /**
@@ -149,7 +145,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         customer.setPostcode(createCard.getZip());
         customer.setTitle(createCard.getTitle());
         customer.setActive(true);
-        customer.setId(createCard.getMobilePhone());
+        customer.setId(StringUtils.removeStart(createCard.getMobilePhone(), "+"));
         customer.setFlat("");
         customer.setHouseNameNumber("");
         customer.setTemppassword(false);
@@ -286,7 +282,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
 
         F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createIdentification(customers.get().getReferral(), createCard.getIssuanceCountry(),
@@ -352,7 +348,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
 
         F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.sendDocument(customers.get().getReferral(), createCard.getDocumentName(), createCard.getDocument(),
@@ -412,7 +408,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
 
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
 
         F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.getCustomer(customers.get().getReferral(), "" + authData.getAccount().getId())
@@ -491,7 +487,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardModel"));
         }
 
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
 
         F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createCard(customers.get().getReferral(),
@@ -702,7 +698,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
 
         final F.Promise<Result> result = customerPromise.zip(senderCardPromise).flatMap(data -> {
@@ -965,7 +961,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: data"));
         }
 
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(createCard.getMobilePhone()));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
 
         final F.Promise<Result> result = customerPromise.flatMap(acc -> {
