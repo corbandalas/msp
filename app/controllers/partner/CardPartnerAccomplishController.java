@@ -284,9 +284,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
+        F.Promise<Optional<Country>> issuanceCountry = F.Promise.wrap(countryRepository.retrieveById(createCard.getIssuanceCountry()));
 
-        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createIdentification(customers.get().getReferral(), createCard.getIssuanceCountry(),
-                createCard.getResidenceCountry(), createCard.getIssueDate(), createCard.getExpiryDate(),
+        F.Promise<Optional<Country>> residanceCuntry = F.Promise.wrap(countryRepository.retrieveById(createCard.getResidenceCountry()));
+
+        F.Promise<Result> result = issuanceCountry.zip(customerPromise).zip(residanceCuntry).flatMap(customers -> accomplishService.createIdentification(customers._1._2.get().getReferral(), customers._1._1.get().getCode(),
+                customers._2.get().getCode(), createCard.getIssueDate(), createCard.getExpiryDate(),
                 createCard.getType(), createCard.getNumber(), "" + authData.getAccount().getId())
                 .map(res -> {
 
