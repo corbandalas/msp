@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseAccomplishController;
@@ -502,22 +504,37 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             if (res.getResult().getCode().equalsIgnoreCase("0000")) {
                                 Card card = new Card();
 
-                                String currency = "DKK";
+                                Config conf = ConfigFactory.load();
+
+                                String accomplishProd = conf.getString("accomplish.environment.prod");
+
+                                String currency = "EUR";
                                 CardBrand cardBrand = CardBrand.WALLET;
                                 CardType cardType = CardType.VIRTUAL;
                                 String type = "";
 
-                                if (createCard.getCardModel().equalsIgnoreCase("mymonii_parentwallet")) {
-                                    cardBrand = CardBrand.WALLET;
-                                    currency = "DKK";
-                                    cardType = CardType.VIRTUAL;
-                                    type = "mvc";
-                                } else if (createCard.getCardModel().equalsIgnoreCase("mymonii_childcard")) {
-                                    cardBrand = CardBrand.WALLET;
-                                    currency = "DKK";
-                                    cardType = CardType.PLASTIC;
+                                if (accomplishProd.equalsIgnoreCase("false")) {
+
                                     type = "physical";
+                                    currency = "EUR";
+
+                                } else {
+                                    if (createCard.getCardModel().equalsIgnoreCase("mymonii_parentwallet")) {
+                                        cardBrand = CardBrand.WALLET;
+                                        currency = "DKK";
+                                        cardType = CardType.VIRTUAL;
+                                        type = "mvc";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("mymonii_childcard")) {
+                                        cardBrand = CardBrand.WALLET;
+                                        currency = "DKK";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    }
                                 }
+
+
+
+
 
                                 card.setToken("" + res.getInfo().getId());
 
