@@ -56,7 +56,7 @@ import static configs.ReturnCodes.*;
  * @author corbandalas created 02.07.2020.
  * @since 0.6.0
  */
-@Api(value = Constants.PARTNERV2_API_PATH, description = "Partner API v2")
+@Api(value = Constants.PARTNERV2_API_PATH, description = "Partner API Accomplish Integration")
 public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @Inject
