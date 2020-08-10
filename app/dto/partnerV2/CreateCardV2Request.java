@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCardRequest {
+public class CreateCardV2Request {
 
     private String cardModel;
     private String cardData;

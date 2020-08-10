@@ -769,6 +769,8 @@ public class AccomplishService {
 
         Logger.info("Accomplish Query: " + query);
 
+        Logger.info("Accomplish request body: " + body);
+
         final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         final Promise<String> promise = Futures.promise();
 
