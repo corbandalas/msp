@@ -786,11 +786,14 @@ public class AccomplishService {
             boundRequestBuilder = asyncHttpClient.preparePut(query);
         }
 
+        String sourceID = "" + System.currentTimeMillis();
+
+        Logger.info("Source ID = " + sourceID);
 
         boundRequestBuilder.setBody(body)
                 .addHeader("Content-type", "application/json")
                 .addHeader("Authorization", "Bearer " + token)
-                .addHeader("source_id", "" + System.currentTimeMillis())
+                .addHeader("source_id", sourceID)
                 .addHeader("lang", "en")
                 .addHeader("time_zone", "UTC +03:00")
                 .execute(new AsyncCompletionHandler<String>() {
