@@ -520,12 +520,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                 } else {
                                     if (createCard.getCardModel().equalsIgnoreCase("mymonii_parentwallet")) {
-                                        cardBrand = CardBrand.WALLET;
+                                        cardBrand = CardBrand.PARENT_WALLET;
                                         currency = "DKK";
                                         cardType = CardType.VIRTUAL;
                                         type = "mvc";
                                     } else if (createCard.getCardModel().equalsIgnoreCase("mymonii_childcard")) {
-                                        cardBrand = CardBrand.WALLET;
+                                        cardBrand = CardBrand.CHILDCARD;
                                         currency = "DKK";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
