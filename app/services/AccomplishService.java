@@ -594,7 +594,7 @@ public class AccomplishService {
         accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
         info.setAmount(amount);
         info.setCurrency(currency);
-        info.setType("84");
+        info.setType("138");
 
         accomplish.dto.account.load.Info_ info_ = new accomplish.dto.account.load.Info_();
 
