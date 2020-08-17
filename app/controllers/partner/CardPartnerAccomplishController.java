@@ -224,8 +224,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                             createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
-                            createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
-                            createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode()))));
+                            createCard.getNationality(), createCard.getKycLevel(), country.get().getCode(), createCard.getAddress1(),
+                            createCard.getAddress2(), createCard.getCity(), createCard.getZip() ))));
                 } else {
                     return createCardProviderException("" + rez.getResult().getCode());
                 }
