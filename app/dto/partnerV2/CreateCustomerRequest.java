@@ -29,5 +29,6 @@ public class CreateCustomerRequest {
     private String country;
     private String lang;
     private String password;
+    private String cdata1;
 
 }

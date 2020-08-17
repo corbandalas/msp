@@ -152,6 +152,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         customer.setFlat("");
         customer.setHouseNameNumber("");
         customer.setTemppassword(false);
+        if (StringUtils.isNotBlank(createCard.getCdata1())) {
+            customer.setCdata(createCard.getCdata1());
+        }
 
         if (StringUtils.isNoneBlank(createCard.getPassword())) {
             customer.setPassword(SecurityUtil.generateKeyFromArray(createCard.getPassword()));
