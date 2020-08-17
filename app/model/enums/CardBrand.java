@@ -7,5 +7,5 @@ package model.enums;
  * @since 0.1.0
  */
 public enum CardBrand {
-    VISA, MASTERCARD, WALLET
+    VISA, MASTERCARD, WALLET, PARENT_WALLET, CHILDCARD
 }

@@ -594,7 +594,7 @@ public class AccomplishService {
         accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
         info.setAmount(amount);
         info.setCurrency(currency);
-        info.setType("84");
+        info.setType("138");
 
         accomplish.dto.account.load.Info_ info_ = new accomplish.dto.account.load.Info_();
 
@@ -769,6 +769,8 @@ public class AccomplishService {
 
         Logger.info("Accomplish Query: " + query);
 
+        Logger.info("Accomplish request body: " + body);
+
         final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         final Promise<String> promise = Futures.promise();
 
@@ -784,11 +786,14 @@ public class AccomplishService {
             boundRequestBuilder = asyncHttpClient.preparePut(query);
         }
 
+        String sourceID = "" + System.currentTimeMillis();
+
+        Logger.info("Source ID = " + sourceID);
 
         boundRequestBuilder.setBody(body)
                 .addHeader("Content-type", "application/json")
                 .addHeader("Authorization", "Bearer " + token)
-                .addHeader("source_id", "" + System.currentTimeMillis())
+                .addHeader("source_id", sourceID)
                 .addHeader("lang", "en")
                 .addHeader("time_zone", "UTC +03:00")
                 .execute(new AsyncCompletionHandler<String>() {

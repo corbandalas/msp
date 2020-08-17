@@ -457,7 +457,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerV2.CreateCardRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Create card request", required = true, dataType = "dto.partnerV2.CreateCardV2Request", paramType = "body"),
             @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
@@ -467,9 +467,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
         final JsonNode jsonNode = request().body().asJson();
-        final CreateCardRequest createCard;
+        final CreateCardV2Request createCard;
         try {
-            createCard = Json.fromJson(jsonNode, CreateCardRequest.class);
+            createCard = Json.fromJson(jsonNode, CreateCardV2Request.class);
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
@@ -521,12 +521,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                 } else {
                                     if (createCard.getCardModel().equalsIgnoreCase("mymonii_parentwallet")) {
-                                        cardBrand = CardBrand.WALLET;
+                                        cardBrand = CardBrand.PARENT_WALLET;
                                         currency = "DKK";
                                         cardType = CardType.VIRTUAL;
                                         type = "mvc";
                                     } else if (createCard.getCardModel().equalsIgnoreCase("mymonii_childcard")) {
-                                        cardBrand = CardBrand.WALLET;
+                                        cardBrand = CardBrand.CHILDCARD;
                                         currency = "DKK";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
