@@ -576,7 +576,7 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/activate" + cardID, gson.toJson(activate), "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/account/activate/" + cardID, gson.toJson(activate), "POST", partnerID);
         return promise.map(res -> {
             ActivateResponse getAccountResponse = gson.fromJson(res, ActivateResponse.class);
 
