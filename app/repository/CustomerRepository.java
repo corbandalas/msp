@@ -44,7 +44,7 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         final String query = "INSERT INTO " + connectionPool.getSchemaName() +
                 ".customer(id, title, firstName, lastName, registrationDate, dateBirth, active, address1, address2, postcode, city, email, kyc, password, country_id, temppassword, houseNameNumber, flat, referral, cdata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getTitle(), entity.getFirstName(),
-                entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword(), entity.getCountry_id(), entity.getTemppassword(), entity.getHouseNameNumber(), entity.getFlat(), entity.getReferral(), entity.getReferral()), result -> promise.success(entity), promise::failure);
+                entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword(), entity.getCountry_id(), entity.getTemppassword(), entity.getHouseNameNumber(), entity.getFlat(), entity.getReferral(), entity.getCdata()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
