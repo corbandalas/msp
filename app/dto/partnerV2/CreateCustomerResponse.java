@@ -1,6 +1,6 @@
 package dto.partnerV2;
 
-import dto.partnerV2.entity.Customer;
+import dto.partnerV2.entity.CustomerV2;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +17,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateCustomerResponse  {
 
-    private Customer customer;
+    private CustomerV2 customer;
 
 }

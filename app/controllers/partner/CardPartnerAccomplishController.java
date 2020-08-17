@@ -15,6 +15,7 @@ import controllers.BaseAccomplishController;
 import controllers.admin.BaseMerchantApiV2Action;
 import dto.Authentication;
 import dto.partnerV2.*;
+import dto.partnerV2.entity.CustomerV2;
 import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
@@ -218,7 +219,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     customerRepository.create(customer);
 
-                    return ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
+                    return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                             createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
                             createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
                             createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode()))));
@@ -420,7 +421,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 .map(res -> {
 
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
-                        return ok(Json.toJson(new CreateCustomerResponse(new dto.partnerV2.entity.Customer(res.getEmail().get(0).getAddress(),
+                        return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
                                 res.getPersonalInfo().getTitle(), res.getPersonalInfo().getFirstName(),
                                 res.getPersonalInfo().getLastName(), res.getPersonalInfo().getDateOfBirth(),
                                 res.getPhone().get(0).getNumber(), res.getAddress().getCountryCode(), customers.get().getKyc().name(),

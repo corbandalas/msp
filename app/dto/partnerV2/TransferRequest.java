@@ -1,6 +1,5 @@
 package dto.partnerV2;
 
-import dto.partnerV2.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

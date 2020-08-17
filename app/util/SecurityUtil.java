@@ -26,6 +26,7 @@ public class SecurityUtil {
 
             final StringBuilder buf = new StringBuilder();
             for (final String item : params) {
+
                 buf.append(item);
             }
 
