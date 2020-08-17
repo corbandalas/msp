@@ -1,1 +1,1 @@
-alter table customer add COLUMN referral character varying(255);
+alter table customer add COLUMN cdata character varying(255);
