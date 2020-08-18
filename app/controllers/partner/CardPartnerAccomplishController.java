@@ -225,7 +225,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                             createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
                             createCard.getNationality(), createCard.getKycLevel(), country.get().getCode(), createCard.getAddress1(),
-                            createCard.getAddress2(), createCard.getCity(), createCard.getZip() ))));
+                            createCard.getAddress2(), createCard.getCity(), createCard.getZip()))));
                 } else {
                     return createCardProviderException("" + rez.getResult().getCode());
                 }
@@ -537,9 +537,6 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 }
 
 
-
-
-
                                 card.setToken("" + res.getInfo().getId());
 
                                 card.setActive(true);
@@ -743,9 +740,16 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
                     return accomplishService.activateAccount(createCard.getToken(), data._2.get().getInfo(),
                             data._1.get().getReferral(), data._2.get().getCurrencyId(), acc.getInfo().getNumber(), "0",
-                            acc.getInfo().getSecurity().getActivationCode(), "" + authData.getAccount().getId()).map(rez ->
-                            ok(Json.toJson(new SuccessAPIV2Response(true)
-                            )));
+                            acc.getInfo().getSecurity().getActivationCode(), "" + authData.getAccount().getId()).map(rez -> {
+                                if (rez.getResult().getCode().equalsIgnoreCase("0000")) {
+                                    return ok(Json.toJson(new SuccessAPIV2Response(true)));
+                                } else {
+                                    return createCardProviderException(rez.getResult().getCode());
+                                }
+
+                            }
+
+                    );
                 } else {
                     returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
                 }
@@ -1235,7 +1239,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         List<Transaction> transactions = new ArrayList<>();
 
-                        for (accomplish.dto.transaction.Transaction transaction: res.getTransactions()) {
+                        for (accomplish.dto.transaction.Transaction transaction : res.getTransactions()) {
 
                             Transaction resTransaction = new Transaction();
 
@@ -1244,8 +1248,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             resTransaction.setCurrency(transaction.getInfo().getCurrency());
                             resTransaction.setDesc(transaction.getInfo().getNotes());
                             resTransaction.setDirection(transaction.getInfo().getOperation());
-                            resTransaction.setLocalDate((int)DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
-                            resTransaction.setSettlementDate((int)DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
+                            resTransaction.setLocalDate((int) DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
+                            resTransaction.setSettlementDate((int) DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
 
                             resTransaction.setOriginalAmount(Double.parseDouble(transaction.getConversion().getOriginalAmount()));
                             resTransaction.setOriginalCurrency(transaction.getConversion().getTransactionCurrency());
