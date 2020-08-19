@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class CreateCardResponse {
 
     private String activationDate;
-    private String balance;
+    private Double balance;
     private String cardData;
     private String currency;
     private String group;

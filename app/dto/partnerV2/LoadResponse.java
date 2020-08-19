@@ -18,6 +18,6 @@ public class LoadResponse {
     private String token;
     private String status;
     private String amount;
-    private String walletBalance;
+    private double walletBalance;
     private String reference;
 }

@@ -209,9 +209,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 //            }
 
             F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUser(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
-                    createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
+                    createCard.getLastName(), DateUtil.format(customer.getDateBirth(), "DD/MM/YYYY"), createCard.getMobilePhone(),
                     createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
-                    createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode(),
+                    createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getId(),
                     createCard.getLang(), createCard.getPassword(), "" + authData.getAccount().getId());
 
 
@@ -224,7 +224,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                             createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
-                            createCard.getNationality(), createCard.getKycLevel(), country.get().getCode(), createCard.getAddress1(),
+                            createCard.getNationality(), createCard.getKycLevel(), country.get().getId(), createCard.getAddress1(),
                             createCard.getAddress2(), createCard.getCity(), createCard.getZip()))));
                 } else {
                     return createCardProviderException("" + rez.getResult().getCode());
@@ -424,11 +424,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 .map(res -> {
 
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
                         return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
-                                res.getPersonalInfo().getTitle(), res.getPersonalInfo().getFirstName(),
-                                res.getPersonalInfo().getLastName(), res.getPersonalInfo().getDateOfBirth(),
-                                res.getPhone().get(0).getNumber(), res.getAddress().getCountryCode(), customers.get().getKyc().name(),
-                                res.getAddress().getCountryCode(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
+                                customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
+                                res.getPersonalInfo().getLastName(), DateUtil.format(customers.get().getDateBirth(), "DD/MM/YYYY"),
+                                res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), customers.get().getKyc().name(),
+                                customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
                     } else {
                         return createCardProviderException(res.getResult().getCode());
@@ -556,7 +557,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                 String finalCurrency = currency;
                                 String finalType = type;
-                                returnPromise = F.Promise.wrap(cardRepository.create(card)).map(rez -> ok(Json.toJson(new CreateCardResponse(null, "0", createCard.getCardData(), finalCurrency,
+                                returnPromise = F.Promise.wrap(cardRepository.create(card)).map(rez -> ok(Json.toJson(new CreateCardResponse(null, 0.0, createCard.getCardData(), finalCurrency,
                                         "mymonii_feegroup_dkk", res.getInfo().getNumber(), "ready", "" + res.getInfo().getId(), finalType, "MYMONII"))));
                             } else {
                                 returnPromise = F.Promise.pure(createCardProviderException(res.getResult().getCode()));
@@ -823,7 +824,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
                 return operationService.createDepositOperation(data.get(),
                         (long) (Float.parseFloat(createCard.getAmount()) * 100), currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
-                        ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", createCard.getAmount(), acc.getInfo().getAvailableBalance(), ref)
+                        ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", createCard.getAmount(), Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
                         )));
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
@@ -922,7 +923,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
                 returnPromise =
-                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.CheckCardResponse(createCard.getToken(), status, acc._2.getInfo().getActivationDateTime(), acc._2.getInfo().getAvailableBalance(), "", acc._1.get().getCurrencyId(), "", acc._2.getInfo().getNumber(),
+                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.CheckCardResponse(createCard.getToken(), status, acc._2.getInfo().getActivationDateTime(), Double.parseDouble(acc._2.getInfo().getAvailableBalance()), "", acc._1.get().getCurrencyId(), "", acc._2.getInfo().getNumber(),
                                 "", ""))));
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));

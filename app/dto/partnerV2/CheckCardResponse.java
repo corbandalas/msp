@@ -18,7 +18,7 @@ public class CheckCardResponse {
     private String token;
     private String status;
     private String activationDate;
-    private String balance;
+    private Double balance;
     private String cardData;
     private String currency;
     private String group;
