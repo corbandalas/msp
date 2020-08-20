@@ -431,7 +431,7 @@ public class AccomplishService {
                 bin = Long.parseLong(accomplishSettings.productID1);
                 type = 0;
                 status = 1;
-                currency = "EUR";
+                currency = "DKK";
 
             } else {
                 if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {

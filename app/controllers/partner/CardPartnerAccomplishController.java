@@ -211,7 +211,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUser(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                     createCard.getLastName(), DateUtil.format(customer.getDateBirth(), "DD/MM/YYYY"), createCard.getMobilePhone(),
                     createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
-                    createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getId(),
+                    createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode(),
                     createCard.getLang(), createCard.getPassword(), "" + authData.getAccount().getId());
 
 
@@ -427,7 +427,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
                                 customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
-                                res.getPersonalInfo().getLastName(), DateUtil.format(customers.get().getDateBirth(), "DD/MM/YYYY"),
+                                res.getPersonalInfo().getLastName(), DateUtil.format(DateUtil.parse(res.getPersonalInfo().getDateOfBirth(), "YYYY-DD-MM"), "DD/MM/YYYY"),
                                 res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), customers.get().getKyc().name(),
                                 customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
