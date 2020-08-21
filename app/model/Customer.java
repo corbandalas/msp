@@ -34,6 +34,8 @@ public class Customer extends BaseEntity<String> {
     private String referral;
 
     private String cdata = "";
+    private String cdata2 = "";
+    private String cdata3 = "";
 
     public Customer() {
     }
@@ -100,7 +102,8 @@ public class Customer extends BaseEntity<String> {
         this.referral = referral;
     }
 
-    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword, String houseNameNumber, String flat, String referral, String cdata) {
+    public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword, String houseNameNumber, String flat, String referral, String cdata,
+                    String cdata2, String cdata3) {
         this.setId(id);
         this.registrationDate = registrationDate;
         this.title = title;
@@ -121,6 +124,8 @@ public class Customer extends BaseEntity<String> {
         this.flat = flat;
         this.referral = referral;
         this.cdata = cdata;
+        this.cdata2 = cdata2;
+        this.cdata3 = cdata3;
     }
 
     public Date getRegistrationDate() {
@@ -270,6 +275,8 @@ public class Customer extends BaseEntity<String> {
                 ", houseNameNumber='" + houseNameNumber + '\'' +
                 ", flat='" + flat + '\'' +
                 ", cdata='" + cdata + '\'' +
+                ", cdata2='" + cdata2 + '\'' +
+                ", cdata3='" + cdata3 + '\'' +
                 '}';
     }
 
@@ -303,5 +310,21 @@ public class Customer extends BaseEntity<String> {
 
     public void setCdata(String cdata) {
         this.cdata = cdata;
+    }
+
+    public String getCdata2() {
+        return cdata2;
+    }
+
+    public void setCdata2(String cdata2) {
+        this.cdata2 = cdata2;
+    }
+
+    public String getCdata3() {
+        return cdata3;
+    }
+
+    public void setCdata3(String cdata3) {
+        this.cdata3 = cdata3;
     }
 }

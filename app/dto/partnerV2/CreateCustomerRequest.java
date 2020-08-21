@@ -30,5 +30,7 @@ public class CreateCustomerRequest {
     private String lang;
     private String password;
     private String cdata1;
+    private String cdata2;
+    private String cdata3;
 
 }

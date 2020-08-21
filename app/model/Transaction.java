@@ -2,6 +2,8 @@ package model;
 
 import model.enums.TransactionType;
 
+import java.util.Date;
+
 /**
  * Database stored entity for managing operation transactions across the project
  * Entity id - phone number in international format without leading '+'
