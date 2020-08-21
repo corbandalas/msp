@@ -209,7 +209,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 //            }
 
             F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUser(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
-                    createCard.getLastName(), DateUtil.format(customer.getDateBirth(), "DD/MM/YYYY"), createCard.getMobilePhone(),
+                    createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
                     createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
                     createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode(),
                     createCard.getLang(), createCard.getPassword(), "" + authData.getAccount().getId());
