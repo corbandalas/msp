@@ -12,7 +12,7 @@ CREATE TABLE wallet_transaction (
     id bigint NOT NULL,
     src_token character varying(255) NOT NULL,
     dest_token character varying(255) NOT NULL,
-    uuid character varying(255) NOT NULL
+    uuid character varying(255) NOT NULL,
     amount_cts bigint NOT NULL,
     date_added bigint NOT NULL,
     description character varying(255),
