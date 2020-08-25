@@ -1357,24 +1357,55 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+        F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
+        F.Promise<Long> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
 
-        final F.Promise<Result> result = senderCardPromise.map(card -> {
+        final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).flatMap(card -> {
+
+            Logger.info("Wallet sum for " + createCard.getUuid() + " = " + card._1._2);
+
+            float sumAfter = createCard.getAmount() + ((float) card._1._2 / 100);
+
+            Logger.info("Sum after = " + sumAfter);
+
+            F.Promise<GetAccountResponse> source = accomplishService.getAccount(card._1._1.get().getToken(), "" + authData.getAccount().getId());
+            F.Promise<GetAccountResponse> dest = accomplishService.getAccount(card._2.get().getToken(), "" + authData.getAccount().getId());
+
+            return source.zip(dest).flatMap(cards -> {
+
+                F.Promise<Result> returnPromise = null;
+
+                if (sumAfter > 0.0) {
+
+                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfter) {
+                        returnPromise =  F.Promise.pure(createNotEnoughFundsResponse());
+                    }
+
+                } else {
+                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
+                        returnPromise =  F.Promise.pure(createNotEnoughFundsResponse());
+                    }
+                }
+
+                if (returnPromise == null) {
+                    WalletTransaction walletTransaction = new WalletTransaction();
 
 
-            WalletTransaction walletTransaction = new WalletTransaction();
+                    walletTransaction.setAmount_cts((long) (createCard.getAmount() * 100));
+                    walletTransaction.setCurrency(card._1._1.get().getCurrencyId());
+                    walletTransaction.setDate_added(new Date().getTime());
+                    walletTransaction.setDescription(createCard.getDescription());
+                    walletTransaction.setDest_token(createCard.getReceiver());
+                    walletTransaction.setType("load");
+                    walletTransaction.setUuid(createCard.getUuid());
 
+                    walletTransactionRepository.create(walletTransaction);
 
-            walletTransaction.setAmount_cts((long) (createCard.getAmount() * 100));
-            walletTransaction.setCurrency(card.get().getCurrencyId());
-            walletTransaction.setDate_added(new Date().getTime());
-            walletTransaction.setDescription(createCard.getDescription());
-            walletTransaction.setDest_token(createCard.getReceiver());
-            walletTransaction.setType("load");
-            walletTransaction.setUuid(createCard.getUuid());
+                    returnPromise = F.Promise.pure(ok(Json.toJson(new SuccessAPIV2Response(true))));
+                }
 
-            walletTransactionRepository.create(walletTransaction);
-
-            return ok(Json.toJson(new SuccessAPIV2Response(true)));
+                return returnPromise;
+            });
         });
 
         return returnRecover(result);
@@ -1541,7 +1572,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         WalletTransaction walletTransaction = new WalletTransaction();
 
 
-                                        walletTransaction.setAmount_cts((long) (createCard.getAmount() * 100));
+                                        walletTransaction.setAmount_cts( ((long) (createCard.getAmount() * 100) > 0)? -(long) (createCard.getAmount() * 100): (long) createCard.getAmount() * 100);
                                         walletTransaction.setCurrency(card._1._1.get().getCurrencyId());
                                         walletTransaction.setDate_added(new Date().getTime());
                                         walletTransaction.setDescription("Transfer");
@@ -1563,6 +1594,60 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     });
 
         });
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getMwBalance",
+            value = "Get mini wallet balance transaction",
+            notes = "Method allows to get mini wallet balance",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = GetWalletBalanceResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Push mini wallet transaction request", required = true, dataType = "dto.partnerV2.GetWalletBalanceRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> getMwBalance() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final GetWalletBalanceRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, GetWalletBalanceRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getUuid())
+                ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
+        }
+
+
+        F.Promise<F.Tuple<Long, List<WalletTransaction>>> zip = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).
+                zip(F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid())));
+
+        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(), (float)card._1 / 100, card._2.get(0).getCurrency()))));
 
         return returnRecover(result);
     }
