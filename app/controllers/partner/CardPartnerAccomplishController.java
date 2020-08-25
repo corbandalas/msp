@@ -15,14 +15,12 @@ import controllers.BaseAccomplishController;
 import controllers.admin.BaseMerchantApiV2Action;
 import dto.Authentication;
 import dto.partnerV2.*;
+import dto.partnerV2.Transaction;
 import dto.partnerV2.entity.CustomerV2;
 import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
-import model.Card;
-import model.Country;
-import model.Currency;
-import model.Customer;
+import model.*;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
@@ -34,10 +32,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import provider.CardProvider;
-import repository.CardRepository;
-import repository.CountryRepository;
-import repository.CurrencyRepository;
-import repository.CustomerRepository;
+import repository.*;
 import services.AccomplishService;
 import services.OperationService;
 import util.DateUtil;
@@ -80,6 +75,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @Inject
     OperationService operationService;
+
+    @Inject
+    WalletTransactionRepository walletTransactionRepository;
 
     @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
@@ -1289,6 +1287,281 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             }
 
             return returnPromise;
+        });
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "pushMwTransaction",
+            value = "Push mini wallet transaction",
+            notes = "Method allows to push mini wallet transaction",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Push mini wallet transaction request", required = true, dataType = "dto.partnerV2.PushMiniWalletRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> pushMwTransaction() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final PushMiniWalletRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, PushMiniWalletRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        if (StringUtils.isBlank(createCard.getReceiver())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: receiver"));
+        }
+
+        if (StringUtils.isBlank(createCard.getDescription())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: description"));
+        }
+
+
+        if (StringUtils.isBlank(createCard.getUuid())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
+        }
+
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+
+        final F.Promise<Result> result = senderCardPromise.map(card -> {
+
+
+            WalletTransaction walletTransaction = new WalletTransaction();
+
+
+            walletTransaction.setAmount_cts((long) (createCard.getAmount() * 100));
+            walletTransaction.setCurrency(card.get().getCurrencyId());
+            walletTransaction.setDate_added(new Date().getTime());
+            walletTransaction.setDescription(createCard.getDescription());
+            walletTransaction.setDest_token(createCard.getReceiver());
+            walletTransaction.setType("load");
+            walletTransaction.setUuid(createCard.getUuid());
+
+            walletTransactionRepository.create(walletTransaction);
+
+            return ok(Json.toJson(new SuccessAPIV2Response(true)));
+        });
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getMwTransactions",
+            value = "Get mini wallet transactions",
+            notes = "Method allows to push mini wallet transaction",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Push mini wallet transaction request", required = true, dataType = "dto.partnerV2.GetMiniWalletTransactionRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> getMwTransactions() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final GetMiniWalletTransactionRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, GetMiniWalletTransactionRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getUuid())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        F.Promise<List<WalletTransaction>> wrap = (StringUtils.isNotBlank(createCard.getDateStart()) &&
+                StringUtils.isNotBlank(createCard.getDateEnd())) ?
+                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()), Long.parseLong(createCard.getDateStart()))) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
+
+        final F.Promise<Result> result = wrap.map(card -> {
+
+            MiniWalletTransactionResponse response = new MiniWalletTransactionResponse();
+
+            response.setUuid(createCard.getUuid());
+
+            ArrayList<Transaction2> transaction2s = new ArrayList<>();
+
+            for (WalletTransaction walletTransaction : card) {
+                Transaction2 transaction2 = new Transaction2();
+                transaction2.setAmount((double) walletTransaction.getAmount_cts() / 100);
+                transaction2.setCurrency(walletTransaction.getCurrency());
+                transaction2.setDate(walletTransaction.getDate_added());
+                transaction2.setDescription(walletTransaction.getDescription());
+                transaction2.setReceiver(walletTransaction.getDest_token());
+                transaction2.setToken(walletTransaction.getSrc_token());
+                transaction2.setType(walletTransaction.getType());
+
+                transaction2s.add(transaction2);
+            }
+
+            response.setTransactions(transaction2s);
+
+
+            return ok(Json.toJson(response));
+        });
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "doMwTransfer",
+            value = "Do mini wallet transaction",
+            notes = "Method allows to do mini wallet transaction",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = TransferResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Do mini wallet transaction request", required = true, dataType = "dto.partnerV2.DoMiniWalletRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> doMwTransfer() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final DoMiniWalletRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, DoMiniWalletRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        if (StringUtils.isBlank(createCard.getReceiver())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: receiver"));
+        }
+
+        if (StringUtils.isBlank(createCard.getUuid())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
+        }
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+        F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
+
+        F.Promise<Long> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
+
+
+        final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).flatMap(card -> {
+
+            if ((long) (createCard.getAmount() * 100) > card._1._2) {
+                return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
+            }
+
+            return F.Promise.wrap(currencyRepository.retrieveById(card._1._1.get().getCurrencyId())).zip(accomplishService.transfer(createCard.getToken(), createCard.getReceiver(), "" + createCard.getAmount(), card._1._1.get().getCurrencyId(), "" + authData.getAccount().getId()))
+                    .flatMap(providerResponse -> {
+
+                        F.Promise<Result> returnPromise = null;
+
+                        if (providerResponse._2.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                            returnPromise = operationService.createTransferOperation(card._1._1.get(),
+                                    card._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds")
+                                    .map(res -> {
+
+                                        WalletTransaction walletTransaction = new WalletTransaction();
+
+
+                                        walletTransaction.setAmount_cts((long) (createCard.getAmount() * 100));
+                                        walletTransaction.setCurrency(card._1._1.get().getCurrencyId());
+                                        walletTransaction.setDate_added(new Date().getTime());
+                                        walletTransaction.setDescription("Transfer");
+                                        walletTransaction.setDest_token(createCard.getReceiver());
+                                        walletTransaction.setType("transfer");
+                                        walletTransaction.setUuid(createCard.getUuid());
+
+                                        walletTransactionRepository.create(walletTransaction);
+
+                                        return (ok(Json.toJson(new TransferResponse(true, "done"))));
+
+                                    });
+                        } else {
+                            returnPromise = F.Promise.pure(createCardProviderException(providerResponse._2.getResult().getCode()));
+                        }
+
+                        return returnPromise;
+
+                    });
+
         });
 
         return returnRecover(result);

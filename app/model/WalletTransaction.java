@@ -23,7 +23,8 @@ public class WalletTransaction extends BaseEntity<Long> {
     public WalletTransaction() {
     }
 
-    public WalletTransaction(Long amount_cts, String currency, Long date_added, String type, String description, String src_token, String dest_token, String uuid) {
+    public WalletTransaction(Long id, Long amount_cts, String currency, Long date_added, String type, String description, String src_token, String dest_token, String uuid) {
+        this.setId(id);
         this.amount_cts = amount_cts;
         this.currency = currency;
         this.date_added = date_added;
