@@ -36,12 +36,14 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
                 idResult -> {
                     final Long id = idResult.row(0).getLong(0);
 
-                    String query = "INSERT INTO " + connectionPool.getSchemaName() + ".wallet_transaction(id, amount_cts, currency, date_added," +
-                            " type, description, src_token,  dest_token, uuid)" +
+                    String query = "INSERT INTO " + connectionPool.getSchemaName() + ".wallet_transaction(id, src_token, dest_token, uuid, amount_cts, date_added, description, currency, type" +
+                            " )" +
                             " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
-                    connectionPool.getConnection().query(query, asList(id, entity.getAmount_cts(), entity.getCurrency(), entity.getDate_added(),
-                            entity.getType(), entity.getDescription(), entity.getSrc_token(), entity.getDest_token(),
-                            entity.getUuid()), result -> {
+                    connectionPool.getConnection().query(query, asList(id, entity.getSrc_token(), entity.getDest_token(), entity.getUuid(), entity.getAmount_cts(),
+                            entity.getDate_added(), entity.getDescription(),
+                            entity.getCurrency(),
+                            entity.getType()
+                    ), result -> {
                         entity.setId(id);
                         promise.success(entity);
                     }, promise::failure);
