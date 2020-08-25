@@ -17,7 +17,7 @@ CREATE TABLE wallet_transaction (
     date_added bigint NOT NULL,
     description character varying(255),
     currency character varying(255) NOT NULL,
-    type character varying(255) NOT NULL,
+    type character varying(255) NOT NULL
 
 );
 
