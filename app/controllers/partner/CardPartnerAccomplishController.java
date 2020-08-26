@@ -443,9 +443,14 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+                        String format = simpleDateFormat.format(customers.get().getDateBirth());
+
+                        Logger.info("DOB date = " +format);
                         return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
                                 customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
-                                res.getPersonalInfo().getLastName(), DateUtil.format(DateUtil.parse(res.getPersonalInfo().getDateOfBirth(), "YYYY-DD-MM"), "DD/MM/YYYY"),
+                                res.getPersonalInfo().getLastName(), format,
                                 res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), customers.get().getKyc().name(),
                                 customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
