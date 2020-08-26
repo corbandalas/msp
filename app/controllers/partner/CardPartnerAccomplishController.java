@@ -1060,6 +1060,54 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
                     }
                 });
+            } else if (createCard.getType().equalsIgnoreCase("kycLevel")) {
+
+                Customer customer = acc.get();
+
+                KYC kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
+
+                if (createCard.getData().equalsIgnoreCase("sdd")) {
+                    kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
+                } else {
+                    kyc = KYC.FULL_DUE_DILIGENCE;
+                }
+
+
+                customer.setKyc(kyc);
+
+                customerRepository.update(customer);
+
+                return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+
+            } else if (createCard.getType().equalsIgnoreCase("cdata1")) {
+
+                Customer customer = acc.get();
+
+                customer.setCdata(createCard.getData());
+
+                customerRepository.update(customer);
+
+                return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+
+            } else if (createCard.getType().equalsIgnoreCase("cdata2")) {
+
+                Customer customer = acc.get();
+
+                customer.setCdata2(createCard.getData());
+
+                customerRepository.update(customer);
+
+                return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+
+            } else if (createCard.getType().equalsIgnoreCase("cdata3")) {
+
+                Customer customer = acc.get();
+
+                customer.setCdata3(createCard.getData());
+
+                customerRepository.update(customer);
+
+                return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
             }
 
             return returnPromise;
@@ -1378,12 +1426,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 if (sumAfter > 0.0) {
 
                     if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfter) {
-                        returnPromise =  F.Promise.pure(createNotEnoughFundsResponse());
+                        returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
 
                 } else {
                     if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
-                        returnPromise =  F.Promise.pure(createNotEnoughFundsResponse());
+                        returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
                 }
 
@@ -1548,34 +1596,56 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
-
         F.Promise<Long> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
+        F.Promise<GetAccountResponse> source = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
+        F.Promise<GetAccountResponse> dest = accomplishService.getAccount(createCard.getReceiver(), "" + authData.getAccount().getId());
 
 
-        final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).flatMap(card -> {
 
-            if ((long) (createCard.getAmount() * 100) > card._1._2) {
-                return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
+        final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).zip(source).zip(dest).flatMap(card -> {
+
+            Long walletBalance = card._1._1._1._2;
+
+            Long amount = (long) (createCard.getAmount() * 100);
+
+            if ((walletBalance > 0 && walletBalance < amount) ||
+                    (walletBalance < 0 && amount < walletBalance)) {
+                return F.Promise.pure(createNotEnoughFundsResponse());
             }
 
-            return F.Promise.wrap(currencyRepository.retrieveById(card._1._1.get().getCurrencyId())).zip(accomplishService.transfer(createCard.getToken(), createCard.getReceiver(), "" + createCard.getAmount(), card._1._1.get().getCurrencyId(), "" + authData.getAccount().getId()))
+            boolean reverse = false;
+
+            if (amount > 0) {
+                if (Float.parseFloat(card._1._2.getInfo().getAvailableBalance()) < createCard.getAmount() ) {
+                    return F.Promise.pure(createNotEnoughFundsResponse());
+                }
+
+            } else {
+                if (Float.parseFloat(card._2.getInfo().getAvailableBalance()) < Math.abs(createCard.getAmount()) ) {
+                    return F.Promise.pure(createNotEnoughFundsResponse());
+                }
+
+                reverse = true;
+            }
+
+            return F.Promise.wrap(currencyRepository.retrieveById(card._1._1._2.get().getCurrencyId())).zip(accomplishService.transfer((!reverse)? createCard.getToken():createCard.getReceiver(), (!reverse)?createCard.getReceiver():createCard.getToken(), "" + createCard.getAmount(), card._1._1._2.get().getCurrencyId(), "" + authData.getAccount().getId()))
                     .flatMap(providerResponse -> {
 
                         F.Promise<Result> returnPromise = null;
 
                         if (providerResponse._2.getResult().getCode().equalsIgnoreCase("0000")) {
 
-                            returnPromise = operationService.createTransferOperation(card._1._1.get(),
-                                    card._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds")
+                            returnPromise = operationService.createTransferOperation(card._1._1._1._1.get(),
+                                    card._1._1._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds")
                                     .map(res -> {
 
                                         WalletTransaction walletTransaction = new WalletTransaction();
 
 
-                                        walletTransaction.setAmount_cts( ((long) (createCard.getAmount() * 100) > 0)? -(long) (createCard.getAmount() * 100): (long) createCard.getAmount() * 100);
-                                        walletTransaction.setCurrency(card._1._1.get().getCurrencyId());
+                                        walletTransaction.setAmount_cts(((long) (createCard.getAmount() * 100) > 0) ? -(long) (createCard.getAmount() * 100) : (long) createCard.getAmount() * 100);
+                                        walletTransaction.setCurrency(card._1._1._2.get().getCurrencyId());
                                         walletTransaction.setDate_added(new Date().getTime());
-                                        walletTransaction.setDescription("Transfer");
+                                        walletTransaction.setDescription("Transfer between from " + createCard.getToken() + " to " + createCard.getReceiver());
                                         walletTransaction.setDest_token(createCard.getReceiver());
                                         walletTransaction.setType("transfer");
                                         walletTransaction.setUuid(createCard.getUuid());
@@ -1638,7 +1708,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getUuid())
-                ) {
+        ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
         }
@@ -1647,7 +1717,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<F.Tuple<Long, List<WalletTransaction>>> zip = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).
                 zip(F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid())));
 
-        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(), (float)card._1 / 100, card._2.get(0).getCurrency()))));
+        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(), (float) card._1 / 100, card._2.get(0).getCurrency()))));
 
         return returnRecover(result);
     }
