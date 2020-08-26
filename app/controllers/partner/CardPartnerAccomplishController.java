@@ -172,9 +172,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         try {
 
-            customer.setKyc(KYC.NONE);
+            KYC kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
 
-            Date dob = DateUtil.parse(createCard.getBirthdayDate(), "DD/MM/YYYY");
+            if (createCard.getKycLevel().equalsIgnoreCase("fdd")) {
+                kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
+            }
+
+            customer.setKyc(kyc);
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+            Date dob = simpleDateFormat.parse(createCard.getBirthdayDate());
+
+            Logger.info("DOB date = " + dob.toString());
 
             customer.setDateBirth(dob);
             customer.setRegistrationDate(new Date());
