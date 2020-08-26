@@ -1,5 +1,6 @@
 package dto.partnerV2;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class CreateCustomerRequest {
     private String title;
     private String firstName;
     private String lastName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/mm/YYYY")
     private String birthdayDate;
     private String mobilePhone;
     private String nationality;

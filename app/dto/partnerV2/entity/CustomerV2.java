@@ -13,7 +13,7 @@ public class CustomerV2 {
     private String title;
     private String firstName;
     private String lastName;
-    private String birthDate;
+    private String birthdayDate;
     private String mobilePhone;
     private String nationality;
     private String kycLevel;
