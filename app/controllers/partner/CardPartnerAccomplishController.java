@@ -1033,7 +1033,18 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 final Gson gson = gsonBuilder.create();
 
-                AddressRequestBean addressRequestBean = gson.fromJson((String)createCard.getData(), AddressRequestBean.class);
+                java.util.LinkedHashMap data = (java.util.LinkedHashMap) createCard.getData();
+
+
+                AddressRequestBean addressRequestBean = new AddressRequestBean();
+
+                addressRequestBean.setAddress1((String)data.get("address1"));
+                addressRequestBean.setAddress2((String)data.get("address2"));
+                addressRequestBean.setCity((String)data.get("city"));
+                addressRequestBean.setCountry((String)data.get("country"));
+                addressRequestBean.setZip("" + (Integer)data.get("zip"));
+
+//                        gson.fromJson("", AddressRequestBean.class);
 
                 return accomplishService.updateUserAddress(acc.get().getReferral(), addressRequestBean, "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
