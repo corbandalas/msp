@@ -1,5 +1,6 @@
 package dto.partnerV2;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class UpdateCustomerRequest {
 
     private String type;
+    @JsonRawValue
     private String data;
     private String mobilePhone;
 
