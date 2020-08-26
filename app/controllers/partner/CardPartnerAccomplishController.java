@@ -1358,7 +1358,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             resTransaction.setSettlementDate( DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
 
                             resTransaction.setOriginalAmount(Double.parseDouble(transaction.getConversion().getOriginalAmount()));
-                            resTransaction.setOriginalCurrency(transaction.getConversion().getTransactionCurrency());
+                            resTransaction.setOriginalCurrency(acc._1.get().getCurrencyId());
                             resTransaction.setType(transaction.getInfo().getOperation());
                             resTransaction.setOriginalSourceId(transaction.getInfo().getOriginalSourceId());
 
