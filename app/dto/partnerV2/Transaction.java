@@ -17,10 +17,19 @@ public class Transaction {
     private String desc;
     @SerializedName("localDate")
     @Expose
-    private Integer localDate;
+    private Long localDate;
+
+    public Long getLocalDate() {
+        return localDate;
+    }
+
+    public Long getSettlementDate() {
+        return settlementDate;
+    }
+
     @SerializedName("settlementDate")
     @Expose
-    private Integer settlementDate;
+    private Long settlementDate;
     @SerializedName("originalAmount")
     @Expose
     private Double originalAmount;
@@ -62,22 +71,6 @@ public class Transaction {
 
     public void setDesc(String desc) {
         this.desc = desc;
-    }
-
-    public Integer getLocalDate() {
-        return localDate;
-    }
-
-    public void setLocalDate(Integer localDate) {
-        this.localDate = localDate;
-    }
-
-    public Integer getSettlementDate() {
-        return settlementDate;
-    }
-
-    public void setSettlementDate(Integer settlementDate) {
-        this.settlementDate = settlementDate;
     }
 
     public Double getOriginalAmount() {
@@ -128,4 +121,11 @@ public class Transaction {
         this.balance = balance;
     }
 
+    public void setLocalDate(Long localDate) {
+        this.localDate = localDate;
+    }
+
+    public void setSettlementDate(Long settlementDate) {
+        this.settlementDate = settlementDate;
+    }
 }
