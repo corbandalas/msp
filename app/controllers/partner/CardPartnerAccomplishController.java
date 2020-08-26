@@ -1044,25 +1044,29 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 addressRequestBean.setCountry((String)data.get("country"));
                 addressRequestBean.setZip("" + ((java.math.BigInteger)data.get("zip")).intValue());
 
-//                        gson.fromJson("", AddressRequestBean.class);
 
-                return accomplishService.updateUserAddress(acc.get().getReferral(), addressRequestBean, "" + authData.getAccount().getId()).flatMap(res -> {
-                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+                return  F.Promise.wrap(countryRepository.retrieveById((String)data.get("country"))).flatMap(country -> {
 
-                        Customer customer = acc.get();
+                    addressRequestBean.setCountry(country.get().getCode());
 
-                        customer.setAddress1(addressRequestBean.getAddress1());
-                        customer.setAddress2(addressRequestBean.getAddress2());
-                        customer.setCity(addressRequestBean.getCity());
-                        customer.setCountry_id(addressRequestBean.getCountry());
-                        customer.setPostcode(addressRequestBean.getZip());
+                    return accomplishService.updateUserAddress(acc.get().getReferral(), addressRequestBean, "" + authData.getAccount().getId()).flatMap(res -> {
+                        if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
-                        customerRepository.update(customer);
+                            Customer customer = acc.get();
 
-                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
-                    } else {
-                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
-                    }
+                            customer.setAddress1(addressRequestBean.getAddress1());
+                            customer.setAddress2(addressRequestBean.getAddress2());
+                            customer.setCity(addressRequestBean.getCity());
+                            customer.setCountry_id(addressRequestBean.getCountry());
+                            customer.setPostcode(addressRequestBean.getZip());
+
+                            customerRepository.update(customer);
+
+                            return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+                        } else {
+                            return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                        }
+                    });
                 });
             } else if (createCard.getType().equalsIgnoreCase("email")) {
                 return accomplishService.updateUserEmail(acc.get().getReferral(), (String)createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
