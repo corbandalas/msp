@@ -579,7 +579,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 card.setCustomerId(StringUtils.removeStart(createCard.getMobilePhone(), "+"));
                                 card.setDeliveryAddress1("address 1");
                                 card.setDeliveryAddress2("address 2");
-                                card.setDeliveryAddress3("address 3");
+                                card.setDeliveryAddress3(createCard.getCardData());
                                 card.setDeliveryCountry("DK");
                                 card.setInfo(res.getInfo().getBinId());
 
@@ -950,10 +950,18 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     status = "active";
                 }
 
+                Card card = acc._1.get();
+
+                String type = "mvc";
+
+                if (card.getType().equals(CardType.PLASTIC)) {
+                    type = "physical";
+                }
+
 
                 returnPromise =
-                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.CheckCardResponse(createCard.getToken(), status, acc._2.getInfo().getActivationDateTime(), Double.parseDouble(acc._2.getInfo().getAvailableBalance()), "", acc._1.get().getCurrencyId(), "", acc._2.getInfo().getNumber(),
-                                "", ""))));
+                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.CheckCardResponse(createCard.getToken(), status, acc._2.getInfo().getActivationDateTime(), Double.parseDouble(acc._2.getInfo().getAvailableBalance()), acc._1.get().getDeliveryAddress3(), acc._1.get().getCurrencyId(), "mymonii_feegroup_dkk", acc._2.getInfo().getNumber(),
+                                type, "MYMONII"))));
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
             }
