@@ -447,11 +447,17 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         String format = simpleDateFormat.format(customers.get().getDateBirth());
 
+                        String kyc = "sdd";
+
+                        if (customers.get().getKyc().equals(KYC.FULL_DUE_DILIGENCE)) {
+                            kyc = "fdd";
+                        }
+
                         Logger.info("DOB date = " +format);
                         return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
                                 customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
                                 res.getPersonalInfo().getLastName(), format,
-                                res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), customers.get().getKyc().name(),
+                                res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), kyc,
                                 customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
                     } else {
