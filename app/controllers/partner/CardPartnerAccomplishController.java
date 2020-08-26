@@ -1325,6 +1325,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         int finalOffset = offset;
         String finalDateFrom = dateFrom;
         String finalDateTo = dateTo;
+        int finalOffset1 = offset;
         final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
 
             F.Promise<Result> returnPromise = null;
@@ -1364,9 +1365,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             transactions.add(resTransaction);
                         }
 
-                        transactionResponse.setFrom(res.getResultSet().getFromDate());
-                        transactionResponse.setTo(res.getResultSet().getToDate());
-                        transactionResponse.setCount("" + res.getResultSet().getTotalRecords());
+                        transactionResponse.setFrom(finalOffset1);
+                        transactionResponse.setTo(res.getTransactions().size());
+                        transactionResponse.setCount(res.getTransactions().size());
 
                         transactionResponse.setTransactions(transactions);
 

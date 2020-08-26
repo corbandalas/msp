@@ -11,33 +11,10 @@ public class TransactionResponse {
     @Expose
     private List<Transaction> transactions = null;
 
-    private String from;
-    private String to;
-    private String count;
+    private int from;
+    private int to;
+    private int count;
 
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public String getTo() {
-        return to;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public String getCount() {
-        return count;
-    }
-
-    public void setCount(String count) {
-        this.count = count;
-    }
 
     public List<Transaction> getTransactions() {
         return transactions;
@@ -47,4 +24,27 @@ public class TransactionResponse {
         this.transactions = transactions;
     }
 
+    public int getFrom() {
+        return from;
+    }
+
+    public void setFrom(int from) {
+        this.from = from;
+    }
+
+    public int getTo() {
+        return to;
+    }
+
+    public void setTo(int to) {
+        this.to = to;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 }
