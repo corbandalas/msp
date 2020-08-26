@@ -1042,7 +1042,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 addressRequestBean.setAddress2((String)data.get("address2"));
                 addressRequestBean.setCity((String)data.get("city"));
                 addressRequestBean.setCountry((String)data.get("country"));
-                addressRequestBean.setZip("" + (Integer)data.get("zip"));
+                addressRequestBean.setZip("" + ((java.math.BigInteger)data.get("zip")).intValue());
 
 //                        gson.fromJson("", AddressRequestBean.class);
 
