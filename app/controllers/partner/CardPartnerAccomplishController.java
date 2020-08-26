@@ -1057,7 +1057,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             customer.setAddress1(addressRequestBean.getAddress1());
                             customer.setAddress2(addressRequestBean.getAddress2());
                             customer.setCity(addressRequestBean.getCity());
-                            customer.setCountry_id(addressRequestBean.getCountry());
+                            customer.setCountry_id((String)data.get("country"));
                             customer.setPostcode(addressRequestBean.getZip());
 
                             customerRepository.update(customer);
