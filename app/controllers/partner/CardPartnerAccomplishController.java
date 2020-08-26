@@ -1014,10 +1014,10 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: type"));
         }
 
-        if (StringUtils.isBlank(createCard.getData())) {
-            Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: data"));
-        }
+//        if (StringUtils.isBlank(createCard.getData())) {
+//            Logger.error("Missing params");
+//            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: data"));
+//        }
 
         F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
 
@@ -1033,7 +1033,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 final Gson gson = gsonBuilder.create();
 
-                AddressRequestBean addressRequestBean = gson.fromJson(createCard.getData(), AddressRequestBean.class);
+                AddressRequestBean addressRequestBean = gson.fromJson((String)createCard.getData(), AddressRequestBean.class);
 
                 return accomplishService.updateUserAddress(acc.get().getReferral(), addressRequestBean, "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
@@ -1054,12 +1054,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     }
                 });
             } else if (createCard.getType().equalsIgnoreCase("email")) {
-                return accomplishService.updateUserEmail(acc.get().getReferral(), createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
+                return accomplishService.updateUserEmail(acc.get().getReferral(), (String)createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
                         Customer customer = acc.get();
 
-                        customer.setEmail(createCard.getData());
+                        customer.setEmail((String)createCard.getData());
 
                         customerRepository.update(customer);
 
@@ -1068,28 +1068,32 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
                     }
                 });
-            } else if (createCard.getType().equalsIgnoreCase("phone")) {
-                return accomplishService.updateUserPhone(acc.get().getReferral(), createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
-                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
-
-//                        Customer customer = acc.get();
+            }
+//            else if (createCard.getType().equalsIgnoreCase("phone")) {
+//                return accomplishService.updateUserPhone(acc.get().getReferral(), (String)createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
+//                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 //
-//                        customer.setEmail(createCard.getData());
+////                        Customer customer = acc.get();
+////
+////                        customer.setEmail(createCard.getData());
+////
+////                        customerRepository.update(customer);
 //
-//                        customerRepository.update(customer);
-
-                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
-                    } else {
-                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
-                    }
-                });
-            } else if (createCard.getType().equalsIgnoreCase("kycLevel")) {
+//                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+//                    } else {
+//                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+//                    }
+//                });
+//            }
+            else if (createCard.getType().equalsIgnoreCase("kycLevel")) {
 
                 Customer customer = acc.get();
 
                 KYC kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
 
-                if (createCard.getData().equalsIgnoreCase("sdd")) {
+                String data = (String) createCard.getData();
+
+                if (data.equalsIgnoreCase("sdd")) {
                     kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
                 } else {
                     kyc = KYC.FULL_DUE_DILIGENCE;
@@ -1106,7 +1110,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 Customer customer = acc.get();
 
-                customer.setCdata(createCard.getData());
+                customer.setCdata((String)createCard.getData());
 
                 customerRepository.update(customer);
 
@@ -1116,7 +1120,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 Customer customer = acc.get();
 
-                customer.setCdata2(createCard.getData());
+                customer.setCdata2((String)createCard.getData());
 
                 customerRepository.update(customer);
 
@@ -1126,7 +1130,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 Customer customer = acc.get();
 
-                customer.setCdata3(createCard.getData());
+                customer.setCdata3((String)createCard.getData());
 
                 customerRepository.update(customer);
 

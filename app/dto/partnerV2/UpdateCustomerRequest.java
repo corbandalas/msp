@@ -19,7 +19,7 @@ public class UpdateCustomerRequest {
 
     private String type;
     @JsonRawValue
-    private String data;
+    private Object data;
     private String mobilePhone;
 
 }
