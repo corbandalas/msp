@@ -52,6 +52,7 @@ import play.libs.F;
 import repository.PropertyRepository;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,10 +157,9 @@ public class AccomplishService {
 
         PersonalInfo personalInfo = new PersonalInfo();
 
-        Transliterator toLatinTrans = Transliterator.getInstance("Any-Latin");
 
-        personalInfo.setFirstName(toLatinTrans.transliterate(firstName));
-        personalInfo.setLastName(toLatinTrans.transliterate(lastName));
+        personalInfo.setFirstName(Utils.trasliterateDanish(firstName));
+        personalInfo.setLastName(Utils.trasliterateDanish(lastName));
         personalInfo.setJobTitle(title);
 //        personalInfo.setNickName();
 
@@ -179,9 +179,9 @@ public class AccomplishService {
         personalInfo.setVerificationStatus("1");
 
         Address address = new Address();
-        address.setAddressLine1(toLatinTrans.transliterate(address1));
-        address.setAddressLine2(toLatinTrans.transliterate(address2));
-        address.setCityTown(toLatinTrans.transliterate(city));
+        address.setAddressLine1(Utils.trasliterateDanish(address1));
+        address.setAddressLine2(Utils.trasliterateDanish(address2));
+        address.setCityTown(Utils.trasliterateDanish(city));
         address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
         address.setCountryCode(country);
@@ -336,7 +336,7 @@ public class AccomplishService {
 
         Attachment attachment = new Attachment();
 
-        attachment.setFileName(fileName);
+        attachment.setFileName(Utils.trasliterateDanish(fileName));
         attachment.setFileExtension(".jpg");
         attachment.setContent(content);
 
@@ -672,9 +672,9 @@ public class AccomplishService {
             List<accomplish.dto.user.update.address.Address> addresses = new ArrayList<>();
 
             accomplish.dto.user.update.address.Address address1 = new accomplish.dto.user.update.address.Address();
-            address1.setAddressLine1(addressRequestBean.getAddress1());
-            address1.setAddressLine2(addressRequestBean.getAddress2());
-            address1.setCityTown(addressRequestBean.getCity());
+            address1.setAddressLine1(Utils.trasliterateDanish(addressRequestBean.getAddress1()));
+            address1.setAddressLine2(Utils.trasliterateDanish(addressRequestBean.getAddress2()));
+            address1.setCityTown(Utils.trasliterateDanish(addressRequestBean.getCity()));
             address1.setCountryCode(addressRequestBean.getCountry());
             address1.setPostalZipCode(addressRequestBean.getZip());
             address1.setId(serverEmail.getId());

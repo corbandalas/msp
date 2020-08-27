@@ -301,4 +301,27 @@ public final class Utils {
     }
 
 
+    public static String trasliterateDanish(String source) {
+
+
+//        Æ = Ae
+//        æ = ae
+//        Ø = Oe
+//        ø = oe
+//        Å = Aa
+//        å = aa
+
+        source = StringUtils.replace(source, "Æ", "Ae");
+        source = StringUtils.replace(source, "æ", "ae");
+        source = StringUtils.replace(source, "Ø", "Oe");
+        source = StringUtils.replace(source, "ø", "o");
+        source = StringUtils.replace(source, "Å", "Aa");
+        source = StringUtils.replace(source, "å", "aa");
+
+        return source;
+
+
+    }
+
+
 }
