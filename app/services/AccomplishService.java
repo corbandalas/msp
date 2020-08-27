@@ -38,6 +38,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.ibm.icu.text.Transliterator;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
@@ -155,8 +156,10 @@ public class AccomplishService {
 
         PersonalInfo personalInfo = new PersonalInfo();
 
-        personalInfo.setFirstName(firstName);
-        personalInfo.setLastName(lastName);
+        Transliterator toLatinTrans = Transliterator.getInstance("Any-Latin");
+
+        personalInfo.setFirstName(toLatinTrans.transliterate(firstName));
+        personalInfo.setLastName(toLatinTrans.transliterate(lastName));
         personalInfo.setJobTitle(title);
 //        personalInfo.setNickName();
 
@@ -176,9 +179,9 @@ public class AccomplishService {
         personalInfo.setVerificationStatus("1");
 
         Address address = new Address();
-        address.setAddressLine1(address1);
-        address.setAddressLine2(address2);
-        address.setCityTown(city);
+        address.setAddressLine1(toLatinTrans.transliterate(address1));
+        address.setAddressLine2(toLatinTrans.transliterate(address2));
+        address.setCityTown(toLatinTrans.transliterate(city));
         address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
         address.setCountryCode(country);
@@ -797,7 +800,7 @@ public class AccomplishService {
                 .addHeader("lang", "en")
                 .addHeader("time_zone", "UTC +03:00");
 
-        if (true) {
+        if (showSensetiveData) {
             boundRequestBuilder = boundRequestBuilder.addHeader("show_sensetive_data", "1");
         }
 
