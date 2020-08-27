@@ -797,7 +797,7 @@ public class AccomplishService {
                 .addHeader("lang", "en")
                 .addHeader("time_zone", "UTC +03:00");
 
-        if (showSensetiveData) {
+        if (true) {
             boundRequestBuilder = boundRequestBuilder.addHeader("show_sensetive_data", "1");
         }
 
