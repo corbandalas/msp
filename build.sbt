@@ -30,7 +30,6 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-jcs-core" % "2.2",
   "com.google.code.gson" % "gson" % "2.8.2",
   "org.projectlombok" % "lombok" % "1.18.12" % "provided",
-  "com.ibm.icu" % "icu4j" % "61.1",
   "com.typesafe.play" %% "play-mailer" % "4.0.0")
 
 libraryDependencies += filters

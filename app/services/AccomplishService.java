@@ -38,7 +38,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.ibm.icu.text.Transliterator;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
@@ -578,7 +577,7 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/activate/" + cardID, gson.toJson(activate), "POST", partnerID, false);
+        F.Promise<String> promise = execute("service/v1/account/activate/" + cardID, gson.toJson(activate), "POST", partnerID, true);
         return promise.map(res -> {
             ActivateResponse getAccountResponse = gson.fromJson(res, ActivateResponse.class);
 
@@ -801,14 +800,20 @@ public class AccomplishService {
                 .addHeader("time_zone", "UTC +03:00");
 
         if (showSensetiveData) {
+
+            Logger.info("Added headers show_sensetive_data  = 1");
+
             boundRequestBuilder = boundRequestBuilder.addHeader("show_sensetive_data", "1");
+            boundRequestBuilder = boundRequestBuilder.addHeader("show_custom_field", "1");
         }
+
 
 
         boundRequestBuilder.execute(new AsyncCompletionHandler<String>() {
 
             @Override
             public String onCompleted(Response response) throws Exception {
+
 
                 String responseBody = response.getResponseBody();
                 Logger.info("///Accomplish API response: " + responseBody);
