@@ -453,7 +453,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             kyc = "fdd";
                         }
 
-                        Logger.info("DOB date = " +format);
+                        Logger.info("DOB date = " + format);
                         return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
                                 customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
                                 res.getPersonalInfo().getLastName(), format,
@@ -1046,14 +1046,14 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 AddressRequestBean addressRequestBean = new AddressRequestBean();
 
-                addressRequestBean.setAddress1((String)data.get("address1"));
-                addressRequestBean.setAddress2((String)data.get("address2"));
-                addressRequestBean.setCity((String)data.get("city"));
-                addressRequestBean.setCountry((String)data.get("country"));
-                addressRequestBean.setZip("" + ((java.math.BigInteger)data.get("zip")).intValue());
+                addressRequestBean.setAddress1((String) data.get("address1"));
+                addressRequestBean.setAddress2((String) data.get("address2"));
+                addressRequestBean.setCity((String) data.get("city"));
+                addressRequestBean.setCountry((String) data.get("country"));
+                addressRequestBean.setZip("" + ((java.math.BigInteger) data.get("zip")).intValue());
 
 
-                return  F.Promise.wrap(countryRepository.retrieveById((String)data.get("country"))).flatMap(country -> {
+                return F.Promise.wrap(countryRepository.retrieveById((String) data.get("country"))).flatMap(country -> {
 
                     addressRequestBean.setCountry(country.get().getCode());
 
@@ -1065,7 +1065,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             customer.setAddress1(addressRequestBean.getAddress1());
                             customer.setAddress2(addressRequestBean.getAddress2());
                             customer.setCity(addressRequestBean.getCity());
-                            customer.setCountry_id((String)data.get("country"));
+                            customer.setCountry_id((String) data.get("country"));
                             customer.setPostcode(addressRequestBean.getZip());
 
                             customerRepository.update(customer);
@@ -1077,12 +1077,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     });
                 });
             } else if (createCard.getType().equalsIgnoreCase("email")) {
-                return accomplishService.updateUserEmail(acc.get().getReferral(), (String)createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
+                return accomplishService.updateUserEmail(acc.get().getReferral(), (String) createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
                         Customer customer = acc.get();
 
-                        customer.setEmail((String)createCard.getData());
+                        customer.setEmail((String) createCard.getData());
 
                         customerRepository.update(customer);
 
@@ -1133,7 +1133,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 Customer customer = acc.get();
 
-                customer.setCdata((String)createCard.getData());
+                customer.setCdata((String) createCard.getData());
 
                 customerRepository.update(customer);
 
@@ -1143,7 +1143,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 Customer customer = acc.get();
 
-                customer.setCdata2((String)createCard.getData());
+                customer.setCdata2((String) createCard.getData());
 
                 customerRepository.update(customer);
 
@@ -1153,7 +1153,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 Customer customer = acc.get();
 
-                customer.setCdata3((String)createCard.getData());
+                customer.setCdata3((String) createCard.getData());
 
                 customerRepository.update(customer);
 
@@ -1354,8 +1354,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             resTransaction.setCurrency(transaction.getInfo().getCurrency());
                             resTransaction.setDesc(transaction.getInfo().getNotes());
                             resTransaction.setDirection(transaction.getInfo().getOperation());
-                            resTransaction.setLocalDate( DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
-                            resTransaction.setSettlementDate( DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
+                            resTransaction.setLocalDate(DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
+                            resTransaction.setSettlementDate(DateUtil.parse(transaction.getInfo().getServerDate(), "yyyy-MM-dd'T'HH:mm:ss").getTime());
 
                             resTransaction.setOriginalAmount(Double.parseDouble(transaction.getConversion().getOriginalAmount()));
                             resTransaction.setOriginalCurrency(acc._1.get().getCurrencyId());
@@ -1514,7 +1514,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
     @ApiOperation(
             nickname = "getMwTransactions",
             value = "Get mini wallet transactions",
-            notes = "Method allows to push mini wallet transaction",
+            notes = "Method allows to get mini wallet transaction",
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
@@ -1530,7 +1530,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Push mini wallet transaction request", required = true, dataType = "dto.partnerV2.GetMiniWalletTransactionRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Get mini wallet transaction request", required = true, dataType = "dto.partnerV2.GetMiniWalletTransactionRequest", paramType = "body"),
             @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
@@ -1652,7 +1652,6 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<GetAccountResponse> dest = accomplishService.getAccount(createCard.getReceiver(), "" + authData.getAccount().getId());
 
 
-
         final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).zip(source).zip(dest).flatMap(card -> {
 
             Long walletBalance = card._1._1._1._2;
@@ -1667,19 +1666,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             boolean reverse = false;
 
             if (amount > 0) {
-                if (Float.parseFloat(card._1._2.getInfo().getAvailableBalance()) < createCard.getAmount() ) {
+                if (Float.parseFloat(card._1._2.getInfo().getAvailableBalance()) < createCard.getAmount()) {
                     return F.Promise.pure(createNotEnoughFundsResponse());
                 }
 
             } else {
-                if (Float.parseFloat(card._2.getInfo().getAvailableBalance()) < Math.abs(createCard.getAmount()) ) {
+                if (Float.parseFloat(card._2.getInfo().getAvailableBalance()) < Math.abs(createCard.getAmount())) {
                     return F.Promise.pure(createNotEnoughFundsResponse());
                 }
 
                 reverse = true;
             }
 
-            return F.Promise.wrap(currencyRepository.retrieveById(card._1._1._2.get().getCurrencyId())).zip(accomplishService.transfer((!reverse)? createCard.getToken():createCard.getReceiver(), (!reverse)?createCard.getReceiver():createCard.getToken(), "" + createCard.getAmount(), card._1._1._2.get().getCurrencyId(), "" + authData.getAccount().getId()))
+            return F.Promise.wrap(currencyRepository.retrieveById(card._1._1._2.get().getCurrencyId())).zip(accomplishService.transfer((!reverse) ? createCard.getToken() : createCard.getReceiver(), (!reverse) ? createCard.getReceiver() : createCard.getToken(), "" + createCard.getAmount(), card._1._1._2.get().getCurrencyId(), "" + authData.getAccount().getId()))
                     .flatMap(providerResponse -> {
 
                         F.Promise<Result> returnPromise = null;
@@ -1728,7 +1727,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = SuccessAPIV2Response.class
+            response = GetWalletBalanceResponse.class
     )
 
     @ApiResponses(value = {
@@ -1740,7 +1739,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
     })
     @ApiImplicitParams(value = {
-            @ApiImplicitParam(value = "Push mini wallet transaction request", required = true, dataType = "dto.partnerV2.GetWalletBalanceRequest", paramType = "body"),
+            @ApiImplicitParam(value = "Get mini wallet balance request", required = true, dataType = "dto.partnerV2.GetWalletBalanceRequest", paramType = "body"),
             @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
@@ -1769,6 +1768,85 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 zip(F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid())));
 
         final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(), (float) card._1 / 100, card._2.get(0).getCurrency()))));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "clearMw",
+            value = "Clear mini wallet balance",
+            notes = "Method allows to clear mini wallet transactions",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Clear mini wallet transaction request", required = true, dataType = "dto.partnerV2.ClearWalletRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> clearMw() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ClearWalletRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, ClearWalletRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getUuid())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
+        }
+
+        if (StringUtils.isBlank(createCard.getAction())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: action"));
+        }
+        F.Promise<Boolean> action = F.Promise.pure(true);
+
+        if (createCard.getAction().equalsIgnoreCase("delete")) {
+            action = F.Promise.wrap(walletTransactionRepository.deleteAll(createCard.getUuid()));
+        } else {
+
+            action = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).map(balance -> {
+                WalletTransaction walletTransaction = new WalletTransaction();
+
+
+                walletTransaction.setAmount_cts((balance > 0) ? -balance : Math.abs(balance));
+//                walletTransaction.setCurrency(card._1._1._2.get().getCurrencyId());
+                walletTransaction.setDate_added(new Date().getTime());
+                walletTransaction.setDescription("Clear wallet " + createCard.getUuid());
+//                walletTransaction.setDest_token(createCard.getReceiver());
+                walletTransaction.setType("load");
+                walletTransaction.setUuid(createCard.getUuid());
+
+                F.Promise.wrap(walletTransactionRepository.create(walletTransaction));
+
+                return true;
+            });
+        }
+
+        final F.Promise<Result> result = action.map(card -> ok(Json.toJson(new SuccessAPIV2Response(true))));
 
         return returnRecover(result);
     }

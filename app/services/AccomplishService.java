@@ -240,7 +240,7 @@ public class AccomplishService {
         String json = gson.toJson(createUser);
 
 
-        F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
 
         return promise.map(res -> {
             CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
@@ -295,7 +295,7 @@ public class AccomplishService {
         String json = gson.toJson(createIdentification);
 
 
-        F.Promise<String> promise = execute("service/v1/user/identification/" + userID, json, "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/user/identification/" + userID, json, "POST", partnerID, false);
 
         return promise.map(res -> {
             CreateIdentificationResponse createUserResponse = gson.fromJson(res, CreateIdentificationResponse.class);
@@ -314,7 +314,7 @@ public class AccomplishService {
         final Gson gson = gsonBuilder.create();
 
 
-        F.Promise<String> promise = execute("service/v1/user/" + userID, "", "GET", partnerID);
+        F.Promise<String> promise = execute("service/v1/user/" + userID, "", "GET", partnerID, true);
 
         return promise.map(res -> {
             GetCustomerResponse createUserResponse = gson.fromJson(res, GetCustomerResponse.class);
@@ -402,7 +402,7 @@ public class AccomplishService {
         String json = gson.toJson(createDocument);
 
 
-        F.Promise<String> promise = execute("service/v1/user/document/" + userID, json, "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/user/document/" + userID, json, "POST", partnerID, false);
 
         return promise.map(res -> {
             CreateDocumentResponse createUserResponse = gson.fromJson(res, CreateDocumentResponse.class);
@@ -446,7 +446,6 @@ public class AccomplishService {
             }
 
 
-
 //        if (currency.equalsIgnoreCase("EUR")) {
 //            bin = 4560;
 //        } else if (currency.equalsIgnoreCase("GBP")) {
@@ -475,7 +474,7 @@ public class AccomplishService {
             final Gson gson = gsonBuilder.create();
             String json = gson.toJson(createCard);
 
-            F.Promise<String> promise = execute("service/v1/account/", json, "POST", partnerID);
+            F.Promise<String> promise = execute("service/v1/account/", json, "POST", partnerID, false);
 
             return promise.map(res -> {
                 CreateCardResponse createCardresponse = gson.fromJson(res, CreateCardResponse.class);
@@ -522,7 +521,7 @@ public class AccomplishService {
             final Gson gson = gsonBuilder.create();
             String json = gson.toJson(transfer);
 
-            F.Promise<String> promise = execute("service/v1/transaction/", json, "POST", partnerID);
+            F.Promise<String> promise = execute("service/v1/transaction/", json, "POST", partnerID, false);
 
             return promise.map(res -> {
                 TransferResponse createCardresponse = gson.fromJson(res, TransferResponse.class);
@@ -540,7 +539,7 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID);
+        F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID, true);
         return promise.map(res -> {
             GetAccountResponse getAccountResponse = gson.fromJson(res, GetAccountResponse.class);
 
@@ -549,8 +548,8 @@ public class AccomplishService {
     }
 
     public F.Promise<ActivateResponse> activateAccount(String cardID, String binID, String userID, String currency,
-                                                         String number, String type, String activationCode,
-                                                         String partnerID) {
+                                                       String number, String type, String activationCode,
+                                                       String partnerID) {
 
         Activate activate = new Activate();
 
@@ -576,7 +575,7 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/activate/" + cardID, gson.toJson(activate), "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/account/activate/" + cardID, gson.toJson(activate), "POST", partnerID, false);
         return promise.map(res -> {
             ActivateResponse getAccountResponse = gson.fromJson(res, ActivateResponse.class);
 
@@ -585,7 +584,7 @@ public class AccomplishService {
     }
 
     public F.Promise<LoadResponse> load(String amount, String currency, String token,
-                                                       String partnerID) {
+                                        String partnerID) {
 
         accomplish.dto.account.load.Load load = new accomplish.dto.account.load.Load();
 
@@ -612,7 +611,7 @@ public class AccomplishService {
 
         String body = gson.toJson(load);
 
-        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID);
+        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID, false);
         return promise.map(res -> {
             LoadResponse loadResponse = gson.fromJson(res, LoadResponse.class);
 
@@ -648,7 +647,7 @@ public class AccomplishService {
 
             String body = gson.toJson(request);
 
-            F.Promise<String> promise = execute("service/v1/user/email/" + userID, body, "PUT", partnerID);
+            F.Promise<String> promise = execute("service/v1/user/email/" + userID, body, "PUT", partnerID, false);
             return promise.map(res -> {
                 UpdateUserEmailResponse loadResponse = gson.fromJson(res, UpdateUserEmailResponse.class);
 
@@ -669,7 +668,7 @@ public class AccomplishService {
 
             List<accomplish.dto.user.update.address.Address> addresses = new ArrayList<>();
 
-            accomplish.dto.user.update.address.Address address1 = new  accomplish.dto.user.update.address.Address();
+            accomplish.dto.user.update.address.Address address1 = new accomplish.dto.user.update.address.Address();
             address1.setAddressLine1(addressRequestBean.getAddress1());
             address1.setAddressLine2(addressRequestBean.getAddress2());
             address1.setCityTown(addressRequestBean.getCity());
@@ -687,7 +686,7 @@ public class AccomplishService {
 
             String body = gson.toJson(request);
 
-            F.Promise<String> promise = execute("service/v1/user/address/" + userID, body, "PUT", partnerID);
+            F.Promise<String> promise = execute("service/v1/user/address/" + userID, body, "PUT", partnerID, false);
             return promise.map(res -> {
                 UpdateUserAddressResponse loadResponse = gson.fromJson(res, UpdateUserAddressResponse.class);
 
@@ -727,7 +726,7 @@ public class AccomplishService {
 
             String body = gson.toJson(request);
 
-            F.Promise<String> promise = execute("service/v1/user/phone/" + userID, body, "PUT", partnerID);
+            F.Promise<String> promise = execute("service/v1/user/phone/" + userID, body, "PUT", partnerID, false);
             return promise.map(res -> {
                 UpdateUserPhoneResponse loadResponse = gson.fromJson(res, UpdateUserPhoneResponse.class);
 
@@ -736,7 +735,7 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<GetTransactionResponse> getTransaction(String userID, String cardID, int limit, int offset,  String fromDate, String toDate, String partnerID) {
+    public F.Promise<GetTransactionResponse> getTransaction(String userID, String cardID, int limit, int offset, String fromDate, String toDate, String partnerID) {
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.disableHtmlEscaping();
@@ -746,7 +745,7 @@ public class AccomplishService {
 
         F.Promise<String> promise = execute("service/v1/transaction/inquiry?user_id=" + userID +
                 "&account_id=" + cardID + "&status=0&from_date=" + fromDate + "&to_date=" + toDate +
-                "&page_size=" + limit + "&start_index=" + offset + "&sort_flag=asc&show_custom_field=1" , "", "GET", partnerID);
+                "&page_size=" + limit + "&start_index=" + offset + "&sort_flag=asc&show_custom_field=1", "", "GET", partnerID, false);
 
         return promise.map(res -> {
             GetTransactionResponse createUserResponse = gson.fromJson(res, GetTransactionResponse.class);
@@ -758,12 +757,12 @@ public class AccomplishService {
     }
 
 
-    private F.Promise<String> execute(String url, String body, String method, String partnerID) {
-        return getSettingsForPartner(partnerID).flatMap(res -> F.Promise.wrap(getOauth(res)).flatMap(token -> F.Promise.wrap(invokeAPI(url, body, token, method, res))));
+    private F.Promise<String> execute(String url, String body, String method, String partnerID, boolean showSensetiveData) {
+        return getSettingsForPartner(partnerID).flatMap(res -> F.Promise.wrap(getOauth(res)).flatMap(token -> F.Promise.wrap(invokeAPI(url, body, token, method, showSensetiveData, res))));
     }
 
 
-    private Future<String> invokeAPI(String url, String body, String token, String method, AccomplishSettings accomplishSettings) {
+    private Future<String> invokeAPI(String url, String body, String token, String method, boolean showSensetiveData, AccomplishSettings accomplishSettings) {
 
         final String query = accomplishSettings.apiURL + url;
 
@@ -782,7 +781,7 @@ public class AccomplishService {
 
         } else if (method.equalsIgnoreCase("GET")) {
             boundRequestBuilder = asyncHttpClient.prepareGet(query);
-        }  else if (method.equalsIgnoreCase("PUT")) {
+        } else if (method.equalsIgnoreCase("PUT")) {
             boundRequestBuilder = asyncHttpClient.preparePut(query);
         }
 
@@ -790,34 +789,41 @@ public class AccomplishService {
 
         Logger.info("Source ID = " + sourceID);
 
-        boundRequestBuilder.setBody(body)
+
+        boundRequestBuilder = boundRequestBuilder.setBody(body)
                 .addHeader("Content-type", "application/json")
                 .addHeader("Authorization", "Bearer " + token)
                 .addHeader("source_id", sourceID)
                 .addHeader("lang", "en")
-                .addHeader("time_zone", "UTC +03:00")
-                .execute(new AsyncCompletionHandler<String>() {
+                .addHeader("time_zone", "UTC +03:00");
 
-                    @Override
-                    public String onCompleted(Response response) throws Exception {
-
-                        String responseBody = response.getResponseBody();
-                        Logger.info("///Accomplish API response: " + responseBody);
+        if (showSensetiveData) {
+            boundRequestBuilder = boundRequestBuilder.addHeader("show_sensetive_data", "1");
+        }
 
 
-                        promise.success(responseBody);
+        boundRequestBuilder.execute(new AsyncCompletionHandler<String>() {
+
+            @Override
+            public String onCompleted(Response response) throws Exception {
+
+                String responseBody = response.getResponseBody();
+                Logger.info("///Accomplish API response: " + responseBody);
 
 
-                        return responseBody;
-                    }
+                promise.success(responseBody);
 
-                    @Override
-                    public void onThrowable(Throwable t) {
-                        Logger.error("/////Error while retrieving Accomplish API response", t);
 
-                        promise.failure(t);
-                    }
-                });
+                return responseBody;
+            }
+
+            @Override
+            public void onThrowable(Throwable t) {
+                Logger.error("/////Error while retrieving Accomplish API response", t);
+
+                promise.failure(t);
+            }
+        });
         return promise.future();
     }
 
@@ -832,7 +838,7 @@ public class AccomplishService {
 
             Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
 
-            String[] split = StringUtils.split(gpsConfigStringValue, "|") ;
+            String[] split = StringUtils.split(gpsConfigStringValue, "|");
 
             return new AccomplishSettings(split[0], split[1], split[2], split[5], split[3], split[4]);
         });

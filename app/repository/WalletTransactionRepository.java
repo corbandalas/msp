@@ -102,6 +102,17 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
         //not required yet
     }
 
+
+    public Future<Boolean> deleteAll(String uuid) {
+        final Promise<Boolean> promise = Futures.promise();
+
+        String query = "DELETE from" + connectionPool.getSchemaName() + ".wallet_transaction where uuid=$1";
+        connectionPool.getConnection().query(query, asList(uuid),
+                result -> promise.success(true), promise::failure);
+
+        return promise.future();
+    }
+
     public Future<List<WalletTransaction>> retrieveByUuid(String uuid) {
 
         final Promise<List<WalletTransaction>> promise = Futures.promise();
