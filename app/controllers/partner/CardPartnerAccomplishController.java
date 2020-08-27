@@ -1828,15 +1828,17 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             action = F.Promise.wrap(walletTransactionRepository.deleteAll(createCard.getUuid()));
         } else {
 
-            action = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).map(balance -> {
+            action = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).
+                    zip(F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()))).map(balance -> {
                 WalletTransaction walletTransaction = new WalletTransaction();
 
 
-                walletTransaction.setAmount_cts((balance > 0) ? -balance : Math.abs(balance));
-//                walletTransaction.setCurrency(card._1._1._2.get().getCurrencyId());
+                walletTransaction.setAmount_cts((balance._1 > 0) ? -balance._1 : Math.abs(balance._1));
+                walletTransaction.setCurrency(balance._2.get(0).getCurrency());
                 walletTransaction.setDate_added(new Date().getTime());
                 walletTransaction.setDescription("Clear wallet " + createCard.getUuid());
-//                walletTransaction.setDest_token(createCard.getReceiver());
+                walletTransaction.setDest_token(balance._2.get(0).getDest_token());
+                walletTransaction.setSrc_token(balance._2.get(0).getSrc_token());
                 walletTransaction.setType("load");
                 walletTransaction.setUuid(createCard.getUuid());
 
