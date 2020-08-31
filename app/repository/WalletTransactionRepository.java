@@ -147,7 +147,7 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
 
         String query = "SELECT sum(amount_cts) FROM " + connectionPool.getSchemaName() + ".wallet_transaction where uuid=$1";
         connectionPool.getConnection().query(query, asList(uuid), result -> {
-            promise.success(result.row(0).getDouble(0));
+            promise.success((result.row(0).getDouble(0) != null)? result.row(0).getDouble(0): 0);
         }, promise::failure);
 
         return promise.future();
