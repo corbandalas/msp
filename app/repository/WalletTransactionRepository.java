@@ -141,13 +141,13 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
         return promise.future();
     }
 
-    public Future<Long> retrieveSumByUUID(String uuid) {
+    public Future<Double> retrieveSumByUUID(String uuid) {
 
-        final Promise<Long> promise = Futures.promise();
+        final Promise<Double> promise = Futures.promise();
 
         String query = "SELECT sum(amount_cts) FROM " + connectionPool.getSchemaName() + ".wallet_transaction where uuid=$1";
         connectionPool.getConnection().query(query, asList(uuid), result -> {
-            promise.success(result.row(0).getLong(0));
+            promise.success(result.row(0).getDouble(0));
         }, promise::failure);
 
         return promise.future();

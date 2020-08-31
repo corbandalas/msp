@@ -1457,13 +1457,13 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
-        F.Promise<Long> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
+        F.Promise<Double> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
 
         final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).flatMap(card -> {
 
             Logger.info("Wallet sum for " + createCard.getUuid() + " = " + card._1._2);
 
-            float sumAfter = createCard.getAmount() + ((float) card._1._2 / 100);
+            float sumAfter = createCard.getAmount() + (card._1._2.floatValue() / 100);
 
             Logger.info("Sum after = " + sumAfter);
 
@@ -1647,14 +1647,14 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
-        F.Promise<Long> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
+        F.Promise<Double> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
         F.Promise<GetAccountResponse> source = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
         F.Promise<GetAccountResponse> dest = accomplishService.getAccount(createCard.getReceiver(), "" + authData.getAccount().getId());
 
 
         final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).zip(source).zip(dest).flatMap(card -> {
 
-            Long walletBalance = card._1._1._1._2;
+            Long walletBalance = card._1._1._1._2.longValue();
 
             Long amount = (long) (createCard.getAmount() * 100);
 
@@ -1764,10 +1764,10 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
 
-        F.Promise<F.Tuple<Long, List<WalletTransaction>>> zip = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).
+        F.Promise<F.Tuple<Double, List<WalletTransaction>>> zip = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).
                 zip(F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid())));
 
-        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(), (float) card._1 / 100, card._2.get(0).getCurrency()))));
+        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(),  card._1.floatValue() / 100, card._2.get(0).getCurrency()))));
 
         return returnRecover(result);
     }
@@ -1833,7 +1833,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 WalletTransaction walletTransaction = new WalletTransaction();
 
 
-                walletTransaction.setAmount_cts((balance._1 > 0) ? -balance._1 : Math.abs(balance._1));
+                walletTransaction.setAmount_cts((balance._1 > 0) ? (long)-balance._1 :(long) Math.abs(balance._1));
                 walletTransaction.setCurrency(balance._2.get(0).getCurrency());
                 walletTransaction.setDate_added(new Date().getTime());
                 walletTransaction.setDescription("Clear wallet " + createCard.getUuid());
