@@ -66,7 +66,8 @@ POST       /api/partner/v2/getTransactions                                  @con
 POST       /api/partner/v2/pushMwTransaction                                  @controllers.partner.CardPartnerAccomplishController.pushMwTransaction()
 POST       /api/partner/v2/getMwTransactions                                  @controllers.partner.CardPartnerAccomplishController.getMwTransactions()
 POST       /api/partner/v2/doMwTransfer                                  @controllers.partner.CardPartnerAccomplishController.doMwTransfer()
-
+POST       /api/partner/v2/clearMw                                  @controllers.partner.CardPartnerAccomplishController.clearMw()
+POST       /api/partner/v2/getMwBalance                                  @controllers.partner.CardPartnerAccomplishController.getMwBalance()
 #Merchant API(admin)
 
 # Property API
