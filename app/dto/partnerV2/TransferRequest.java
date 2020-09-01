@@ -20,5 +20,6 @@ public class TransferRequest {
     private String receiver;
     private float amount;
     private String currency;
+    private String queue;
 
 }
