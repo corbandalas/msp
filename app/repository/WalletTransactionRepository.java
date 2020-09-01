@@ -132,7 +132,7 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
         final Promise<List<WalletTransaction>> promise = Futures.promise();
 
         String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".wallet_transaction where uuid=$1 and date_added >= $2 and date_added <=$3";
-        connectionPool.getConnection().query(query, asList(uuid, toDate, fromDate), result -> {
+        connectionPool.getConnection().query(query, asList(uuid, fromDate, toDate), result -> {
             final ArrayList<WalletTransaction> transactions = new ArrayList<>();
             result.forEach(row -> transactions.add(createEntity(row)));
             promise.success(transactions);
