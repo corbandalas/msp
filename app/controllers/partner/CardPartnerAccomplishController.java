@@ -1569,7 +1569,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         F.Promise<List<WalletTransaction>> wrap = (StringUtils.isNotBlank(createCard.getDateStart()) &&
                 StringUtils.isNotBlank(createCard.getDateEnd())) ?
-                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()), Long.parseLong(createCard.getDateStart()))) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
+                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()) / 1000, Long.parseLong(createCard.getDateStart()) / 1000)) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
 
         final F.Promise<Result> result = wrap.map(card -> {
 
