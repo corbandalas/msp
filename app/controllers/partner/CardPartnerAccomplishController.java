@@ -1334,7 +1334,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
 
                 returnPromise = accomplishService.getTransaction("" + acc._2.getInfo().getUserId(), createCard.getToken(), finalLimit,
-                        finalOffset, finalDateFrom, finalDateTo, "" + authData.getAccount().getId()).flatMap(res -> {
+                        finalOffset, DateUtil.format(new Date(Long.parseLong(finalDateFrom)), "yyyy-mm-dd"), DateUtil.format(new Date(Long.parseLong(finalDateTo)), "yyyy-mm-dd"), "" + authData.getAccount().getId()).flatMap(res -> {
 
                     F.Promise<Result> promise = null;
 
