@@ -1713,7 +1713,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         walletTransaction.setType("transfer");
                                         walletTransaction.setUuid(createCard.getUuid());
 
-                                        walletTransactionRepository.create(walletTransaction);
+//                                        walletTransactionRepository.create(walletTransaction);
 
 
                                         return F.Promise.wrap(walletTransactionRepository.create(walletTransaction)).map(tr -> ok(Json.toJson(new TransferResponse(true, "done"))));
