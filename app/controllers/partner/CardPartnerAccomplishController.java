@@ -1319,7 +1319,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         int finalLimit = limit;
         int finalOffset = offset;
