@@ -1707,7 +1707,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                         walletTransaction.setAmount_cts(((long) (createCard.getAmount() * 100) > 0) ? -(long) (createCard.getAmount() * 100) : (long) createCard.getAmount() * 100);
                                         walletTransaction.setCurrency(card._1._1._2.get().getCurrencyId());
-                                        walletTransaction.setDate_added(new Date().getTime());
+                                        walletTransaction.setDate_added(new Date().getTime() / 1000);
                                         walletTransaction.setDescription("Transfer between from " + createCard.getToken() + " to " + createCard.getReceiver());
                                         walletTransaction.setDest_token(createCard.getReceiver());
                                         walletTransaction.setType("transfer");
@@ -1848,7 +1848,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 walletTransaction.setAmount_cts((balance._1 > 0) ? (long) -balance._1 : (long) Math.abs(balance._1));
                 walletTransaction.setCurrency(balance._2.get(0).getCurrency());
-                walletTransaction.setDate_added(new Date().getTime());
+                walletTransaction.setDate_added(new Date().getTime() / 1000);
                 walletTransaction.setDescription("Clear wallet " + createCard.getUuid());
                 walletTransaction.setDest_token(balance._2.get(0).getDest_token());
                 walletTransaction.setSrc_token(balance._2.get(0).getSrc_token());
