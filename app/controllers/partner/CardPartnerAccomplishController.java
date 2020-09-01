@@ -1700,7 +1700,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                             returnPromise = operationService.createTransferOperation(card._1._1._1._1.get(),
                                     card._1._1._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds")
-                                    .map(res -> {
+                                    .flatMap(res -> {
 
                                         WalletTransaction walletTransaction = new WalletTransaction();
 
@@ -1715,7 +1715,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                         walletTransactionRepository.create(walletTransaction);
 
-                                        return (ok(Json.toJson(new TransferResponse(true, "done"))));
+
+                                        return F.Promise.wrap(walletTransactionRepository.create(walletTransaction)).map(tr -> ok(Json.toJson(new TransferResponse(true, "done"))));
+
+
+//                                        return (ok(Json.toJson(new TransferResponse(true, "done"))));
 
                                     });
                         } else {
