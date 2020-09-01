@@ -1325,11 +1325,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         int finalOffset = offset;
         String finalDateFrom =  simpleDateFormat.format(new Date(Long.parseLong(dateFrom)));
 
-        Logger.info("new Date(Long.parseLong(dateFrom) = " + (new Date(Long.parseLong(dateFrom)).toString());
+        Logger.info("new Date(Long.parseLong(dateFrom) = " + (new Date(Long.parseLong(dateFrom)).toString()));
 
         String finalDateTo = simpleDateFormat.format(new Date(Long.parseLong(dateTo)));
 
-        Logger.info("new Date(Long.parseLong(dateFrom) = " + (new Date(Long.parseLong(dateTo)).toString());
+        Logger.info("new Date(Long.parseLong(dateFrom) = " + (new Date(Long.parseLong(dateTo)).toString()));
         int finalOffset1 = offset;
         final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
 
