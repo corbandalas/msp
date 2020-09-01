@@ -1583,7 +1583,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 Transaction2 transaction2 = new Transaction2();
                 transaction2.setAmount((double) walletTransaction.getAmount_cts() / 100);
                 transaction2.setCurrency(walletTransaction.getCurrency());
-                transaction2.setDate(walletTransaction.getDate_added());
+                transaction2.setDate(walletTransaction.getDate_added() * 1000);
                 transaction2.setDescription(walletTransaction.getDescription());
                 transaction2.setReceiver(walletTransaction.getDest_token());
                 transaction2.setToken(walletTransaction.getSrc_token());
