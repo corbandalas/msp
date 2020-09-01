@@ -1711,6 +1711,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         walletTransaction.setDescription("Transfer between from " + createCard.getToken() + " to " + createCard.getReceiver());
                                         walletTransaction.setDest_token(createCard.getReceiver());
                                         walletTransaction.setType("transfer");
+                                        walletTransaction.setSrc_token(createCard.getToken());
                                         walletTransaction.setUuid(createCard.getUuid());
 
 //                                        walletTransactionRepository.create(walletTransaction);
