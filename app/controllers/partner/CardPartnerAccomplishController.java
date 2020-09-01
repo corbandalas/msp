@@ -1502,6 +1502,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     walletTransaction.setCurrency(card._1._1.get().getCurrencyId());
                     walletTransaction.setDate_added(new Date().getTime() / 1000);
                     walletTransaction.setDescription(createCard.getDescription());
+                    walletTransaction.setSrc_token(createCard.getToken());
                     walletTransaction.setDest_token(createCard.getReceiver());
                     walletTransaction.setType("load");
                     walletTransaction.setUuid(createCard.getUuid());
