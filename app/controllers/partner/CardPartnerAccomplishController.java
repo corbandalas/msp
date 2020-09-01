@@ -21,6 +21,7 @@ import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
 import model.*;
+import model.Currency;
 import model.enums.CardBrand;
 import model.enums.CardType;
 import model.enums.KYC;
@@ -40,10 +41,7 @@ import util.SecurityUtil;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static configs.ReturnCodes.*;
 
@@ -1321,10 +1319,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
         int finalLimit = limit;
         int finalOffset = offset;
-        String finalDateFrom = dateFrom;
-        String finalDateTo = dateTo;
+        String finalDateFrom =  simpleDateFormat.format(new Date(Long.parseLong(dateFrom)));
+        String finalDateTo = simpleDateFormat.format(new Date(Long.parseLong(dateTo)));
         int finalOffset1 = offset;
         final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
 
@@ -1333,8 +1333,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
             if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
 
+
+
+
+
                 returnPromise = accomplishService.getTransaction("" + acc._2.getInfo().getUserId(), createCard.getToken(), finalLimit,
-                        finalOffset, DateUtil.format(new Date(Long.parseLong(finalDateFrom)), "yyyy-mm-dd"), DateUtil.format(new Date(Long.parseLong(finalDateTo)), "yyyy-mm-dd"), "" + authData.getAccount().getId()).flatMap(res -> {
+                        finalOffset,finalDateFrom, finalDateTo, "" + authData.getAccount().getId()).flatMap(res -> {
 
                     F.Promise<Result> promise = null;
 
