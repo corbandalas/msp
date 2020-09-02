@@ -19,5 +19,6 @@ public class CreateDocumentRequest {
     private String documentName;
     private String document;
     private String mobilePhone;
+    private String cdata1;
 
 }
