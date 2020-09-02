@@ -21,5 +21,6 @@ public class UpdateCustomerRequest {
     @JsonRawValue
     private Object data;
     private String mobilePhone;
+    private String cdata1;
 
 }
