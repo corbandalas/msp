@@ -173,7 +173,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             KYC kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
 
             if (createCard.getKycLevel().equalsIgnoreCase("fdd")) {
-                kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
+                kyc = KYC.FULL_DUE_DILIGENCE;
             }
 
             customer.setKyc(kyc);
