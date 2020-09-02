@@ -21,6 +21,7 @@ public class CreateCustomerIdentificationRequest {
     private String expiryDate;
     private String type;
     private String number;
+    private String cdata1;
 
 
 }

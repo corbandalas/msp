@@ -128,7 +128,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getBirthdayDate()) ||
                 StringUtils.isBlank(createCard.getLang()) ||
                 StringUtils.isBlank(createCard.getEmail())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
         }
@@ -299,7 +299,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getIssuanceCountry()) ||
                 StringUtils.isBlank(createCard.getResidenceCountry()) ||
                 StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
@@ -368,7 +368,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 StringUtils.isBlank(createCard.getDocumentType()) ||
                 StringUtils.isBlank(createCard.getDocumentName()) ||
                 StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
@@ -428,7 +428,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
@@ -507,19 +507,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getMobilePhone())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: mobilePhone"));
         }
 
         if (StringUtils.isBlank(createCard.getCardData())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardData"));
         }
 
         if (StringUtils.isBlank(createCard.getCardModel())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cardModel"));
         }
@@ -1205,7 +1205,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getToken())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
         }
@@ -1272,7 +1272,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getToken())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
         }
@@ -1319,11 +1319,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId());
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         int finalLimit = limit;
         int finalOffset = offset;
-        String finalDateFrom =  simpleDateFormat.format(new Date(Long.parseLong(dateFrom)));
+        String finalDateFrom = simpleDateFormat.format(new Date(Long.parseLong(dateFrom)));
 
         Logger.info("new Date(Long.parseLong(dateFrom) = " + (new Date(Long.parseLong(dateFrom)).toString()));
 
@@ -1339,11 +1339,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
 
 
-
-
-
                 returnPromise = accomplishService.getTransaction("" + acc._2.getInfo().getUserId(), createCard.getToken(), finalLimit,
-                        finalOffset,finalDateFrom, finalDateTo, "" + authData.getAccount().getId()).flatMap(res -> {
+                        finalOffset, finalDateFrom, finalDateTo, "" + authData.getAccount().getId()).flatMap(res -> {
 
                     F.Promise<Result> promise = null;
 
@@ -1439,26 +1436,26 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getToken())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
         }
 
         if (StringUtils.isBlank(createCard.getReceiver())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: receiver"));
         }
 
         if (StringUtils.isBlank(createCard.getDescription())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: description"));
         }
 
 
         if (StringUtils.isBlank(createCard.getUuid())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
         }
@@ -1470,7 +1467,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).flatMap(card -> {
 
-            Logger.info("Wallet sum for " + createCard.getUuid() + " = " + card._1._2);
+            Logger.info("Wallet sum for " + createCard.getUuid() + " = " + (card._1._2.floatValue() / 100));
 
             float sumAfter = createCard.getAmount() + (card._1._2.floatValue() / 100);
 
@@ -1496,20 +1493,27 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 }
 
                 if (returnPromise == null) {
+
+
                     WalletTransaction walletTransaction = new WalletTransaction();
 
 
                     walletTransaction.setAmount_cts((long) (createCard.getAmount() * 100));
                     walletTransaction.setCurrency(card._1._1.get().getCurrencyId());
-                    walletTransaction.setDate_added(new Date().getTime());
+                    walletTransaction.setDate_added(new Date().getTime() / 1000);
                     walletTransaction.setDescription(createCard.getDescription());
+                    walletTransaction.setSrc_token(createCard.getToken());
                     walletTransaction.setDest_token(createCard.getReceiver());
                     walletTransaction.setType("load");
                     walletTransaction.setUuid(createCard.getUuid());
 
-                    walletTransactionRepository.create(walletTransaction);
+                    Logger.info("Trying to save wallet transaction " + walletTransaction);
 
-                    returnPromise = F.Promise.pure(ok(Json.toJson(new SuccessAPIV2Response(true))));
+
+                    returnPromise =
+
+                            F.Promise.wrap(walletTransactionRepository.create(walletTransaction)).map(tr -> ok(Json.toJson(new SuccessAPIV2Response(true))));
+
                 }
 
                 return returnPromise;
@@ -1558,14 +1562,14 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getUuid())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
         }
 
         F.Promise<List<WalletTransaction>> wrap = (StringUtils.isNotBlank(createCard.getDateStart()) &&
                 StringUtils.isNotBlank(createCard.getDateEnd())) ?
-                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()), Long.parseLong(createCard.getDateStart()))) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
+                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()) / 1000, Long.parseLong(createCard.getDateStart()) / 1000)) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
 
         final F.Promise<Result> result = wrap.map(card -> {
 
@@ -1579,7 +1583,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 Transaction2 transaction2 = new Transaction2();
                 transaction2.setAmount((double) walletTransaction.getAmount_cts() / 100);
                 transaction2.setCurrency(walletTransaction.getCurrency());
-                transaction2.setDate(walletTransaction.getDate_added());
+                transaction2.setDate(walletTransaction.getDate_added() * 1000);
                 transaction2.setDescription(walletTransaction.getDescription());
                 transaction2.setReceiver(walletTransaction.getDest_token());
                 transaction2.setToken(walletTransaction.getSrc_token());
@@ -1637,19 +1641,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getToken())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
         }
 
         if (StringUtils.isBlank(createCard.getReceiver())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: receiver"));
         }
 
         if (StringUtils.isBlank(createCard.getUuid())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
         }
@@ -1696,22 +1700,27 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                             returnPromise = operationService.createTransferOperation(card._1._1._1._1.get(),
                                     card._1._1._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds")
-                                    .map(res -> {
+                                    .flatMap(res -> {
 
                                         WalletTransaction walletTransaction = new WalletTransaction();
 
 
                                         walletTransaction.setAmount_cts(((long) (createCard.getAmount() * 100) > 0) ? -(long) (createCard.getAmount() * 100) : (long) createCard.getAmount() * 100);
                                         walletTransaction.setCurrency(card._1._1._2.get().getCurrencyId());
-                                        walletTransaction.setDate_added(new Date().getTime());
+                                        walletTransaction.setDate_added(new Date().getTime() / 1000);
                                         walletTransaction.setDescription("Transfer between from " + createCard.getToken() + " to " + createCard.getReceiver());
                                         walletTransaction.setDest_token(createCard.getReceiver());
                                         walletTransaction.setType("transfer");
+                                        walletTransaction.setSrc_token(createCard.getToken());
                                         walletTransaction.setUuid(createCard.getUuid());
 
-                                        walletTransactionRepository.create(walletTransaction);
+//                                        walletTransactionRepository.create(walletTransaction);
 
-                                        return (ok(Json.toJson(new TransferResponse(true, "done"))));
+
+                                        return F.Promise.wrap(walletTransactionRepository.create(walletTransaction)).map(tr -> ok(Json.toJson(new TransferResponse(true, "done"))));
+
+
+//                                        return (ok(Json.toJson(new TransferResponse(true, "done"))));
 
                                     });
                         } else {
@@ -1767,7 +1776,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getUuid())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
         }
@@ -1776,7 +1785,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<F.Tuple<Double, List<WalletTransaction>>> zip = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid())).
                 zip(F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid())));
 
-        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(),  card._1.floatValue() / 100, card._2.get(0).getCurrency()))));
+        final F.Promise<Result> result = zip.map(card -> ok(Json.toJson(new GetWalletBalanceResponse(createCard.getUuid(), card._1.floatValue() / 100, card._2.get(0).getCurrency()))));
 
         return returnRecover(result);
     }
@@ -1821,13 +1830,13 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (StringUtils.isBlank(createCard.getUuid())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: uuid"));
         }
 
         if (StringUtils.isBlank(createCard.getAction())
-        ) {
+                ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: action"));
         }
@@ -1842,9 +1851,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 WalletTransaction walletTransaction = new WalletTransaction();
 
 
-                walletTransaction.setAmount_cts((balance._1 > 0) ? (long)-balance._1 :(long) Math.abs(balance._1));
+                walletTransaction.setAmount_cts((balance._1 > 0) ? (long) -balance._1 : (long) Math.abs(balance._1));
                 walletTransaction.setCurrency(balance._2.get(0).getCurrency());
-                walletTransaction.setDate_added(new Date().getTime());
+                walletTransaction.setDate_added(new Date().getTime() / 1000);
                 walletTransaction.setDescription("Clear wallet " + createCard.getUuid());
                 walletTransaction.setDest_token(balance._2.get(0).getDest_token());
                 walletTransaction.setSrc_token(balance._2.get(0).getSrc_token());

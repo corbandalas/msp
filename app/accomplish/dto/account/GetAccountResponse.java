@@ -1,6 +1,7 @@
 
 package accomplish.dto.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -12,6 +13,7 @@ public class GetAccountResponse {
     @SerializedName("info")
     @Expose
     private Info info;
+    @JsonIgnore
     @SerializedName("limits")
     @Expose
     private Limits limits;

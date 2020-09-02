@@ -98,4 +98,18 @@ public class WalletTransaction extends BaseEntity<Long> {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
+
+    @Override
+    public String toString() {
+        return "WalletTransaction{" +
+                "amount_cts=" + amount_cts +
+                ", currency='" + currency + '\'' +
+                ", date_added=" + date_added +
+                ", type='" + type + '\'' +
+                ", description='" + description + '\'' +
+                ", src_token='" + src_token + '\'' +
+                ", dest_token='" + dest_token + '\'' +
+                ", uuid='" + uuid + '\'' +
+                '}';
+    }
 }

@@ -15,5 +15,6 @@ import lombok.NoArgsConstructor;
 public class GetCustomerRequest {
 
     private String mobilePhone;
+    private String cdata1;
 
 }

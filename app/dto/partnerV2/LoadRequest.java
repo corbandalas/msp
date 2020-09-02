@@ -20,5 +20,6 @@ public class LoadRequest {
     private String label;
     private String amount;
     private String reference;
+    private String queue;
 
 }
