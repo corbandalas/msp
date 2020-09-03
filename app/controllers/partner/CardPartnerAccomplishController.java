@@ -761,7 +761,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
+        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1()));
 
 
         final F.Promise<Result> result = customerPromise.zip(senderCardPromise).flatMap(data -> {

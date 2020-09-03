@@ -19,6 +19,7 @@ public class ActivateRequest {
     private String token;
     private String lastName;
     private String mobilePhone;
+    private String cdata1;
     private String lastDigits;
 
 }
