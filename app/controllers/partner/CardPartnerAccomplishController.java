@@ -1114,7 +1114,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         Customer customer = acc.get();
 //
-                        customer.setPhone2((String)createCard.getData());
+                        customer.setPhone2(StringUtils.removeStart((String)createCard.getData(), "+"));
 //
                         customerRepository.update(customer);
 
