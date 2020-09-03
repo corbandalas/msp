@@ -168,6 +168,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             customer.setPassword(SecurityUtil.generateKeyFromArray(RandomStringUtils.random(8)));
         }
 
+
+        String formatDate = "";
         try {
 
             KYC kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
@@ -187,6 +189,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             customer.setDateBirth(dob);
             customer.setRegistrationDate(new Date());
 
+            simpleDateFormat = new SimpleDateFormat("YYYY/MM/DD");
+
+            formatDate = simpleDateFormat.format(dob);
+
+
         } catch (Exception ex) {
             Logger.error("Wrong request format: ", ex);
             return F.Promise.pure(createWrongRequestFormatResponse("Wrong date format"));
@@ -195,6 +202,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<F.Tuple<F.Tuple<Optional<Country>, List<Customer>>, Boolean>> promise = F.Promise.wrap(countryRepository.retrieveById(createCard.getCountry()))
                 .zip(F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()))).zip(F.Promise.wrap(customerRepository.isRegistered(createCard.getMobilePhone())));
 
+        final String finalFormatDate = formatDate;
         F.Promise<Result> result = promise.flatMap(res -> {
 
             boolean isRegisteredByPhone = res._2.booleanValue();
@@ -224,8 +232,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 //                throw new WrongPhoneNumberException();
 //            }
 
+
             F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUser(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
-                    createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
+                    createCard.getLastName(), /*createCard.getBirthdayDate()*/ finalFormatDate, createCard.getMobilePhone(),
                     createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
                     createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode(),
                     createCard.getLang(), createCard.getPassword(), "" + authData.getAccount().getId());
@@ -449,9 +458,14 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-                        String format = simpleDateFormat.format(customers.get().getDateBirth());
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY/MM/DD");
+
+//                        String format = simpleDateFormat.format(customers.get().getDateBirth());
+
+                        Date date = simpleDateFormat.parse(
+                                res.getPersonalInfo().getDateOfBirth());
 
                         String kyc = "sdd";
 
@@ -459,10 +473,16 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             kyc = "fdd";
                         }
 
-                        Logger.info("DOB date = " + format);
+
+                        Logger.info("DOB date = " + date);
+
+                        simpleDateFormat = new SimpleDateFormat("DD/MM/YYYY");
+
+
+
                         return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
                                 customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
-                                res.getPersonalInfo().getLastName(), format,
+                                res.getPersonalInfo().getLastName(), simpleDateFormat.format(date),
                                 res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), kyc,
                                 customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));

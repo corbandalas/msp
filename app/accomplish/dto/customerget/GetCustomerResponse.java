@@ -217,4 +217,7 @@ public class GetCustomerResponse {
         this.lastActivity = lastActivity;
     }
 
+
+
+
 }
