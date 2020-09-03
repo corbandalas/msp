@@ -18,5 +18,8 @@ public class CreateCardV2Request {
     private String cardModel;
     private String cardData;
     private String mobilePhone;
+    private String monthExpiry;
+    private String embossedThirdLine;
+    private String cdata1;
 
 }

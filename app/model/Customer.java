@@ -37,6 +37,8 @@ public class Customer extends BaseEntity<String> {
     private String cdata2 = "";
     private String cdata3 = "";
 
+    private String phone2 = "";
+
     public Customer() {
     }
 
@@ -103,7 +105,7 @@ public class Customer extends BaseEntity<String> {
     }
 
     public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword, String houseNameNumber, String flat, String referral, String cdata,
-                    String cdata2, String cdata3) {
+                    String cdata2, String cdata3, String phone2) {
         this.setId(id);
         this.registrationDate = registrationDate;
         this.title = title;
@@ -126,6 +128,7 @@ public class Customer extends BaseEntity<String> {
         this.cdata = cdata;
         this.cdata2 = cdata2;
         this.cdata3 = cdata3;
+        this.phone2 = phone2;
     }
 
     public Date getRegistrationDate() {
@@ -253,32 +256,6 @@ public class Customer extends BaseEntity<String> {
         return firstName + " " + lastName;
     }
 
-    @Override
-    public String toString() {
-        return "Customer{" +
-                "registrationDate=" + registrationDate +
-                ", title='" + title + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", address1='" + address1 + '\'' +
-                ", address2='" + address2 + '\'' +
-                ", postcode='" + postcode + '\'' +
-                ", city='" + city + '\'' +
-                ", email='" + email + '\'' +
-                ", dateBirth=" + dateBirth +
-                ", active=" + active +
-                ", kyc=" + kyc +
-                ", referral=" + referral +
-                ", password='" + password + '\'' +
-                ", country_id='" + country_id + '\'' +
-                ", temppassword='" + temppassword + '\'' +
-                ", houseNameNumber='" + houseNameNumber + '\'' +
-                ", flat='" + flat + '\'' +
-                ", cdata='" + cdata + '\'' +
-                ", cdata2='" + cdata2 + '\'' +
-                ", cdata3='" + cdata3 + '\'' +
-                '}';
-    }
 
     public String getHouseNameNumber() {
         return houseNameNumber;
@@ -326,5 +303,41 @@ public class Customer extends BaseEntity<String> {
 
     public void setCdata3(String cdata3) {
         this.cdata3 = cdata3;
+    }
+
+    public String getPhone2() {
+        return phone2;
+    }
+
+    public void setPhone2(String phone2) {
+        this.phone2 = phone2;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "registrationDate=" + registrationDate +
+                ", title='" + title + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", address1='" + address1 + '\'' +
+                ", address2='" + address2 + '\'' +
+                ", postcode='" + postcode + '\'' +
+                ", city='" + city + '\'' +
+                ", email='" + email + '\'' +
+                ", dateBirth=" + dateBirth +
+                ", active=" + active +
+                ", kyc=" + kyc +
+                ", referral=" + referral +
+                ", password='" + password + '\'' +
+                ", country_id='" + country_id + '\'' +
+                ", temppassword='" + temppassword + '\'' +
+                ", houseNameNumber='" + houseNameNumber + '\'' +
+                ", flat='" + flat + '\'' +
+                ", cdata='" + cdata + '\'' +
+                ", cdata2='" + cdata2 + '\'' +
+                ", cdata3='" + cdata3 + '\'' +
+                ", phone2='" + phone2 + '\'' +
+                '}';
     }
 }

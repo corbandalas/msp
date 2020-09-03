@@ -22,5 +22,7 @@ public class UpdateCustomerRequest {
     private Object data;
     private String mobilePhone;
     private String cdata1;
+    private String token;
+    private String email;
 
 }
