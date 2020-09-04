@@ -189,7 +189,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             customer.setDateBirth(dob);
             customer.setRegistrationDate(new Date());
 
-            simpleDateFormat = new SimpleDateFormat("YYYY/MM/DD");
+            simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
             formatDate = simpleDateFormat.format(dob);
 
