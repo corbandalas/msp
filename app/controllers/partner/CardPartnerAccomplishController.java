@@ -460,7 +460,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 //                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY/MM/DD");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
 //                        String format = simpleDateFormat.format(customers.get().getDateBirth());
 
