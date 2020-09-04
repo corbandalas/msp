@@ -798,7 +798,7 @@ public class AccomplishService {
                 .addHeader("source_id", sourceID)
                 .addHeader("lang", "en")
                 .addHeader("time_zone", "UTC +03:00")
-               .addHeader("show_sensetive_data", "1")
+               .addHeader("show_sensitive_data", "1")
               .addHeader("show_custom_field", "1");
 
 //        if (showSensetiveData) {
