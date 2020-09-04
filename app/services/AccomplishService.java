@@ -560,7 +560,7 @@ public class AccomplishService {
         info.setId(cardID);
         info.setBinId(binID);
         info.setCurrency(currency);
-        info.setNumber(number);
+//        info.setNumber(number);
         info.setUserId(userID);
         info.setType(type);
 
@@ -797,15 +797,17 @@ public class AccomplishService {
                 .addHeader("Authorization", "Bearer " + token)
                 .addHeader("source_id", sourceID)
                 .addHeader("lang", "en")
-                .addHeader("time_zone", "UTC +03:00");
+                .addHeader("time_zone", "UTC +03:00")
+               .addHeader("show_sensitive_data", "1")
+              .addHeader("show_custom_field", "1");
 
-        if (showSensetiveData) {
+//        if (showSensetiveData) {
 
             Logger.info("Added headers show_sensetive_data  = 1");
 
-            boundRequestBuilder = boundRequestBuilder.addHeader("show_sensetive_data", "1");
-            boundRequestBuilder = boundRequestBuilder.addHeader("show_custom_field", "1");
-        }
+//            boundRequestBuilder = boundRequestBuilder.addHeader("show_sensetive_data", "1");
+//            boundRequestBuilder = boundRequestBuilder.addHeader("show_custom_field", "1");
+//        }
 
 
 
