@@ -1,6 +1,7 @@
 package dto.partnerV2;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,8 @@ public class CreateCustomerRequest {
     private String lang;
     private String password;
     private String cdata1;
-    private String cdata2;
+    @JsonRawValue
+    private Object cdata2;
     private String cdata3;
 
 }
