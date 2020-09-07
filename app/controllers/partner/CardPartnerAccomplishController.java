@@ -158,13 +158,23 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 //            customer.setCdata2(createCard.getCdata2());
 //        }
 
-        java.util.LinkedHashMap data = (java.util.LinkedHashMap) createCard.getCdata2();
+        String cdata = "";
 
-        String cdata2 = data.toString();
+        if ( createCard.getCdata2() instanceof String) {
 
-        if (StringUtils.isNotBlank(cdata2)) {
-            customer.setCdata2(cdata2);
+        } else {
+            java.util.LinkedHashMap data = (java.util.LinkedHashMap) createCard.getCdata2();
+            cdata = data.toString();
+
         }
+
+
+
+        if (StringUtils.isNotBlank(cdata)) {
+            customer.setCdata2(cdata);
+        }
+
+
 
 
         if (StringUtils.isNotBlank(createCard.getCdata3())) {
@@ -212,6 +222,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 .zip(F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()))).zip(F.Promise.wrap(customerRepository.isRegistered(StringUtils.removeStart(createCard.getMobilePhone(), "+"))));
 
         final String finalFormatDate = formatDate;
+        String finalCdata = cdata;
         F.Promise<Result> result = promise.flatMap(res -> {
 
             boolean isRegisteredByPhone = res._2.booleanValue();
@@ -246,7 +257,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     createCard.getLastName(), /*createCard.getBirthdayDate()*/ finalFormatDate, createCard.getMobilePhone(),
                     createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
                     createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode(),
-                    createCard.getLang(), createCard.getPassword(), createCard.getCdata1(), cdata2, createCard.getCdata3(), "" + authData.getAccount().getId());
+                    createCard.getLang(), createCard.getPassword(), createCard.getCdata1(), finalCdata, createCard.getCdata3(), "" + authData.getAccount().getId());
 
 
             return userResponsePromise.map(rez -> {
