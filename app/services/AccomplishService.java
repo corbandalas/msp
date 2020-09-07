@@ -247,23 +247,23 @@ public class AccomplishService {
             createUser.setAddress(address);
             createUser.setPersonalInfo(personalInfo);
 
-            CustomField customField = new CustomField();
-
-
-
-            customField.setCdata1(cdata1);
-            if (StringUtils.isBlank(cdata2)) {
-                customField.setCdata2("");
-            } else {
-                customField.setCdata2(cdata2);
-            }
-            if (StringUtils.isNotEmpty(cdata3)) {
-                customField.setCdata3(cdata3);
-                customField.setLinkedUserId(rez.get().getReferral());
-            }
-
-
-            createUser.setCustomField(customField);
+//            CustomField customField = new CustomField();
+//
+//
+//
+//            customField.setCdata1(cdata1);
+//            if (StringUtils.isBlank(cdata2)) {
+//                customField.setCdata2("");
+//            } else {
+//                customField.setCdata2(cdata2);
+//            }
+//            if (StringUtils.isNotEmpty(cdata3)) {
+//                customField.setCdata3(cdata3);
+//                customField.setLinkedUserId(rez.get().getReferral());
+//            }
+//
+//
+//            createUser.setCustomField(customField);
 
             final GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.disableHtmlEscaping();
