@@ -6,27 +6,51 @@ import com.google.gson.annotations.SerializedName;
 
 public class CustomField {
 
-    @SerializedName("acceptance2")
+    @SerializedName("cdata1")
     @Expose
-    private String acceptance2;
-    @SerializedName("acceptance")
+    private String cdata1;
+    @SerializedName("cdata2")
     @Expose
-    private String acceptance;
+    private String cdata2;
 
-    public String getAcceptance2() {
-        return acceptance2;
+    @SerializedName("cdata3")
+    @Expose
+    private String cdata3;
+
+    @SerializedName("linkedUserId")
+    @Expose
+    private String linkedUserId;
+
+
+    public String getCdata1() {
+        return cdata1;
     }
 
-    public void setAcceptance2(String acceptance2) {
-        this.acceptance2 = acceptance2;
+    public void setCdata1(String cdata1) {
+        this.cdata1 = cdata1;
     }
 
-    public String getAcceptance() {
-        return acceptance;
+    public String getCdata2() {
+        return cdata2;
     }
 
-    public void setAcceptance(String acceptance) {
-        this.acceptance = acceptance;
+    public void setCdata2(String cdata2) {
+        this.cdata2 = cdata2;
     }
 
+    public String getCdata3() {
+        return cdata3;
+    }
+
+    public void setCdata3(String cdata3) {
+        this.cdata3 = cdata3;
+    }
+
+    public String getLinkedUserId() {
+        return linkedUserId;
+    }
+
+    public void setLinkedUserId(String linkedUserId) {
+        this.linkedUserId = linkedUserId;
+    }
 }

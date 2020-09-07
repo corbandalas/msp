@@ -59,6 +59,16 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         return promise.future();
     }
 
+    public Future<Optional<Customer>> retrieveByUUID(String cdata) {
+
+        final Promise<Optional<Customer>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE cdata3=$1";
+        connectionPool.getConnection().query(query, asList(cdata), result -> promise.success(createEntity(result)), promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<Optional<Customer>> retrieveById(Object id) {
 

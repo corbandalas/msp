@@ -48,6 +48,7 @@ import model.Property;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
+import repository.CustomerRepository;
 import repository.PropertyRepository;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
@@ -69,6 +70,9 @@ public class AccomplishService {
 
     @Inject
     private PropertyRepository propertyRepository;
+
+    @Inject
+    private CustomerRepository customerRepository;
 
 
     private class AccomplishSettings {
@@ -151,106 +155,137 @@ public class AccomplishService {
     public F.Promise<CreateUserResponse> createUser(String emailValue, String title, String firstName, String lastName,
                                                     String birthdayDate, String mobilePhone, String nationality,
                                                     String kycLevel, String address1, String address2, String city,
-                                                    String zip, String country, String lang, String password, String partnerID) {
-        CreateUser createUser = new CreateUser();
+                                                    String zip, String country, String lang, String password, String cdata1, String cdata2, String cdata3, String partnerID) {
 
-        PersonalInfo personalInfo = new PersonalInfo();
+        String data = cdata3;
 
-
-        personalInfo.setFirstName(Utils.trasliterateDanish(firstName));
-        personalInfo.setLastName(Utils.trasliterateDanish(lastName));
-        personalInfo.setJobTitle(title);
-//        personalInfo.setNickName();
-
-        String titleValue = "10";
-
-        if (title.equalsIgnoreCase("Mr")) {
-            titleValue = "1";
-        } else if (title.equalsIgnoreCase("Mrs")) {
-            titleValue = "1";
-        } else if (title.equalsIgnoreCase("Ms")) {
-            titleValue = "1";
+        if (StringUtils.isEmpty(cdata3)) {
+            data = "fake";
         }
 
-        personalInfo.setTitle(titleValue);
-        personalInfo.setGender("0");
-        personalInfo.setDateOfBirth(birthdayDate);
-        personalInfo.setVerificationStatus("1");
+        return F.Promise.wrap(customerRepository.retrieveByUUID(data)).flatMap(rez -> {
+            CreateUser createUser = new CreateUser();
 
-        Address address = new Address();
-        address.setAddressLine1(Utils.trasliterateDanish(address1));
-        address.setAddressLine2(Utils.trasliterateDanish(address2));
-        address.setCityTown(Utils.trasliterateDanish(city));
-        address.setPostalZipCode(zip);
+            PersonalInfo personalInfo = new PersonalInfo();
+
+
+            personalInfo.setFirstName(Utils.trasliterateDanish(firstName));
+            personalInfo.setLastName(Utils.trasliterateDanish(lastName));
+            personalInfo.setJobTitle(title);
+//        personalInfo.setNickName();
+
+            String titleValue = "10";
+
+            if (title.equalsIgnoreCase("Mr")) {
+                titleValue = "1";
+            } else if (title.equalsIgnoreCase("Mrs")) {
+                titleValue = "1";
+            } else if (title.equalsIgnoreCase("Ms")) {
+                titleValue = "1";
+            }
+
+            personalInfo.setTitle(titleValue);
+            personalInfo.setGender("0");
+            personalInfo.setDateOfBirth(birthdayDate);
+            personalInfo.setVerificationStatus("1");
+
+            Address address = new Address();
+            address.setAddressLine1(Utils.trasliterateDanish(address1));
+            address.setAddressLine2(Utils.trasliterateDanish(address2));
+            address.setCityTown(Utils.trasliterateDanish(city));
+            address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
-        address.setCountryCode(country);
-        address.setVerificationStatus(1);
+            address.setCountryCode(country);
+            address.setVerificationStatus(1);
 
 
-        List<Email> emails = new ArrayList<Email>();
-        Email email = new Email();
-        email.setAddress(emailValue);
-        email.setIsPrimary("1");
-        email.setVerificationStatus("1");
-        emails.add(email);
+            List<Email> emails = new ArrayList<Email>();
+            Email email = new Email();
+            email.setAddress(emailValue);
+            email.setIsPrimary("1");
+            email.setVerificationStatus("1");
+            emails.add(email);
 
-        List<Phone> phones = new ArrayList<Phone>();
-        Phone phone = new Phone();
-        phone.setCountryCode(country);
-        phone.setIsPrimary(1);
-        phone.setNumber(mobilePhone);
-        phone.setType("1");
-        phone.setVerificationStatus("1");
-        phones.add(phone);
-
-
-        List<Currency> currencies = new ArrayList<Currency>();
-        Currency currency = new Currency();
-        currency.setCode("EUR");
-        currencies.add(currency);
-
-        Preferences preferences = new Preferences();
-        preferences.setTimeZone("UTC +03:00");
-        preferences.setPreferredLanguageCode(lang);
+            List<Phone> phones = new ArrayList<Phone>();
+            Phone phone = new Phone();
+            phone.setCountryCode(country);
+            phone.setIsPrimary(1);
+            phone.setNumber(mobilePhone);
+            phone.setType("1");
+            phone.setVerificationStatus("1");
+            phones.add(phone);
 
 
-        TermsConditions termsConditions = new TermsConditions();
-        termsConditions.setAcceptance("1");
+            List<Currency> currencies = new ArrayList<Currency>();
+            Currency currency = new Currency();
+            currency.setCode("EUR");
+            currencies.add(currency);
 
-        Security security = new Security();
-
-        security.setSecurityCode("1111");
-        security.setPassword(password);
-        security.setSecretAnswer1("soma");
-        security.setSecretAnswer2("Alex");
-        security.setSecretQuestion1("1");
-        security.setSecretQuestion2("2");
-
-        createUser.setSecurity(security);
-        createUser.setTermsConditions(termsConditions);
-        createUser.setPreferences(preferences);
-        createUser.setCurrency(currencies);
-        createUser.setPhone(phones);
-        createUser.setEmail(emails);
-        createUser.setAddress(address);
-        createUser.setPersonalInfo(personalInfo);
-
-        final GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.disableHtmlEscaping();
-
-        final Gson gson = gsonBuilder.create();
-        String json = gson.toJson(createUser);
+            Preferences preferences = new Preferences();
+            preferences.setTimeZone("UTC +03:00");
+            preferences.setPreferredLanguageCode(lang);
 
 
-        F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
+            TermsConditions termsConditions = new TermsConditions();
+            termsConditions.setAcceptance("1");
 
-        return promise.map(res -> {
-            CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
+            Security security = new Security();
 
-            Logger.info("Result = " + createUserResponse.getResult().getCode());
+            security.setSecurityCode("1111");
+            security.setPassword(password);
+            security.setSecretAnswer1("soma");
+            security.setSecretAnswer2("Alex");
+            security.setSecretQuestion1("1");
+            security.setSecretQuestion2("2");
 
-            return createUserResponse;
+            createUser.setSecurity(security);
+            createUser.setTermsConditions(termsConditions);
+            createUser.setPreferences(preferences);
+            createUser.setCurrency(currencies);
+            createUser.setPhone(phones);
+            createUser.setEmail(emails);
+            createUser.setAddress(address);
+            createUser.setPersonalInfo(personalInfo);
+
+            CustomField customField = new CustomField();
+
+
+
+            customField.setCdata1(cdata1);
+            if (StringUtils.isBlank(cdata2)) {
+                customField.setCdata2("");
+            } else {
+                customField.setCdata2(cdata2);
+            }
+            if (StringUtils.isNotEmpty(cdata3)) {
+                customField.setCdata3(cdata3);
+                customField.setLinkedUserId(rez.get().getReferral());
+            }
+
+
+            createUser.setCustomField(customField);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+            String json = gson.toJson(createUser);
+
+
+            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
+
+            return promise.map(res -> {
+                CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
+
+                Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+                return createUserResponse;
+            });
         });
+
+
+
+
     }
 
 
