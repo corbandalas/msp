@@ -272,7 +272,7 @@ public class AccomplishService {
             String json = gson.toJson(createUser);
 
 
-            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
+            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, true);
 
             return promise.map(res -> {
                 CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
