@@ -200,7 +200,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         F.Promise<F.Tuple<F.Tuple<Optional<Country>, List<Customer>>, Boolean>> promise = F.Promise.wrap(countryRepository.retrieveById(createCard.getCountry()))
-                .zip(F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()))).zip(F.Promise.wrap(customerRepository.isRegistered(createCard.getMobilePhone())));
+                .zip(F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()))).zip(F.Promise.wrap(customerRepository.isRegistered(StringUtils.removeStart(createCard.getMobilePhone(), "+"))));
 
         final String finalFormatDate = formatDate;
         F.Promise<Result> result = promise.flatMap(res -> {
