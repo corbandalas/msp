@@ -51,7 +51,7 @@ POST       /api/partner/card/extend                                          @co
 POST       /api/partner/card/regenerate                                          @controllers.partner.CardPartnerController.regenerate()
 POST       /api/partner/card/checksanction                                          @controllers.partner.CardPartnerController.checkUserSanctions()
 
-POST       /api/partner/v2/newCustomer                               @controllers.partner.CardPartnerAccomplishController.createCustomer()
+POST       /api/partner/v2/newCustomer                               @controllers.partner.CardPartnerAccomplishController.newCustomer()
 POST       /api/partner/v2/createIdentification                                  @controllers.partner.CardPartnerAccomplishController.createIdentification()
 POST       /api/partner/v2/sendDocument                               @controllers.partner.CardPartnerAccomplishController.sendDocument()
 POST       /api/partner/v2/getCustomer                                  @controllers.partner.CardPartnerAccomplishController.getCustomer()

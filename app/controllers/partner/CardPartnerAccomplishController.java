@@ -81,7 +81,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
-            nickname = "createCustomer",
+            nickname = "newCustomer",
             value = "Create new customer",
             notes = "Method allows to create new customer",
             produces = "application/json",
@@ -104,7 +104,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
             @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
-    public F.Promise<Result> createCustomer() {
+    public F.Promise<Result> newCustomer() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
