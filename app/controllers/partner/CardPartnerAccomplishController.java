@@ -601,16 +601,25 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                 if (accomplishProd.equalsIgnoreCase("false")) {
 
-                                    type = "physical";
-                                    currency = "EUR";
-
-                                } else {
-                                    if (createCard.getCardModel().equalsIgnoreCase("mymonii_parentwallet")) {
+                                    if (createCard.getCardModel().equalsIgnoreCase("mm_parent_wallet_dkk")) {
                                         cardBrand = CardBrand.PARENT_WALLET;
                                         currency = "DKK";
                                         cardType = CardType.VIRTUAL;
                                         type = "mvc";
-                                    } else if (createCard.getCardModel().equalsIgnoreCase("mymonii_childcard")) {
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("mm_child_card_dkk")) {
+                                        cardBrand = CardBrand.CHILDCARD;
+                                        currency = "DKK";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    }
+
+                                } else {
+                                    if (createCard.getCardModel().equalsIgnoreCase("mm_parent_wallet_dkk")) {
+                                        cardBrand = CardBrand.PARENT_WALLET;
+                                        currency = "DKK";
+                                        cardType = CardType.VIRTUAL;
+                                        type = "mvc";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("mm_child_card_dkk")) {
                                         cardBrand = CardBrand.CHILDCARD;
                                         currency = "DKK";
                                         cardType = CardType.PLASTIC;
