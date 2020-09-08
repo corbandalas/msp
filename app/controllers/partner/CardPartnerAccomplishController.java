@@ -829,8 +829,16 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 }
 
                 if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                    String type = "1";
+
+                    if (data._2.get().getAlias().contains("child")) {
+                        type = "0";
+                    }
+
+
                     return accomplishService.activateAccount(createCard.getToken(), data._2.get().getInfo(),
-                            data._1.get().getReferral(), data._2.get().getCurrencyId(), acc.getInfo().getNumber(), "0",
+                            data._1.get().getReferral(), data._2.get().getCurrencyId(), acc.getInfo().getNumber(), type,
                             acc.getInfo().getSecurity().getActivationCode(), "" + authData.getAccount().getId()).map(rez -> {
                                 if (rez.getResult().getCode().equalsIgnoreCase("0000")) {
                                     return ok(Json.toJson(new SuccessAPIV2Response(true)));
