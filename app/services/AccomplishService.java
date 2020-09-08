@@ -465,10 +465,20 @@ public class AccomplishService {
             String accomplishProd = conf.getString("accomplish.environment.prod");
 
             if (accomplishProd.equalsIgnoreCase("false")) {
-                bin = Long.parseLong(accomplishSettings.productID1);
-                type = 0;
-                status = 1;
-                currency = "EUR";
+//                bin = Long.parseLong(accomplishSettings.productID1);
+//                type = 0;
+//                status = 1;
+//                currency = "EUR";
+
+                if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    type = 1;
+                    status = 1;
+                } else if (cardModel.equalsIgnoreCase("mymonii_childcard")) {
+                    bin = Long.parseLong(accomplishSettings.productID2);
+                    status = 12;
+                    type = 0;
+                }
 
             } else {
                 if (cardModel.equalsIgnoreCase("mymonii_parentwallet")) {
