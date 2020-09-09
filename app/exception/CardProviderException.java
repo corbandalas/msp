@@ -10,6 +10,7 @@ package exception;
 public class CardProviderException extends MspException{
 
     private String errorCode;
+    private String text;
 
     public CardProviderException(String message) {
         super(message);
@@ -20,11 +21,25 @@ public class CardProviderException extends MspException{
         this.errorCode = errorCode;
     }
 
+    public CardProviderException(String message, String errorCode, String text) {
+        super(message);
+        this.errorCode = errorCode;
+        this.text = text;
+    }
+
     public String getErrorCode() {
         return errorCode;
     }
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

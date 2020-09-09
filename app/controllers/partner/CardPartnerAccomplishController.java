@@ -272,7 +272,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             createCard.getNationality(), createCard.getKycLevel(), country.get().getId(), createCard.getAddress1(),
                             createCard.getAddress2(), createCard.getCity(), createCard.getZip()))));
                 } else {
-                    return createCardProviderException("" + rez.getResult().getCode());
+                    return createCardProviderException("" + rez.getResult().getCode(), rez.getResult().getMessage());
                 }
 
             });
@@ -348,7 +348,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
                         return ok(Json.toJson(new CreateCustomerIdentificationResponse("" + res.getIdentification().get(0).getId())));
                     } else {
-                        return createCardProviderException(res.getResult().getCode());
+                        return createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage());
                     }
                 }));
 
@@ -413,7 +413,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
                         return ok(Json.toJson(new CreateCustomerDocumentResponse(new Document("" + res.getInfo().getDocumentId(), "" + res.getInfo().getStatus()))));
                     } else {
-                        return createCardProviderException(res.getResult().getCode());
+                        return createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage());
                     }
                 }));
 
@@ -507,7 +507,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
                     } else {
-                        return createCardProviderException(res.getResult().getCode());
+                        return createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage());
                     }
 
                 }));
@@ -650,7 +650,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 returnPromise = F.Promise.wrap(cardRepository.create(card)).map(rez -> ok(Json.toJson(new CreateCardResponse(null, 0.0, createCard.getCardData(), finalCurrency,
                                         "mymonii_feegroup_dkk", res.getInfo().getNumber(), "ready", "" + res.getInfo().getId(), finalType, "MYMONII"))));
                             } else {
-                                returnPromise = F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                                returnPromise = F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
                             }
                             return returnPromise;
                         }
@@ -745,7 +745,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             .map(res -> ok(Json.toJson(new TransferResponse(true, "ready")
                             )));
                 } else {
-                    returnPromise = F.Promise.pure(createCardProviderException(providerResponse.getResult().getCode()));
+                    returnPromise = F.Promise.pure(createCardProviderException(providerResponse.getResult().getCode(), providerResponse.getResult().getMessage()));
                 }
 
                 return returnPromise;
@@ -843,14 +843,14 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 if (rez.getResult().getCode().equalsIgnoreCase("0000")) {
                                     return ok(Json.toJson(new SuccessAPIV2Response(true)));
                                 } else {
-                                    return createCardProviderException(rez.getResult().getCode());
+                                    return createCardProviderException(rez.getResult().getCode(), rez.getResult().getMessage());
                                 }
 
                             }
 
                     );
                 } else {
-                    returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
+                    returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode(), acc.getResult().getMessage()));
                 }
 
                 return returnPromise;
@@ -925,7 +925,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", createCard.getAmount(), Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
                         )));
             } else {
-                returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode()));
+                returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode(), acc.getResult().getMessage()));
             }
 
             return returnPromise;
@@ -1032,7 +1032,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         F.Promise.pure(ok(Json.toJson(new dto.partnerV2.CheckCardResponse(createCard.getToken(), status, acc._2.getInfo().getActivationDateTime(), Double.parseDouble(acc._2.getInfo().getAvailableBalance()), acc._1.get().getDeliveryAddress3(), acc._1.get().getCurrencyId(), "mymonii_feegroup_dkk", acc._2.getInfo().getNumber(),
                                 type, "MYMONII"))));
             } else {
-                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode(), acc._2.getResult().getMessage()));
             }
 
             return returnPromise;
@@ -1145,7 +1145,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                             return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
                         } else {
-                            return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                            return F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
                         }
                     });
                 });
@@ -1161,7 +1161,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
                     } else {
-                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                        return F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
                     }
                 });
             }
@@ -1177,7 +1177,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
                     } else {
-                        return F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                        return F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
                     }
                 });
             }
@@ -1299,7 +1299,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 returnPromise =
                         F.Promise.pure(ok(Json.toJson(new dto.partnerV2.GetPINImageCardResponse(acc._2.getInfo().getSecurity().getPin_code()))));
             } else {
-                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode(), acc._2.getResult().getMessage()));
             }
 
             return returnPromise;
@@ -1455,7 +1455,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         promise =
                                 F.Promise.pure(ok(Json.toJson(transactionResponse)));
                     } else {
-                        promise = F.Promise.pure(createCardProviderException(res.getResult().getCode()));
+                        promise = F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
                     }
 
                     return promise;
@@ -1463,7 +1463,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 });
 
             } else {
-                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode()));
+                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode(), acc._2.getResult().getMessage()));
             }
 
             return returnPromise;
@@ -1799,7 +1799,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                                     });
                         } else {
-                            returnPromise = F.Promise.pure(createCardProviderException(providerResponse._2.getResult().getCode()));
+                            returnPromise = F.Promise.pure(createCardProviderException(providerResponse._2.getResult().getCode(), providerResponse._2.getResult().getMessage()));
                         }
 
                         return returnPromise;

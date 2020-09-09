@@ -57,8 +57,8 @@ public class BaseAccomplishController extends play.mvc.Controller {
         return badRequest(Json.toJson(new BaseAPIV2ErrorResponse(NOT_ENOUGH_FUNDS_TEXT, "" + NOT_ENOUGH_FUNDS_CODE, "", "")));
     }
 
-    protected Results.Status createCardProviderException(String errorCode) {
-        return badRequest(Json.toJson(new BaseAPIV2ErrorResponse(CARD_PROVIDER_EXCEPTION_TEXT, "" + CARD_PROVIDER_EXCEPTION_CODE, errorCode, "")));
+    protected Results.Status createCardProviderException(String errorCode, String message) {
+        return badRequest(Json.toJson(new BaseAPIV2ErrorResponse(CARD_PROVIDER_EXCEPTION_TEXT, "" + CARD_PROVIDER_EXCEPTION_CODE, errorCode, message)));
     }
 
     protected Results.Status createWrongKYCResponse() {
@@ -157,7 +157,7 @@ public class BaseAccomplishController extends play.mvc.Controller {
                     }
 
                     if (throwable instanceof CardProviderException) {
-                        return createCardProviderException(((CardProviderException) throwable).getErrorCode());
+                        return createCardProviderException(((CardProviderException) throwable).getErrorCode(), ((CardProviderException) throwable).getText());
                     }
 
                     return createGeneralErrorResponse();
