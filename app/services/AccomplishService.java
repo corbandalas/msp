@@ -218,7 +218,7 @@ public class AccomplishService {
 
             List<Currency> currencies = new ArrayList<Currency>();
             Currency currency = new Currency();
-            currency.setCode("EUR");
+            currency.setCode("DKK");
             currencies.add(currency);
 
             Preferences preferences = new Preferences();
