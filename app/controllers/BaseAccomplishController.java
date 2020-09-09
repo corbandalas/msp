@@ -58,7 +58,7 @@ public class BaseAccomplishController extends play.mvc.Controller {
     }
 
     protected Results.Status createCardProviderException(String errorCode, String message) {
-        return badRequest(Json.toJson(new BaseAPIV2ErrorResponse(CARD_PROVIDER_EXCEPTION_TEXT, "" + CARD_PROVIDER_EXCEPTION_CODE, errorCode, message)));
+        return badRequest(Json.toJson(new BaseAPIV2ErrorResponse(CARD_PROVIDER_EXCEPTION_TEXT, "" + CARD_PROVIDER_EXCEPTION_CODE, message, errorCode)));
     }
 
     protected Results.Status createWrongKYCResponse() {
