@@ -834,6 +834,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     if (data._2.get().getAlias().contains("child")) {
                         type = "0";
+                    } else {
+                        return F.Promise.pure(ok(Json.toJson(new SuccessAPIV2Response(true))));
                     }
 
 
