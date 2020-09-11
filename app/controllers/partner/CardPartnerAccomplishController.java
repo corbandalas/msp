@@ -257,7 +257,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     createCard.getLastName(), /*createCard.getBirthdayDate()*/ finalFormatDate, createCard.getMobilePhone(),
                     createCard.getNationality(), createCard.getKycLevel(), createCard.getAddress1(),
                     createCard.getAddress2(), createCard.getCity(), createCard.getZip(), country.get().getCode(),
-                    createCard.getLang(), createCard.getPassword(), createCard.getCdata1(), finalCdata, createCard.getCdata3(), "" + authData.getAccount().getId());
+                    createCard.getLang(), customer.getPassword(), createCard.getCdata1(), finalCdata, createCard.getCdata3(), "" + authData.getAccount().getId());
 
 
             return userResponsePromise.map(rez -> {
