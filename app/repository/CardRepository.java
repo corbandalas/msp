@@ -131,6 +131,16 @@ public class CardRepository implements BaseCRUDRepository<Card> {
         return promise.future();
     }
 
+    public Future<Boolean> deleteAllCards(String customerID) {
+        final Promise<Boolean> promise = Futures.promise();
+
+        String query = "DELETE from" + connectionPool.getSchemaName() + ".card  where customer_id=$1";
+        connectionPool.getConnection().query(query, asList(customerID),
+                result -> promise.success(true), promise::failure);
+
+        return promise.future();
+    }
+
     public Future<Long> countCardsByType(String customerID, CardType cardType) {
 
         final Promise<Long> promise = Futures.promise();

@@ -102,6 +102,16 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         //not required yet
     }
 
+    public Future<Boolean> deleteAllTransaction(Long cardID) {
+        final Promise<Boolean> promise = Futures.promise();
+
+        String query = "DELETE from" + connectionPool.getSchemaName() + ".transaction where to_card_id=$1 OR from_card_id=$1";
+        connectionPool.getConnection().query(query, asList(cardID),
+                result -> promise.success(true), promise::failure);
+
+        return promise.future();
+    }
+
     public Future<List<Transaction>> retrieveByOperationId(Long operationId) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
