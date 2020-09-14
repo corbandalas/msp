@@ -2003,15 +2003,20 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: cdata1"));
         }
 
-//        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1()));
 //
-//        customerPromise.zip(F.Promise.wrap(cardRepository.retrieveListByCustomerId(createCard.getMobilePhone()))).map(cards -> {
-//
-//        });
+        final F.Promise<Result> result  = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1()))
+                .zip(F.Promise.wrap(cardRepository.retrieveListByCustomerId(createCard.getMobilePhone()))).map(cards -> {
 
-        F.Promise<Boolean> action = F.Promise.pure(true);
+            cards._2.stream().map(card -> {
+                return F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).map(transactions -> {
+                    return true;
+                }).zip(F.Promise.wrap(cardRepository.deleteAllCards(createCard.getMobilePhone()))).map(res -> {
+                     return F.Promise.wrap(customerRepository.deleteCustomer(cards._1.get().getId()));
+                });
+            });
 
-        final F.Promise<Result> result = action.map(card -> ok(Json.toJson(new SuccessAPIV2Response(true))));
+            return ok(Json.toJson(new SuccessAPIV2Response(true)));
+        });
 
         return returnRecover(result);
     }

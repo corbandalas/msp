@@ -181,6 +181,16 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         //not required
     }
 
+    public Future<Boolean> deleteCustomer(String phone) {
+        final Promise<Boolean> promise = Futures.promise();
+
+        String query = "DELETE from" + connectionPool.getSchemaName() + ".customer where id=$1";
+        connectionPool.getConnection().query(query, asList(phone),
+                result -> promise.success(true), promise::failure);
+
+        return promise.future();
+    }
+
     public Customer createEntity(Row row) {
         return new Customer(row.getString("id"), row.getTimestamp("registrationDate"), row.getString("title"), row.getString("firstname"), row.getString("lastname"), row.getString("address1"), row.getString("address2"), row.getString("postcode"), row.getString("city"), row.getString("email"), row.getTimestamp("dateBirth"), row.getBoolean("active"), KYC.valueOf(row.getString("kyc")), row.getString("password"), row.getString("country_id"), row.getBoolean("temppassword"), row.getString("houseNameNumber"), row.getString("flat"),row.getString("referral"), row.getString("cdata"), row.getString("cdata2"), row.getString("cdata3"), row.getString("phone2"));
     }
