@@ -1978,7 +1978,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
                     required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
             @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
-    public F.Promise<Result> removeCustomer() {
+    public F.Promise<Result> deleteCustomer() {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
@@ -2005,12 +2005,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 //
         final F.Promise<Result> result  = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1()))
-                .zip(F.Promise.wrap(cardRepository.retrieveListByCustomerId(createCard.getMobilePhone()))).map(cards -> {
+                .zip(F.Promise.wrap(cardRepository.retrieveListByCustomerId(StringUtils.removeStart(createCard.getMobilePhone(), "+")))).map(cards -> {
 
             cards._2.stream().map(card -> {
                 return F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).map(transactions -> {
                     return true;
-                }).zip(F.Promise.wrap(cardRepository.deleteAllCards(createCard.getMobilePhone()))).map(res -> {
+                }).zip(F.Promise.wrap(cardRepository.deleteAllCards(StringUtils.removeStart(createCard.getMobilePhone(), "+")))).map(res -> {
                      return F.Promise.wrap(customerRepository.deleteCustomer(cards._1.get().getId()));
                 });
             });
