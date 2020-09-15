@@ -1997,23 +1997,23 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
 //
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1()))
-                .zip(F.Promise.wrap(cardRepository.retrieveListByCustomerId(StringUtils.removeStart(createCard.getMobilePhone(), "+")))).map(cards -> {
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1())).
+                flatMap(res -> F.Promise.wrap(cardRepository.retrieveListByCustomerId(res.get().getId())).map(cards -> {
 
-                    Logger.info("Customer " + cards._1.get());
-                    Logger.info("Cards " + cards._2.size());
+            Logger.info("Customer " + res.get());
+            Logger.info("Cards " + cards.size());
 
-                    for (Card card: cards._2) {
+            for (Card card: cards) {
 
-                        Boolean aBoolean = F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).get(10000);
-                    }
+                Boolean aBoolean = F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).get(10000);
+            }
 
-                    Boolean aBoolean1 = F.Promise.wrap(cardRepository.deleteAllCards(StringUtils.removeStart(createCard.getMobilePhone(), "+"))).get(10000);
-                    Boolean aBoolean = F.Promise.wrap(customerRepository.deleteCustomer(cards._1.get().getId())).get(10000);
+            Boolean aBoolean1 = F.Promise.wrap(cardRepository.deleteAllCards(res.get().getId())).get(10000);
+            Boolean aBoolean = F.Promise.wrap(customerRepository.deleteCustomer(res.get().getId())).get(10000);
 
 
-                    return ok(Json.toJson(new SuccessAPIV2Response(true)));
-                });
+            return ok(Json.toJson(new SuccessAPIV2Response(true)));
+        }));
 
         return returnRecover(result);
     }
