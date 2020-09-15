@@ -2001,6 +2001,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 .zip(F.Promise.wrap(cardRepository.retrieveListByCustomerId(StringUtils.removeStart(createCard.getMobilePhone(), "+")))).map(cards -> {
 
                     Logger.info("Customer " + cards._1.get());
+                    Logger.info("Cards " + cards._2.size());
 
                     cards._2.stream().map(card -> {
                         return F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).map(transactions -> {
