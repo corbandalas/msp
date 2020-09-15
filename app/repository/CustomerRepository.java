@@ -184,7 +184,7 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
     public Future<Boolean> deleteCustomer(String phone) {
         final Promise<Boolean> promise = Futures.promise();
 
-        String query = "DELETE from" + connectionPool.getSchemaName() + ".customer where id=$1";
+        String query = "DELETE from " + connectionPool.getSchemaName() + ".customer where id=$1";
         connectionPool.getConnection().query(query, asList(phone),
                 result -> promise.success(true), promise::failure);
 
