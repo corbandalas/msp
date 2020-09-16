@@ -26,6 +26,7 @@ import accomplish.dto.transfer.Transfer;
 import accomplish.dto.transfer.Transfer_;
 import accomplish.dto.transfer.response.TransferResponse;
 import accomplish.dto.user.CreateUserResponse;
+import accomplish.dto.user.delete.DeleteUserResponse;
 import accomplish.dto.user.update.address.UpdateUserAddressRequest;
 import accomplish.dto.user.update.address.response.AddressRequestBean;
 import accomplish.dto.user.update.address.response.UpdateUserAddressResponse;
@@ -666,6 +667,27 @@ public class AccomplishService {
         });
     }
 
+    public F.Promise<DeleteUserResponse> removeCustomer(String userID,
+                                        String partnerID) {
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+
+        F.Promise<String> promise = execute("service/v1/user/" + userID
+               , "", "DELETE", partnerID, false);
+
+        return promise.map(res -> {
+            DeleteUserResponse createUserResponse = gson.fromJson(res, DeleteUserResponse.class);
+
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+            return createUserResponse;
+        });
+    }
+
 
     public F.Promise<UpdateUserEmailResponse> updateUserEmail(String userID, String emailValue,
 
@@ -830,6 +852,8 @@ public class AccomplishService {
             boundRequestBuilder = asyncHttpClient.prepareGet(query);
         } else if (method.equalsIgnoreCase("PUT")) {
             boundRequestBuilder = asyncHttpClient.preparePut(query);
+        }   else if (method.equalsIgnoreCase("DELETE")) {
+            boundRequestBuilder = asyncHttpClient.prepareDelete(query);
         }
 
         String sourceID = "" + System.currentTimeMillis();
