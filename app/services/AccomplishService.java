@@ -285,8 +285,6 @@ public class AccomplishService {
         });
 
 
-
-
     }
 
 
@@ -631,7 +629,7 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<LoadResponse> load(String amount, String currency, String token,
+    public F.Promise<LoadResponse> load(String amount, String currency, String token, String additionalData,
                                         String partnerID) {
 
         accomplish.dto.account.load.Load load = new accomplish.dto.account.load.Load();
@@ -668,7 +666,7 @@ public class AccomplishService {
     }
 
     public F.Promise<DeleteUserResponse> removeCustomer(String userID,
-                                        String partnerID) {
+                                                        String partnerID) {
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.disableHtmlEscaping();
@@ -677,7 +675,7 @@ public class AccomplishService {
 
 
         F.Promise<String> promise = execute("service/v1/user/" + userID
-               , "", "DELETE", partnerID, false);
+                , "", "DELETE", partnerID, false);
 
         return promise.map(res -> {
             DeleteUserResponse createUserResponse = gson.fromJson(res, DeleteUserResponse.class);
@@ -830,8 +828,15 @@ public class AccomplishService {
         return getSettingsForPartner(partnerID).flatMap(res -> F.Promise.wrap(getOauth(res)).flatMap(token -> F.Promise.wrap(invokeAPI(url, body, token, method, showSensetiveData, res))));
     }
 
+    private F.Promise<String> execute(String url, String body, String method, String partnerID, String additonalData, boolean showSensetiveData) {
+        return getSettingsForPartner(partnerID).flatMap(res -> F.Promise.wrap(getOauth(res)).flatMap(token -> F.Promise.wrap(invokeAPI(url, body, token, method, showSensetiveData, additonalData, res))));
+    }
 
     private Future<String> invokeAPI(String url, String body, String token, String method, boolean showSensetiveData, AccomplishSettings accomplishSettings) {
+        return invokeAPI(url, body, token, method, showSensetiveData, "", accomplishSettings);
+    }
+
+    private Future<String> invokeAPI(String url, String body, String token, String method, boolean showSensetiveData, String additionalData, AccomplishSettings accomplishSettings) {
 
         final String query = accomplishSettings.apiURL + url;
 
@@ -852,7 +857,7 @@ public class AccomplishService {
             boundRequestBuilder = asyncHttpClient.prepareGet(query);
         } else if (method.equalsIgnoreCase("PUT")) {
             boundRequestBuilder = asyncHttpClient.preparePut(query);
-        }   else if (method.equalsIgnoreCase("DELETE")) {
+        } else if (method.equalsIgnoreCase("DELETE")) {
             boundRequestBuilder = asyncHttpClient.prepareDelete(query);
         }
 
@@ -867,8 +872,6 @@ public class AccomplishService {
                 .addHeader("source_id", sourceID)
                 .addHeader("lang", "en")
                 .addHeader("time_zone", "UTC +03:00");
-//                .addHeader("show_sensitive_data", "1")
-//                .addHeader("show_custom_field", "1");
 
         if (showSensetiveData) {
 
@@ -876,8 +879,6 @@ public class AccomplishService {
             boundRequestBuilder = boundRequestBuilder.addHeader("show_sensitive_data", "1");
             boundRequestBuilder = boundRequestBuilder.addHeader("show_custom_field", "1");
         }
-//
-//        }
 
 
         boundRequestBuilder.execute(new AsyncCompletionHandler<String>() {
@@ -888,6 +889,10 @@ public class AccomplishService {
 
                 String responseBody = response.getResponseBody();
                 Logger.info("///Accomplish API response: " + responseBody);
+
+                if (url.equalsIgnoreCase("service/v1/transaction") && method.equalsIgnoreCase("POST")) {
+                    CacheProvider.getInstance().putObject(sourceID, additionalData/*, 24 * 60 * 60*/);
+                }
 
 
                 promise.success(responseBody);
