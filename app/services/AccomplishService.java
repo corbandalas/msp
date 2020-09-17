@@ -891,6 +891,9 @@ public class AccomplishService {
                 Logger.info("///Accomplish API response: " + responseBody);
 
                 if (url.equalsIgnoreCase("service/v1/transaction") && method.equalsIgnoreCase("POST")) {
+
+                    Logger.info("sourceID = " + sourceID + " ref = " + additionalData);
+
                     CacheProvider.getInstance().putObject(sourceID, additionalData/*, 24 * 60 * 60*/);
                 }
 
