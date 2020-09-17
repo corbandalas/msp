@@ -657,7 +657,7 @@ public class AccomplishService {
 
         String body = gson.toJson(load);
 
-        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID, false);
+        F.Promise<String> promise = execute("service/v1/transaction", body, "POST", partnerID, additionalData, false);
         return promise.map(res -> {
             LoadResponse loadResponse = gson.fromJson(res, LoadResponse.class);
 
