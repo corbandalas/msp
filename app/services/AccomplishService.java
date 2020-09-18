@@ -261,6 +261,8 @@ public class AccomplishService {
             if (StringUtils.isNotEmpty(cdata3)) {
                 customField.setCdata3(cdata3);
                 customField.setLinkedUserId(rez.get().getReferral());
+            } else {
+                customField.setCdata3("empty");
             }
 
 
