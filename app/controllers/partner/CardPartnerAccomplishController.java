@@ -166,6 +166,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         if (createCard.getCdata2() instanceof String) {
 
+            cdata = (String)createCard.getCdata2();
+
         } else {
             java.util.LinkedHashMap data = (java.util.LinkedHashMap) createCard.getCdata2();
             cdata = data.toString();
