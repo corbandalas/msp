@@ -30,7 +30,7 @@ public class SecurityUtil {
                 buf.append(item);
             }
 
-            Logger.info("Concatenated string = " + buf.toString());
+//            Logger.info("Concatenated string = " + buf.toString());
 
             md5.update(buf.toString().getBytes());
             byteHash = md5.digest();
