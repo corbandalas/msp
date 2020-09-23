@@ -638,10 +638,17 @@ public class AccomplishService {
 
         accomplish.dto.account.load.Account account = new Account();
 
+        long amountValue = (long) (Float.parseFloat(amount) * 100);
+
         accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
-        info.setAmount(amount);
+        if (amountValue > 0) {
+            info.setAmount(amount);
+            info.setType("138");
+        } else {
+            info.setAmount("-" + amount);
+            info.setType("228");
+        }
         info.setCurrency(currency);
-        info.setType("138");
 
         accomplish.dto.account.load.Info_ info_ = new accomplish.dto.account.load.Info_();
 

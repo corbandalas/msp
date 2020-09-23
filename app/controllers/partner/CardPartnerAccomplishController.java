@@ -1,6 +1,8 @@
 package controllers.partner;
 
 import accomplish.dto.account.GetAccountResponse;
+import accomplish.dto.customerget.*;
+import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.user.CreateUserResponse;
 import accomplish.dto.user.update.address.response.AddressRequestBean;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +19,7 @@ import dto.Authentication;
 import dto.partnerV2.*;
 import dto.partnerV2.Transaction;
 import dto.partnerV2.entity.CustomerV2;
+import dto.partnerV2.entity.CustomerV3;
 import dto.partnerV2.entity.Document;
 import exception.CustomerAlreadyRegisteredException;
 import exception.WrongCountryException;
@@ -431,11 +434,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = CreateCustomerResponse.class
+            response = GetCustomerAPIResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerResponse.class),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = GetCustomerAPIResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
             @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
@@ -490,22 +493,57 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         Date date = simpleDateFormat.parse(
                                 res.getPersonalInfo().getDateOfBirth());
 
-                        String kyc = "sdd";
-
-                        if (customers.get().getKyc().equals(KYC.FULL_DUE_DILIGENCE)) {
-                            kyc = "fdd";
-                        }
+//                        String kyc = "sdd";
+//
+//                        if (customers.get().getKyc().equals(KYC.FULL_DUE_DILIGENCE)) {
+//                            kyc = "fdd";
+//                        }
 
 
                         Logger.info("DOB date = " + date);
 
                         simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
+//                        String kycStatus = "";
+//
+//                        switch(res.getSecurity().getTrustLevel()) {
+//                            case "0": kycStatus = "ko"; break;
+//                            case "1":
+//                            case "2":
+//                                kycStatus = "light"; break;
+//                            case "3":
+//                            case "4":
+//                                kycStatus = "full"; break;
+//                            case "5":
+//                            case "6":
+//                            case "7":
+//                            case "8":
+//                            case "9":
+//                            case "10":
+//                                kycStatus = "extended"; break;
+//                            default:
+//                                kycStatus = "pending"; break;
+//
+//                        }
 
-                        return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(res.getEmail().get(0).getAddress(),
+                        String kycStatus = "";
+
+                        switch(res.getSecurity().getTrustLevel()) {
+                            case "1": kycStatus = "none"; break;
+                            case "3":
+                                kycStatus = "sdd"; break;
+                            case "5":
+                                kycStatus = "fdd"; break;
+                            default:
+                                kycStatus = "none"; break;
+
+                        }
+
+
+                        return ok(Json.toJson(new GetCustomerAPIResponse(new CustomerV3(res.getEmail().get(0).getAddress(),
                                 customers.get().getTitle(), res.getPersonalInfo().getFirstName(),
                                 res.getPersonalInfo().getLastName(), simpleDateFormat.format(date),
-                                res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), kyc,
+                                res.getPhone().get(0).getNumber(), customers.get().getCountry_id(), kycStatus,
                                 customers.get().getCountry_id(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
                                 res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
                     } else {
@@ -923,10 +961,22 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             F.Promise<Result> returnPromise = null;
 
             if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
-                return operationService.createDepositOperation(data.get(),
-                        (long) (Float.parseFloat(createCard.getAmount()) * 100), currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
-                        ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", createCard.getAmount(), Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
-                        )));
+
+                long amount = (long) (Float.parseFloat(createCard.getAmount()) * 100);
+
+                if (amount > 0) {
+                    return operationService.createDepositOperation(data.get(),
+                            amount, currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
+                            ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", "" + amount, Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
+                            )));
+                } else {
+                    return operationService.createWithdrawOperation(data.get(),
+                            -amount, currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
+                            ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", "" + (-amount), Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
+                            )));
+                }
+
+
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc.getResult().getCode(), acc.getResult().getMessage()));
             }
