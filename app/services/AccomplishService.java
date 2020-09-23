@@ -640,12 +640,14 @@ public class AccomplishService {
 
         long amountValue = (long) (Float.parseFloat(amount) * 100);
 
+        float amountFLoat = Float.parseFloat(amount);
+
         accomplish.dto.account.load.Info info = new accomplish.dto.account.load.Info();
         if (amountValue > 0) {
-            info.setAmount(amount);
+            info.setAmount("" + amountFLoat);
             info.setType("138");
         } else {
-            info.setAmount("-" + amount);
+            info.setAmount("" + (-amountFLoat));
             info.setType("228");
         }
         info.setCurrency(currency);
