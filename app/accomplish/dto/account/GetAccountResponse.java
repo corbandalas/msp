@@ -15,11 +15,11 @@ public class GetAccountResponse {
     private Info info;
     @JsonIgnore
     @SerializedName("limits")
-    @Expose
-    private transient Limits limits;
+//    @Expose
+    private Limits limits;
     @SerializedName("options")
-    @Expose
-    private transient Options options;
+//    @Expose
+    private Options options;
 
     public Result getResult() {
         return result;
