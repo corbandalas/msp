@@ -8,6 +8,8 @@ import accomplish.dto.account.activate.*;
 import accomplish.dto.account.activate.response.ActivateResponse;
 import accomplish.dto.account.load.Account;
 import accomplish.dto.account.load.response.LoadResponse;
+import accomplish.dto.account.update.UpdateCardRequest;
+import accomplish.dto.account.update.response.UpdateAccountResponse;
 import accomplish.dto.card.CreateCard;
 import accomplish.dto.card.CreateCardResponse;
 import accomplish.dto.card.Info;
@@ -626,6 +628,35 @@ public class AccomplishService {
         F.Promise<String> promise = execute("service/v1/account/activate/" + cardID, gson.toJson(activate), "POST", partnerID, true);
         return promise.map(res -> {
             ActivateResponse getAccountResponse = gson.fromJson(res, ActivateResponse.class);
+
+            return getAccountResponse;
+        });
+    }
+
+    public F.Promise<UpdateAccountResponse> updateCard(String cardID, String status,
+                                                       String partnerID) {
+
+
+        UpdateCardRequest updateCardRequest = new UpdateCardRequest();
+
+        accomplish.dto.account.update.Info info = new accomplish.dto.account.update.Info();
+
+
+        info.setStatus(Integer.parseInt(status));
+//        info.setType(Integer.parseInt(type));
+//        info.setUserId(Integer.parseInt(userID));
+
+        updateCardRequest.setInfo(info);
+
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        F.Promise<String> promise = execute("service/v1/account/" + cardID, gson.toJson(updateCardRequest), "PUT", partnerID, true);
+        return promise.map(res -> {
+            UpdateAccountResponse getAccountResponse = gson.fromJson(res, UpdateAccountResponse.class);
 
             return getAccountResponse;
         });

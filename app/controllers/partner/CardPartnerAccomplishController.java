@@ -1,6 +1,7 @@
 package controllers.partner;
 
 import accomplish.dto.account.GetAccountResponse;
+import accomplish.dto.account.update.response.UpdateAccountResponse;
 import accomplish.dto.customerget.*;
 import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.user.CreateUserResponse;
@@ -169,7 +170,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         if (createCard.getCdata2() instanceof String) {
 
-            cdata = (String)createCard.getCdata2();
+            cdata = (String) createCard.getCdata2();
 
         } else {
             java.util.LinkedHashMap data = (java.util.LinkedHashMap) createCard.getCdata2();
@@ -528,14 +529,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         String kycStatus = "";
 
-                        switch(res.getSecurity().getTrustLevel()) {
-                            case "1": kycStatus = "none"; break;
+                        switch (res.getSecurity().getTrustLevel()) {
+                            case "1":
+                                kycStatus = "none";
+                                break;
                             case "3":
-                                kycStatus = "sdd"; break;
+                                kycStatus = "sdd";
+                                break;
                             case "5":
-                                kycStatus = "fdd"; break;
+                                kycStatus = "fdd";
+                                break;
                             default:
-                                kycStatus = "none"; break;
+                                kycStatus = "none";
+                                break;
 
                         }
 
@@ -896,6 +902,95 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 }
 
                 return returnPromise;
+            });
+        });
+
+        return returnRecover(result);
+
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "setCardStatus\n",
+            value = "Set card status",
+            notes = "Method allows to set card status",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Set card status request", required = true, dataType = "dto.partnerV2.SetCardStatusRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> setCardStatus
+            () {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final SetCardStatusRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, SetCardStatusRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+        if (StringUtils.isBlank(createCard.getNewStatus())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: status"));
+        }
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+
+        final F.Promise<Result> result = senderCardPromise.flatMap(data -> {
+
+            String newStatus = "1";
+
+            switch (createCard.getNewStatus()) {
+                case "active":
+                    newStatus = "1";
+                    break;
+                case "blocked":
+                    newStatus = "9";
+                    break;
+                case "lost":
+                    newStatus = "2";
+                    break;
+                case "stolen":
+                    newStatus = "3";
+                    break;
+                default:
+                    newStatus = "1";
+            }
+
+            F.Promise<UpdateAccountResponse> account = accomplishService.updateCard(createCard.getToken(), newStatus, "" + authData.getAccount().getId());
+
+            return account.map(acc -> {
+
+                if (acc.getResult().getCode().equalsIgnoreCase("0000")) {
+                    return ok(Json.toJson(new SuccessAPIV2Response(true)));
+                } else {
+                    return createCardProviderException(acc.getResult().getCode(), acc.getResult().getMessage());
+                }
             });
         });
 
@@ -2052,23 +2147,23 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+"), createCard.getCdata1())).
                 flatMap(res -> F.Promise.wrap(cardRepository.retrieveListByCustomerId(res.get().getId())).map(cards -> {
 
-            Logger.info("Customer " + res.get());
-            Logger.info("Cards " + cards.size());
+                    Logger.info("Customer " + res.get());
+                    Logger.info("Cards " + cards.size());
 
-            for (Card card: cards) {
+                    for (Card card : cards) {
 
-                Boolean aBoolean = F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).get(10000);
-            }
+                        Boolean aBoolean = F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).get(10000);
+                    }
 
-            Boolean aBoolean1 = F.Promise.wrap(cardRepository.deleteAllCards(res.get().getId())).get(10000);
-            Boolean aBoolean = F.Promise.wrap(customerRepository.deleteCustomer(res.get().getId())).get(10000);
+                    Boolean aBoolean1 = F.Promise.wrap(cardRepository.deleteAllCards(res.get().getId())).get(10000);
+                    Boolean aBoolean = F.Promise.wrap(customerRepository.deleteCustomer(res.get().getId())).get(10000);
                     accomplishService.updateUserEmail(res.get().getReferral(), res.get().getPhone2() + "0@me.com", "" + authData.getAccount().getId()).get(10000);
 
                     accomplishService.updateUserPhone(res.get().getReferral(), "+" + res.get().getPhone2() + "0", "" + authData.getAccount().getId()).get(10000);
 
 
-            return ok(Json.toJson(new SuccessAPIV2Response(true)));
-        }));
+                    return ok(Json.toJson(new SuccessAPIV2Response(true)));
+                }));
 
         return returnRecover(result);
     }
@@ -2117,13 +2212,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
         }
 
-        String reference = (String)CacheProvider.getInstance().getObject(createCard.getSourceID());
+        String reference = (String) CacheProvider.getInstance().getObject(createCard.getSourceID());
 
         final F.Promise<Result> result = F.Promise.pure(ok(Json.toJson(new dto.partnerV2.GetReferenceResponse(reference))));
 
         return returnRecover(result);
     }
-
 
 
 }
