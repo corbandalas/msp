@@ -16,10 +16,10 @@ public class GetAccountResponse {
     @JsonIgnore
     @SerializedName("limits")
     @Expose
-    private Limits limits;
+    private transient Limits limits;
     @SerializedName("options")
     @Expose
-    private Options options;
+    private transient Options options;
 
     public Result getResult() {
         return result;
