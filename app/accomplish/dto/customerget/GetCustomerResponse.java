@@ -35,34 +35,34 @@ public class GetCustomerResponse {
     @Expose
     private Preferences preferences;
     @SerializedName("identification")
-//    @Expose
+    @Expose(deserialize = false)
     private List<Identification> identification = null;
     @SerializedName("bank_account")
-//    @Expose
+    @Expose(deserialize = false)
     private List<BankAccount> bankAccount = null;
     @SerializedName("credit_card")
-//    @Expose
+    @Expose(deserialize = false)
     private List<CreditCard> creditCard = null;
     @SerializedName("currency")
-//    @Expose
+    @Expose(deserialize = false)
     private List<Currency> currency = null;
     @SerializedName("account")
-//    @Expose
+    @Expose(deserialize = false)
     private List<Account> account = null;
     @SerializedName("terms_conditions")
-//    @Expose
+    @Expose(deserialize = false)
     private TermsConditions termsConditions;
     @SerializedName("device_info")
-//    @Expose
+    @Expose(deserialize = false)
     private DeviceInfo deviceInfo;
     @SerializedName("commerce_info")
-//    @Expose
+    @Expose(deserialize = false)
     private CommerceInfo commerceInfo;
     @SerializedName("external_auth")
-//    @Expose
+    @Expose(deserialize = false)
     private List<ExternalAuth> externalAuth = null;
     @SerializedName("last_activity")
-//    @Expose
+    @Expose(deserialize = false)
     private LastActivity lastActivity;
 
     public Result getResult() {

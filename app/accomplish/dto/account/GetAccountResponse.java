@@ -15,10 +15,10 @@ public class GetAccountResponse {
     private Info info;
     @JsonIgnore
     @SerializedName("limits")
-//    @Expose
+    @Expose(deserialize = false)
     private Limits limits;
     @SerializedName("options")
-//    @Expose
+    @Expose(deserialize = false)
     private Options options;
 
     public Result getResult() {
