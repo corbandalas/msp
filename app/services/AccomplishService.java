@@ -348,7 +348,7 @@ public class AccomplishService {
 
     public F.Promise<GetCustomerResponse> getCustomer(String userID, String partnerID) {
 
-        final GsonBuilder gsonBuilder = new GsonBuilder();
+        final GsonBuilder gsonBuilder = new GsonBuilder().excludeFieldsWithoutExposeAnnotation();
         gsonBuilder.disableHtmlEscaping();
 
         final Gson gson = gsonBuilder.create();
@@ -584,10 +584,12 @@ public class AccomplishService {
 
     public F.Promise<GetAccountResponse> getAccount(String cardID, String partnerID) {
 
-        final GsonBuilder gsonBuilder = new GsonBuilder();
+        final GsonBuilder gsonBuilder = new GsonBuilder().excludeFieldsWithoutExposeAnnotation();
         gsonBuilder.disableHtmlEscaping();
 
         final Gson gson = gsonBuilder.create();
+
+
 
         F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID, true);
         return promise.map(res -> {
