@@ -970,7 +970,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     newStatus = "1";
                     break;
                 case "blocked":
-                    newStatus = "9";
+                    newStatus = "4";
                     break;
                 case "lost":
                     newStatus = "2";

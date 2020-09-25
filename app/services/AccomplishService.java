@@ -664,6 +664,36 @@ public class AccomplishService {
         });
     }
 
+
+    public F.Promise<UpdateAccountResponse> getAccountBalanc(String cardID, String status,
+                                                       String partnerID) {
+
+
+        UpdateCardRequest updateCardRequest = new UpdateCardRequest();
+
+        accomplish.dto.account.update.Info info = new accomplish.dto.account.update.Info();
+
+
+        info.setStatus(status);
+//        info.setType(Integer.parseInt(type));
+//        info.setUserId(Integer.parseInt(userID));
+
+        updateCardRequest.setInfo(info);
+
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        F.Promise<String> promise = execute("service/v1/account/" + cardID, gson.toJson(updateCardRequest), "PUT", partnerID, true);
+        return promise.map(res -> {
+            UpdateAccountResponse getAccountResponse = gson.fromJson(res, UpdateAccountResponse.class);
+
+            return getAccountResponse;
+        });
+    }
+
     public F.Promise<LoadResponse> load(String amount, String currency, String token, String additionalData,
                                         String partnerID) {
 
