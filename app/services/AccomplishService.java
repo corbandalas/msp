@@ -644,7 +644,7 @@ public class AccomplishService {
         accomplish.dto.account.update.Info info = new accomplish.dto.account.update.Info();
 
 
-        info.setStatus(Integer.parseInt(status));
+        info.setStatus(status);
 //        info.setType(Integer.parseInt(type));
 //        info.setUserId(Integer.parseInt(userID));
 

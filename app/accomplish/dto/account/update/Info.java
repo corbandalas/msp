@@ -13,7 +13,7 @@ public class Info {
     private Integer userId;
     @SerializedName("status")
     @Expose
-    private Integer status;
+    private String status;
 
     public Integer getType() {
         return type;
@@ -31,11 +31,11 @@ public class Info {
         this.userId = userId;
     }
 
-    public Integer getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
