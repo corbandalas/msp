@@ -1,15 +1,12 @@
 package controllers.admin;
 
+import accomplish.dto.account.balance.response.GetBINBalanceResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
-import dto.AccountListResponse;
-import dto.AccountResponse;
-import dto.Authentication;
-import dto.BaseAPIResponse;
-import dto.partnerV2.account.balance.response.GetBINBalanceResponse;
+import dto.*;
 import model.Account;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -22,6 +19,7 @@ import repository.PropertyRepository;
 import services.AccomplishService;
 import util.SecurityUtil;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import static configs.ReturnCodes.*;
@@ -263,8 +261,8 @@ public class AccountController extends BaseController {
         F.Promise<GetBINBalanceResponse[]> accountBalance = accomplishService.getAccountBalance("" + authData.getAccount().getId());
 
 
-        final F.Promise<Result> result = F.Promise.wrap(accountRepository.retrieveAll()).map(accounts -> ok(Json
-                .toJson(new AccountListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), accounts))));
+        final F.Promise<Result> result = accountBalance.map(accounts -> ok(Json
+                .toJson(new AccountBalanceResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), Arrays.asList(accounts[0], accounts[1])))));
 
         return returnRecover(result);
     }

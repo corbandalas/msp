@@ -6,6 +6,7 @@ import accomplish.Security;
 import accomplish.dto.account.GetAccountResponse;
 import accomplish.dto.account.activate.*;
 import accomplish.dto.account.activate.response.ActivateResponse;
+import accomplish.dto.account.balance.response.GetBINBalanceResponse;
 import accomplish.dto.account.load.Account;
 import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.account.update.UpdateCardRequest;
@@ -665,7 +666,7 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<dto.partnerV2.account.balance.response.GetBINBalanceResponse[]> getAccountBalance(
+    public F.Promise<GetBINBalanceResponse[]> getAccountBalance(
                                                                                                      String partnerID) {
 
 
@@ -692,10 +693,10 @@ public class AccomplishService {
         F.Promise<String> promise1 = execute("service/v1/bin/info" + accomplishSettings.productID1, "", "GET", partnerID, true);
         F.Promise<String> promise2 = execute("service/v1/bin/info" + accomplishSettings.productID2, "", "GET", partnerID, true);
         return promise1.zip(promise2).map(res -> {
-            dto.partnerV2.account.balance.response.GetBINBalanceResponse getAccountResponse1 = gson.fromJson(res._1, dto.partnerV2.account.balance.response.GetBINBalanceResponse.class);
-            dto.partnerV2.account.balance.response.GetBINBalanceResponse getAccountResponse2 = gson.fromJson(res._2, dto.partnerV2.account.balance.response.GetBINBalanceResponse.class);
+            GetBINBalanceResponse getAccountResponse1 = gson.fromJson(res._1, GetBINBalanceResponse.class);
+            GetBINBalanceResponse getAccountResponse2 = gson.fromJson(res._2, GetBINBalanceResponse.class);
 
-            return new dto.partnerV2.account.balance.response.GetBINBalanceResponse[]{getAccountResponse1, getAccountResponse2};
+            return new GetBINBalanceResponse[]{getAccountResponse1, getAccountResponse2};
         });
     }
 
