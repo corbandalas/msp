@@ -117,7 +117,7 @@ POST    /api/admin/account/create                                             @c
 POST    /api/admin/account/update                                             @controllers.admin.AccountController.update()
 GET     /api/admin/account/get/:accountID                                     @controllers.admin.AccountController.retrieveById(accountID:Int)
 GET     /api/admin/account/list                                               @controllers.admin.AccountController.retrieveAll()
-
+GET     /api/admin/account/balance                                               @controllers.admin.AccountController.getAccountBalance()
 
 # Operation API
 GET     /api-docs/api/admin/operation                                         @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/operation")

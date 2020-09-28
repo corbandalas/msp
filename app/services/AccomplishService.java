@@ -665,32 +665,37 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<UpdateAccountResponse> getAccountBalanc(String cardID, String status,
-                                                       String partnerID) {
+    public F.Promise<dto.partnerV2.account.balance.response.GetBINBalanceResponse[]> getAccountBalance(
+                                                                                                     String partnerID) {
 
 
-        UpdateCardRequest updateCardRequest = new UpdateCardRequest();
-
-        accomplish.dto.account.update.Info info = new accomplish.dto.account.update.Info();
-
-
-        info.setStatus(status);
+//        UpdateCardRequest updateCardRequest = new UpdateCardRequest();
+//
+//        accomplish.dto.account.update.Info info = new accomplish.dto.account.update.Info();
+//
+//
+//        info.setStatus(status);
 //        info.setType(Integer.parseInt(type));
 //        info.setUserId(Integer.parseInt(userID));
+//
+//        updateCardRequest.setInfo(info);
+//
+//
 
-        updateCardRequest.setInfo(info);
-
+        AccomplishSettings accomplishSettings = getSettingsForPartner(partnerID).get(3000);
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.disableHtmlEscaping();
-
+//
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/" + cardID, gson.toJson(updateCardRequest), "PUT", partnerID, true);
-        return promise.map(res -> {
-            UpdateAccountResponse getAccountResponse = gson.fromJson(res, UpdateAccountResponse.class);
+        F.Promise<String> promise1 = execute("service/v1/bin/info" + accomplishSettings.productID1, "", "GET", partnerID, true);
+        F.Promise<String> promise2 = execute("service/v1/bin/info" + accomplishSettings.productID2, "", "GET", partnerID, true);
+        return promise1.zip(promise2).map(res -> {
+            dto.partnerV2.account.balance.response.GetBINBalanceResponse getAccountResponse1 = gson.fromJson(res._1, dto.partnerV2.account.balance.response.GetBINBalanceResponse.class);
+            dto.partnerV2.account.balance.response.GetBINBalanceResponse getAccountResponse2 = gson.fromJson(res._2, dto.partnerV2.account.balance.response.GetBINBalanceResponse.class);
 
-            return getAccountResponse;
+            return new dto.partnerV2.account.balance.response.GetBINBalanceResponse[]{getAccountResponse1, getAccountResponse2};
         });
     }
 
