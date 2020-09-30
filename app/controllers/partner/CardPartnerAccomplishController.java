@@ -273,7 +273,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 if (rez.getResult().getCode().equalsIgnoreCase("0000")) {
                     customer.setReferral("" + rez.getInfo().getId());
 
-                    customerRepository.create(customer);
+                    F.Promise.wrap(customerRepository.create(customer)).get(10000);
 
                     return ok(Json.toJson(new CreateCustomerResponse(new CustomerV2(createCard.getEmail(), createCard.getTitle(), createCard.getFirstName(),
                             createCard.getLastName(), createCard.getBirthdayDate(), createCard.getMobilePhone(),
