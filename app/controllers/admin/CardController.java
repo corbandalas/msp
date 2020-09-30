@@ -63,13 +63,15 @@ public class CardController extends BaseController {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveAll()).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
+        final Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveAll():cardRepository.retrieveAll(authData.getAccount().getId().toString())).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
         return returnRecover(result);
     }
@@ -101,6 +103,8 @@ public class CardController extends BaseController {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), cardBrand,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
@@ -113,7 +117,7 @@ public class CardController extends BaseController {
 
         CardBrand cardBrandValue = CardBrand.valueOf(cardBrand);
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCardBrand(cardBrandValue)).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
+        final Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveListByCardBrand(cardBrandValue):cardRepository.retrieveListByCardBrand(cardBrandValue, authData.getAccount().getId().toString())).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
         return returnRecover(result);
     }
@@ -145,6 +149,8 @@ public class CardController extends BaseController {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), cardType,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
@@ -157,7 +163,7 @@ public class CardController extends BaseController {
 
         CardType cardTypeValue = CardType.valueOf(cardType);
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCardType(cardTypeValue)).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
+        final Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveListByCardType(cardTypeValue):cardRepository.retrieveListByCardType(cardTypeValue, authData.getAccount().getId().toString())).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
         return returnRecover(result);
     }
@@ -189,6 +195,8 @@ public class CardController extends BaseController {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(), customerID,
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
@@ -199,7 +207,7 @@ public class CardController extends BaseController {
             return Promise.pure(createWrongRequestFormatResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(cardRepository.retrieveListByCustomerId(customerID)).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
+        final Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveListByCustomerId(customerID):cardRepository.retrieveListByCustomerId(customerID, authData.getAccount().getId().toString())).map(cards -> ok(Json.toJson(new CardListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, cards))));
 
         return returnRecover(result);
     }
@@ -232,6 +240,8 @@ public class CardController extends BaseController {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 cardID, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
@@ -243,7 +253,7 @@ public class CardController extends BaseController {
             return Promise.pure(createWrongRequestFormatResponse());
         }
 
-        Promise<Result> result = Promise.wrap(cardRepository.retrieveById(cardID)).map(res -> res.map(card
+        Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveById(cardID):cardRepository.retrieveById(cardID, authData.getAccount().getId().toString())).map(res -> res.map(card
                 -> ok(Json.toJson(new CardResponse(""+SUCCESS_CODE, SUCCESS_TEXT, card)))).orElse(createWrongCardResponse()));
 
         return returnRecover(result);

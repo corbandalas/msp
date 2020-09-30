@@ -42,7 +42,7 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         final Promise<Customer> promise = Futures.promise();
 
         final String query = "INSERT INTO " + connectionPool.getSchemaName() +
-                ".customer(id, title, firstName, lastName, registrationDate, dateBirth, active, address1, address2, postcode, city, email, kyc, password, country_id, temppassword, houseNameNumber, flat, referral, cdata, cdata2, cdata3, phone2) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)";
+                ".customer(id, title, firstName, lastName, registrationDate, dateBirth, active, address1, address2, postcode, city, email, kyc, password, country_id, temppassword, houseNameNumber, flat, referral, cdata, cdata2, cdata3, phone2, account_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getTitle(), entity.getFirstName(),
                 entity.getLastName(), new Timestamp(entity.getRegistrationDate().getTime()), new Timestamp(entity.getDateBirth().getTime()), entity.getActive(), entity.getAddress1(), entity.getAddress2(), entity.getPostcode(), entity.getCity(), entity.getEmail(), entity.getKyc().toString(), entity.getPassword(), entity.getCountry_id(), entity.getTemppassword(), entity.getHouseNameNumber(), entity.getFlat(), entity.getReferral(), entity.getCdata(), entity.getCdata2(), entity.getCdata3(), entity.getPhone2()), result -> promise.success(entity), promise::failure);
 
@@ -76,6 +76,16 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE id=$1";
         connectionPool.getConnection().query(query, asList(id), result -> promise.success(createEntity(result)), promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<Optional<Customer>> retrieveById(Object id, String accountID) {
+
+        final Promise<Optional<Customer>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE id=$1 AND account_id=$2";
+        connectionPool.getConnection().query(query, asList(id, accountID), result -> promise.success(createEntity(result)), promise::failure);
 
         return promise.future();
     }
@@ -123,10 +133,34 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         return promise.future();
     }
 
+    public Future<List<Customer>> retrieveByRegistrationDate(Date startDate, Date endDate, String accountID) {
+        final Promise<List<Customer>> promise = Futures.promise();
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE (registrationDate BETWEEN $1 AND $2) AND account_id = $3";
+        connectionPool.getConnection().query(query, asList(new Timestamp(DateUtil.getStartOfDay(startDate)), new Timestamp(DateUtil.getEndOfDay(endDate)), accountID), result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createEntity(row)));
+            promise.success(customers);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     public Future<List<Customer>> retrieveByKYC(KYC kyc) {
         final Promise<List<Customer>> promise = Futures.promise();
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE kyc=$1";
         connectionPool.getConnection().query(query, asList(kyc.toString()), result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createEntity(row)));
+            promise.success(customers);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Customer>> retrieveByKYC(KYC kyc, String accountID) {
+        final Promise<List<Customer>> promise = Futures.promise();
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE kyc=$1 and account_id = $2";
+        connectionPool.getConnection().query(query, asList(kyc.toString(), accountID), result -> {
             final ArrayList<Customer> customers = new ArrayList<>();
             result.forEach(row -> customers.add(createEntity(row)));
             promise.success(customers);
@@ -147,6 +181,18 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         return promise.future();
     }
 
+    public Future<List<Customer>> retrieveByEmail(String email, String accountID) {
+        final Promise<List<Customer>> promise = Futures.promise();
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer WHERE email=$1 and account_id = $2";
+        connectionPool.getConnection().query(query, asList(email, accountID), result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createEntity(row)));
+            promise.success(customers);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
     @Override
     public Future<List<Customer>> retrieveAll() {
 
@@ -154,6 +200,20 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
 
         final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer";
         connectionPool.getConnection().query(query, result -> {
+            final ArrayList<Customer> customers = new ArrayList<>();
+            result.forEach(row -> customers.add(createEntity(row)));
+            promise.success(customers);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Customer>> retrieveAll(String accountID) {
+
+        final Promise<List<Customer>> promise = Futures.promise();
+
+        final String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".customer where account_id = $1";
+        connectionPool.getConnection().query(query, asList(accountID), result -> {
             final ArrayList<Customer> customers = new ArrayList<>();
             result.forEach(row -> customers.add(createEntity(row)));
             promise.success(customers);
@@ -192,6 +252,6 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
     }
 
     public Customer createEntity(Row row) {
-        return new Customer(row.getString("id"), row.getTimestamp("registrationDate"), row.getString("title"), row.getString("firstname"), row.getString("lastname"), row.getString("address1"), row.getString("address2"), row.getString("postcode"), row.getString("city"), row.getString("email"), row.getTimestamp("dateBirth"), row.getBoolean("active"), KYC.valueOf(row.getString("kyc")), row.getString("password"), row.getString("country_id"), row.getBoolean("temppassword"), row.getString("houseNameNumber"), row.getString("flat"),row.getString("referral"), row.getString("cdata"), row.getString("cdata2"), row.getString("cdata3"), row.getString("phone2"));
+        return new Customer(row.getString("id"), row.getTimestamp("registrationDate"), row.getString("title"), row.getString("firstname"), row.getString("lastname"), row.getString("address1"), row.getString("address2"), row.getString("postcode"), row.getString("city"), row.getString("email"), row.getTimestamp("dateBirth"), row.getBoolean("active"), KYC.valueOf(row.getString("kyc")), row.getString("password"), row.getString("country_id"), row.getBoolean("temppassword"), row.getString("houseNameNumber"), row.getString("flat"),row.getString("referral"), row.getString("cdata"), row.getString("cdata2"), row.getString("cdata3"), row.getString("phone2"), row.getString("account_id"));
     }
 }

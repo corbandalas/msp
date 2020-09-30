@@ -38,6 +38,7 @@ public class Customer extends BaseEntity<String> {
     private String cdata3 = "";
 
     private String phone2 = "";
+    private String accountID = "";
 
     public Customer() {
     }
@@ -105,7 +106,7 @@ public class Customer extends BaseEntity<String> {
     }
 
     public Customer(String id, Date registrationDate, String title, String firstName, String lastName, String address1, String address2, String postcode, String city, String email, Date dateBirth, Boolean active, KYC kyc, String password, String country_id, boolean temppassword, String houseNameNumber, String flat, String referral, String cdata,
-                    String cdata2, String cdata3, String phone2) {
+                    String cdata2, String cdata3, String phone2, String accountID) {
         this.setId(id);
         this.registrationDate = registrationDate;
         this.title = title;
@@ -129,6 +130,7 @@ public class Customer extends BaseEntity<String> {
         this.cdata2 = cdata2;
         this.cdata3 = cdata3;
         this.phone2 = phone2;
+        this.accountID = accountID;
     }
 
     public Date getRegistrationDate() {
@@ -256,6 +258,13 @@ public class Customer extends BaseEntity<String> {
         return firstName + " " + lastName;
     }
 
+    public String getAccountID() {
+        return accountID;
+    }
+
+    public void setAccountID(String accountID) {
+        this.accountID = accountID;
+    }
 
     public String getHouseNameNumber() {
         return houseNameNumber;
@@ -338,6 +347,7 @@ public class Customer extends BaseEntity<String> {
                 ", cdata2='" + cdata2 + '\'' +
                 ", cdata3='" + cdata3 + '\'' +
                 ", phone2='" + phone2 + '\'' +
+                ", accountID='" + accountID + '\'' +
                 '}';
     }
 }

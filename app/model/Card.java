@@ -27,6 +27,7 @@ public class Card extends BaseEntity<Long> {
     private String deliveryAddress2;
     private String deliveryAddress3;
     private String deliveryCountry;
+    private String accountID;
 
     public Card() {
     }
@@ -66,6 +67,25 @@ public class Card extends BaseEntity<Long> {
         this.deliveryAddress3 = deliveryAddress3;
         this.deliveryCountry = deliveryCountry;
         this.cardDefault = defaultCard;
+    }
+
+    public Card(Long id, String token, String customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry, String accountID) {
+        this.setId(id);
+        this.token = token;
+        this.customerId = customerId;
+        this.type = type;
+        this.brand = brand;
+        this.cardDefault = cardDefault;
+        this.createDate = createDate;
+        this.alias = alias;
+        this.active = active;
+        this.info = info;
+        this.currencyId = currencyId;
+        this.deliveryAddress1 = deliveryAddress1;
+        this.deliveryAddress2 = deliveryAddress2;
+        this.deliveryAddress3 = deliveryAddress3;
+        this.deliveryCountry = deliveryCountry;
+        this.accountID = accountID;
     }
 
     public Boolean getCardDefault() {
@@ -197,6 +217,15 @@ public class Card extends BaseEntity<Long> {
                 ", deliveryAddress2='" + deliveryAddress2 + '\'' +
                 ", deliveryAddress3='" + deliveryAddress3 + '\'' +
                 ", deliveryCountry='" + deliveryCountry + '\'' +
+                ", accountID='" + accountID + '\'' +
                 '}';
+    }
+
+    public String getAccountID() {
+        return accountID;
+    }
+
+    public void setAccountID(String accountID) {
+        this.accountID = accountID;
     }
 }

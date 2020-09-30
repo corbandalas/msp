@@ -16,11 +16,13 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.CustomerRepository;
+import scala.concurrent.Future;
 import util.SecurityUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static configs.ReturnCodes.*;
@@ -69,7 +71,10 @@ public class CustomerController extends BaseController {
             return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveAll()).map(customers -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customers))));
+        boolean admin = authData.getAccount().isAdmin();
+
+
+        final F.Promise<Result> result = F.Promise.wrap((admin)?customerRepository.retrieveAll():customerRepository.retrieveAll(authData.getAccount().getId().toString())).map(customers -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customers))));
 
         return returnRecover(result);
     }
@@ -113,7 +118,9 @@ public class CustomerController extends BaseController {
             return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveById(phone)).map(operationOpt
+        boolean admin = authData.getAccount().isAdmin();
+
+        final F.Promise<Result> result = F.Promise.wrap((admin)?customerRepository.retrieveById(phone):customerRepository.retrieveById(phone, authData.getAccount().getId().toString())).map(operationOpt
                 -> operationOpt.map(customer -> ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customer))))
                 .orElse(createWrongCustomerAccountResponse()));
 
@@ -149,6 +156,8 @@ public class CustomerController extends BaseController {
 
         final Authentication authData = (Authentication) ctx().args.get("authData");
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (StringUtils.isBlank(startDate) || StringUtils.isBlank(endDate)) {
             return Promise.pure(createWrongRequestFormatResponse());
         }
@@ -169,7 +178,7 @@ public class CustomerController extends BaseController {
             return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByRegistrationDate(parsedStartDate, parsedEndDate)).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
+        final Promise<Result> result = Promise.wrap(admin?customerRepository.retrieveByRegistrationDate(parsedStartDate, parsedEndDate):customerRepository.retrieveByRegistrationDate(parsedStartDate, parsedEndDate, authData.getAccount().getId().toString())).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
         return returnRecover(result);
     }
@@ -206,13 +215,15 @@ public class CustomerController extends BaseController {
             return Promise.pure(createWrongRequestFormatResponse());
         }
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 kyc, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByKYC(KYC.valueOf(kyc))).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
+        final Promise<Result> result = Promise.wrap(admin?customerRepository.retrieveByKYC(KYC.valueOf(kyc)): customerRepository.retrieveByKYC(KYC.valueOf(kyc), authData.getAccount().getId().toString())).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
         return returnRecover(result);
     }
@@ -249,13 +260,15 @@ public class CustomerController extends BaseController {
             return Promise.pure(createWrongRequestFormatResponse());
         }
 
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 email, authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return Promise.pure(createWrongEncKeyResponse());
         }
 
-        final Promise<Result> result = Promise.wrap(customerRepository.retrieveByEmail(email)).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
+        final Promise<Result> result = Promise.wrap(admin? customerRepository.retrieveByEmail(email): customerRepository.retrieveByEmail(email, authData.getAccount().getId().toString())).map(countries -> ok(Json.toJson(new CustomerListResponse(""+SUCCESS_CODE, SUCCESS_TEXT, countries))));
 
         return returnRecover(result);
     }
@@ -368,6 +381,8 @@ public class CustomerController extends BaseController {
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
 
         customer.setTemppassword(true);
+
+        customer.setAccountID(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()));
 
         final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
                 ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, res))));

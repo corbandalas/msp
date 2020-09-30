@@ -157,6 +157,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         customer.setPhone2(StringUtils.removeStart(createCard.getMobilePhone(), "+"));
         customer.setFlat("");
         customer.setHouseNameNumber("");
+        customer.setAccountID(authData.getAccount().getId().toString());
         customer.setTemppassword(false);
         if (StringUtils.isNotBlank(createCard.getCdata1())) {
             customer.setCdata(createCard.getCdata1());
@@ -689,6 +690,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 card.setDeliveryAddress3(createCard.getCardData());
                                 card.setDeliveryCountry("DK");
                                 card.setInfo(res.getInfo().getBinId());
+                                card.setAccountID(authData.getAccount().getId().toString());
 
 
                                 String finalCurrency = currency;
