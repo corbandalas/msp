@@ -25,6 +25,8 @@ public class Transaction extends BaseEntity<Long> {
     private Double fromCardExchangeRate;
     private Double toCardExchangeRate;
     private TransactionType type;
+    private Date createDate;
+    private String orderID;
 
     public Transaction(Long id, Long operationId, Long amount, String currencyId, Integer fromAccountId, Integer toAccountId,
                        Long fromCardId, Long toCardId, Double fromAccountExchangeRate, Double toAccountExchangeRate,
@@ -42,6 +44,26 @@ public class Transaction extends BaseEntity<Long> {
         this.fromCardExchangeRate=fromCardExchangeRate;
         this.toCardExchangeRate=toCardExchangeRate;
         this.type = type;
+    }
+
+    public Transaction(Long id, Long operationId, Long amount, String currencyId, Integer fromAccountId, Integer toAccountId,
+                       Long fromCardId, Long toCardId, Double fromAccountExchangeRate, Double toAccountExchangeRate,
+                       Double fromCardExchangeRate, Double toCardExchangeRate, TransactionType type, Date createDate,  String orderID) {
+        this.setId(id);
+        this.operationId = operationId;
+        this.amount = amount;
+        this.currencyId = currencyId;
+        this.fromAccountId = fromAccountId;
+        this.toAccountId = toAccountId;
+        this.fromCardId=fromCardId;
+        this.toCardId = toCardId;
+        this.fromAccountExchangeRate = fromAccountExchangeRate;
+        this.toAccountExchangeRate = toAccountExchangeRate;
+        this.fromCardExchangeRate=fromCardExchangeRate;
+        this.toCardExchangeRate=toCardExchangeRate;
+        this.type = type;
+        this.createDate = createDate;
+        this.orderID = orderID;
     }
 
     public Transaction() {
@@ -143,6 +165,14 @@ public class Transaction extends BaseEntity<Long> {
         this.type = type;
     }
 
+    public String getOrderID() {
+        return orderID;
+    }
+
+    public void setOrderID(String orderID) {
+        this.orderID = orderID;
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -155,6 +185,16 @@ public class Transaction extends BaseEntity<Long> {
                 ", fromAccountExchangeRate=" + fromAccountExchangeRate +
                 ", toAccountExchangeRate=" + toAccountExchangeRate +
                 ", type=" + type +
+                ", createDate=" + createDate +
+                ", orderID=" + orderID +
                 '}';
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 }

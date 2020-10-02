@@ -63,6 +63,22 @@ public class OperationService {
         });
     }
 
+    public F.Promise<F.Tuple<Operation, List<Transaction>>> createAccomplishTransferOperation(Card sourceCard, Card destinationCard, Long amount, Currency currency, String orderId, String description, Account account) {
+
+            return getExchangeRates(currency, account, account, sourceCard, destinationCard).flatMap(rates ->
+                    F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.TRANSFER, orderId, description, new Date())))
+                            .flatMap(operation -> {
+                                final F.Promise<Transaction> sourceTransactionPromise = F.Promise
+                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
+                                                account.getId(), account.getId(), sourceCard.getId(), null, rates._1._1, rates._1._2, rates._2._1, null, TransactionType.TRANSFER_FROM, new Date(), orderId)));
+                                final F.Promise<Transaction> destinationTransactionPromise = F.Promise
+                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
+                                                account.getId(), account.getId(), null, destinationCard.getId(), rates._1._2, rates._1._1, null, rates._2._2, TransactionType.TRANSFER_TO, new Date(), orderId)));
+
+                                return F.Promise.sequence(sourceTransactionPromise, destinationTransactionPromise).map(trans -> new F.Tuple<>(operation, trans));
+                            }));
+    }
+
     public F.Promise<F.Tuple<Operation, Transaction>> createDepositOperation(Card card, Long amount, Currency currency, String orderId, String description) {
         final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
                 .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
@@ -85,6 +101,27 @@ public class OperationService {
         });
     }
 
+    public F.Promise<F.Tuple<Operation, Transaction>> createAccomplishDepositOperation(Card card, Long amount, Currency currency, String orderId, String description, Account account) {
+//        final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
+//                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
+        final F.Promise<Optional<Account>> depositAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.deposit"))
+                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
+
+        return depositAccountPromise.flatMap(accounts -> {
+            final Account depositAccount = accounts.orElseThrow(WrongAccountException::new);
+
+            return getExchangeRates(currency, depositAccount, account, null, card).flatMap(rates ->
+                    F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.DEPOSIT, orderId, description, new Date())))
+                            .flatMap(operation -> {
+                                final F.Promise<Transaction> transactionPromise = F.Promise
+                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
+                                                depositAccount.getId(), account.getId(), null, card.getId(), rates._1._1, rates._1._2, null, rates._2._2, TransactionType.DEPOSIT, new Date(), orderId)));
+
+                                return transactionPromise.map(trans -> new F.Tuple<>(operation, trans));
+                            }));
+        });
+    }
+
     public F.Promise<F.Tuple<Operation, Transaction>> createWithdrawOperation(Card card, Long amount, Currency currency, String orderId, String description) {
         final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
                 .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
@@ -101,6 +138,28 @@ public class OperationService {
                                 final F.Promise<Transaction> transactionPromise = F.Promise
                                         .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
                                                 cardAccount.getId(), withdrawAccount.getId(), card.getId(), null,  rates._1._1, rates._1._2, rates._2._1, null, TransactionType.WITHDRAW)));
+
+                                return transactionPromise.map(trans -> new F.Tuple<>(operation, trans));
+                            }));
+        });
+    }
+
+    public F.Promise<F.Tuple<Operation, Transaction>> createAccomplishWithdrawOperation(Card card, Long amount, Currency currency, String orderId, String description, Account account) {
+//        final F.Promise<Optional<Account>> cardAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.card"))
+//                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
+        final F.Promise<Optional<Account>> withdrawAccountPromise = F.Promise.wrap(propertyRepository.retrieveById("com.msp.accounts.withdraw"))
+                .flatMap(prop -> F.Promise.wrap(accountRepository.retrieveById(prop.orElseThrow(WrongPropertyException::new).getValue())));
+
+        return withdrawAccountPromise.flatMap(accounts -> {
+//            final Account cardAccount = accounts._1.orElseThrow(WrongAccountException::new);
+            final Account withdrawAccount = accounts.orElseThrow(WrongAccountException::new);
+
+            return getExchangeRates(currency, account, withdrawAccount, card, null).flatMap(rates ->
+                    F.Promise.wrap(operationRepository.create(new Operation(null, OperationType.WITHDRAW, orderId, description, new Date())))
+                            .flatMap(operation -> {
+                                final F.Promise<Transaction> transactionPromise = F.Promise
+                                        .wrap(transactionRepository.create(new Transaction(null, operation.getId(), amount, currency.getId(),
+                                                account.getId(), withdrawAccount.getId(), card.getId(), null,  rates._1._1, rates._1._2, rates._2._1, null, TransactionType.WITHDRAW, new Date(), orderId)));
 
                                 return transactionPromise.map(trans -> new F.Tuple<>(operation, trans));
                             }));

@@ -215,13 +215,16 @@ public class TransactionController extends BaseController {
             @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
     public F.Promise<Result> retrieveAll() {
         final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        boolean admin = authData.getAccount().isAdmin();
+
         if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
                 authData.getOrderId(), authData.getAccount().getSecret()))) {
             Logger.error("Provided and calculated enckeys do not match");
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveAll()).map(transactions ->
+        final F.Promise<Result> result = F.Promise.wrap(admin?transactionRepository.retrieveAll(): transactionRepository.retrieveAll(authData.getAccount().getId())).map(transactions ->
                 ok(Json.toJson(new TransactionListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), transactions))));
 
         return returnRecover(result);

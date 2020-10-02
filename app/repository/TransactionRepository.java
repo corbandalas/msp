@@ -39,12 +39,12 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
                     String query = "INSERT INTO " + connectionPool.getSchemaName() + ".transaction(id, operation_id, amount, currency_id," +
                             " from_account_id, to_account_id, from_card_id,  to_card_id, from_account_exchange_rate," +
-                            " to_account_exchange_rate, from_card_exchange_rate, to_card_exchange_rate, type)" +
+                            " to_account_exchange_rate, from_card_exchange_rate, to_card_exchange_rate, type, create_date, order_id)" +
                             " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)";
                     connectionPool.getConnection().query(query, asList(id, entity.getOperationId(), entity.getAmount(), entity.getCurrencyId(),
                             entity.getFromAccountId(), entity.getToAccountId(), entity.getFromCardId(), entity.getToCardId(),
                             entity.getFromAccountExchangeRate(), entity.getToAccountExchangeRate(), entity.getFromCardExchangeRate(),
-                            entity.getToCardExchangeRate(), entity.getType().name()), result -> {
+                            entity.getToCardExchangeRate(), entity.getType().name(), entity.getCreateDate(), entity.getOrderID()), result -> {
                         entity.setId(id);
                         promise.success(entity);
                     }, promise::failure);
@@ -72,6 +72,20 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
         String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction";
         connectionPool.getConnection().query(query, result -> {
+            final ArrayList<Transaction> transactions = new ArrayList<>();
+            result.forEach(row -> transactions.add(createEntity(row)));
+            promise.success(transactions);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Transaction>> retrieveAll(Integer  accountID) {
+
+        final Promise<List<Transaction>> promise = Futures.promise();
+
+        String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".transaction where to_account_id=$1 OR from_account_id=$1";
+        connectionPool.getConnection().query(query, asList(accountID), result -> {
             final ArrayList<Transaction> transactions = new ArrayList<>();
             result.forEach(row -> transactions.add(createEntity(row)));
             promise.success(transactions);
@@ -182,6 +196,6 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return new Transaction(row.getLong("id"), row.getLong("operation_id"), row.getLong("amount"), row.getString("currency_id"),
                 row.getInt("from_account_id"), row.getInt("to_account_id"), row.getLong("from_card_id"), row.getLong("to_card_id"),
                 row.getDouble("from_account_exchange_rate"), row.getDouble("to_account_exchange_rate"), row.getDouble("from_card_exchange_rate"),
-                row.getDouble("to_card_exchange_rate"), TransactionType.valueOf(row.getString("type")));
+                row.getDouble("to_card_exchange_rate"), TransactionType.valueOf(row.getString("type")), row.getTimestamp("create_date"), row.getString("order_id"));
     }
 }

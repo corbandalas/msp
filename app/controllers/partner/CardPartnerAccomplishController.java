@@ -788,8 +788,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 if (providerResponse.getResult().getCode().equalsIgnoreCase("0000")) {
 
-                    returnPromise = operationService.createTransferOperation(data._1._1.get(),
-                            data._1._2.get(), (long) createCard.getAmount() * 100, data._2.get(), "" + System.currentTimeMillis(), "Transfer funds")
+                    returnPromise = operationService.createAccomplishTransferOperation(data._1._1.get(),
+                            data._1._2.get(), (long) createCard.getAmount() * 100, data._2.get(), "" + System.currentTimeMillis(), "Transfer funds", authData.getAccount())
                             .map(res -> ok(Json.toJson(new TransferResponse(true, "ready")
                             )));
                 } else {
@@ -1062,13 +1062,13 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 long amount = (long) (Float.parseFloat(createCard.getAmount()) * 100);
 
                 if (amount > 0) {
-                    return operationService.createDepositOperation(data.get(),
-                            amount, currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
+                    return operationService.createAccomplishDepositOperation(data.get(),
+                            amount, currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel(), authData.getAccount()).map(rez ->
                             ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", "" + amount, Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
                             )));
                 } else {
-                    return operationService.createWithdrawOperation(data.get(),
-                            -amount, currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel()).map(rez ->
+                    return operationService.createAccomplishWithdrawOperation(data.get(),
+                            -amount, currency.get(), ref, StringUtils.isBlank(createCard.getLabel()) ? "Debit card deposit" : createCard.getLabel(), authData.getAccount()).map(rez ->
                             ok(Json.toJson(new LoadResponse(createCard.getToken(), "done", "" + (-amount), Double.parseDouble(acc.getInfo().getAvailableBalance()), ref)
                             )));
                 }
@@ -1921,8 +1921,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         if (providerResponse._2.getResult().getCode().equalsIgnoreCase("0000")) {
 
-                            returnPromise = operationService.createTransferOperation(card._1._1._1._1.get(),
-                                    card._1._1._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds")
+                            returnPromise = operationService.createAccomplishTransferOperation(card._1._1._1._1.get(),
+                                    card._1._1._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds", authData.getAccount())
                                     .flatMap(res -> {
 
                                         WalletTransaction walletTransaction = new WalletTransaction();
