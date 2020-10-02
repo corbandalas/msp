@@ -47,7 +47,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
                     String query = "INSERT INTO " + connectionPool.getSchemaName() + ".transaction(id, operation_id, amount, currency_id," +
                             " from_account_id, to_account_id, from_card_id,  to_card_id, from_account_exchange_rate," +
                             " to_account_exchange_rate, from_card_exchange_rate, to_card_exchange_rate, type, create_date, order_id)" +
-                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)";
+                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)";
                     connectionPool.getConnection().query(query, asList(id, entity.getOperationId(), entity.getAmount(), entity.getCurrencyId(),
                             entity.getFromAccountId(), entity.getToAccountId(), entity.getFromCardId(), entity.getToCardId(),
                             entity.getFromAccountExchangeRate(), entity.getToAccountExchangeRate(), entity.getFromCardExchangeRate(),
