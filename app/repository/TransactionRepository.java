@@ -51,7 +51,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
                     connectionPool.getConnection().query(query, asList(id, entity.getOperationId(), entity.getAmount(), entity.getCurrencyId(),
                             entity.getFromAccountId(), entity.getToAccountId(), entity.getFromCardId(), entity.getToCardId(),
                             entity.getFromAccountExchangeRate(), entity.getToAccountExchangeRate(), entity.getFromCardExchangeRate(),
-                            entity.getToCardExchangeRate(), entity.getType().name(), entity.getCreateDate(), entity.getOrderID()), result -> {
+                            entity.getToCardExchangeRate(), entity.getType().name(), new Timestamp(entity.getCreateDate().getTime()), entity.getOrderID()), result -> {
                         entity.setId(id);
                         promise.success(entity);
                     }, promise::failure);
