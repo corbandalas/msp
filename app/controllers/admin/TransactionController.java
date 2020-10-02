@@ -7,6 +7,8 @@ import configs.Constants;
 import controllers.BaseController;
 import dto.*;
 import model.Transaction;
+import model.enums.OperationType;
+import model.enums.TransactionType;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -15,6 +17,10 @@ import play.mvc.Result;
 import play.mvc.With;
 import repository.TransactionRepository;
 import util.SecurityUtil;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static configs.ReturnCodes.*;
 
@@ -226,6 +232,73 @@ public class TransactionController extends BaseController {
 
         final F.Promise<Result> result = F.Promise.wrap(admin?transactionRepository.retrieveAll(): transactionRepository.retrieveAll(authData.getAccount().getId())).map(transactions ->
                 ok(Json.toJson(new TransactionListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), transactions))));
+
+        return returnRecover(result);
+    }
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "listFilteredTransactions",
+            value = "Filtered transactions list",
+            notes = "Method allows to get list of filtered transactions in admin system",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = TransactionListResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = TransactionListResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+dateFrom+dateTo+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId"),
+            @ApiImplicitParam(value = "Filter object with restriction params", required = true, dataType = "dto.TransactionFilter", paramType = "body")})
+    public F.Promise<Result> retrieveFiltered() {
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final TransactionFilter filter;
+        try {
+            filter = Json.fromJson(jsonNode, TransactionFilter.class);
+        } catch (Exception e) {
+            Logger.error("Wrong request format: ", e);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        Date parsedFromDate;
+        Date parsedToDate;
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            parsedFromDate = simpleDateFormat.parse(filter.getDateFrom());
+            parsedToDate = simpleDateFormat.parse(filter.getDateTo());
+        } catch (ParseException e) {
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        final TransactionType operationType;
+        if (StringUtils.isNotBlank(filter.getType())) {
+            operationType = TransactionType.valueOf(filter.getType());
+            if (operationType == null) {
+                Logger.error("Specified operation type does not exist");
+                return F.Promise.pure(createWrongRequestFormatResponse());
+            }
+        } else operationType = null;
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                filter.getDateFrom(), filter.getDateTo(), authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return F.Promise.pure(createWrongEncKeyResponse());
+        }
+
+        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveByDateAndType(parsedFromDate, parsedToDate,
+                operationType, filter.getLimit(), filter.getOffset(), filter.getOrderID()))
+                .map(operations -> ok(Json.toJson(new TransactionListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), operations))));
 
         return returnRecover(result);
     }

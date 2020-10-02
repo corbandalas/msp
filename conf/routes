@@ -133,6 +133,7 @@ POST    /api/admin/transaction/create                                         @c
 POST    /api/admin/transaction/update                                         @controllers.admin.TransactionController.update()
 GET     /api/admin/transaction/get/:transactionID                             @controllers.admin.TransactionController.retrieveById(transactionID:Int)
 GET     /api/admin/transaction/list                                           @controllers.admin.TransactionController.retrieveAll()
+GET     /api/admin/transaction/listFiltered                                   @controllers.admin.TransactionController.retrieveFiltered()
 GET     /api/admin/transaction/listByOperation/:operationID                   @controllers.admin.TransactionController.retrieveByOperationId(operationID:Long)
 
 # Customer API

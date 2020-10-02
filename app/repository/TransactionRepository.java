@@ -4,14 +4,21 @@ import akka.dispatch.Futures;
 import com.github.pgasync.Row;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import model.Operation;
 import model.Transaction;
+import model.enums.OperationType;
 import model.enums.TransactionType;
+import org.apache.commons.lang3.StringUtils;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
 
@@ -188,6 +195,28 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         connectionPool.getConnection().query(query, asList(fromCardId), result -> {
             promise.success(result.row(0).getDouble(0));
         }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<Transaction>> retrieveByDateAndType(Date dateFrom, Date dateTo, TransactionType type, Short limit, Long offset, String orderID) {
+
+        final Promise<List<Transaction>> promise = Futures.promise();
+
+        final StringBuilder queryBuilder = new StringBuilder("Select * FROM ").append(connectionPool.getSchemaName())
+                .append(".transaction where create_date between $1 and $2");
+
+        if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
+
+        queryBuilder.append(" limit $3 offset $4");
+
+        if (StringUtils.isNotBlank(orderID)) {
+            queryBuilder.append(" and order_id = '").append(orderID).append("'");;
+        }
+
+        connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
+                new Timestamp(dateTo.getTime()), limit, offset), result -> promise.success(StreamSupport
+                .stream(result.spliterator(), true).map(this::createEntity).collect(Collectors.toList())), promise::failure);
 
         return promise.future();
     }
