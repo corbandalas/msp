@@ -271,6 +271,8 @@ public class TransactionController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
+        boolean admin = authData.getAccount().isAdmin();
+
         Date parsedFromDate;
         Date parsedToDate;
         try {
@@ -296,7 +298,8 @@ public class TransactionController extends BaseController {
             return F.Promise.pure(createWrongEncKeyResponse());
         }
 
-        final F.Promise<Result> result = F.Promise.wrap(transactionRepository.retrieveByDateAndType(parsedFromDate, parsedToDate,
+        final F.Promise<Result> result = F.Promise.wrap(admin? transactionRepository.retrieveByDateAndType(parsedFromDate, parsedToDate,
+                operationType, filter.getLimit(), filter.getOffset(), filter.getOrderID()): transactionRepository.retrieveByDateAndType(authData.getAccount().getId(), parsedFromDate, parsedToDate,
                 operationType, filter.getLimit(), filter.getOffset(), filter.getOrderID()))
                 .map(operations -> ok(Json.toJson(new TransactionListResponse(SUCCESS_TEXT, String.valueOf(SUCCESS_CODE), operations))));
 

@@ -199,6 +199,33 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         return promise.future();
     }
 
+    public Future<List<Transaction>> retrieveByDateAndType( Integer  accountID, Date dateFrom, Date dateTo, TransactionType type, Short limit, Long offset, String orderID) {
+
+        final Promise<List<Transaction>> promise = Futures.promise();
+
+        final StringBuilder queryBuilder = new StringBuilder("Select * FROM ").append(connectionPool.getSchemaName())
+                .append(".transaction where create_date between $1 and $2");
+
+        if (StringUtils.isNotBlank(orderID)) {
+            queryBuilder.append(" and order_id = '").append(orderID).append("'");;
+        }
+
+        if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
+
+        queryBuilder.append(" where to_account_id=$5 OR from_account_id=$5");
+
+
+        queryBuilder.append(" limit $3 offset $4");
+
+
+
+        connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
+                new Timestamp(dateTo.getTime()), limit, offset, orderID, accountID), result -> promise.success(StreamSupport
+                .stream(result.spliterator(), true).map(this::createEntity).collect(Collectors.toList())), promise::failure);
+
+        return promise.future();
+    }
+
     public Future<List<Transaction>> retrieveByDateAndType(Date dateFrom, Date dateTo, TransactionType type, Short limit, Long offset, String orderID) {
 
         final Promise<List<Transaction>> promise = Futures.promise();
@@ -208,18 +235,22 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
         if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
 
-        queryBuilder.append(" limit $3 offset $4");
-
         if (StringUtils.isNotBlank(orderID)) {
             queryBuilder.append(" and order_id = '").append(orderID).append("'");;
         }
 
+        queryBuilder.append(" limit $3 offset $4");
+
+
+
         connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
-                new Timestamp(dateTo.getTime()), limit, offset), result -> promise.success(StreamSupport
+                new Timestamp(dateTo.getTime()), limit, offset, orderID), result -> promise.success(StreamSupport
                 .stream(result.spliterator(), true).map(this::createEntity).collect(Collectors.toList())), promise::failure);
 
         return promise.future();
     }
+
+
 
     public Transaction createEntity(Row row) {
         return new Transaction(row.getLong("id"), row.getLong("operation_id"), row.getLong("amount"), row.getString("currency_id"),
