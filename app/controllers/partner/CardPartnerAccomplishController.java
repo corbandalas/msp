@@ -181,6 +181,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
         if (StringUtils.isNotBlank(cdata)) {
+
+            cdata = StringUtils.removeStart(cdata, "\\\"}\"");
+            cdata = StringUtils.removeStart(cdata, "\\\"");
+            cdata = StringUtils.removeStart(cdata, "\"{\\");
+
+
             customer.setCdata2(cdata);
         }
 
