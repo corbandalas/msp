@@ -128,6 +128,17 @@ public class CustomerController extends BaseController {
     }
 
 
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "retrieveByCdata",
+            value = "Method allows to get customer by cdata in admin system",
+            notes = "Get customer by cdata",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = CustomerResponse.class
+    )
+
+
     @ApiResponses(value = {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerResponse.class),
             @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
