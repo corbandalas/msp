@@ -139,6 +139,7 @@ GET     /api/admin/transaction/listByOperation/:operationID                   @c
 # Customer API
 GET     /api-docs/api/admin/customer                                       @pl.matisoft.swagger.ApiHelpController.getResource(path = "/api/admin/customer")
 GET     /api/admin/customer/getByPhone/:phone                              @controllers.admin.CustomerController.retrieveByPhone(phone)
+GET     /api/admin/customer/retrieveByCdata/:cdata                              @controllers.admin.CustomerController.retrieveByCdata(cdata)
 GET     /api/admin/customer/getByKYC/:kyc                                  @controllers.admin.CustomerController.retrieveByKYC(kyc)
 GET     /api/admin/customer/getByEmail/:email                              @controllers.admin.CustomerController.retrieveByEmail(email)
 GET     /api/admin/customer/getByRegistrationDate/:startDate/:endDate      @controllers.admin.CustomerController.retrieveByRegistrationDate(startDate, endDate)
