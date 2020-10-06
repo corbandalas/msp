@@ -382,7 +382,7 @@ public class CustomerController extends BaseController {
 
         customer.setTemppassword(true);
 
-        customer.setAccountID(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString()));
+        customer.setAccountID(authData.getAccount().getId().toString());
 
         final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
                 ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, res))));
