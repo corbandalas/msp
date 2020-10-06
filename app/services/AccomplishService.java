@@ -259,7 +259,7 @@ public class AccomplishService {
             if (StringUtils.isBlank(cdata2)) {
                 customField.setCdata2("empty");
             } else {
-                customField.setCdata2(cdata2);
+                customField.setCdata2(Utils.trasliterateDanish(cdata2));
             }
             if (StringUtils.isNotEmpty(cdata3)) {
                 customField.setCdata3(cdata3);

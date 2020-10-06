@@ -127,6 +127,56 @@ public class CustomerController extends BaseController {
         return returnRecover(result);
     }
 
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "retrieveByCdata",
+            value = "Method allows to get customer by cdata in admin system",
+            notes = "Get customer by cdata",
+            produces = "application/json",
+            httpMethod = "GET",
+            response = CustomerResponse.class
+    )
+
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CustomerResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT),
+            @ApiResponse(code = WRONG_CUSTOMER_ACCOUNT_CODE, message = WRONG_CUSTOMER_ACCOUNT_TEXT),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT)
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cdata", value = "Cdata to retrieve", required = true, dataType = "string", paramType = "path"),
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+cdata+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId")})
+    public Promise<Result> retrieveByCdata(String cdata) {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        if (StringUtils.isBlank(cdata)) {
+
+            return Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+                cdata, authData.getOrderId(), authData.getAccount().getSecret()))) {
+            Logger.error("Provided and calculated enckeys do not match");
+            return Promise.pure(createWrongEncKeyResponse());
+        }
+
+        boolean admin = authData.getAccount().isAdmin();
+
+        final F.Promise<Result> result = F.Promise.wrap(customerRepository.retrieveByUUID(cdata)).map(operationOpt
+                -> operationOpt.map(customer -> ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customer))))
+                .orElse(createWrongCustomerAccountResponse()));
+
+        return returnRecover(result);
+    }
+
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
             nickname = "retrieveByRegistrationDate",
