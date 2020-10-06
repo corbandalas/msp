@@ -421,12 +421,12 @@ public class CustomerController extends BaseController {
             return Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
-                customer.getId(), customer.getFirstName(), authData.getOrderId(),
-                authData.getAccount().getSecret()))) {
-            Logger.error("Provided and calculated enckeys do not match");
-            return Promise.pure(createWrongEncKeyResponse());
-        }
+//        if (!authData.getEnckey().equalsIgnoreCase(SecurityUtil.generateKeyFromArray(authData.getAccount().getId().toString(),
+//                customer.getId(), customer.getFirstName(), authData.getOrderId(),
+//                authData.getAccount().getSecret()))) {
+//            Logger.error("Provided and calculated enckeys do not match");
+//            return Promise.pure(createWrongEncKeyResponse());
+//        }
 
         if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
 
