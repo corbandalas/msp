@@ -669,7 +669,19 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         currency = "DKK";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("tgr_eur")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "EUR";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("tgr_gbp")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "GBP";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
                                     }
+
+
 
                                 } else {
                                     if (createCard.getCardModel().equalsIgnoreCase("mm_parent_wallet_dkk")) {
@@ -680,6 +692,21 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                     } else if (createCard.getCardModel().equalsIgnoreCase("mm_child_card_dkk")) {
                                         cardBrand = CardBrand.CHILDCARD;
                                         currency = "DKK";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("accomplish_eur")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "EUR";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("accomplish_gbp")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "GBP";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("accomplish_eur_wallet")) {
+                                        cardBrand = CardBrand.PARENT_WALLET;
+                                        currency = "EUR";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
                                     }
@@ -1765,11 +1792,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             produces = "application/json",
             consumes = "application/json",
             httpMethod = "POST",
-            response = SuccessAPIV2Response.class
+            response = MiniWalletTransactionResponse.class
     )
 
     @ApiResponses(value = {
-            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = MiniWalletTransactionResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
             @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
             @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),

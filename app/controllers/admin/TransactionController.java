@@ -6,7 +6,10 @@ import com.wordnik.swagger.annotations.*;
 import configs.Constants;
 import controllers.BaseController;
 import dto.*;
+import dto.TransactionResponse;
+import dto.partnerV2.*;
 import model.Transaction;
+import model.WalletTransaction;
 import model.enums.OperationType;
 import model.enums.TransactionType;
 import org.apache.commons.lang3.StringUtils;
@@ -16,11 +19,14 @@ import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.With;
 import repository.TransactionRepository;
+import repository.WalletTransactionRepository;
 import util.SecurityUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static configs.ReturnCodes.*;
 
@@ -35,6 +41,9 @@ public class TransactionController extends BaseController {
 
     @Inject
     private TransactionRepository transactionRepository;
+
+    @Inject
+    WalletTransactionRepository walletTransactionRepository;
 
     @With(BaseMerchantApiAction.class)
     @ApiOperation(
@@ -342,6 +351,83 @@ public class TransactionController extends BaseController {
         return returnRecover(result);
     }
 
+
+    @With(BaseMerchantApiAction.class)
+    @ApiOperation(
+            nickname = "getWalletTransactions",
+            value = "Get mini wallet transactions",
+            notes = "Method allows to get mini wallet transaction",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = AdminMiniWalletTransactionResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = AdminMiniWalletTransactionResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIResponse.class)
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "Account id header", required = true, dataType = "String", paramType = "header", name = "accountId"),
+            @ApiImplicitParam(value = "Enckey header SHA256(accountId+orderId+secret)", required = true, dataType = "String", paramType = "header", name = "enckey"),
+            @ApiImplicitParam(value = "orderId header", required = true, dataType = "String", paramType = "header", name = "orderId"),
+            @ApiImplicitParam(value = "Filter object with restriction params", required = true, dataType = "dto.AdminMiniWalletTransactionRequest", paramType = "body")})
+    public F.Promise<Result> getWalletTransactions() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final AdminMiniWalletTransactionRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, AdminMiniWalletTransactionRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        if (StringUtils.isBlank(createCard.getUuid())
+                ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse());
+        }
+
+        F.Promise<List<WalletTransaction>> wrap = (StringUtils.isNotBlank(createCard.getDateStart()) &&
+                StringUtils.isNotBlank(createCard.getDateEnd())) ?
+                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()) / 1000, Long.parseLong(createCard.getDateStart()) / 1000)) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
+
+        final F.Promise<Result> result = wrap.map(card -> {
+
+            AdminMiniWalletTransactionResponse response = new AdminMiniWalletTransactionResponse();
+
+            response.setUuid(createCard.getUuid());
+
+            ArrayList<Transaction2> transaction2s = new ArrayList<>();
+
+            for (WalletTransaction walletTransaction : card) {
+                Transaction2 transaction2 = new Transaction2();
+                transaction2.setAmount((double) walletTransaction.getAmount_cts() / 100);
+                transaction2.setCurrency(walletTransaction.getCurrency());
+                transaction2.setDate(walletTransaction.getDate_added() * 1000);
+                transaction2.setDescription(walletTransaction.getDescription());
+                transaction2.setReceiver(walletTransaction.getDest_token());
+                transaction2.setToken(walletTransaction.getSrc_token());
+                transaction2.setType(walletTransaction.getType());
+
+                transaction2s.add(transaction2);
+            }
+
+            response.setTransactions(transaction2s);
+
+
+            return ok(Json.toJson(response));
+        });
+
+        return returnRecover(result);
+    }
 
 
 }

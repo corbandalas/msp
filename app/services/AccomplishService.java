@@ -469,10 +469,6 @@ public class AccomplishService {
             String accomplishProd = conf.getString("accomplish.environment.prod");
 
             if (accomplishProd.equalsIgnoreCase("false")) {
-//                bin = Long.parseLong(accomplishSettings.productID1);
-//                type = 0;
-//                status = 1;
-//                currency = "EUR";
 
                 if (cardModel.equalsIgnoreCase("mm_parent_wallet_dkk")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
@@ -482,6 +478,16 @@ public class AccomplishService {
                     bin = Long.parseLong(accomplishSettings.productID2);
                     status = 12;
                     type = 0;
+                } else if (cardModel.equalsIgnoreCase("tgr_eur")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "EUR";
+                }  else if (cardModel.equalsIgnoreCase("tgr_gbp")) {
+                    bin = Long.parseLong(accomplishSettings.productID2);
+                    status = 12;
+                    type = 0;
+                    currency = "GBP";
                 }
 
             } else {
@@ -493,15 +499,23 @@ public class AccomplishService {
                     bin = Long.parseLong(accomplishSettings.productID2);
                     status = 12;
                     type = 0;
+                } else if (cardModel.equalsIgnoreCase("accomplish_eur")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "EUR";
+                }  else if (cardModel.equalsIgnoreCase("accomplish_gbp")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "GBP";
+                }  else if (cardModel.equalsIgnoreCase("accomplish_eur_wallet")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "EUR";
                 }
             }
-
-
-//        if (currency.equalsIgnoreCase("EUR")) {
-//            bin = 4560;
-//        } else if (currency.equalsIgnoreCase("GBP")) {
-//            bin = 4560;
-//        }
 
 
             Info info = new Info();
