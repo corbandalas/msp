@@ -212,7 +212,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
         if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
 
-        queryBuilder.append(" and  (to_account_id=$5 OR from_account_id=$5)");
+        queryBuilder.append(" and  (to_account_id=$3 OR from_account_id=$3)");
 
 
 //        queryBuilder.append(" limit $3 offset $4");
@@ -220,7 +220,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
 
         connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
-                new Timestamp(dateTo.getTime()), limit, offset, orderID, accountID), result -> promise.success(StreamSupport
+                new Timestamp(dateTo.getTime()), accountID), result -> promise.success(StreamSupport
                 .stream(result.spliterator(), true).map(this::createEntity).collect(Collectors.toList())), promise::failure);
 
         return promise.future();
@@ -244,7 +244,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
 
         connectionPool.getConnection().query(queryBuilder.toString(), asList(new Timestamp(dateFrom.getTime()),
-                new Timestamp(dateTo.getTime()), limit, offset, orderID), result -> promise.success(StreamSupport
+                new Timestamp(dateTo.getTime())), result -> promise.success(StreamSupport
                 .stream(result.spliterator(), true).map(this::createEntity).collect(Collectors.toList())), promise::failure);
 
         return promise.future();
