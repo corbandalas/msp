@@ -215,7 +215,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         queryBuilder.append(" where to_account_id=$5 OR from_account_id=$5");
 
 
-        queryBuilder.append(" limit $3 offset $4");
+//        queryBuilder.append(" limit $3 offset $4");
 
 
 
@@ -236,10 +236,10 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
         if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
 
         if (StringUtils.isNotBlank(orderID)) {
-            queryBuilder.append(" and order_id = '").append(orderID).append("'");;
+            queryBuilder.append(" and order_id = '").append(orderID).append("'");
         }
 
-        queryBuilder.append(" limit $3 offset $4");
+//        queryBuilder.append(" limit $3 offset $4");
 
 
 
