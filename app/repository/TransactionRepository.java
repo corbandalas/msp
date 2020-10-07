@@ -212,7 +212,7 @@ public class TransactionRepository implements BaseCRUDRepository<Transaction> {
 
         if (type != null) queryBuilder.append(" and type='").append(type.name()).append("'");
 
-        queryBuilder.append(" where to_account_id=$5 OR from_account_id=$5");
+        queryBuilder.append(" to_account_id=$5 OR from_account_id=$5");
 
 
 //        queryBuilder.append(" limit $3 offset $4");
