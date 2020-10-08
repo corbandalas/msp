@@ -253,7 +253,7 @@ public class CardController extends BaseController {
             return Promise.pure(createWrongRequestFormatResponse());
         }
 
-        Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveById(cardID):cardRepository.retrieveById(cardID, authData.getAccount().getId().toString())).map(res -> res.map(card
+        Promise<Result> result = Promise.wrap(admin?cardRepository.retrieveByToken(cardID):cardRepository.retrieveByToken(cardID, authData.getAccount().getId().toString())).map(res -> res.map(card
                 -> ok(Json.toJson(new CardResponse(""+SUCCESS_CODE, SUCCESS_TEXT, card)))).orElse(createWrongCardResponse()));
 
         return returnRecover(result);
