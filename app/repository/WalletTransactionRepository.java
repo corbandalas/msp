@@ -4,7 +4,9 @@ import akka.dispatch.Futures;
 import com.github.pgasync.Row;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import model.Transaction;
 import model.WalletTransaction;
+import org.apache.commons.lang3.StringUtils;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -133,6 +135,45 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
 
         String query = "SELECT * FROM " + connectionPool.getSchemaName() + ".wallet_transaction where uuid=$1 and date_added >= $2 and date_added <=$3";
         connectionPool.getConnection().query(query, asList(uuid, fromDate, toDate), result -> {
+            final ArrayList<WalletTransaction> transactions = new ArrayList<>();
+            result.forEach(row -> transactions.add(createEntity(row)));
+            promise.success(transactions);
+        }, promise::failure);
+
+        return promise.future();
+    }
+
+    public Future<List<WalletTransaction>> retrieveFiltered(String uuid, long toDate, long fromDate, String sourceToken,
+                                                                 String destToken) {
+
+
+
+        final StringBuilder queryBuilder = new StringBuilder("Select * FROM ").append(connectionPool.getSchemaName())
+                .append(".wallet_transaction where ");
+
+
+        if (toDate > 0 && fromDate > 0) {
+            queryBuilder.append( ("date_added >=" + fromDate + " and date_added <=" + toDate));
+        }
+
+
+        if (StringUtils.isNoneBlank(uuid)) {
+            queryBuilder.append( (" and uuid =" + uuid));
+        }
+
+        if (StringUtils.isNoneBlank(sourceToken)) {
+            queryBuilder.append( (" and src_token =" + sourceToken));
+        }
+
+        if (StringUtils.isNoneBlank(destToken)) {
+            queryBuilder.append( (" and src_token =" + sourceToken));
+        }
+
+
+
+        final Promise<List<WalletTransaction>> promise = Futures.promise();
+
+        connectionPool.getConnection().query(queryBuilder.toString(), result -> {
             final ArrayList<WalletTransaction> transactions = new ArrayList<>();
             result.forEach(row -> transactions.add(createEntity(row)));
             promise.success(transactions);

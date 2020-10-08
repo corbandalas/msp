@@ -389,15 +389,14 @@ public class TransactionController extends BaseController {
             return F.Promise.pure(createWrongRequestFormatResponse());
         }
 
-        if (StringUtils.isBlank(createCard.getUuid())
-                ) {
-            Logger.error("Missing params");
-            return F.Promise.pure(createWrongRequestFormatResponse());
-        }
-
-        F.Promise<List<WalletTransaction>> wrap = (StringUtils.isNotBlank(createCard.getDateStart()) &&
-                StringUtils.isNotBlank(createCard.getDateEnd())) ?
-                F.Promise.wrap(walletTransactionRepository.retrieveByUuidAndDate(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()) / 1000, Long.parseLong(createCard.getDateStart()) / 1000)) : F.Promise.wrap(walletTransactionRepository.retrieveByUuid(createCard.getUuid()));
+//        if (StringUtils.isBlank(createCard.getUuid())
+//                ) {
+//            Logger.error("Missing params");
+//            return F.Promise.pure(createWrongRequestFormatResponse());
+//        }
+//
+        F.Promise<List<WalletTransaction>> wrap = (
+                F.Promise.wrap(walletTransactionRepository.retrieveFiltered(createCard.getUuid(), Long.parseLong(createCard.getDateEnd()) / 1000, Long.parseLong(createCard.getDateStart()) / 1000, createCard.getSourceToken(), createCard.getDestToken())));
 
         final F.Promise<Result> result = wrap.map(card -> {
 
