@@ -428,11 +428,9 @@ public class CustomerController extends BaseController {
 //            return Promise.pure(createWrongEncKeyResponse());
 //        }
 
-        if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
+//        if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
 
         customer.setTemppassword(true);
-
-        customer.setAccountID(authData.getAccount().getId().toString());
 
         final Promise<Result> result = Promise.wrap(customerRepository.create(customer)).map(res ->
                 ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, res))));
