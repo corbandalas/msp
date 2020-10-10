@@ -17,10 +17,12 @@ import play.mvc.Result;
 import play.mvc.With;
 import repository.CustomerRepository;
 import scala.concurrent.Future;
+import util.DateUtil;
 import util.SecurityUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -429,6 +431,20 @@ public class CustomerController extends BaseController {
 //        }
 
 //        if (customer.getRegistrationDate() == null) customer.setRegistrationDate(new Date());
+
+        Date dateBirth = customer.getDateBirth();
+
+        if (dateBirth != null) {
+            Calendar instance = Calendar.getInstance();
+
+            instance.setTime(dateBirth);
+
+            instance.add(Calendar.HOUR, 12);
+
+            dateBirth = instance.getTime();
+
+            customer.setDateBirth(dateBirth);
+        }
 
         customer.setTemppassword(true);
 
