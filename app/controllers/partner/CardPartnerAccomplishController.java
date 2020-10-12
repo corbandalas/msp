@@ -1748,7 +1748,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     }
 
                 } else {
-                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
+                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
                 }
