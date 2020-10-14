@@ -158,15 +158,15 @@ public class WalletTransactionRepository implements BaseCRUDRepository<WalletTra
 
 
         if (StringUtils.isNoneBlank(uuid)) {
-            queryBuilder.append( (" and uuid =" + uuid));
+            queryBuilder.append( (" and uuid ='" + uuid +"' "));
         }
 
         if (StringUtils.isNoneBlank(sourceToken)) {
-            queryBuilder.append( (" and src_token =" + sourceToken));
+            queryBuilder.append( (" and src_token = '" + sourceToken + "'"));
         }
 
         if (StringUtils.isNoneBlank(destToken)) {
-            queryBuilder.append( (" and src_token =" + sourceToken));
+            queryBuilder.append( (" and src_token ='" + sourceToken + "'"));
         }
 
 
