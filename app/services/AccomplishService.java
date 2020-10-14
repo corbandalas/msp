@@ -61,7 +61,10 @@ import util.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import play.libs.ws.*;
 /**
  * Accomplish payment service
  *
@@ -77,6 +80,10 @@ public class AccomplishService {
 
     @Inject
     private CustomerRepository customerRepository;
+
+
+    @Inject
+    private WSClient ws;
 
 
     private class AccomplishSettings {
@@ -114,11 +121,11 @@ public class AccomplishService {
 
         Logger.info("Query: " + query);
 
-        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+//        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         final Promise<String> promise = Futures.promise();
 
 
-        asyncHttpClient.preparePost(query)
+        Utils.asyncHttpClient.preparePost(query)
                 .addFormParam("grant_type", "program_credential")
                 .addFormParam("user_name", accomplishSettings.userName)
                 .addFormParam("password", accomplishSettings.password)
@@ -938,6 +945,8 @@ public class AccomplishService {
 
         Logger.info("Accomplish request body: " + body);
 
+//        ws.url(query).pu
+
 
         final Promise<String> promise = Futures.promise();
 
@@ -973,6 +982,12 @@ public class AccomplishService {
             boundRequestBuilder = boundRequestBuilder.addHeader("show_sensitive_data", "1");
             boundRequestBuilder = boundRequestBuilder.addHeader("show_custom_field", "1");
         }
+
+//        try {
+//            Response response = boundRequestBuilder.execute().get(100, TimeUnit.SECONDS);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 
         boundRequestBuilder.execute(new AsyncCompletionHandler<String>() {
