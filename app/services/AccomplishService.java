@@ -938,21 +938,21 @@ public class AccomplishService {
 
         Logger.info("Accomplish request body: " + body);
 
-        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+
         final Promise<String> promise = Futures.promise();
 
         AsyncHttpClient.BoundRequestBuilder boundRequestBuilder = null;
 
         if (method.equalsIgnoreCase("POST")) {
 
-            boundRequestBuilder = asyncHttpClient.preparePost(query);
+            boundRequestBuilder = Utils.asyncHttpClient.preparePost(query);
 
         } else if (method.equalsIgnoreCase("GET")) {
-            boundRequestBuilder = asyncHttpClient.prepareGet(query);
+            boundRequestBuilder = Utils.asyncHttpClient.prepareGet(query);
         } else if (method.equalsIgnoreCase("PUT")) {
-            boundRequestBuilder = asyncHttpClient.preparePut(query);
+            boundRequestBuilder = Utils.asyncHttpClient.preparePut(query);
         } else if (method.equalsIgnoreCase("DELETE")) {
-            boundRequestBuilder = asyncHttpClient.prepareDelete(query);
+            boundRequestBuilder = Utils.asyncHttpClient.prepareDelete(query);
         }
 
         String sourceID = "" + System.currentTimeMillis();

@@ -3,6 +3,7 @@ package util;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+import com.ning.http.client.AsyncHttpClient;
 import exception.MspException;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
@@ -29,6 +30,8 @@ import java.util.*;
  * @since 0.1.0
  */
 public final class Utils {
+
+    public static final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
     /**
      * Constant for timestamp {@value}
