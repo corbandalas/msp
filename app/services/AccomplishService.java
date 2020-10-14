@@ -82,9 +82,6 @@ public class AccomplishService {
     private CustomerRepository customerRepository;
 
 
-    @Inject
-    private WSClient ws;
-
 
     private class AccomplishSettings {
 
@@ -988,7 +985,6 @@ public class AccomplishService {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-
 
         boundRequestBuilder.execute(new AsyncCompletionHandler<String>() {
 
