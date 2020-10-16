@@ -37,4 +37,6 @@ public class CreateCustomerRequest {
     private Object cdata2;
     private String cdata3;
 
+    private String currency;
+
 }

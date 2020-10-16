@@ -160,7 +160,7 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<CreateUserResponse> createUser(String emailValue, String title, String firstName, String lastName,
+    public F.Promise<CreateUserResponse> createUser(String currency, String emailValue, String title, String firstName, String lastName,
                                                     String birthdayDate, String mobilePhone, String nationality,
                                                     String kycLevel, String address1, String address2, String city,
                                                     String zip, String country, String lang, String password, String cdata1, String cdata2, String cdata3, String partnerID) {
@@ -225,20 +225,29 @@ public class AccomplishService {
 
 
             List<Currency> currencies = new ArrayList<Currency>();
-            Currency currency = new Currency();
-            currency.setCode("DKK");
 
-            currencies.add(currency);
+            if (StringUtils.isNotBlank(currency)) {
+                Currency curObject = new Currency();
+                curObject.setCode(currency);
 
-            Currency currency2 = new Currency();
-            currency2.setCode("EUR");
+                currencies.add(curObject);
+            } else {
+                Currency curObject = new Currency();
+                curObject.setCode("DKK");
 
-            currencies.add(currency2);
+                currencies.add(curObject);
+            }
 
-            Currency currency3 = new Currency();
-            currency3.setCode("GBP");
 
-            currencies.add(currency3);
+//            Currency currency2 = new Currency();
+//            currency2.setCode("EUR");
+//
+//            currencies.add(currency2);
+//
+//            Currency currency3 = new Currency();
+//            currency3.setCode("GBP");
+//
+//            currencies.add(currency3);
 
             Preferences preferences = new Preferences();
             preferences.setTimeZone("UTC +03:00");
