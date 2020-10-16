@@ -227,7 +227,18 @@ public class AccomplishService {
             List<Currency> currencies = new ArrayList<Currency>();
             Currency currency = new Currency();
             currency.setCode("DKK");
+
             currencies.add(currency);
+
+            Currency currency2 = new Currency();
+            currency2.setCode("EUR");
+
+            currencies.add(currency2);
+
+            Currency currency3 = new Currency();
+            currency3.setCode("GBP");
+
+            currencies.add(currency3);
 
             Preferences preferences = new Preferences();
             preferences.setTimeZone("UTC +03:00");
