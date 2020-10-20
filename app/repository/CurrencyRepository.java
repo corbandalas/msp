@@ -15,6 +15,7 @@ import model.ExchangeRateHistory;
 import play.Logger;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import util.Utils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -110,12 +111,11 @@ public class CurrencyRepository implements BaseCRUDRepository<Currency> {
 
         final String query = url + "?access_key=" + apiKey + "&currencies=" + currencies.parallelStream().map(BaseEntity::getId).collect(Collectors.joining(","));
 
-        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
         final Promise<CurrencyExchangeRatesResponse> promise = Futures.promise();
 
 
-        asyncHttpClient.prepareGet(query).execute(new AsyncCompletionHandler<CurrencyExchangeRatesResponse>() {
+        Utils.asyncHttpClient.prepareGet(query).execute(new AsyncCompletionHandler<CurrencyExchangeRatesResponse>() {
 
             @Override
             public CurrencyExchangeRatesResponse onCompleted(Response response) throws Exception {
