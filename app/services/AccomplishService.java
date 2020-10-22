@@ -442,8 +442,8 @@ public class AccomplishService {
             typeValue = 10;
             entityValue = 60;
         } else if (type.equalsIgnoreCase("insuranceDocument")) {
-            typeValue = 11;
-            entityValue = 60;
+            typeValue = 15;
+            entityValue = 25;
         } else if (type.equalsIgnoreCase("other")) {
             typeValue = 12;
             entityValue = 60;
