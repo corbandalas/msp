@@ -321,6 +321,117 @@ public final class Utils {
         source = StringUtils.replace(source, "Å", "Aa");
         source = StringUtils.replace(source, "å", "aa");
 
+        source = StringUtils.replace(source, "É", "E");
+        source = StringUtils.replace(source, "é", "e");
+        source = StringUtils.replace(source, "Â", "A");
+        source = StringUtils.replace(source, "â", "a");
+        source = StringUtils.replace(source, "Ê", "E");
+        source = StringUtils.replace(source, "ê", "e");
+        source = StringUtils.replace(source, "Î", "I");
+        source = StringUtils.replace(source, "î", "i");
+        source = StringUtils.replace(source, "Ô", "O");
+        source = StringUtils.replace(source, "ô", "o");
+        source = StringUtils.replace(source, "Û", "U");
+        source = StringUtils.replace(source, "û", "u");
+        source = StringUtils.replace(source, "À", "A");
+        source = StringUtils.replace(source, "à", "a");
+        source = StringUtils.replace(source, "È", "E");
+        source = StringUtils.replace(source, "è", "e");
+
+        source = StringUtils.replace(source, "Ù", "U");
+        source = StringUtils.replace(source, "ù", "u");
+        source = StringUtils.replace(source, "Ë", "E");
+        source = StringUtils.replace(source, "ë", "ë");
+
+        source = StringUtils.replace(source, "Ï", "I");
+        source = StringUtils.replace(source, "ï", "i");
+        source = StringUtils.replace(source, "Ü", "U");
+        source = StringUtils.replace(source, "ü", "u");
+
+        source = StringUtils.replace(source, "Ÿ", "Y");
+        source = StringUtils.replace(source, "ÿ", "y");
+        source = StringUtils.replace(source, "Ç", "C");
+        source = StringUtils.replace(source, "ç", "c");
+
+        source = StringUtils.replace(source, "Ä", "A");
+        source = StringUtils.replace(source, "ä", "a");
+        source = StringUtils.replace(source, "Ö", "O");
+        source = StringUtils.replace(source, "ö", "o");
+
+
+        source = StringUtils.replace(source, "ẞ", "Ss");
+        source = StringUtils.replace(source, "ß", "ss");
+        source = StringUtils.replace(source, "Á", "A");
+        source = StringUtils.replace(source, "á", "a");
+
+        source = StringUtils.replace(source, "Ð", "D");
+        source = StringUtils.replace(source, "ð", "d");
+        source = StringUtils.replace(source, "Ó", "O");
+        source = StringUtils.replace(source, "ó", "o");
+
+        source = StringUtils.replace(source, "Ú", "U");
+        source = StringUtils.replace(source, "ú", "u");
+        source = StringUtils.replace(source, "Ý", "Y");
+        source = StringUtils.replace(source, "ý", "y");
+
+        source = StringUtils.replace(source, "Ñ", "N");
+        source = StringUtils.replace(source, "ñ", "n");
+        source = StringUtils.replace(source, "Á", "A");
+        source = StringUtils.replace(source, "á", "a");
+
+        source = StringUtils.replace(source, "Ã", "A");
+        source = StringUtils.replace(source, "ã", "a");
+        source = StringUtils.replace(source, "Í", "I");
+        source = StringUtils.replace(source, "í", "i");
+
+        source = StringUtils.replace(source, "Õ", "O");
+        source = StringUtils.replace(source, "õ", "o");
+        source = StringUtils.replace(source, "Ğ", "G");
+        source = StringUtils.replace(source, "ğ", "g");
+
+        source = StringUtils.replace(source, "Ş", "S");
+        source = StringUtils.replace(source, "ş", "s");
+        source = StringUtils.replace(source, "ă", "a");
+        source = StringUtils.replace(source, "Ă", "A");
+
+        source = StringUtils.replace(source, "Ą", "A");
+        source = StringUtils.replace(source, "ą", "a");
+        source = StringUtils.replace(source, "Č", "C");
+        source = StringUtils.replace(source, "č", "c");
+
+        source = StringUtils.replace(source, "Ę", "E");
+        source = StringUtils.replace(source, "ę", "e");
+        source = StringUtils.replace(source, "Ē", "E");
+        source = StringUtils.replace(source, "ē", "e");
+
+        source = StringUtils.replace(source, "Ė", "E");
+        source = StringUtils.replace(source, "ė", "e");
+        source = StringUtils.replace(source, "Į", "I");
+        source = StringUtils.replace(source, "į", "i");
+
+        source = StringUtils.replace(source, "Š", "S");
+        source = StringUtils.replace(source, "š", "s");
+        source = StringUtils.replace(source, "Ų", "U");
+        source = StringUtils.replace(source, "ų", "u");
+
+        source = StringUtils.replace(source, "Ž", "Z");
+        source = StringUtils.replace(source, "ž", "ž");
+        source = StringUtils.replace(source, "Ā", "A");
+        source = StringUtils.replace(source, "ā", "a");
+
+        source = StringUtils.replace(source, "Ģ", "G");
+        source = StringUtils.replace(source, "ģ", "g");
+        source = StringUtils.replace(source, "Ī", "I");
+        source = StringUtils.replace(source, "ī", "i");
+
+        source = StringUtils.replace(source, "Ķ", "K");
+        source = StringUtils.replace(source, "ķ", "k");
+        source = StringUtils.replace(source, "Ļ", "L");
+        source = StringUtils.replace(source, "ļ", "l");
+
+        source = StringUtils.replace(source, "Ņ", "N");
+        source = StringUtils.replace(source, "ņ", "n");
+
         return source;
 
 
