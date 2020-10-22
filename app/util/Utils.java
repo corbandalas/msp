@@ -341,7 +341,7 @@ public final class Utils {
         source = StringUtils.replace(source, "Ù", "U");
         source = StringUtils.replace(source, "ù", "u");
         source = StringUtils.replace(source, "Ë", "E");
-        source = StringUtils.replace(source, "ë", "ë");
+        source = StringUtils.replace(source, "ë", "e");
 
         source = StringUtils.replace(source, "Ï", "I");
         source = StringUtils.replace(source, "ï", "i");
@@ -415,7 +415,7 @@ public final class Utils {
         source = StringUtils.replace(source, "ų", "u");
 
         source = StringUtils.replace(source, "Ž", "Z");
-        source = StringUtils.replace(source, "ž", "ž");
+        source = StringUtils.replace(source, "ž", "z");
         source = StringUtils.replace(source, "Ā", "A");
         source = StringUtils.replace(source, "ā", "a");
 
