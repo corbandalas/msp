@@ -1188,9 +1188,9 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 } else if (accStatus.equalsIgnoreCase("1")) {
                     status = "active";
                 } else if (accStatus.equalsIgnoreCase("2")) {
-                    status = "lost_or_stolen";
+                    status = "lostOrStolen";
                 } else if (accStatus.equalsIgnoreCase("3")) {
-                    status = "lost_or_stolen";
+                    status = "lostOrStolen";
                 } else if (accStatus.equalsIgnoreCase("4")) {
                     status = "blocked";
                 } else if (accStatus.equalsIgnoreCase("5")) {
