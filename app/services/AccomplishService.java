@@ -7,6 +7,7 @@ import accomplish.dto.account.GetAccountResponse;
 import accomplish.dto.account.activate.*;
 import accomplish.dto.account.activate.response.ActivateResponse;
 import accomplish.dto.account.balance.response.GetBINBalanceResponse;
+import accomplish.dto.account.document.GetDocumentResponse;
 import accomplish.dto.account.load.Account;
 import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.account.update.UpdateCardRequest;
@@ -633,6 +634,24 @@ public class AccomplishService {
         F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID, true);
         return promise.map(res -> {
             GetAccountResponse getAccountResponse = gson.fromJson(res, GetAccountResponse.class);
+
+            return getAccountResponse;
+        });
+    }
+
+
+    public F.Promise<GetDocumentResponse> getDocument(String userID, String partnerID) {
+
+        final GsonBuilder gsonBuilder = new GsonBuilder().excludeFieldsWithoutExposeAnnotation();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+
+
+        F.Promise<String> promise = execute("service/v1/user/document/" + userID, "", "GET", partnerID, true);
+        return promise.map(res -> {
+            GetDocumentResponse getAccountResponse = gson.fromJson(res, GetDocumentResponse.class);
 
             return getAccountResponse;
         });
