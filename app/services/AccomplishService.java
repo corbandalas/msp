@@ -303,7 +303,7 @@ public class AccomplishService {
             String json = gson.toJson(createUser);
 
 
-            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, true);
+            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
 
             return promise.map(res -> {
                 CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
@@ -380,7 +380,7 @@ public class AccomplishService {
         final Gson gson = gsonBuilder.create();
 
 
-        F.Promise<String> promise = execute("service/v1/user/" + userID, "", "GET", partnerID, true);
+        F.Promise<String> promise = execute("service/v1/user/" + userID, "", "GET", partnerID, false);
 
         return promise.map(res -> {
             GetCustomerResponse createUserResponse = gson.fromJson(res, GetCustomerResponse.class);
@@ -649,7 +649,7 @@ public class AccomplishService {
 
 
 
-        F.Promise<String> promise = execute("service/v1/user/document/" + userID, "", "GET", partnerID, true);
+        F.Promise<String> promise = execute("service/v1/user/document/" + userID, "", "GET", partnerID, false);
         return promise.map(res -> {
             GetDocumentResponse getAccountResponse = gson.fromJson(res, GetDocumentResponse.class);
 
@@ -714,7 +714,7 @@ public class AccomplishService {
 
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise = execute("service/v1/account/" + cardID, gson.toJson(updateCardRequest), "PUT", partnerID, true);
+        F.Promise<String> promise = execute("service/v1/account/" + cardID, gson.toJson(updateCardRequest), "PUT", partnerID, false);
         return promise.map(res -> {
             UpdateAccountResponse getAccountResponse = gson.fromJson(res, UpdateAccountResponse.class);
 
@@ -747,8 +747,8 @@ public class AccomplishService {
 //
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise1 = execute("service/v1/bin/info/" + accomplishSettings.productID1, "", "GET", partnerID, true);
-        F.Promise<String> promise2 = execute("service/v1/bin/info/" + accomplishSettings.productID2, "", "GET", partnerID, true);
+        F.Promise<String> promise1 = execute("service/v1/bin/info/" + accomplishSettings.productID1, "", "GET", partnerID, false);
+        F.Promise<String> promise2 = execute("service/v1/bin/info/" + accomplishSettings.productID2, "", "GET", partnerID, false);
         return promise1.zip(promise2).map(res -> {
             GetBINBalanceResponse getAccountResponse1 = gson.fromJson(res._1, GetBINBalanceResponse.class);
             GetBINBalanceResponse getAccountResponse2 = gson.fromJson(res._2, GetBINBalanceResponse.class);
