@@ -621,7 +621,7 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<GetAccountResponse> getAccount(String cardID, String partnerID) {
+    public F.Promise<GetAccountResponse> getAccount(String cardID, String partnerID, boolean showSensetiveData) {
 
         final GsonBuilder gsonBuilder = new GsonBuilder().excludeFieldsWithoutExposeAnnotation();
         gsonBuilder.disableHtmlEscaping();
@@ -630,7 +630,7 @@ public class AccomplishService {
 
 
 
-        F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID, true);
+        F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID, showSensetiveData);
         return promise.map(res -> {
             GetAccountResponse getAccountResponse = gson.fromJson(res, GetAccountResponse.class);
 
