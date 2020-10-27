@@ -1069,7 +1069,7 @@ public class AccomplishService {
 
             Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
 
-            String[] split = StringUtils.split(gpsConfigStringValue, "|");
+            String[] split = StringUtils.split(gpsConfigStringValue, "|" );
 
             return new AccomplishSettings(split[0], split[1], split[2], split[5], split[3], split[4]);
         });

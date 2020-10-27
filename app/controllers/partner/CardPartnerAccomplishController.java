@@ -2019,7 +2019,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                         F.Promise<Result> returnPromise = null;
 
-                        if (providerResponse._2.getResult().getCode().equalsIgnoreCase("0000")) {
+                        if (providerResponse._2.getResult().getCode().equalsIgnoreCase("0000") ) {
 
                             returnPromise = operationService.createAccomplishTransferOperation(card._1._1._1._1.get(),
                                     card._1._1._2.get(), (long) createCard.getAmount() * 100, providerResponse._1.get(), "" + System.currentTimeMillis(), "Transfer funds", authData.getAccount())
