@@ -1,6 +1,7 @@
 package controllers.partner;
 
 import accomplish.dto.account.GetAccountResponse;
+import accomplish.dto.account.info.GetAccountInfoResponse;
 import accomplish.dto.account.update.response.UpdateAccountResponse;
 import accomplish.dto.customerget.*;
 import accomplish.dto.customerget.GetCustomerResponse;
@@ -1640,7 +1641,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
-        F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId(), false);
+        F.Promise<GetAccountInfoResponse> accountPromise = accomplishService.getAccountInfo(createCard.getToken(), "" + authData.getAccount().getId(), false);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -1796,8 +1797,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
             Logger.info("Sum after = " + sumAfter);
 
-            F.Promise<GetAccountResponse> source = accomplishService.getAccount(card._1._1.get().getToken(), "" + authData.getAccount().getId(), false);
-            F.Promise<GetAccountResponse> dest = accomplishService.getAccount(card._2.get().getToken(), "" + authData.getAccount().getId(), false);
+            F.Promise<GetAccountInfoResponse> source = accomplishService.getAccountInfo(card._1._1.get().getToken(), "" + authData.getAccount().getId(), false);
+            F.Promise<GetAccountInfoResponse> dest = accomplishService.getAccountInfo(card._2.get().getToken(), "" + authData.getAccount().getId(), false);
 
             return source.zip(dest).flatMap(cards -> {
 
@@ -1984,8 +1985,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<Optional<Card>> receiverCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getReceiver()));
         F.Promise<Double> sum = F.Promise.wrap(walletTransactionRepository.retrieveSumByUUID(createCard.getUuid()));
-        F.Promise<GetAccountResponse> source = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId(), false);
-        F.Promise<GetAccountResponse> dest = accomplishService.getAccount(createCard.getReceiver(), "" + authData.getAccount().getId(), false);
+        F.Promise<GetAccountInfoResponse> source = accomplishService.getAccountInfo(createCard.getToken(), "" + authData.getAccount().getId(), false);
+        F.Promise<GetAccountInfoResponse> dest = accomplishService.getAccountInfo(createCard.getReceiver(), "" + authData.getAccount().getId(), false);
 
 
         final F.Promise<Result> result = senderCardPromise.zip(sum).zip(receiverCardPromise).zip(source).zip(dest).flatMap(card -> {
