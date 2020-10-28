@@ -1267,7 +1267,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 } else if (accStatus.equalsIgnoreCase("9")) {
                     status = "blocked";
                 } else if (accStatus.equalsIgnoreCase("12")) {
-                    status = "active";
+                    status = "ready";
                 }
 
                 Card card = acc._1.get();
