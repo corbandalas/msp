@@ -66,7 +66,9 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import play.libs.ws.*;
+
 /**
  * Accomplish payment service
  *
@@ -82,7 +84,6 @@ public class AccomplishService {
 
     @Inject
     private CustomerRepository customerRepository;
-
 
 
     private class AccomplishSettings {
@@ -121,43 +122,60 @@ public class AccomplishService {
         Logger.info("Query: " + query);
 
 //        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+
+        String token = "";
+
         final Promise<String> promise = Futures.promise();
 
+        try {
+            token = (String) CacheProvider.getInstance().getObject("accomplish.token");
 
-        Utils.asyncHttpClient.preparePost(query)
-                .addFormParam("grant_type", "program_credential")
-                .addFormParam("user_name", accomplishSettings.userName)
-                .addFormParam("password", accomplishSettings.password)
-                .addFormParam("program_Id", accomplishSettings.programID)
-                .addFormParam("language", "en")
+        } catch (Exception e) {
+            Logger.error("Getting oauth token from cache error", e);
+        }
 
-                .execute(new AsyncCompletionHandler<String>() {
+        if (StringUtils.isBlank(token)) {
+            Utils.asyncHttpClient.preparePost(query)
+                    .addFormParam("grant_type", "program_credential")
+                    .addFormParam("user_name", accomplishSettings.userName)
+                    .addFormParam("password", accomplishSettings.password)
+                    .addFormParam("program_Id", accomplishSettings.programID)
+                    .addFormParam("language", "en")
 
-                    @Override
-                    public String onCompleted(Response response) throws Exception {
+                    .execute(new AsyncCompletionHandler<String>() {
 
-                        String responseBody = response.getResponseBody();
-                        Logger.info("///Accomplish OAuth API response: " + responseBody);
+                        @Override
+                        public String onCompleted(Response response) throws Exception {
 
-                        final GsonBuilder gsonBuilder = new GsonBuilder();
-                        gsonBuilder.disableHtmlEscaping();
+                            String responseBody = response.getResponseBody();
+                            Logger.info("///Accomplish OAuth API response: " + responseBody);
 
-                        final Gson gson = gsonBuilder.create();
+                            final GsonBuilder gsonBuilder = new GsonBuilder();
+                            gsonBuilder.disableHtmlEscaping();
 
-                        TokenResponse tokenResponse = gson.fromJson(responseBody, TokenResponse.class);
+                            final Gson gson = gsonBuilder.create();
 
-                        promise.success(tokenResponse.getAccessToken());
+                            TokenResponse tokenResponse = gson.fromJson(responseBody, TokenResponse.class);
 
-                        return responseBody;
-                    }
+                            CacheProvider.getInstance().putObject("accomplish.token", tokenResponse.getAccessToken()/*, 24 * 60 * 60*/);
 
-                    @Override
-                    public void onThrowable(Throwable t) {
-                        Logger.error("/////Error while retrieving Accomplish API response", t);
+                            promise.success(tokenResponse.getAccessToken());
 
-                        promise.failure(t);
-                    }
-                });
+                            return responseBody;
+                        }
+
+                        @Override
+                        public void onThrowable(Throwable t) {
+                            Logger.error("/////Error while retrieving Accomplish API response", t);
+
+                            promise.failure(t);
+                        }
+                    });
+        } else {
+                return Futures.successful(token);
+        }
+
+
         return promise.future();
     }
 
@@ -278,7 +296,6 @@ public class AccomplishService {
             createUser.setPersonalInfo(personalInfo);
 
             CustomField customField = new CustomField();
-
 
 
             customField.setCdata1(cdata1);
@@ -509,7 +526,7 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "EUR";
-                }  else if (cardModel.equalsIgnoreCase("tgr_gbp")) {
+                } else if (cardModel.equalsIgnoreCase("tgr_gbp")) {
                     bin = Long.parseLong(accomplishSettings.productID2);
                     status = 12;
                     type = 0;
@@ -530,12 +547,12 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "EUR";
-                }  else if (cardModel.equalsIgnoreCase("accomplish_gbp")) {
+                } else if (cardModel.equalsIgnoreCase("accomplish_gbp")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
                     status = 12;
                     type = 0;
                     currency = "GBP";
-                }  else if (cardModel.equalsIgnoreCase("accomplish_eur_wallet")) {
+                } else if (cardModel.equalsIgnoreCase("accomplish_eur_wallet")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
                     status = 12;
                     type = 0;
@@ -631,7 +648,6 @@ public class AccomplishService {
         final Gson gson = gsonBuilder.create();
 
 
-
         F.Promise<String> promise = execute("service/v1/account/" + cardID, "", "GET", partnerID, showSensetiveData);
         return promise.map(res -> {
             GetAccountResponse getAccountResponse = gson.fromJson(res, GetAccountResponse.class);
@@ -648,8 +664,7 @@ public class AccomplishService {
         final Gson gson = gsonBuilder.create();
 
 
-
-        F.Promise<String> promise = execute("service/v1/account/info" + cardID, "", "GET", partnerID, showSensetiveData);
+        F.Promise<String> promise = execute("service/v1/account/info/" + cardID, "", "GET", partnerID, showSensetiveData);
         return promise.map(res -> {
             GetAccountInfoResponse getAccountResponse = gson.fromJson(res, GetAccountInfoResponse.class);
 
@@ -664,7 +679,6 @@ public class AccomplishService {
         gsonBuilder.disableHtmlEscaping();
 
         final Gson gson = gsonBuilder.create();
-
 
 
         F.Promise<String> promise = execute("service/v1/user/document/" + userID, "", "GET", partnerID, false);
@@ -742,7 +756,7 @@ public class AccomplishService {
 
 
     public F.Promise<GetBINBalanceResponse[]> getAccountBalance(
-                                                                                                     String partnerID) {
+            String partnerID) {
 
 
 //        UpdateCardRequest updateCardRequest = new UpdateCardRequest();
@@ -1087,7 +1101,7 @@ public class AccomplishService {
 
             Logger.info("gpsConfigStringValue = " + gpsConfigStringValue);
 
-            String[] split = StringUtils.split(gpsConfigStringValue, "|" );
+            String[] split = StringUtils.split(gpsConfigStringValue, "|");
 
             return new AccomplishSettings(split[0], split[1], split[2], split[5], split[3], split[4]);
         });
