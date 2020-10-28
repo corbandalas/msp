@@ -58,6 +58,7 @@ import repository.CustomerRepository;
 import repository.PropertyRepository;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import services.dto.AccomplishAuthToken;
 import util.Utils;
 
 import java.util.ArrayList;
@@ -123,18 +124,18 @@ public class AccomplishService {
 
 //        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
-        String token = "";
+        AccomplishAuthToken token = null;
 
         final Promise<String> promise = Futures.promise();
 
         try {
-            token = (String) CacheProvider.getInstance().getObject("accomplish.token");
+            token = (AccomplishAuthToken) CacheProvider.getInstance().getObject("accomplish.token");
 
         } catch (Exception e) {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (StringUtils.isBlank(token)) {
+        if (token == null || (System.currentTimeMillis() - token.time) >= 1000 * 60 * 60 ) {
             Utils.asyncHttpClient.preparePost(query)
                     .addFormParam("grant_type", "program_credential")
                     .addFormParam("user_name", accomplishSettings.userName)
@@ -157,7 +158,7 @@ public class AccomplishService {
 
                             TokenResponse tokenResponse = gson.fromJson(responseBody, TokenResponse.class);
 
-                            CacheProvider.getInstance().putObject("accomplish.token", tokenResponse.getAccessToken()/*, 24 * 60 * 60*/);
+                            CacheProvider.getInstance().putObject("accomplish.token", new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis())/*, 24 * 60 * 60*/);
 
                             promise.success(tokenResponse.getAccessToken());
 
@@ -172,7 +173,7 @@ public class AccomplishService {
                         }
                     });
         } else {
-                return Futures.successful(token);
+                return Futures.successful(token.token);
         }
 
 
