@@ -51,6 +51,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import exception.WrongPropertyException;
 import model.Property;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.F;
@@ -1033,7 +1034,7 @@ public class AccomplishService {
             boundRequestBuilder = Utils.asyncHttpClient.prepareDelete(query);
         }
 
-        String sourceID = "" + System.currentTimeMillis();
+        String sourceID = RandomStringUtils.randomAlphabetic(10) + System.currentTimeMillis();
 
         Logger.info("Source ID = " + sourceID);
 
