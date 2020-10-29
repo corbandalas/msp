@@ -141,7 +141,7 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (token == null || (System.currentTimeMillis() - token.time) >=   1000 * 60 * 12 * 60 ) {
+        if (token == null || (System.currentTimeMillis() - token.time) >=   1000 * 5  * 60 ) {
             Utils.asyncHttpClient.preparePost(query)
                     .addFormParam("grant_type", "program_credential")
                     .addFormParam("user_name", accomplishSettings.userName)
@@ -786,8 +786,8 @@ public class AccomplishService {
 //
         final Gson gson = gsonBuilder.create();
 
-        F.Promise<String> promise1 = execute("service/v1/bin/info/" + accomplishSettings.productID1, "", "GET", partnerID, false);
-        F.Promise<String> promise2 = execute("service/v1/bin/info/" + accomplishSettings.productID2, "", "GET", partnerID, false);
+        F.Promise<String> promise1 = execute("service/v1/bin/info/" + accomplishSettings.productID1, "", "GET", partnerID, true);
+        F.Promise<String> promise2 = execute("service/v1/bin/info/" + accomplishSettings.productID2, "", "GET", partnerID, true);
         return promise1.zip(promise2).map(res -> {
             GetBINBalanceResponse getAccountResponse1 = gson.fromJson(res._1, GetBINBalanceResponse.class);
             GetBINBalanceResponse getAccountResponse2 = gson.fromJson(res._2, GetBINBalanceResponse.class);
