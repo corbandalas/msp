@@ -8,6 +8,6 @@ import lombok.Data;
 public class AccomplishAuthToken {
     public String token;
     public long time;
-
+    public Integer expires;
 
 }

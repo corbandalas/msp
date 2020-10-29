@@ -141,7 +141,7 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (token == null || (System.currentTimeMillis() - token.time) >=   1000 * 5  * 60 ) {
+        if (token == null || (System.currentTimeMillis() - token.time) >=   1000 * token.expires ) {
             Utils.asyncHttpClient.preparePost(query)
                     .addFormParam("grant_type", "program_credential")
                     .addFormParam("user_name", accomplishSettings.userName)
@@ -164,7 +164,7 @@ public class AccomplishService {
 
                             TokenResponse tokenResponse = gson.fromJson(responseBody, TokenResponse.class);
 
-                            CacheProvider.getInstance().putObject("accomplish.token"  + accomplishSettings.programID, new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis())/*, 24 * 60 * 60*/);
+                            CacheProvider.getInstance().putObject("accomplish.token"  + accomplishSettings.programID, new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis(), tokenResponse.getExpiresIn())/*, 24 * 60 * 60*/);
 
                             promise.success(tokenResponse.getAccessToken());
 
