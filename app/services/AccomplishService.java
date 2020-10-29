@@ -130,7 +130,7 @@ public class AccomplishService {
         final Promise<String> promise = Futures.promise();
 
         try {
-            token = (AccomplishAuthToken) CacheProvider.getInstance().getObject("accomplish.token");
+            token = (AccomplishAuthToken) CacheProvider.getInstance().getObject("accomplish.token" + accomplishSettings.programID);
 
             if (token != null) {
                 Logger.info("Auth token from cache: " + token.toString());
@@ -164,7 +164,7 @@ public class AccomplishService {
 
                             TokenResponse tokenResponse = gson.fromJson(responseBody, TokenResponse.class);
 
-                            CacheProvider.getInstance().putObject("accomplish.token", new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis())/*, 24 * 60 * 60*/);
+                            CacheProvider.getInstance().putObject("accomplish.token"  + accomplishSettings.programID, new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis())/*, 24 * 60 * 60*/);
 
                             promise.success(tokenResponse.getAccessToken());
 
