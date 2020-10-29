@@ -135,7 +135,7 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (token == null || (System.currentTimeMillis() - token.time) >= 1000 * 60 * 60 ) {
+        if (token == null || (System.currentTimeMillis() - token.time) >=   60 * 60 ) {
             Utils.asyncHttpClient.preparePost(query)
                     .addFormParam("grant_type", "program_credential")
                     .addFormParam("user_name", accomplishSettings.userName)
