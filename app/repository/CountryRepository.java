@@ -106,9 +106,9 @@ public class CountryRepository implements BaseCRUDRepository<Country> {
         final Promise<Country> promise = Futures.promise();
 
         final String query = "UPDATE " + connectionPool.getSchemaName() +
-                ".country SET name=$2, phonecode=$3, active=$4, currency_id=$5 WHERE id=$1";
+                ".country SET name=$2, phonecode=$3, active=$4, currency_id=$5, code=$6 WHERE id=$1";
         connectionPool.getConnection().query(query, asList(entity.getId(), entity.getName(), entity.getPhoneCode(),
-                entity.getActive(), entity.getCurrencyId()), result -> promise.success(entity), promise::failure);
+                entity.getActive(), entity.getCurrencyId(), entity.getCode()), result -> promise.success(entity), promise::failure);
 
         return promise.future();
     }
