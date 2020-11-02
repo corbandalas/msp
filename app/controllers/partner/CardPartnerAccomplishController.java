@@ -204,7 +204,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         if (StringUtils.isNoneBlank(createCard.getPassword())) {
             customer.setPassword(SecurityUtil.generateKeyFromArray(createCard.getPassword()));
         } else {
-            customer.setPassword(SecurityUtil.generateKeyFromArray(RandomStringUtils.random(8)));
+            customer.setPassword(SecurityUtil.generateKeyFromArray(RandomStringUtils.random(8)).substring(0, 8));
         }
 
 
