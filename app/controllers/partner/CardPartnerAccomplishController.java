@@ -1232,7 +1232,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
-        F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId(), false);
+        F.Promise<GetAccountInfoResponse> accountPromise = accomplishService.getAccountInfo(createCard.getToken(), "" + authData.getAccount().getId(), false);
 
         final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
 
