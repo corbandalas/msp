@@ -122,7 +122,7 @@ public class CustomerController extends BaseController {
 
         boolean admin = authData.getAccount().isAdmin();
 
-        final F.Promise<Result> result = F.Promise.wrap((admin)?customerRepository.retrieveById(phone):customerRepository.retrieveById(phone, authData.getAccount().getId().toString())).map(operationOpt
+        final F.Promise<Result> result = F.Promise.wrap((admin)?customerRepository.retrieveById(phone):customerRepository.retrieveByIDAccount(phone, authData.getAccount().getId().toString())).map(operationOpt
                 -> operationOpt.map(customer -> ok(Json.toJson(new CustomerResponse(""+SUCCESS_CODE, SUCCESS_TEXT, customer))))
                 .orElse(createWrongCustomerAccountResponse()));
 

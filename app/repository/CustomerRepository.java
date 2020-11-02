@@ -80,7 +80,7 @@ public class CustomerRepository implements BaseCRUDRepository<Customer> {
         return promise.future();
     }
 
-    public Future<Optional<Customer>> retrieveById(Object id, String accountID) {
+    public Future<Optional<Customer>> retrieveByIDAccount(Object id, String accountID) {
 
         final Promise<Optional<Customer>> promise = Futures.promise();
 
