@@ -1800,28 +1800,29 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
             Logger.info("Sum after = " + sumAfter);
 
-            MathContext context = new MathContext(2, RoundingMode.HALF_DOWN);
 
-            BigDecimal sumAfterRounded = new BigDecimal(sumAfter, context);
+            BigDecimal value = new BigDecimal(sumAfter);
+            value = value.setScale(2, BigDecimal.ROUND_DOWN);
 
-            Logger.info("Sum after rounded = " + sumAfterRounded);
+            Logger.info("Sum after rounded = " + value.floatValue());
 
 
             F.Promise<GetAccountInfoResponse> source = accomplishService.getAccountInfo(card._1._1.get().getToken(), "" + authData.getAccount().getId(), false);
             F.Promise<GetAccountInfoResponse> dest = accomplishService.getAccountInfo(card._2.get().getToken(), "" + authData.getAccount().getId(), false);
 
+            BigDecimal finalValue = value;
             return source.zip(dest).flatMap(cards -> {
 
                 F.Promise<Result> returnPromise = null;
 
                 if (sumAfter > 0.0) {
 
-                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfter) {
+                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < finalValue.floatValue()) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
 
                 } else {
-                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
+                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(finalValue.floatValue())) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
                 }
