@@ -1816,12 +1816,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 if (sumAfter > 0.0) {
 
-                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfterRounded.floatValue()) {
+                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfter) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
 
                 } else {
-                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(sumAfterRounded.floatValue())) {
+                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
                 }
