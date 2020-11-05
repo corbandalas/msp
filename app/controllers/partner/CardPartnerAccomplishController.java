@@ -1802,7 +1802,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
             BigDecimal value = new BigDecimal(sumAfter);
-            value = value.setScale(2, BigDecimal.ROUND_DOWN);
+            value = value.setScale(2, BigDecimal.ROUND_HALF_EVEN);
 
             Logger.info("Sum after rounded = " + value.floatValue());
 
