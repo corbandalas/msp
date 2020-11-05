@@ -46,6 +46,9 @@ import services.OperationService;
 import util.DateUtil;
 import util.SecurityUtil;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1797,6 +1800,13 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
             Logger.info("Sum after = " + sumAfter);
 
+            MathContext context = new MathContext(2, RoundingMode.HALF_DOWN);
+
+            BigDecimal sumAfterRounded = new BigDecimal(sumAfter, context);
+
+            Logger.info("Sum after rounded = " + sumAfterRounded);
+
+
             F.Promise<GetAccountInfoResponse> source = accomplishService.getAccountInfo(card._1._1.get().getToken(), "" + authData.getAccount().getId(), false);
             F.Promise<GetAccountInfoResponse> dest = accomplishService.getAccountInfo(card._2.get().getToken(), "" + authData.getAccount().getId(), false);
 
@@ -1806,12 +1816,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 if (sumAfter > 0.0) {
 
-                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfter) {
+                    if (Float.parseFloat(cards._1.getInfo().getAvailableBalance()) < sumAfterRounded.floatValue()) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
 
                 } else {
-                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(sumAfter)) {
+                    if (Float.parseFloat(cards._2.getInfo().getAvailableBalance()) < Math.abs(sumAfterRounded.floatValue())) {
                         returnPromise = F.Promise.pure(createNotEnoughFundsResponse());
                     }
                 }
