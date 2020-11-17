@@ -309,7 +309,7 @@ public class AccomplishService {
 //
 
 
-            customField.setCdata1(cdata1);
+            customField.setCdata1(newCdata1);
             if (StringUtils.isBlank(cdata2)) {
                 customField.setCdata2("empty");
             } else {
