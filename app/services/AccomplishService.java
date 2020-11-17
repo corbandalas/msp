@@ -304,8 +304,8 @@ public class AccomplishService {
 
             CustomField customField = new CustomField();
 
-            String newCdata1 = StringUtils.remove(cdata1, "-");
-            newCdata1 = StringUtils.remove(newCdata1, "_");
+            String newCdata1 = StringUtils.removeStart(cdata1, "-");
+            newCdata1 = StringUtils.removeStart(newCdata1, "_");
 //
 
 
@@ -314,16 +314,16 @@ public class AccomplishService {
                 customField.setCdata2("empty");
             } else {
 
-                String newCdata2 = StringUtils.remove(cdata2, "-");
-                newCdata2 = StringUtils.remove(newCdata2, "_");
+                String newCdata2 = StringUtils.removeStart(cdata2, "-");
+                newCdata2 = StringUtils.removeStart(newCdata2, "_");
 //
 
                 customField.setCdata2(Utils.trasliterateDanish(newCdata2));
             }
             if (StringUtils.isNotEmpty(cdata3)) {
 
-                String newCdata3 = StringUtils.remove(cdata3, "-");
-                newCdata3 = StringUtils.remove(newCdata3, "_");
+                String newCdata3 = StringUtils.removeStart(cdata3, "-");
+                newCdata3 = StringUtils.removeStart(newCdata3, "_");
 //
                 customField.setCdata3(newCdata3);
                 customField.setLinkedUserId(rez.get().getReferral());
