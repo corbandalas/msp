@@ -309,10 +309,19 @@ public class AccomplishService {
             if (StringUtils.isBlank(cdata2)) {
                 customField.setCdata2("empty");
             } else {
-                customField.setCdata2(Utils.trasliterateDanish(cdata2));
+
+                String newCdata2 = StringUtils.remove(cdata2, "-");
+                newCdata2 = StringUtils.remove(newCdata2, "_");
+//
+
+                customField.setCdata2(Utils.trasliterateDanish(newCdata2));
             }
             if (StringUtils.isNotEmpty(cdata3)) {
-                customField.setCdata3(cdata3);
+
+                String newCdata3 = StringUtils.remove(cdata3, "-");
+                newCdata3 = StringUtils.remove(newCdata3, "_");
+//
+                customField.setCdata3(newCdata3);
                 customField.setLinkedUserId(rez.get().getReferral());
             } else {
                 customField.setCdata3("empty");
