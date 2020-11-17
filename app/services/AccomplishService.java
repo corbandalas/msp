@@ -141,7 +141,7 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (token == null || (System.currentTimeMillis() - token.time) >=   1000 * token.expires ) {
+        if (token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) {
             Utils.asyncHttpClient.preparePost(query)
                     .addFormParam("grant_type", "program_credential")
                     .addFormParam("user_name", accomplishSettings.userName)
@@ -164,7 +164,7 @@ public class AccomplishService {
 
                             TokenResponse tokenResponse = gson.fromJson(responseBody, TokenResponse.class);
 
-                            CacheProvider.getInstance().putObject("accomplish.token"  + accomplishSettings.programID, new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis(), tokenResponse.getExpiresIn())/*, 24 * 60 * 60*/);
+                            CacheProvider.getInstance().putObject("accomplish.token" + accomplishSettings.programID, new AccomplishAuthToken(tokenResponse.getAccessToken(), System.currentTimeMillis(), tokenResponse.getExpiresIn())/*, 24 * 60 * 60*/);
 
                             promise.success(tokenResponse.getAccessToken());
 
@@ -179,7 +179,7 @@ public class AccomplishService {
                         }
                     });
         } else {
-                return Futures.successful(token.token);
+            return Futures.successful(token.token);
         }
 
 
@@ -303,6 +303,10 @@ public class AccomplishService {
             createUser.setPersonalInfo(personalInfo);
 
             CustomField customField = new CustomField();
+
+            String newCdata1 = StringUtils.remove(cdata1, "-");
+            newCdata1 = StringUtils.remove(newCdata1, "_");
+//
 
 
             customField.setCdata1(cdata1);
