@@ -431,7 +431,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
         F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.sendDocument(customers.get().getReferral(), createCard.getDocumentName(), createCard.getDocument(),
-                createCard.getDocumentType(), "" + authData.getAccount().getId())
+                createCard.getDocumentType(), createCard.getDocumentExtension(), "" + authData.getAccount().getId())
                 .map(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
                         return ok(Json.toJson(new CreateCustomerDocumentResponse(new Document("" + res.getInfo().getDocumentId(), "" + res.getInfo().getStatus()))));
