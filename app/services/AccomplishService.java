@@ -577,6 +577,16 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "EUR";
+                } else if (cardModel.equalsIgnoreCase("tgr_gbp")) {
+                    bin = Long.parseLong(accomplishSettings.productID2);
+                    status = 12;
+                    type = 0;
+                    currency = "GBP";
+                } else if (cardModel.equalsIgnoreCase("tgr_eur")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "EUR";
                 }
             }
 

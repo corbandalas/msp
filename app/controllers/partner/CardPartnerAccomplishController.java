@@ -775,6 +775,16 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         currency = "EUR";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("tgr_gbp")) {
+                                        cardBrand = CardBrand.MASTERCARD;
+                                        currency = "GBP";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("tgr_eur")) {
+                                        cardBrand = CardBrand.MASTERCARD;
+                                        currency = "EUR";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
                                     }
                                 }
 
