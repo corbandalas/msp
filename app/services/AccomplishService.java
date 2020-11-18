@@ -429,7 +429,7 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<CreateDocumentResponse> sendDocument(String userID, String fileName, String content, String type, String partnerID) {
+    public F.Promise<CreateDocumentResponse> sendDocument(String userID, String fileName, String content, String type, String documentExtension, String partnerID) {
 
         CreateDocument createDocument = new CreateDocument();
 
@@ -438,7 +438,12 @@ public class AccomplishService {
         Attachment attachment = new Attachment();
 
         attachment.setFileName(Utils.trasliterateDanish(fileName));
-        attachment.setFileExtension(".jpg");
+
+        if (StringUtils.isNotEmpty(documentExtension)) {
+            attachment.setFileExtension(documentExtension);
+        } else {
+            attachment.setFileExtension(".jpg");
+        }
         attachment.setContent(content);
 
         attachments.add(attachment);
