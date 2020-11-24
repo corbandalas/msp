@@ -58,5 +58,7 @@ public class MspModule extends AbstractModule {
         bind(PropertyLoader.class);
 
         bind(SmsGateway.class);
+
+        bind(TokenLoader.class);
     }
 }

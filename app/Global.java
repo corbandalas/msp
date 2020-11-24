@@ -2,6 +2,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import module.MspModule;
 import module.PropertyLoader;
+import module.TokenLoader;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -39,6 +40,13 @@ public class Global extends GlobalSettings {
         PropertyLoader propertyLoader = injector.getInstance(PropertyLoader.class);
 
         propertyLoader.load("conf/properties.json", Play.application().getWrappedApplication().actorSystem().dispatcher());
+
+
+        //Load accomplish token
+        TokenLoader tokenLoader = injector.getInstance(TokenLoader.class);
+
+        tokenLoader.load(Play.application().getWrappedApplication().actorSystem().dispatcher());
+
 
         //Exchange Rates trigger
         if (application.isDev() || application.isProd()) {

@@ -47,6 +47,7 @@ import com.google.inject.Singleton;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import exception.WrongPropertyException;
@@ -88,7 +89,7 @@ public class AccomplishService {
     private CustomerRepository customerRepository;
 
 
-    private class AccomplishSettings {
+    public class AccomplishSettings {
 
         private String apiURL;
         private String userName;
@@ -118,12 +119,8 @@ public class AccomplishService {
 
     public Future<String> getOauth(AccomplishSettings accomplishSettings) {
 
-
-        final String query = getAccessUrl(accomplishSettings, "Service/oauth/token");
-
-        Logger.info("Query: " + query);
-
-//        final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        Config conf = ConfigFactory.load();
+        String oauthActive = conf.getString("accomplish.oauth.token.obtain");
 
         AccomplishAuthToken token = null;
 
@@ -141,7 +138,14 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) {
+        if (token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires && Boolean.parseBoolean(oauthActive)) {
+
+            Logger.info("Trying to get oauth token from accomplish");
+
+            final String query = getAccessUrl(accomplishSettings, "Service/oauth/token");
+
+            Logger.info("Query: " + query);
+
             Utils.asyncHttpClient.preparePost(query)
                     .addFormParam("grant_type", "program_credential")
                     .addFormParam("user_name", accomplishSettings.userName)
@@ -1126,7 +1130,7 @@ public class AccomplishService {
     }
 
 
-    private F.Promise<AccomplishSettings> getSettingsForPartner(String partnerID) {
+    public F.Promise<AccomplishSettings> getSettingsForPartner(String partnerID) {
 
         final F.Promise<Optional<Property>> otherSettingsPromise = F.Promise.wrap(propertyRepository.retrieveById("cardprovider.accomplish.api.settings." + partnerID));
 
