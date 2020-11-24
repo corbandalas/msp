@@ -29,6 +29,8 @@ public class TokenLoader {
 
             boolean needObtainToken = conf.getBoolean("oauth.token.obtain");
 
+            Logger.info("TokenLoader is working....needObtainToken = " + needObtainToken);
+
             if (needObtainToken) {
                 String[] accounts = StringUtils.split(list, ",");
 

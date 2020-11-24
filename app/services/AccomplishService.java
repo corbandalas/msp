@@ -560,6 +560,11 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "GBP";
+                } else if (cardModel.equalsIgnoreCase("Fortu_GBP")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "GBP";
                 }
 
             } else {
@@ -596,6 +601,11 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "EUR";
+                }  else if (cardModel.equalsIgnoreCase("Fortu_GBP")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "GBP";
                 }
             }
 
