@@ -22,19 +22,19 @@ public class TokenLoader {
 
     public void load(ExecutionContextExecutor executionContextExecutor) {
 
-        try {
 
-            Config conf = ConfigFactory.load();
-            String list = conf.getString("partners.list");
+        Config conf = ConfigFactory.load();
+        String list = conf.getString("partners.list");
 
-            boolean needObtainToken = conf.getBoolean("oauth.token.obtain");
+        boolean needObtainToken = conf.getBoolean("oauth.token.obtain");
 
-            Logger.info("TokenLoader is working....needObtainToken = " + needObtainToken);
+        Logger.info("TokenLoader is working....needObtainToken = " + needObtainToken);
 
-            if (needObtainToken) {
-                String[] accounts = StringUtils.split(list, ",");
+        if (needObtainToken) {
+            String[] accounts = StringUtils.split(list, ",");
 
-                for (String account : accounts) {
+            for (String account : accounts) {
+                try {
                     AccomplishService.AccomplishSettings accomplishSettings = accomplishService.getSettingsForPartner(account).get(2000);
                     accomplishService.getOauth(accomplishSettings).onComplete(new OnComplete<String>() {
                         public void onComplete(Throwable failure, String result) {
@@ -44,11 +44,13 @@ public class TokenLoader {
 
                         }
                     }, executionContextExecutor);
+                } catch (Exception e) {
+                    Logger.error("Error while getting token for account " + account, e);
                 }
             }
 
-        } catch (Exception e) {
-            Logger.error("Error while getting token", e);
         }
+
+
     }
 }
