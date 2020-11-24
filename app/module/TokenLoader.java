@@ -25,9 +25,9 @@ public class TokenLoader {
         try {
 
             Config conf = ConfigFactory.load();
-            String list = conf.getString("accomplish.oauth.token.obtain.partners.list");
+            String list = conf.getString("partners.list");
 
-            boolean needObtainToken = conf.getBoolean("accomplish.oauth.token.obtain");
+            boolean needObtainToken = conf.getBoolean("oauth.token.obtain");
 
             if (needObtainToken) {
                 String[] accounts = StringUtils.split(list, ",");

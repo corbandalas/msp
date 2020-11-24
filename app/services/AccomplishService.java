@@ -120,7 +120,7 @@ public class AccomplishService {
     public Future<String> getOauth(AccomplishSettings accomplishSettings) {
 
         Config conf = ConfigFactory.load();
-        String oauthActive = conf.getString("accomplish.oauth.token.obtain");
+        String oauthActive = conf.getString("oauth.token.obtain");
 
         AccomplishAuthToken token = null;
 
