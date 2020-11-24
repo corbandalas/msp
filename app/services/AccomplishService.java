@@ -138,7 +138,7 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
-        if (token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires && Boolean.parseBoolean(oauthActive)) {
+        if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {
 
             Logger.info("Trying to get oauth token from accomplish");
 
