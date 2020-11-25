@@ -1317,6 +1317,78 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
     }
 
 
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getCardDetails",
+            value = "Get card details",
+            notes = "Method allows to get card details",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = GetCardDetailsResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = GetCardDetailsResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Get card details request", required = true, dataType = "dto.partnerV2.CheckCardRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> getCardDetails() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final CheckCardRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, CheckCardRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getToken())) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: token"));
+        }
+
+
+        F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
+        F.Promise<GetAccountResponse> accountPromise = accomplishService.getAccount(createCard.getToken(), "" + authData.getAccount().getId(), true);
+
+        final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
+
+            F.Promise<Result> returnPromise = null;
+
+
+            if (acc._2.getResult().getCode().equalsIgnoreCase("0000")) {
+
+
+                returnPromise =
+                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.GetCardDetailsResponse(createCard.getToken(),  acc._2.getInfo().getNumber(), acc._2.getInfo().getSecurity().getSecurity_code(), acc._2.getInfo().getSecurity().getExpiry_date()
+                                ))));
+            } else {
+                returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode(), acc._2.getResult().getMessage()));
+            }
+
+            return returnPromise;
+        });
+
+        return returnRecover(result);
+
+    }
+
+
+
     @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
             nickname = "updateCustomer",
