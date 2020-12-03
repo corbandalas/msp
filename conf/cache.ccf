@@ -26,3 +26,33 @@ jcs.auxiliary.LTCP.attributes.TcpServers=localhost:1111
 jcs.auxiliary.LTCP.attributes.TcpListenerPort=1111
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=false
 jcs.auxiliary.LTCP.attributes.AllowGet=true
+
+
+################## AUXILIARY CACHES AVAILABLE ################
+# MYSQL disk cache used for flight options
+jcs.auxiliary.MYSQL=org.apache.commons.jcs3.auxiliary.disk.jdbc.JDBCDiskCacheFactory
+jcs.auxiliary.MYSQL.attributes=org.apache.commons.jcs3.auxiliary.disk.jdbc.JDBCDiskCacheAttributes
+jcs.auxiliary.MYSQL.attributes.userName=myUsername
+jcs.auxiliary.MYSQL.attributes.password=myPassword
+jcs.auxiliary.MYSQL.attributes.url=jdbc:mysql://localhost:3306/YOURDBNAME?autoReconnect=true
+jcs.auxiliary.MYSQL.attributes.driverClassName=com.mysql.jdbc.Driver
+jcs.auxiliary.MYSQL.attributes.tableName=JCS_STORE
+jcs.auxiliary.MYSQL.attributes.testBeforeInsert=false
+jcs.auxiliary.MYSQL.attributes.maxActive=100
+jcs.auxiliary.MYSQL.attributes.MaxPurgatorySize=10000000
+jcs.auxiliary.MYSQL.attributes.UseDiskShrinker=true
+jcs.auxiliary.MYSQL.attributes.ShrinkerInterval=1800
+jcs.auxiliary.MYSQL.attributes.allowRemoveAll=false
+jcs.auxiliary.MYSQL.attributes.EventQueueType=POOLED
+jcs.auxiliary.MYSQL.attributes.EventQueuePoolName=disk_cache_event_queue
+
+##############################################################
+################## OPTIONAL THREAD POOL CONFIGURATION #########
+# Disk Cache pool
+thread_pool.disk_cache_event_queue.useBoundary=true
+thread_pool.disk_cache_event_queue.boundarySize=1000
+thread_pool.disk_cache_event_queue.maximumPoolSize=50
+thread_pool.disk_cache_event_queue.minimumPoolSize=10
+thread_pool.disk_cache_event_queue.keepAliveTime=3500
+thread_pool.disk_cache_event_queue.whenBlockedPolicy=RUN
+thread_pool.disk_cache_event_queue.startUpSize=10
