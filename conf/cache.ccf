@@ -30,7 +30,7 @@ jcs.auxiliary.LTCP.attributes.AllowGet=true
 
 ################## AUXILIARY CACHES AVAILABLE ################
 # MYSQL disk cache used for flight options
-jcs.auxiliary.MYSQL=org.apache.commons.jcs.auxiliary.disk.jdbcJDBCDiskCacheFactory
+jcs.auxiliary.MYSQL=org.apache.commons.jcs.auxiliary.disk.jdbc.JDBCDiskCacheFactory
 jcs.auxiliary.MYSQL.attributes=org.apache.commons.jcs.auxiliary.disk.jdbc.JDBCDiskCacheAttributes
 jcs.auxiliary.MYSQL.attributes.userName=myUsername
 jcs.auxiliary.MYSQL.attributes.password=myPassword
