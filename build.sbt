@@ -27,12 +27,14 @@ libraryDependencies ++= Seq(
   "commons-net" % "commons-net" % "3.6",
   "com.googlecode.libphonenumber" % "libphonenumber" % "8.9.7",
   "com.google.inject.extensions" % "guice-multibindings" % "4.0-beta4",
-  "org.apache.commons" % "commons-jcs-core" % "2.2.1",
+//  "org.apache.commons" % "commons-jcs-core" % "2.2.1",
   "com.google.code.gson" % "gson" % "2.8.2",
   "org.projectlombok" % "lombok" % "1.18.12" % "provided",
   "org.apache.commons" % "commons-text" % "1.3",
   "mysql" % "mysql-connector-java" % "8.0.22",
-  "commons-dbcp" % "commons-dbcp" % "1.4",
+//  "commons-dbcp" % "commons-dbcp" % "1.4",
+  "org.apache.commons" % "commons-jcs3-core" % "3.0",
+  "org.apache.commons" % "commons-dbcp2" % "2.8.0",
   "com.typesafe.play" %% "play-mailer" % "4.0.0")
 
 libraryDependencies += filters
