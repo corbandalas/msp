@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "org.projectlombok" % "lombok" % "1.18.12" % "provided",
   "org.apache.commons" % "commons-text" % "1.3",
   "mysql" % "mysql-connector-java" % "8.0.22",
-  "org.apache.commons" % "commons-dbcp" % "1.2.2",
+  "commons-dbcp" % "commons-dbcp" % "1.4",
   "com.typesafe.play" %% "play-mailer" % "4.0.0")
 
 libraryDependencies += filters
