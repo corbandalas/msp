@@ -132,11 +132,14 @@ public class AccomplishService {
             if (token != null) {
                 Logger.info("Auth token from cache: " + token.toString());
                 Logger.info("Time: " + System.currentTimeMillis());
+            } else {
+                Logger.info("Token is null in cache");
             }
 
         } catch (Exception e) {
             Logger.error("Getting oauth token from cache error", e);
         }
+
 
         if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {
 
