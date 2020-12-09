@@ -133,7 +133,7 @@ public class AccomplishService {
                 Logger.info("Auth token from cache: " + token.toString());
                 Logger.info("Time: " + System.currentTimeMillis());
             } else {
-                Logger.info("Token is null in cache");
+                Logger.info("Token for key = accomplish.token" + accomplishSettings.programID + " is null in cache");
             }
 
         } catch (Exception e) {
