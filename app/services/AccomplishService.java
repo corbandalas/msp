@@ -147,9 +147,6 @@ public class AccomplishService {
                 Logger.info("Trying to get oauth token from accomplish: token is null in cache");
             }
 
-            if ((System.currentTimeMillis() - token.time) >= 1000 * token.expires) {
-                Logger.info("Trying to get oauth token from accomplish: token is expired");
-            }
 
             final String query = getAccessUrl(accomplishSettings, "Service/oauth/token");
 
