@@ -750,6 +750,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         currency = "GBP";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("wari_eur")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "EUR";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
                                     }
 
 
@@ -793,6 +798,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                     } else if (createCard.getCardModel().equalsIgnoreCase("Fortu_GBP")) {
                                         cardBrand = CardBrand.VISA;
                                         currency = "GBP";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("wari_eur")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "EUR";
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
                                     }

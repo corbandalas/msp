@@ -573,6 +573,13 @@ public class AccomplishService {
                     currency = "GBP";
                 }
 
+                else if (cardModel.equalsIgnoreCase("wari_eur")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "EUR";
+                }
+
             } else {
                 if (cardModel.equalsIgnoreCase("mm_parent_wallet_dkk")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
@@ -612,6 +619,11 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "GBP";
+                } else if (cardModel.equalsIgnoreCase("wari_eur")) {
+                    bin = Long.parseLong(accomplishSettings.productID1);
+                    status = 12;
+                    type = 0;
+                    currency = "EUR";
                 }
             }
 
