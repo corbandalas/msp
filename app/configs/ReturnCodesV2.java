@@ -22,7 +22,7 @@ public class ReturnCodesV2 {
     public static final String WRONG_CUSTOMER_ACCOUNT_TEXT = "Сardholder account is invalid or does not exist in the system";
 
     public static final short ALREADY_REGISTERED_CUSTOMER_ACCOUNT_CODE = 131;
-    public static final String ALREADY_REGISTERED_CUSTOMER_ACCOUNT_TEXT = "Cardholder account is already registered in the system";
+    public static final String ALREADY_REGISTERED_CUSTOMER_ACCOUNT_TEXT = "Phone number, email or cdata1 is already registered in the system";
 
     public static final short PASSWORD_MISMATCH_CODE = 5;
     public static final String PASSWORD_MISMATCH_TEXT = "Password mismatch";
