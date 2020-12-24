@@ -140,6 +140,11 @@ public class AccomplishService {
             Logger.error("Getting oauth token from cache error", e);
         }
 
+        if (token != null && token.expires == null) {
+            token.expires = 0;
+        }
+
+
 
         if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {
 
