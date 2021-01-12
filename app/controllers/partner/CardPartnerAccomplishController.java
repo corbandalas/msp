@@ -1014,7 +1014,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                     String type = "1";
 
-                    if (data._2.get().getBrand().equals(CardBrand.CHILDCARD)) {
+                    if (data._2.get().getType().equals("physical")) {
                         type = "0";
                     } else {
                         return F.Promise.pure(ok(Json.toJson(new SuccessAPIV2Response(true))));
