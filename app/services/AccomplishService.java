@@ -484,7 +484,7 @@ public class AccomplishService {
             entityValue = 25;
         } else if (type.equalsIgnoreCase("utilityBill")) {
             typeValue = 5;
-            entityValue = 60;
+            entityValue = 15;
         } else if (type.equalsIgnoreCase("creditcardStatement")) {
             typeValue = 6;
             entityValue = 15;
