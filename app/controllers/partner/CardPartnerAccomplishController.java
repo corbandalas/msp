@@ -2371,10 +2371,12 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         Boolean aBoolean = F.Promise.wrap(transactionRepository.deleteAllTransaction(card.getId())).get(10000);
                     }
 
+                    accomplishService.updateUserEmail(res.get().getReferral(), res.get().getPhone2() + System.currentTimeMillis() + "@me.com", "" + authData.getAccount().getId()).get(10000);
+                    accomplishService.updateUserPhone(res.get().getReferral(), "+" + res.get().getPhone2() + RandomStringUtils.randomNumeric(4), "" + authData.getAccount().getId()).get(10000);
+
+
                     Boolean aBoolean1 = F.Promise.wrap(cardRepository.deleteAllCards(res.get().getId())).get(10000);
                     Boolean aBoolean = F.Promise.wrap(customerRepository.deleteCustomer(res.get().getId())).get(10000);
-                    accomplishService.updateUserEmail(res.get().getReferral(), res.get().getPhone2() + System.currentTimeMillis() + "@me.com", "" + authData.getAccount().getId()).get(10000);
-                    accomplishService.updateUserPhone(res.get().getReferral(), "+" + res.get().getPhone2() + RandomStringUtils.randomNumeric(2), "" + authData.getAccount().getId()).get(10000);
 
 
 //                    accomplishService.updateUserPhone(res.get().getReferral(), "+" + res.get().getPhone2() + "0", "" + authData.getAccount().getId()).get(10000);
