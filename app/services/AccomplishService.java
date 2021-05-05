@@ -35,6 +35,8 @@ import accomplish.dto.user.delete.DeleteUserResponse;
 import accomplish.dto.user.update.address.UpdateUserAddressRequest;
 import accomplish.dto.user.update.address.response.AddressRequestBean;
 import accomplish.dto.user.update.address.response.UpdateUserAddressResponse;
+import accomplish.dto.user.update.birthdate.UpdateUserBirthdate;
+import accomplish.dto.user.update.birthdate.response.UpdateUserBirthdateResponse;
 import accomplish.dto.user.update.email.*;
 import accomplish.dto.user.update.email.response.UpdateUserEmailResponse;
 import accomplish.dto.user.update.phone.UpdateUserPhone;
@@ -1037,6 +1039,44 @@ public class AccomplishService {
             F.Promise<String> promise = execute("service/v1/user/phone/" + userID, body, "PUT", partnerID, false);
             return promise.map(res -> {
                 UpdateUserPhoneResponse loadResponse = gson.fromJson(res, UpdateUserPhoneResponse.class);
+
+                return loadResponse;
+            });
+        });
+    }
+
+
+    public F.Promise<UpdateUserBirthdateResponse> updateUserBirthdate(String userID, String birthdate,
+
+                                                                      String partnerID) {
+
+
+        return getCustomer(userID, partnerID).flatMap(cust -> {
+
+
+            UpdateUserBirthdate request = new UpdateUserBirthdate();
+
+
+            accomplish.dto.user.update.birthdate.PersonalInfo personalInfo = new accomplish.dto.user.update.birthdate.PersonalInfo();
+
+            personalInfo.setDateOfBirth(birthdate);
+            personalInfo.setFirstName(cust.getPersonalInfo().getFirstName());
+            personalInfo.setLastName(cust.getPersonalInfo().getLastName());
+            personalInfo.setGender(cust.getPersonalInfo().getGender());
+            personalInfo.setTitle(cust.getPersonalInfo().getTitle());
+
+            request.setPersonalInfo(personalInfo);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+
+            String body = gson.toJson(request);
+
+            F.Promise<String> promise = execute("service/v1/user/personal_info/" + userID, body, "PUT", partnerID, false);
+            return promise.map(res -> {
+                UpdateUserBirthdateResponse loadResponse = gson.fromJson(res, UpdateUserBirthdateResponse.class);
 
                 return loadResponse;
             });
