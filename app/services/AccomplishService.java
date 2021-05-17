@@ -148,7 +148,7 @@ public class AccomplishService {
 
 
 
-        if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {
+        if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {    
 
             if (token == null) {
                 Logger.info("Trying to get oauth token from accomplish: token is null in cache");
@@ -372,6 +372,51 @@ public class AccomplishService {
 
     }
 
+
+    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue,
+                                                     String password, String partnerID) {
+
+
+            CreateUser createUser = new CreateUser();
+
+
+
+            List<Email> emails = new ArrayList<Email>();
+            Email email = new Email();
+            email.setAddress(emailValue);
+            email.setIsPrimary("1");
+            email.setVerificationStatus("1");
+            emails.add(email);
+
+            Security security = new Security();
+
+            security.setPassword(password);
+
+            createUser.setSecurity(security);
+            createUser.setEmail(emails);
+
+            CustomField customField = new CustomField();
+
+            createUser.setCustomField(customField);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+            String json = gson.toJson(createUser);
+
+            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
+
+            return promise.map(res -> {
+                CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
+
+                Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+                return createUserResponse;
+            });
+
+
+    }
 
     public F.Promise<CreateIdentificationResponse> createIdentification(String userID, String issuanceCountry,
                                                                         String residenceCountry, String issueDate, String expiryDate, String type, String number, String partnerID) {
