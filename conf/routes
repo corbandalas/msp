@@ -53,6 +53,7 @@ POST       /api/partner/card/checksanction                                      
 
 POST       /api/partner/v2/newCustomer                               @controllers.partner.CardPartnerAccomplishController.newCustomer()
 POST       /api/partner/v2/newCustomerSimple                               @controllers.partner.CardPartnerAccomplishController.newCustomerSimple()
+POST       /api/partner/v2/connectCustomer                               @controllers.partner.CardPartnerAccomplishController.connectCustomer()
 POST       /api/partner/v2/createIdentification                                  @controllers.partner.CardPartnerAccomplishController.createIdentification()
 POST       /api/partner/v2/sendDocument                               @controllers.partner.CardPartnerAccomplishController.sendDocument()
 POST       /api/partner/v2/getDocument                               @controllers.partner.CardPartnerAccomplishController.getDocument()

@@ -388,6 +388,154 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
+            nickname = "connectCustomer",
+            value = "Connect existed card provider customer",
+            notes = "Method allows to connect existed card provider customer",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = CreateCustomerResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = CreateCustomerResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Connect customer request", required = true, dataType = "dto.partnerV2.ConnectCustomerRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> connectCustomer() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ConnectCustomerRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, ConnectCustomerRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format. Check your json"));
+        }
+
+        if (StringUtils.isBlank(createCard.getUserID())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
+        }
+
+
+        F.Promise<Result> result = accomplishService.getCustomer(createCard.getUserID(), "" + authData.getAccount().getId())
+                .flatMap(res -> {
+
+                    F.Promise<Result> returnPromise = null;
+
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                        F.Promise<Optional<Country>> countryPromise = F.Promise.wrap(countryRepository.retrieveByCode(res.getAddress().getCountryCode()));
+
+                        returnPromise = countryPromise.map(rezz -> {
+
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                            Date date = simpleDateFormat.parse(
+                                    res.getPersonalInfo().getDateOfBirth());
+
+
+                            Logger.info("DOB date = " + date);
+
+                            String titleValue = "Mr";
+
+                            if (res.getPersonalInfo().getTitle().equalsIgnoreCase("1")) {
+                                titleValue = "Mr";
+                            } else if (res.getPersonalInfo().getTitle().equalsIgnoreCase("10")) {
+                                titleValue = "Mrs";
+                            } else if (res.getPersonalInfo().getTitle().equalsIgnoreCase("11")) {
+                                titleValue = "Ms";
+                            }
+
+                            String kycStatus = "";
+
+                            switch (res.getSecurity().getTrustLevel()) {
+                                case "1":
+                                    kycStatus = "none";
+                                    break;
+                                case "3":
+                                    kycStatus = "sdd";
+                                    break;
+                                case "5":
+                                    kycStatus = "fdd";
+                                    break;
+                                default:
+                                    kycStatus = "none";
+                                    break;
+
+                            }
+
+                            KYC kyc = KYC.SIMPLIFIED_DUE_DILIGENCE;
+
+                            if (kycStatus.equalsIgnoreCase("fdd")) {
+                                kyc = KYC.FULL_DUE_DILIGENCE;
+                            }
+
+
+                            Customer customer = new Customer();
+
+                            customer.setFirstName(res.getPersonalInfo().getFirstName());
+                            customer.setLastName(res.getPersonalInfo().getLastName());
+                            customer.setAddress1(res.getAddress().getAddressLine1());
+                            customer.setAddress2(res.getAddress().getAddressLine2());
+                            customer.setCity(res.getAddress().getCityTown());
+                            customer.setEmail(res.getEmail().get(0).getAddress());
+                            customer.setCountry_id(rezz.get().getId());
+                            customer.setPostcode(res.getAddress().getPostalZipCode());
+                            customer.setTitle(titleValue);
+                            customer.setActive(true);
+                            customer.setId(StringUtils.removeStart(res.getPhone().get(0).getNumber(), "+"));
+                            customer.setPhone2(StringUtils.removeStart(res.getPhone().get(0).getNumber(), "+"));
+                            customer.setFlat("");
+                            customer.setHouseNameNumber("");
+                            customer.setAccountID(authData.getAccount().getId().toString());
+                            customer.setTemppassword(false);
+                            customer.setCdata(res.getEmail().get(0).getAddress());
+                            customer.setKyc(kyc);
+                            customer.setPassword(SecurityUtil.generateKeyFromArray(RandomStringUtils.random(8)).substring(0, 8));
+
+                            customer.setDateBirth(date);
+                            customer.setRegistrationDate(new Date());
+
+                            simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+
+
+                            return ok(Json.toJson(new GetCustomerAPIResponse(new CustomerV3(res.getEmail().get(0).getAddress(),
+                                    titleValue, res.getPersonalInfo().getFirstName(),
+                                    res.getPersonalInfo().getLastName(), simpleDateFormat.format(date),
+                                    res.getPhone().get(0).getNumber(), rezz.get().getId(), kycStatus,
+                                    rezz.get().getId(), res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
+                                    res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
+                        });
+                    } else {
+                        returnPromise = F.Promise.pure(createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage()));
+                    }
+
+                    return returnPromise;
+
+
+                });
+
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
             nickname = "createIdentification",
             value = "Create identification",
             notes = "Method allows to create identification",
