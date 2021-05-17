@@ -369,9 +369,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return userResponsePromise.map(rez -> {
 
                 if (rez.getResult().getCode().equalsIgnoreCase("0000")) {
-//                    customer.setReferral("" + rez.getInfo().getId());
-
-//                    F.Promise.wrap(customerRepository.create(customer)).get(10000);
+//
 
                     return ok(Json.toJson(new CreateCustomerSimpleResponse("" + rez.getInfo().getId())));
                 } else {
@@ -511,6 +509,10 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             customer.setRegistrationDate(new Date());
 
                             simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+
+                            customer.setReferral("" + res.getInfo().getId());
+
+                            F.Promise.wrap(customerRepository.create(customer)).get(10000);
 
 
                             return ok(Json.toJson(new GetCustomerAPIResponse(new CustomerV3(res.getEmail().get(0).getAddress(),
