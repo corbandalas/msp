@@ -346,7 +346,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (
-                StringUtils.isBlank(createCard.getEmail())
+                StringUtils.isBlank(createCard.getEmail()) || StringUtils.isBlank(createCard.getPassword())
         ) {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
