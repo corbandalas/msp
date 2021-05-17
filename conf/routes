@@ -52,7 +52,7 @@ POST       /api/partner/card/regenerate                                         
 POST       /api/partner/card/checksanction                                          @controllers.partner.CardPartnerController.checkUserSanctions()
 
 POST       /api/partner/v2/newCustomer                               @controllers.partner.CardPartnerAccomplishController.newCustomer()
-POST       /api/partner/v2/newCustomerSipme                               @controllers.partner.CardPartnerAccomplishController.newCustomerSimple()
+POST       /api/partner/v2/newCustomerSimple                               @controllers.partner.CardPartnerAccomplishController.newCustomerSimple()
 POST       /api/partner/v2/createIdentification                                  @controllers.partner.CardPartnerAccomplishController.createIdentification()
 POST       /api/partner/v2/sendDocument                               @controllers.partner.CardPartnerAccomplishController.sendDocument()
 POST       /api/partner/v2/getDocument                               @controllers.partner.CardPartnerAccomplishController.getDocument()
