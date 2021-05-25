@@ -410,6 +410,9 @@ public class AccomplishService {
             currencies.add(curObject);
         }
 
+        TermsConditions termsConditions = new TermsConditions();
+        termsConditions.setAcceptance("1");
+
 
         List<Email> emails = new ArrayList<Email>();
         Email email = new Email();
@@ -443,6 +446,7 @@ public class AccomplishService {
         createUser.setPhone(phones);
         createUser.setPreferences(preferences);
         createUser.setCurrency(currencies);
+        createUser.setTermsConditions(termsConditions);
 
         CustomField customField = new CustomField();
 
