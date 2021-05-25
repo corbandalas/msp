@@ -373,7 +373,7 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone,
+    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone, String countryCode,
                                                               String password, String partnerID) {
 
 
@@ -404,6 +404,15 @@ public class AccomplishService {
         email.setVerificationStatus("1");
         emails.add(email);
 
+        List<Phone> phones = new ArrayList<Phone>();
+        Phone phoneNumber = new Phone();
+        phoneNumber.setCountryCode(countryCode);
+        phoneNumber.setIsPrimary(1);
+        phoneNumber.setNumber(phone);
+        phoneNumber.setType("1");
+        phoneNumber.setVerificationStatus("1");
+        phones.add(phoneNumber);
+
         Security security = new Security();
 
         security.setPassword(password);
@@ -412,6 +421,7 @@ public class AccomplishService {
         createUser.setEmail(emails);
         createUser.setAddress(address);
         createUser.setPersonalInfo(personalInfo);
+        createUser.setPhone(phones);
 
         CustomField customField = new CustomField();
 

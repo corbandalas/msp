@@ -352,11 +352,11 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
         }
 
-        F.Promise<F.Tuple<List<Customer>, Boolean>> promise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail())).zip(F.Promise.wrap(customerRepository.isRegistered(StringUtils.removeStart(createCard.getPhone(), "+"))));
-
+        F.Promise<F.Tuple<F.Tuple<Optional<Country>, List<Customer>>, Boolean>> promise = F.Promise.wrap(countryRepository.retrieveById(createCard.getCountry()))
+                .zip(F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()))).zip(F.Promise.wrap(customerRepository.isRegistered(StringUtils.removeStart(createCard.getPhone(), "+"))));
         F.Promise<Result> result = promise.flatMap(res -> {
 
-            if (res != null && res._1.size() > 0) {
+            if (res != null && res._1._2.size() > 0) {
                 Logger.error("Customer is already registered");
 
                 throw new CustomerAlreadyRegisteredException("Customer is already registered");
@@ -369,7 +369,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             }
 
 
-            F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUserSimplified(createCard.getEmail(), createCard.getPhone(),
+            F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUserSimplified(createCard.getEmail(), createCard.getPhone(), res._1._1.get().getCode(),
                     createCard.getPassword(), "" + authData.getAccount().getId());
 
             return userResponsePromise.map(rez -> {
