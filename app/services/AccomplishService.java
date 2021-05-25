@@ -413,6 +413,11 @@ public class AccomplishService {
         phoneNumber.setVerificationStatus("1");
         phones.add(phoneNumber);
 
+
+        Preferences preferences = new Preferences();
+        preferences.setTimeZone("UTC +03:00");
+        preferences.setPreferredLanguageCode("en");
+
         Security security = new Security();
 
         security.setPassword(password);
@@ -422,6 +427,7 @@ public class AccomplishService {
         createUser.setAddress(address);
         createUser.setPersonalInfo(personalInfo);
         createUser.setPhone(phones);
+        createUser.setPreferences(preferences);
 
         CustomField customField = new CustomField();
 
