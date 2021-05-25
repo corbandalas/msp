@@ -65,6 +65,7 @@ import scala.concurrent.Promise;
 import services.dto.AccomplishAuthToken;
 import util.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -147,8 +148,7 @@ public class AccomplishService {
         }
 
 
-
-        if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {    
+        if ((token == null || (System.currentTimeMillis() - token.time) >= 1000 * token.expires) && Boolean.parseBoolean(oauthActive)) {
 
             if (token == null) {
                 Logger.info("Trying to get oauth token from accomplish: token is null in cache");
@@ -373,47 +373,63 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue,
-                                                     String password, String partnerID) {
+    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone,
+                                                              String password, String partnerID) {
 
 
-            CreateUser createUser = new CreateUser();
+        CreateUser createUser = new CreateUser();
+
+        PersonalInfo personalInfo = new PersonalInfo();
+
+        personalInfo.setFirstName(Utils.trasliterateDanish("Coinify"));
+        personalInfo.setLastName(Utils.trasliterateDanish("Card1"));
+        personalInfo.setGender("0");
+        personalInfo.setDateOfBirth("1985/03/02");
+        personalInfo.setVerificationStatus("1");
+
+        Address address = new Address();
+        address.setAddressLine1(Utils.trasliterateDanish("Coinify address"));
+        address.setAddressLine2(Utils.trasliterateDanish("Coinify address"));
+        address.setCityTown(Utils.trasliterateDanish("Coinify address"));
+//        address.setPostalZipCode(zip);
+//        address.setStateRegion("DN");
+//        address.setCountryCode(country);
+        address.setVerificationStatus(1);
 
 
+        List<Email> emails = new ArrayList<Email>();
+        Email email = new Email();
+        email.setAddress(emailValue);
+        email.setIsPrimary("1");
+        email.setVerificationStatus("1");
+        emails.add(email);
 
-            List<Email> emails = new ArrayList<Email>();
-            Email email = new Email();
-            email.setAddress(emailValue);
-            email.setIsPrimary("1");
-            email.setVerificationStatus("1");
-            emails.add(email);
+        Security security = new Security();
 
-            Security security = new Security();
+        security.setPassword(password);
 
-            security.setPassword(password);
+        createUser.setSecurity(security);
+        createUser.setEmail(emails);
 
-            createUser.setSecurity(security);
-            createUser.setEmail(emails);
+        CustomField customField = new CustomField();
 
-            CustomField customField = new CustomField();
+        createUser.setCustomField(customField);
 
-            createUser.setCustomField(customField);
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
 
-            final GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.disableHtmlEscaping();
+        final Gson gson = gsonBuilder.create();
+        String json = gson.toJson(createUser);
 
-            final Gson gson = gsonBuilder.create();
-            String json = gson.toJson(createUser);
+        F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
 
-            F.Promise<String> promise = execute("service/v1/user/", json, "POST", partnerID, false);
+        return promise.map(res -> {
+            CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
 
-            return promise.map(res -> {
-                CreateUserResponse createUserResponse = gson.fromJson(res, CreateUserResponse.class);
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
 
-                Logger.info("Result = " + createUserResponse.getResult().getCode());
-
-                return createUserResponse;
-            });
+            return createUserResponse;
+        });
 
 
     }
@@ -623,9 +639,7 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "GBP";
-                }
-
-                else if (cardModel.equalsIgnoreCase("wari_eur")) {
+                } else if (cardModel.equalsIgnoreCase("wari_eur")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
                     status = 12;
                     type = 0;
@@ -635,9 +649,7 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "EUR";
-                }
-
-                else if (cardModel.equalsIgnoreCase("coinify_gbp")) {
+                } else if (cardModel.equalsIgnoreCase("coinify_gbp")) {
                     bin = Long.parseLong(accomplishSettings.productID2);
                     status = 12;
                     type = 0;
@@ -678,7 +690,7 @@ public class AccomplishService {
                     status = 12;
                     type = 0;
                     currency = "EUR";
-                }  else if (cardModel.equalsIgnoreCase("Fortu_GBP")) {
+                } else if (cardModel.equalsIgnoreCase("Fortu_GBP")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
                     status = 12;
                     type = 0;

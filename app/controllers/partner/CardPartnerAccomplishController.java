@@ -352,18 +352,24 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             return F.Promise.pure(createWrongRequestFormatResponse("Missing params. Check API docs"));
         }
 
-        F.Promise<List<Customer>> promise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail()));
+        F.Promise<F.Tuple<List<Customer>, Boolean>> promise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail())).zip(F.Promise.wrap(customerRepository.isRegistered(StringUtils.removeStart(createCard.getPhone(), "+"))));
 
         F.Promise<Result> result = promise.flatMap(res -> {
 
-            if (res != null && res.size() > 0) {
+            if (res != null && res._1.size() > 0) {
+                Logger.error("Customer is already registered");
+
+                throw new CustomerAlreadyRegisteredException("Customer is already registered");
+            }
+
+            if (res._2) {
                 Logger.error("Customer is already registered");
 
                 throw new CustomerAlreadyRegisteredException("Customer is already registered");
             }
 
 
-            F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUserSimplified(createCard.getEmail(),
+            F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUserSimplified(createCard.getEmail(), createCard.getPhone(),
                     createCard.getPassword(), "" + authData.getAccount().getId());
 
             return userResponsePromise.map(rez -> {
