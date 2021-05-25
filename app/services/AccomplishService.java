@@ -393,7 +393,7 @@ public class AccomplishService {
         address.setCityTown(Utils.trasliterateDanish("Coinify address"));
 //        address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
-//        address.setCountryCode(country);
+        address.setCountryCode(countryCode);
         address.setVerificationStatus(1);
 
         List<Currency> currencies = new ArrayList<Currency>();
