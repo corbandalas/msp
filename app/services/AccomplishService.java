@@ -410,6 +410,8 @@ public class AccomplishService {
 
         createUser.setSecurity(security);
         createUser.setEmail(emails);
+        createUser.setAddress(address);
+        createUser.setPersonalInfo(personalInfo);
 
         CustomField customField = new CustomField();
 
