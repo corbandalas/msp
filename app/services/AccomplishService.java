@@ -373,7 +373,7 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone, String countryCode,
+    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone, String countryCode, String currency,
                                                               String password, String partnerID) {
 
 
@@ -395,6 +395,20 @@ public class AccomplishService {
 //        address.setStateRegion("DN");
 //        address.setCountryCode(country);
         address.setVerificationStatus(1);
+
+        List<Currency> currencies = new ArrayList<Currency>();
+
+        if (StringUtils.isNotBlank(currency)) {
+            Currency curObject = new Currency();
+            curObject.setCode(currency);
+
+            currencies.add(curObject);
+        } else {
+            Currency curObject = new Currency();
+            curObject.setCode("DKK");
+
+            currencies.add(curObject);
+        }
 
 
         List<Email> emails = new ArrayList<Email>();
@@ -428,6 +442,7 @@ public class AccomplishService {
         createUser.setPersonalInfo(personalInfo);
         createUser.setPhone(phones);
         createUser.setPreferences(preferences);
+        createUser.setCurrency(currencies);
 
         CustomField customField = new CustomField();
 
