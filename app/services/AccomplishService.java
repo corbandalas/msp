@@ -415,7 +415,12 @@ public class AccomplishService {
 
         Security security = new Security();
 
+        security.setSecurityCode("1111");
         security.setPassword(password);
+        security.setSecretAnswer1("soma");
+        security.setSecretAnswer2("Alex");
+        security.setSecretQuestion1("1");
+        security.setSecretQuestion2("2");
 
         createUser.setSecurity(security);
         createUser.setEmail(emails);
