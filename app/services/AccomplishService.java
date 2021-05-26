@@ -43,6 +43,10 @@ import accomplish.dto.user.update.phone.UpdateUserPhone;
 import accomplish.dto.user.update.phone.response.UpdateUserPhoneResponse;
 import accomplish.dto.validate.ValidateData;
 import accomplish.dto.validate.ValidatePassword;
+import accomplish.dto.validate.reset.ForgetPassword;
+import accomplish.dto.validate.reset.ResetPassword;
+import accomplish.dto.validate.reset.ResetSecurityData;
+import accomplish.dto.validate.reset.response.ResetPasswordResponse;
 import accomplish.dto.validate.response.ValidatePasswordResponse;
 import akka.dispatch.Futures;
 import com.google.gson.Gson;
@@ -879,10 +883,9 @@ public class AccomplishService {
 
 
     public F.Promise<ValidatePasswordResponse> validatePassword(String userID, String password,
-                                                       String partnerID) {
+                                                                String partnerID) {
 
         ValidatePassword validatePassword = new ValidatePassword();
-
 
 
         accomplish.dto.validate.Info info = new accomplish.dto.validate.Info();
@@ -904,6 +907,41 @@ public class AccomplishService {
         F.Promise<String> promise = execute("service/v1/user/security/validate/" + userID, gson.toJson(validatePassword), "POST", partnerID, false);
         return promise.map(res -> {
             ValidatePasswordResponse validatePasswordResponse = gson.fromJson(res, ValidatePasswordResponse.class);
+
+            return validatePasswordResponse;
+        });
+    }
+
+    public F.Promise<ResetPasswordResponse> resetPassword(String userID, String email,
+                                                          String partnerID) {
+
+        ResetPassword resetPassword = new ResetPassword();
+
+
+        accomplish.dto.validate.reset.Info info = new accomplish.dto.validate.reset.Info();
+        info.setType(3);
+
+
+        ResetSecurityData resetSecurityData = new ResetSecurityData();
+
+        ForgetPassword forgetPassword = new ForgetPassword();
+
+        forgetPassword.setVerifiedEmail(email);
+
+        resetSecurityData.setForgetPassword(forgetPassword);
+
+        resetPassword.setValidate("0");
+        resetPassword.setResetSecurityData(resetSecurityData);
+        resetPassword.setInfo(info);
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        F.Promise<String> promise = execute("service/v1/user/security/reset/" + userID, gson.toJson(resetPassword), "POST", partnerID, false);
+        return promise.map(res -> {
+            ResetPasswordResponse validatePasswordResponse = gson.fromJson(res, ResetPasswordResponse.class);
 
             return validatePasswordResponse;
         });
