@@ -369,7 +369,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             }
 
 
-            F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUserSimplified(createCard.getEmail(), createCard.getPhone(), res._1._1.get().getCode(),
+            F.Promise<CreateUserResponse> userResponsePromise = accomplishService.createUserSimplified(createCard.getEmail(), createCard.getPhone(),  res._1._1.get().getCode(), createCard.getCurrency(),
                     createCard.getPassword(), "" + authData.getAccount().getId());
 
             return userResponsePromise.map(rez -> {

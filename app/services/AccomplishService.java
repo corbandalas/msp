@@ -373,7 +373,7 @@ public class AccomplishService {
     }
 
 
-    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone, String countryCode,
+    public F.Promise<CreateUserResponse> createUserSimplified(String emailValue, String phone, String countryCode, String currency,
                                                               String password, String partnerID) {
 
 
@@ -393,8 +393,25 @@ public class AccomplishService {
         address.setCityTown(Utils.trasliterateDanish("Coinify address"));
 //        address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
-//        address.setCountryCode(country);
+        address.setCountryCode(countryCode);
         address.setVerificationStatus(1);
+
+        List<Currency> currencies = new ArrayList<Currency>();
+
+        if (StringUtils.isNotBlank(currency)) {
+            Currency curObject = new Currency();
+            curObject.setCode(currency);
+
+            currencies.add(curObject);
+        } else {
+            Currency curObject = new Currency();
+            curObject.setCode("DKK");
+
+            currencies.add(curObject);
+        }
+
+        TermsConditions termsConditions = new TermsConditions();
+        termsConditions.setAcceptance("1");
 
 
         List<Email> emails = new ArrayList<Email>();
@@ -413,6 +430,11 @@ public class AccomplishService {
         phoneNumber.setVerificationStatus("1");
         phones.add(phoneNumber);
 
+
+        Preferences preferences = new Preferences();
+        preferences.setTimeZone("UTC +03:00");
+        preferences.setPreferredLanguageCode("en");
+
         Security security = new Security();
 
         security.setSecurityCode("1111");
@@ -427,6 +449,9 @@ public class AccomplishService {
         createUser.setAddress(address);
         createUser.setPersonalInfo(personalInfo);
         createUser.setPhone(phones);
+        createUser.setPreferences(preferences);
+        createUser.setCurrency(currencies);
+        createUser.setTermsConditions(termsConditions);
 
         CustomField customField = new CustomField();
 
