@@ -75,6 +75,7 @@ POST       /api/partner/v2/clearMw                                  @controllers
 POST       /api/partner/v2/getMwBalance                                  @controllers.partner.CardPartnerAccomplishController.getMwBalance()
 POST       /api/partner/v2/getRef                                  @controllers.partner.CardPartnerAccomplishController.getRef()
 POST       /api/partner/v2/setCardStatus                                  @controllers.partner.CardPartnerAccomplishController.setCardStatus()
+POST       /api/partner/v2/checkPassword                                  @controllers.partner.CardPartnerAccomplishController.checkPassword()
 
 #Merchant API(admin)
 

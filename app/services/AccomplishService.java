@@ -41,6 +41,9 @@ import accomplish.dto.user.update.email.*;
 import accomplish.dto.user.update.email.response.UpdateUserEmailResponse;
 import accomplish.dto.user.update.phone.UpdateUserPhone;
 import accomplish.dto.user.update.phone.response.UpdateUserPhoneResponse;
+import accomplish.dto.validate.ValidateData;
+import accomplish.dto.validate.ValidatePassword;
+import accomplish.dto.validate.response.ValidatePasswordResponse;
 import akka.dispatch.Futures;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -871,6 +874,38 @@ public class AccomplishService {
             GetDocumentResponse getAccountResponse = gson.fromJson(res, GetDocumentResponse.class);
 
             return getAccountResponse;
+        });
+    }
+
+
+    public F.Promise<ValidatePasswordResponse> validatePassword(String userID, String password,
+                                                       String partnerID) {
+
+        ValidatePassword validatePassword = new ValidatePassword();
+
+
+
+        accomplish.dto.validate.Info info = new accomplish.dto.validate.Info();
+        info.setType("10");
+
+        ValidateData validateData = new ValidateData();
+
+        validateData.setPassword(password);
+
+        validatePassword.setValidateData(validateData);
+        validatePassword.setInfo(info);
+
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        F.Promise<String> promise = execute("service/v1/user/security/validate/" + userID, gson.toJson(validatePassword), "POST", partnerID, false);
+        return promise.map(res -> {
+            ValidatePasswordResponse validatePasswordResponse = gson.fromJson(res, ValidatePasswordResponse.class);
+
+            return validatePasswordResponse;
         });
     }
 
