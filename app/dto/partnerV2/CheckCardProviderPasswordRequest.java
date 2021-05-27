@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CheckCardProviderPasswordRequest {
 
-    private String mobilePhone;
+    private String email;
     private String password;
 
 
