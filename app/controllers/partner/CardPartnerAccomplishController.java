@@ -665,7 +665,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 .map(res -> {
 
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
-                        return ok(Json.toJson(new SuccessAPIV2Response(true)));
+                        return ok(Json.toJson(new СheckCardProviderCustomerPasswordResponse(customers.get(0).getFirstName(), customers.get(0).getLastName())));
                     } else {
                         return createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage());
                     }
