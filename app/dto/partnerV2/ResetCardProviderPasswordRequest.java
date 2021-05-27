@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResetCardProviderPasswordRequest {
 
-    private String mobilePhone;
+    private String email;
 
 }

@@ -714,15 +714,15 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         }
 
         if (
-                StringUtils.isBlank(createCard.getMobilePhone()))
+                StringUtils.isBlank(createCard.getEmail()))
         {
             Logger.error("Missing params");
             return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
         }
 
-        F.Promise<Optional<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveById(StringUtils.removeStart(createCard.getMobilePhone(), "+")));
+        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail(), "" + authData.getAccount().getId()));
 
-        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.resetPassword(customers.get().getReferral(), customers.get().getEmail(), "" + authData.getAccount().getId())
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.resetPassword(customers.get(0).getReferral(), customers.get(0).getEmail(), "" + authData.getAccount().getId())
                 .map(res -> {
 
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
