@@ -2179,6 +2179,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                             resTransaction.setOriginalCurrency(acc._1.get().getCurrencyId());
                             resTransaction.setType(transaction.getInfo().getOperation());
                             resTransaction.setOriginalSourceId(transaction.getInfo().getOriginalSourceId());
+                            resTransaction.setStatus(transaction.getAccount().getInfo().getStatus());
 
                             transactions.add(resTransaction);
                         }

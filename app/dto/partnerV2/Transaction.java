@@ -49,6 +49,10 @@ public class Transaction {
     @Expose
     private Double balance;
 
+    @SerializedName("status")
+    @Expose
+    private String status;
+
     public Double getAmount() {
         return amount;
     }
@@ -127,5 +131,13 @@ public class Transaction {
 
     public void setSettlementDate(Long settlementDate) {
         this.settlementDate = settlementDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
