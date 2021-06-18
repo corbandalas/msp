@@ -19,4 +19,5 @@ public class GetCardDetailsResponse {
     private String panNumber;
     private String cvv;
     private String expDate;
+    private String designID;
 }

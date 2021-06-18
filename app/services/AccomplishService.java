@@ -13,9 +13,12 @@ import accomplish.dto.account.load.Account;
 import accomplish.dto.account.load.response.LoadResponse;
 import accomplish.dto.account.update.UpdateCardRequest;
 import accomplish.dto.account.update.response.UpdateAccountResponse;
-import accomplish.dto.card.CreateCard;
+import accomplish.dto.card.request.CreateCard;
 import accomplish.dto.card.CreateCardResponse;
 import accomplish.dto.card.Info;
+import accomplish.dto.card.request.Fulfilment;
+import accomplish.dto.card.request.Info__1;
+import accomplish.dto.card.request.Options;
 import accomplish.dto.customerget.Address_;
 import accomplish.dto.customerget.GetCustomerResponse;
 import accomplish.dto.identification.CreateIdentification;
@@ -649,7 +652,7 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<CreateCardResponse> createCard(String userID, String cardModel, String partnerID) {
+    public F.Promise<CreateCardResponse> createCard(String userID, String cardModel, String designID, String partnerID) {
 
         return getSettingsForPartner(partnerID).flatMap(accomplishSettings -> {
             CreateCard createCard = new CreateCard();
@@ -753,7 +756,7 @@ public class AccomplishService {
             }
 
 
-            Info info = new Info();
+            accomplish.dto.card.request.Info info = new accomplish.dto.card.request.Info();
             info.setBinId("" + bin);
             info.setCurrency(currency);
             info.setType("" + type);
@@ -766,7 +769,30 @@ public class AccomplishService {
             customField.setAcceptance("1");
             customField.setAcceptance2("2");
 
+
             createCard.setCustomField(customField);
+
+
+            if (StringUtils.isNoneBlank(designID)) {
+                Options options = new Options();
+
+                Fulfilment fulfilment = new Fulfilment();
+
+                Info__1 info__1 = new Info__1();
+
+//                info__1.setFulfillmentType();
+                info__1.setFulfilmentConfigId(Integer.parseInt(designID));
+                info__1.setFulfilmentNotes("Live");
+                info__1.setFulfilmentReason(1);
+
+                fulfilment.setInfo(info__1);
+
+                options.setFulfilment(fulfilment);
+
+
+                createCard.setOptions(options);
+            }
+
 
             final GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.disableHtmlEscaping();

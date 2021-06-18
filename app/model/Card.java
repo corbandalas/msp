@@ -28,6 +28,7 @@ public class Card extends BaseEntity<Long> {
     private String deliveryAddress3;
     private String deliveryCountry;
     private String accountID;
+    private String fulfilment;
 
     public Card() {
     }
@@ -86,6 +87,26 @@ public class Card extends BaseEntity<Long> {
         this.deliveryAddress3 = deliveryAddress3;
         this.deliveryCountry = deliveryCountry;
         this.accountID = accountID;
+    }
+
+    public Card(Long id, String token, String customerId, CardType type, CardBrand brand, Boolean cardDefault, Date createDate, String alias, Boolean active, String info, String currencyId, String deliveryAddress1, String deliveryAddress2, String deliveryAddress3, String deliveryCountry, String accountID, String fulfilment) {
+        this.setId(id);
+        this.token = token;
+        this.customerId = customerId;
+        this.type = type;
+        this.brand = brand;
+        this.cardDefault = cardDefault;
+        this.createDate = createDate;
+        this.alias = alias;
+        this.active = active;
+        this.info = info;
+        this.currencyId = currencyId;
+        this.deliveryAddress1 = deliveryAddress1;
+        this.deliveryAddress2 = deliveryAddress2;
+        this.deliveryAddress3 = deliveryAddress3;
+        this.deliveryCountry = deliveryCountry;
+        this.accountID = accountID;
+        this.fulfilment = fulfilment;
     }
 
     public Boolean getCardDefault() {
@@ -218,6 +239,7 @@ public class Card extends BaseEntity<Long> {
                 ", deliveryAddress3='" + deliveryAddress3 + '\'' +
                 ", deliveryCountry='" + deliveryCountry + '\'' +
                 ", accountID='" + accountID + '\'' +
+                ", fulfilment='" + fulfilment + '\'' +
                 '}';
     }
 
@@ -227,5 +249,13 @@ public class Card extends BaseEntity<Long> {
 
     public void setAccountID(String accountID) {
         this.accountID = accountID;
+    }
+
+    public String getFulfilment() {
+        return fulfilment;
+    }
+
+    public void setFulfilment(String fulfilment) {
+        this.fulfilment = fulfilment;
     }
 }

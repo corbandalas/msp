@@ -21,5 +21,6 @@ public class CreateCardV2Request {
     private String monthExpiry;
     private String embossedThirdLine;
     private String cdata1;
+    private String designID;
 
 }

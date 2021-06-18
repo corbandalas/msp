@@ -1,0 +1,1 @@
+alter table card add COLUMN fulfilment character varying(255);

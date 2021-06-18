@@ -1063,7 +1063,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
         F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.createCard(customers.get().getReferral(),
-                createCard.getCardModel(), "" + authData.getAccount().getId())
+                createCard.getCardModel(), createCard.getDesignID(), "" + authData.getAccount().getId())
                 .flatMap(res -> {
 
                             F.Promise<Result> returnPromise = null;
@@ -1191,7 +1191,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                 card.setDeliveryCountry("DK");
                                 card.setInfo(res.getInfo().getBinId());
                                 card.setAccountID(authData.getAccount().getId().toString());
-
+                                card.setFulfilment(createCard.getDesignID());
 
                                 String finalCurrency = currency;
                                 String finalType = type;
@@ -1749,7 +1749,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
                 returnPromise =
-                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.GetCardDetailsResponse(createCard.getToken(), acc._2.getInfo().getNumber(), acc._2.getInfo().getSecurity().getSecurity_code(), acc._2.getInfo().getSecurity().getExpiry_date()
+                        F.Promise.pure(ok(Json.toJson(new dto.partnerV2.GetCardDetailsResponse(createCard.getToken(), acc._2.getInfo().getNumber(), acc._2.getInfo().getSecurity().getSecurity_code(), acc._2.getInfo().getSecurity().getExpiry_date(), acc._1.get().getFulfilment()
                         ))));
             } else {
                 returnPromise = F.Promise.pure(createCardProviderException(acc._2.getResult().getCode(), acc._2.getResult().getMessage()));
