@@ -38,7 +38,7 @@ public class CardRepository implements BaseCRUDRepository<Card> {
                 idResult -> {
                     final Long id = idResult.row(0).getLong(0);
 
-                    final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".card (id, token, cardtype, brand, createDate, is_default, active, customer_id, alias, info, deliveryAddress1, deliveryAddress2, deliveryAddress3, deliveryCountry, currency_id, account_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)";
+                    final String query = "INSERT INTO " + connectionPool.getSchemaName() + ".card (id, token, cardtype, brand, createDate, is_default, active, customer_id, alias, info, deliveryAddress1, deliveryAddress2, deliveryAddress3, deliveryCountry, currency_id, account_id, fulfilment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)";
 
                     connectionPool.getConnection().query(query,
                             asList(id, entity.getToken(), entity.getType().toString(),
