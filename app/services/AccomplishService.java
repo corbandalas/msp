@@ -973,6 +973,44 @@ public class AccomplishService {
         });
     }
 
+
+    public F.Promise<accomplish.dto.validate.reset.password.response.ResetPasswordResponse> resetPassword(String userID, String oldPassword, String newPassword,
+                                                          String partnerID) {
+
+
+        accomplish.dto.validate.reset.password.ResetPassword resetPassword = new accomplish.dto.validate.reset.password.ResetPassword();
+
+
+        accomplish.dto.validate.reset.password.Info info = new accomplish.dto.validate.reset.password.Info();
+        info.setType("1");
+
+
+        accomplish.dto.validate.reset.password.ResetSecurityData resetSecurityData = new accomplish.dto.validate.reset.password.ResetSecurityData();
+
+        accomplish.dto.validate.reset.password.ResetPassword__1 resetPassword1 = new accomplish.dto.validate.reset.password.ResetPassword__1();
+
+        resetPassword1.setCurrentPassword(oldPassword);
+        resetPassword1.setNewPassword(newPassword);
+
+        resetSecurityData.setResetPassword(resetPassword1);
+
+
+        resetPassword.setResetSecurityData(resetSecurityData);
+        resetPassword.setInfo(info);
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+        F.Promise<String> promise = execute("service/v1/user/security/reset/" + userID, gson.toJson(resetPassword), "POST", partnerID, false);
+        return promise.map(res -> {
+            accomplish.dto.validate.reset.password.response.ResetPasswordResponse validatePasswordResponse = gson.fromJson(res, accomplish.dto.validate.reset.password.response.ResetPasswordResponse.class);
+
+            return validatePasswordResponse;
+        });
+    }
+
     public F.Promise<ActivateResponse> activateAccount(String cardID, String binID, String userID, String currency,
                                                        String number, String type, String activationCode,
                                                        String partnerID) {

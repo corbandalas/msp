@@ -738,6 +738,67 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
     @With(BaseMerchantApiV2Action.class)
     @ApiOperation(
+            nickname = "resetPassword2",
+            value = "Reset card provider user password ",
+            notes = "Method allows to reset card provider user password",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = SuccessAPIV2Response.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = SuccessAPIV2Response.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Reset password  request", required = true, dataType = "dto.partnerV2.ResetCardProviderPasswordRequest2", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> resetPassword2() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final ResetCardProviderPasswordRequest2 createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, ResetCardProviderPasswordRequest2.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (
+                StringUtils.isBlank(createCard.getEmail()) || StringUtils.isBlank(createCard.getCurrentPassword()) || StringUtils.isBlank(createCard.getNewPassword()))
+        {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params"));
+        }
+
+        F.Promise<List<Customer>> customerPromise = F.Promise.wrap(customerRepository.retrieveByEmail(createCard.getEmail(), "" + authData.getAccount().getId()));
+
+        F.Promise<Result> result = customerPromise.flatMap(customers -> accomplishService.resetPassword(customers.get(0).getReferral(), createCard.getCurrentPassword(), createCard.getNewPassword(), "" + authData.getAccount().getId())
+                .map(res -> {
+
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+                        return ok(Json.toJson(new SuccessAPIV2Response(true)));
+                    } else {
+                        return createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage());
+                    }
+                }));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
             nickname = "sendDocument",
             value = "Send document",
             notes = "Method allows to send document",

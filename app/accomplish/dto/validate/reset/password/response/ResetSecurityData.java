@@ -1,0 +1,23 @@
+
+package accomplish.dto.validate.reset.password.response;
+
+import javax.annotation.Generated;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+@Generated("jsonschema2pojo")
+public class ResetSecurityData {
+
+    @SerializedName("reset_password")
+    @Expose
+    private ResetPassword resetPassword;
+
+    public ResetPassword getResetPassword() {
+        return resetPassword;
+    }
+
+    public void setResetPassword(ResetPassword resetPassword) {
+        this.resetPassword = resetPassword;
+    }
+
+}
