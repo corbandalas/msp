@@ -1233,6 +1233,17 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                                         cardType = CardType.PLASTIC;
                                         type = "physical";
                                     }
+                                    else if (createCard.getCardModel().equalsIgnoreCase("coinify_eur")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "EUR";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    } else if (createCard.getCardModel().equalsIgnoreCase("coinify_gbp")) {
+                                        cardBrand = CardBrand.VISA;
+                                        currency = "GBP";
+                                        cardType = CardType.PLASTIC;
+                                        type = "physical";
+                                    }
                                 }
 
 
