@@ -27,6 +27,7 @@ import accomplish.dto.identification.Identification;
 import accomplish.dto.identification.document.Attachment;
 import accomplish.dto.identification.document.CreateDocument;
 import accomplish.dto.identification.document.CreateDocumentResponse;
+import accomplish.dto.limits.AccountLimitsResponse;
 import accomplish.dto.transaction.GetTransactionResponse;
 import accomplish.dto.transfer.AccountInfo;
 import accomplish.dto.transfer.Info_;
@@ -399,7 +400,7 @@ public class AccomplishService {
 
         Address address = new Address();
         address.setAddressLine1(Utils.trasliterateDanish("Coinify address"));
-        address.setAddressLine2(Utils.trasliterateDanish("Coinify address"));
+//        address.setAddressLine2(Utils.trasliterateDanish("Coinify address"));
         address.setCityTown(Utils.trasliterateDanish("Coinify address"));
 //        address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
@@ -1355,6 +1356,25 @@ public class AccomplishService {
 
         return promise.map(res -> {
             GetTransactionResponse createUserResponse = gson.fromJson(res, GetTransactionResponse.class);
+
+            Logger.info("Result = " + createUserResponse.getResult().getCode());
+
+            return createUserResponse;
+        });
+    }
+
+    public F.Promise<AccountLimitsResponse> getLimits(String cardID, String partnerID) {
+
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.disableHtmlEscaping();
+
+        final Gson gson = gsonBuilder.create();
+
+
+        F.Promise<String> promise = execute("service/v1/account/limits/" + cardID , "", "GET", partnerID, false);
+
+        return promise.map(res -> {
+            AccountLimitsResponse createUserResponse = gson.fromJson(res, AccountLimitsResponse.class);
 
             Logger.info("Result = " + createUserResponse.getResult().getCode());
 
