@@ -21,5 +21,6 @@ public class TransactionRequest {
     private String dateEnd;
     private String limit;
     private String offset;
+    private String status;
 
 }

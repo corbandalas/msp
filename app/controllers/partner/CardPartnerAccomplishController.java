@@ -2163,6 +2163,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         int offset = 0;
         int limit = 0;
+        String status = "0";
         String dateFrom = null;
         String dateTo = null;
 
@@ -2199,6 +2200,10 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
             }
         }
 
+        if (StringUtils.isNotBlank(createCard.getStatus())) {
+            status = createCard.getStatus();
+        }
+
 
         F.Promise<Optional<Card>> senderCardPromise = F.Promise.wrap(cardRepository.retrieveByToken(createCard.getToken()));
         F.Promise<GetAccountInfoResponse> accountPromise = accomplishService.getAccountInfo(createCard.getToken(), "" + authData.getAccount().getId(), false);
@@ -2215,6 +2220,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
         Logger.info("new Date(Long.parseLong(dateFrom) = " + (new Date(Long.parseLong(dateTo)).toString()));
         int finalOffset1 = offset;
+        String finalStatus = status;
         final F.Promise<Result> result = senderCardPromise.zip(accountPromise).flatMap(acc -> {
 
             F.Promise<Result> returnPromise = null;
@@ -2224,7 +2230,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
 
                 returnPromise = accomplishService.getTransaction("" + acc._2.getInfo().getUserId(), createCard.getToken(), finalLimit,
-                        finalOffset, finalDateFrom, finalDateTo, "" + authData.getAccount().getId()).flatMap(res -> {
+                        finalOffset, finalDateFrom, finalDateTo, finalStatus, "" + authData.getAccount().getId()).flatMap(res -> {
 
                     F.Promise<Result> promise = null;
 

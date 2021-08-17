@@ -1341,7 +1341,7 @@ public class AccomplishService {
         });
     }
 
-    public F.Promise<GetTransactionResponse> getTransaction(String userID, String cardID, int limit, int offset, String fromDate, String toDate, String partnerID) {
+    public F.Promise<GetTransactionResponse> getTransaction(String userID, String cardID, int limit, int offset, String fromDate, String toDate, String status, String partnerID) {
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.disableHtmlEscaping();
@@ -1350,7 +1350,7 @@ public class AccomplishService {
 
 
         F.Promise<String> promise = execute("service/v1/transaction/inquiry?user_id=" + userID +
-                "&account_id=" + cardID + "&status=0&from_date=" + fromDate + "&to_date=" + toDate +
+                "&account_id=" + cardID + "&status=" + status + "&from_date=" + fromDate + "&to_date=" + toDate +
                 "&page_size=" + limit + "&start_index=" + offset + "&sort_flag=asc&show_custom_field=1", "", "GET", partnerID, false);
 
         return promise.map(res -> {
