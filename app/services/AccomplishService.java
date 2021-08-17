@@ -400,7 +400,7 @@ public class AccomplishService {
 
         Address address = new Address();
         address.setAddressLine1(Utils.trasliterateDanish("Coinify address"));
-//        address.setAddressLine2(Utils.trasliterateDanish("Coinify address"));
+        address.setAddressLine2("");
         address.setCityTown(Utils.trasliterateDanish("Coinify address"));
 //        address.setPostalZipCode(zip);
 //        address.setStateRegion("DN");
