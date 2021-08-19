@@ -674,7 +674,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
         return returnRecover(result);
     }
 
-
+    @With(BaseMerchantApiV2Action.class)
     @ApiResponses(value = {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = LimitsResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
