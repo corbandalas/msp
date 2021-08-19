@@ -699,12 +699,12 @@ public class AccomplishService {
                     currency = "EUR";
                 } else if (cardModel.equalsIgnoreCase("coinify_eur")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
-                    status = 12;
+                    status = 1;
                     type = 0;
                     currency = "EUR";
                 } else if (cardModel.equalsIgnoreCase("coinify_gbp")) {
                     bin = Long.parseLong(accomplishSettings.productID2);
-                    status = 12;
+                    status = 1;
                     type = 0;
                     currency = "GBP";
                 }
@@ -755,12 +755,12 @@ public class AccomplishService {
                     currency = "EUR";
                 } else if (cardModel.equalsIgnoreCase("coinify_eur")) {
                     bin = Long.parseLong(accomplishSettings.productID1);
-                    status = 12;
+                    status = 1;
                     type = 0;
                     currency = "EUR";
                 } else if (cardModel.equalsIgnoreCase("coinify_gbp")) {
                     bin = Long.parseLong(accomplishSettings.productID2);
-                    status = 12;
+                    status = 1;
                     type = 0;
                     currency = "GBP";
                 }
