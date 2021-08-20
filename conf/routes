@@ -79,6 +79,7 @@ POST       /api/partner/v2/checkPassword                                  @contr
 POST       /api/partner/v2/resetPassword                                  @controllers.partner.CardPartnerAccomplishController.resetPassword()
 POST       /api/partner/v2/resetPassword2                                  @controllers.partner.CardPartnerAccomplishController.resetPassword2()
 POST       /api/partner/v2/limits                                  @controllers.partner.CardPartnerAccomplishController.getLimits()
+POST       /api/partner/v2/getCustomerProvider                                  @controllers.partner.CardPartnerAccomplishController.getCustomerCardProvider()
 
 
 #Merchant API(admin)

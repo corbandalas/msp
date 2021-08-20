@@ -675,6 +675,15 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
     }
 
     @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getLimits",
+            value = "Get card provider card limits",
+            notes = "Method allows to get card provider card limits",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = LimitsResponse.class
+    )
     @ApiResponses(value = {
             @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = LimitsResponse.class),
             @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
@@ -1099,6 +1108,100 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     }
 
                 }));
+
+        return returnRecover(result);
+    }
+
+
+    @With(BaseMerchantApiV2Action.class)
+    @ApiOperation(
+            nickname = "getCustomerCardProvider",
+            value = "Get customer at card provider side",
+            notes = "Method allows to get card provider customer",
+            produces = "application/json",
+            consumes = "application/json",
+            httpMethod = "POST",
+            response = GetCustomerAPIResponse.class
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = SUCCESS_CODE, message = SUCCESS_TEXT, response = GetCustomerAPIResponse.class),
+            @ApiResponse(code = INCORRECT_AUTHORIZATION_DATA_CODE, message = INCORRECT_AUTHORIZATION_DATA_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = INACTIVE_ACCOUNT_CODE, message = INACTIVE_ACCOUNT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_FORMAT_CODE, message = WRONG_REQUEST_FORMAT_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = WRONG_REQUEST_ENCKEY_CODE, message = WRONG_REQUEST_ENCKEY_TEXT, response = BaseAPIV2ErrorResponse.class),
+            @ApiResponse(code = GENERAL_ERROR_CODE, message = GENERAL_ERROR_TEXT, response = BaseAPIV2ErrorResponse.class),
+    })
+    @ApiImplicitParams(value = {
+            @ApiImplicitParam(value = "Get customer request", required = true, dataType = "dto.partnerV2.GetCustomerCardProviderRequest", paramType = "body"),
+            @ApiImplicitParam(value = "X-Api-Key account ID header", required = true, dataType = "String", paramType = "header", name = "X-Api-Key"),
+            @ApiImplicitParam(value = "X-Request-Hash message digest header. Base64(sha1(RequestNonce+Api Secret))",
+                    required = true, dataType = "String", paramType = "header", name = "X-Request-Hash"),
+            @ApiImplicitParam(value = "X-Request-Nonce orderID header", required = true, dataType = "String", paramType = "header", name = "X-Request-Nonce")})
+    public F.Promise<Result> getCustomerCardProvider() {
+
+        final Authentication authData = (Authentication) ctx().args.get("authData");
+
+        final JsonNode jsonNode = request().body().asJson();
+        final GetCustomerCardProviderRequest createCard;
+        try {
+            createCard = Json.fromJson(jsonNode, GetCustomerCardProviderRequest.class);
+        } catch (Exception ex) {
+            Logger.error("Wrong request format: ", ex);
+            return F.Promise.pure(createWrongRequestFormatResponse("Wrong request format"));
+        }
+
+        if (StringUtils.isBlank(createCard.getUserID())
+        ) {
+            Logger.error("Missing params");
+            return F.Promise.pure(createWrongRequestFormatResponse("Missing request params: userID"));
+        }
+
+
+        F.Promise<Result> result = accomplishService.getCustomer(createCard.getUserID(), "" + authData.getAccount().getId())
+                .map(res -> {
+
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                        Date date = simpleDateFormat.parse(
+                                res.getPersonalInfo().getDateOfBirth());
+
+                        Logger.info("DOB date = " + date);
+
+                        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+                        String kycStatus = "";
+
+                        switch (res.getSecurity().getTrustLevel()) {
+                            case "1":
+                                kycStatus = "none";
+                                break;
+                            case "3":
+                                kycStatus = "sdd";
+                                break;
+                            case "5":
+                                kycStatus = "fdd";
+                                break;
+                            default:
+                                kycStatus = "none";
+                                break;
+
+                        }
+
+
+                        return ok(Json.toJson(new GetCustomerAPIResponse(new CustomerV3(res.getEmail().get(0).getAddress(),
+                                "Dr", res.getPersonalInfo().getFirstName(),
+                                res.getPersonalInfo().getLastName(), simpleDateFormat.format(date),
+                                res.getPhone().get(0).getNumber(), "", kycStatus,
+                                "", res.getAddress().getAddressLine1(), res.getAddress().getAddressLine2(),
+                                res.getAddress().getCityTown(), res.getAddress().getPostalZipCode()))));
+                    } else {
+                        return createCardProviderException("" + res.getResult().getCode(), res.getResult().getMessage());
+                    }
+
+                });
 
         return returnRecover(result);
     }
