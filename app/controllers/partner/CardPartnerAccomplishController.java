@@ -2208,15 +2208,37 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 String data = (String) createCard.getData();
 
-                String[] split = StringUtils.split(data, "|");
 
-                return accomplishService.updateUserName(acc.get().getReferral(), split[0], split[1], "" + authData.getAccount().getId()).flatMap(res -> {
+                String firstNameData = "";
+                String lastNameData = "";
+
+                try {
+                    String[] split = StringUtils.split(data, "|");
+                    firstNameData = split[0];
+                    lastNameData = split[1];
+
+                } catch (Exception e) {
+
+                }
+
+
+
+
+                if (StringUtils.isBlank(firstNameData)) {
+                    firstNameData = acc.get().getFirstName();
+                    lastNameData = acc.get().getLastName();
+                }
+
+
+                final String finalFirstNameData = firstNameData;
+                final String finalLastNameData = lastNameData;
+                return accomplishService.updateUserName(acc.get().getReferral(), firstNameData, lastNameData, "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 
                         Customer customer = acc.get();
 
-                        customer.setFirstName(split[0]);
-                        customer.setLastName(split[1]);
+                        customer.setFirstName(finalFirstNameData);
+                        customer.setLastName(finalLastNameData);
 
                         customerRepository.update(customer);
 
