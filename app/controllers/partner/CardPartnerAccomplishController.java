@@ -2226,8 +2226,15 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 if (StringUtils.isBlank(firstNameData)) {
                     firstNameData = acc.get().getFirstName();
-                    lastNameData = acc.get().getLastName();
+
                 }
+
+                if (StringUtils.isBlank(lastNameData)) {
+                    lastNameData = acc.get().getLastName();
+
+                }
+
+
 
 
                 final String finalFirstNameData = firstNameData;
