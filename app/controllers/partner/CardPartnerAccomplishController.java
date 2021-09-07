@@ -2204,7 +2204,29 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                         return F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
                     }
                 });
-            } else if (createCard.getType().equalsIgnoreCase("phone")) {
+            }else if (createCard.getType().equalsIgnoreCase("name")) {
+
+                String data = (String) createCard.getData();
+
+                String[] split = StringUtils.split(data, "|");
+
+                return accomplishService.updateUserName(acc.get().getReferral(), split[0], split[1], "" + authData.getAccount().getId()).flatMap(res -> {
+                    if (res.getResult().getCode().equalsIgnoreCase("0000")) {
+
+                        Customer customer = acc.get();
+
+                        customer.setFirstName(split[0]);
+                        customer.setLastName(split[1]);
+
+                        customerRepository.update(customer);
+
+                        return F.Promise.pure(ok(Json.toJson(new dto.partnerV2.SuccessAPIV2Response(true))));
+                    } else {
+                        return F.Promise.pure(createCardProviderException(res.getResult().getCode(), res.getResult().getMessage()));
+                    }
+                });
+            }
+            else if (createCard.getType().equalsIgnoreCase("phone")) {
                 return accomplishService.updateUserPhone(acc.get().getReferral(), (String) createCard.getData(), "" + authData.getAccount().getId()).flatMap(res -> {
                     if (res.getResult().getCode().equalsIgnoreCase("0000")) {
 

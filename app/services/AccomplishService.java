@@ -1342,6 +1342,43 @@ public class AccomplishService {
         });
     }
 
+
+    public F.Promise<UpdateUserBirthdateResponse> updateUserName(String userID, String firstName, String lastName,
+
+                                                                      String partnerID) {
+
+
+        return getCustomer(userID, partnerID).flatMap(cust -> {
+
+
+            UpdateUserBirthdate request = new UpdateUserBirthdate();
+
+            accomplish.dto.user.update.birthdate.PersonalInfo personalInfo = new accomplish.dto.user.update.birthdate.PersonalInfo();
+
+            personalInfo.setFirstName(firstName);
+            personalInfo.setLastName(lastName);
+            personalInfo.setGender(cust.getPersonalInfo().getGender());
+            personalInfo.setTitle(cust.getPersonalInfo().getTitle());
+            personalInfo.setDateOfBirth(cust.getPersonalInfo().getDateOfBirth());
+
+            request.setPersonalInfo(personalInfo);
+
+            final GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.disableHtmlEscaping();
+
+            final Gson gson = gsonBuilder.create();
+
+            String body = gson.toJson(request);
+
+            F.Promise<String> promise = execute("service/v1/user/personal_info/" + userID, body, "PUT", partnerID, false);
+            return promise.map(res -> {
+                UpdateUserBirthdateResponse loadResponse = gson.fromJson(res, UpdateUserBirthdateResponse.class);
+
+                return loadResponse;
+            });
+        });
+    }
+
     public F.Promise<GetTransactionResponse> getTransaction(String userID, String cardID, int limit, int offset, String fromDate, String toDate, String status, String partnerID) {
 
         final GsonBuilder gsonBuilder = new GsonBuilder();
