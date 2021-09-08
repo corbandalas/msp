@@ -2217,6 +2217,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                     firstNameData = split[0];
                     lastNameData = split[1];
 
+                    Logger.info("# Parsed name: firstNameData = " + firstNameData + " lastNameData = " + lastNameData);
+
                 } catch (Exception e) {
 
                 }
@@ -2234,6 +2236,7 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
 
                 }
 
+                Logger.info("# Actual name: firstNameData = " + firstNameData + " lastNameData = " + lastNameData);
 
 
 
