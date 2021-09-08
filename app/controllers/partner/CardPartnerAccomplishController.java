@@ -2213,9 +2213,8 @@ public class CardPartnerAccomplishController extends BaseAccomplishController {
                 String lastNameData = "";
 
                 try {
-                    String[] split = StringUtils.split(data, "|");
-                    firstNameData = split[0];
-                    lastNameData = split[1];
+                    firstNameData = StringUtils.substringBefore(data, "|");
+                    lastNameData =  StringUtils.substringAfterLast(data, "|");
 
                     Logger.info("# Parsed name: firstNameData = " + firstNameData + " lastNameData = " + lastNameData);
 
